@@ -59,6 +59,9 @@ public class ChallengeData : ScriptableObject
     public ChallengeFrequency frequency = ChallengeFrequency.WorldEvent;
     public ChallengeDifficulty difficulty = ChallengeDifficulty.Medium;
     
+    [Header("Minimap Icon")]
+    public Lovatto.MiniMap.bl_MiniMapIconData iconData;
+    
     [Header("Requirements")]
     public int recommendedLevel = 1;
     public int requiredPlayerLevel = 1;

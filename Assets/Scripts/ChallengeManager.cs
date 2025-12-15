@@ -24,8 +24,10 @@ public class ChallengeManager : MonoBehaviour
     public GameObject worldMarkerPrefab;
     public GameObject compassMarkerPrefab;
     public Transform compassMarkerContainer;
+    public Transform worldspaceUIContainer;
     public bool spawnWorldMarkers = true;
     public bool spawnCompassMarkers = true;
+    public bool spawnMinimapPointers = true;
     
     [Header("Active Challenges")]
     public List<ActiveChallenge> activeChallenges = new List<ActiveChallenge>();
@@ -186,12 +188,19 @@ public class ChallengeManager : MonoBehaviour
 
         if (ChallengeSpawner.Instance != null)
         {
+            Transform uiContainer = spawnWorldMarkers ? worldspaceUIContainer : null;
+            GameObject worldPrefab = spawnWorldMarkers ? worldMarkerPrefab : null;
+            GameObject compassPrefab = spawnCompassMarkers ? compassMarkerPrefab : null;
+            Transform compassContainer = spawnCompassMarkers ? compassMarkerContainer : null;
+            
             ChallengeSpawner.Instance.SpawnChallengeContent(
                 activeChallenge,
                 challenge,
-                worldMarkerPrefab,
-                compassMarkerPrefab,
-                compassMarkerContainer
+                worldPrefab,
+                compassPrefab,
+                compassContainer,
+                uiContainer,
+                spawnMinimapPointers
             );
         }
         else

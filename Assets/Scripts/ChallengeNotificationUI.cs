@@ -17,6 +17,7 @@ public class ChallengeNotificationUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI rewardText;
     [SerializeField] private TextMeshProUGUI progressText;
     [SerializeField] private TextMeshProUGUI timeRemainingText;
+    [SerializeField] private TextMeshProUGUI distanceText;
     [SerializeField] private Image difficultyImage;
     [SerializeField] private Image challengeIcon;
     [SerializeField] private Slider progressSlider;
@@ -33,6 +34,8 @@ public class ChallengeNotificationUI : MonoBehaviour
     [Header("Display Settings")]
     [SerializeField] private bool showMultipleChallenges = true;
     [SerializeField] private int maxDisplayedChallenges = 3;
+    [SerializeField] private bool showDistance = true;
+    [SerializeField] private float distanceUpdateInterval = 0.5f;
     
     private AudioSource audioSource;
     private List<ActiveChallenge> trackedChallenges = new List<ActiveChallenge>();
@@ -40,6 +43,8 @@ public class ChallengeNotificationUI : MonoBehaviour
     private bool isPanelVisible = false;
     private ChallengeManager challengeManager;
     private bool isInitialized = false;
+    private Transform playerTransform;
+    private float distanceUpdateTimer;
 
     private void Awake()
     {
@@ -77,7 +82,30 @@ public class ChallengeNotificationUI : MonoBehaviour
         challengeManager.onChallengeExpired.AddListener(OnChallengeExpired);
         challengeManager.onChallengeFailed.AddListener(OnChallengeFailed);
 
+        FindPlayerTransform();
         isInitialized = true;
+    }
+    
+    private void FindPlayerTransform()
+    {
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            playerTransform = player.transform;
+        }
+        else
+        {
+            JUTPS.JUCharacterController playerController = Object.FindFirstObjectByType<JUTPS.JUCharacterController>();
+            if (playerController != null)
+            {
+                playerTransform = playerController.transform;
+            }
+        }
+        
+        if (playerTransform == null && showDistance)
+        {
+            Debug.LogWarning("ChallengeNotificationUI: Could not find player transform for distance calculation.");
+        }
     }
 
     private void Update()
@@ -85,6 +113,16 @@ public class ChallengeNotificationUI : MonoBehaviour
         if (isPanelVisible && currentDisplayedChallenge != null)
         {
             UpdateChallengeDisplay();
+            
+            if (showDistance && distanceText != null)
+            {
+                distanceUpdateTimer -= Time.deltaTime;
+                if (distanceUpdateTimer <= 0f)
+                {
+                    UpdateDistanceDisplay();
+                    distanceUpdateTimer = distanceUpdateInterval;
+                }
+            }
         }
     }
 
@@ -267,6 +305,30 @@ public class ChallengeNotificationUI : MonoBehaviour
             {
                 timeRemainingText.text = "Expired";
             }
+        }
+    }
+    
+    private void UpdateDistanceDisplay()
+    {
+        if (currentDisplayedChallenge == null || distanceText == null)
+            return;
+            
+        if (playerTransform == null)
+        {
+            FindPlayerTransform();
+            if (playerTransform == null)
+                return;
+        }
+        
+        float distance = Vector3.Distance(playerTransform.position, currentDisplayedChallenge.position);
+        
+        if (distance >= 1000f)
+        {
+            distanceText.text = $"{(distance / 1000f):F1} km";
+        }
+        else
+        {
+            distanceText.text = $"{Mathf.RoundToInt(distance)} m";
         }
     }
 

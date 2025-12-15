@@ -20,8 +20,8 @@ public class SurvivalManager : MonoBehaviour
     [Range(0f, 100f)] public float normalTemperature = 100f;
     [Tooltip("Minimum temperature before player freezes")]
     public float minTemperature = 0f;
-    [Tooltip("Temperature decrease rate per second")]
-    public float temperatureDecreaseRate = 0.5f;
+    [Tooltip("Temperature decrease rate per second (100 to 0 in ~3 minutes)")]
+    public float temperatureDecreaseRate = 0.56f;
     [Tooltip("Temperature recovery rate per second")]
     public float temperatureNormalizeRate = 5f;
     [Tooltip("Critical cold threshold (0-1 as percentage of max)")]
@@ -43,7 +43,7 @@ public class SurvivalManager : MonoBehaviour
     public float infectionDamagePerSecond = 1f;
     
     [Header("Health & Temperature Effects")]
-    public float coldDamagePerSecond = 2f;
+    public float coldDamagePerSecond = 0.5f;
     public float damageTickInterval = 1f;
     
     [Header("Temperature Modifiers")]

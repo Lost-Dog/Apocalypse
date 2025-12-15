@@ -124,6 +124,13 @@ public class SafeZone : MonoBehaviour
         {
             if (childCol.gameObject != gameObject)
             {
+                MeshCollider meshCol = childCol as MeshCollider;
+                if (meshCol != null && !meshCol.convex)
+                {
+                    Debug.LogWarning($"Skipping concave MeshCollider on '{childCol.gameObject.name}' - cannot be a trigger. Use BoxCollider or set MeshCollider to convex.");
+                    continue;
+                }
+                
                 childCol.isTrigger = true;
                 Debug.Log($"<color=yellow>Set child collider '{childCol.gameObject.name}' to trigger</color>");
             }

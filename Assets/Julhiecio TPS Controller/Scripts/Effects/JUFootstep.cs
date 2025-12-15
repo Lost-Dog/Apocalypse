@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using UnityEngine.Events;
 
@@ -256,7 +256,7 @@ namespace JUTPS.FX
             }
 
             // Draw a line in the upward direction of the Footstep Decal
-            //Debug.DrawRay(footstepDecal.transform.position, footstepDecal.transform.up * 2, Color.red, 1);
+            Debug.DrawRay(footstepDecal.transform.position, footstepDecal.transform.up * 2, Color.red, 1);
         }
 
         private void UpdateFootstepActiveByDistance()

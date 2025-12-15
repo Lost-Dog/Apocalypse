@@ -318,12 +318,9 @@ namespace JU.CharacterSystem.AI
                             continue;
                     }
 
-                    if (!IsTargetInSafeZone(_detections[i]))
-                    {
-                        minDistance = distance;
-                        NearestColliderInView = _detections[i];
-                        LastColliderViewedPosition = colliderCenter;
-                    }
+                    minDistance = distance;
+                    NearestColliderInView = _detections[i];
+                    LastColliderViewedPosition = colliderCenter;
                 }
             }
         }
@@ -351,12 +348,6 @@ namespace JU.CharacterSystem.AI
                 }
 
                 if (!hasTag)
-                    return false;
-            }
-
-            if (otherTransform.TryGetComponent<Collider>(out var collider))
-            {
-                if (IsTargetInSafeZone(collider))
                     return false;
             }
 
@@ -401,9 +392,6 @@ namespace JU.CharacterSystem.AI
                     return false;
             }
 
-            if (IsTargetInSafeZone(otherCollider))
-                return false;
-
             Vector3 center = Center;
             Vector3 otherColliderPosition = otherCollider.bounds.center;
 
@@ -427,25 +415,6 @@ namespace JU.CharacterSystem.AI
         public bool IsOnView(Bounds bounds)
         {
             return IsOnView(bounds.center);
-        }
-
-        /// <summary>
-        /// Check if target is in a safe zone.
-        /// </summary>
-        private bool IsTargetInSafeZone(Collider target)
-        {
-            if (target == null) return false;
-            
-            if (target.TryGetComponent<JUTPS.JUCharacterController>(out var character))
-            {
-                SurvivalManager survivalManager = SurvivalManager.Instance;
-                if (survivalManager != null && survivalManager.isInSafeZone)
-                {
-                    return true;
-                }
-            }
-            
-            return false;
         }
 
         /// <summary>

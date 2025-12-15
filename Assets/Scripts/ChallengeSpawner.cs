@@ -18,6 +18,7 @@ public class ChallengeSpawner : MonoBehaviour
     {
         public GameObject worldMarker;
         public GameObject compassMarker;
+        public GameObject minimapPointer;
         public List<GameObject> spawnedEnemies = new List<GameObject>();
         public List<GameObject> spawnedCivilians = new List<GameObject>();
         public List<GameObject> spawnedObjects = new List<GameObject>();
@@ -38,7 +39,7 @@ public class ChallengeSpawner : MonoBehaviour
         }
     }
 
-    public void SpawnChallengeContent(ActiveChallenge challenge, ChallengeData data, GameObject worldMarkerPrefab, GameObject compassMarkerPrefab, Transform compassContainer)
+    public void SpawnChallengeContent(ActiveChallenge challenge, ChallengeData data, GameObject worldMarkerPrefab, GameObject compassMarkerPrefab, Transform compassContainer, Transform worldspaceUIContainer = null, bool spawnMinimapPointer = true)
     {
         if (activeChallengeInstances.ContainsKey(challenge))
         {
@@ -48,7 +49,7 @@ public class ChallengeSpawner : MonoBehaviour
 
         ChallengeInstance instance = new ChallengeInstance();
 
-        SpawnMarkers(challenge, data, worldMarkerPrefab, compassMarkerPrefab, compassContainer, instance);
+        SpawnMarkers(challenge, data, worldMarkerPrefab, compassMarkerPrefab, compassContainer, worldspaceUIContainer, spawnMinimapPointer, instance);
         
         ControlZone controlZone = FindControlZoneForChallenge(challenge.position, data.challengeType);
         if (controlZone != null)
@@ -313,11 +314,11 @@ public class ChallengeSpawner : MonoBehaviour
         }
     }
 
-    private void SpawnMarkers(ActiveChallenge challenge, ChallengeData data, GameObject worldMarkerPrefab, GameObject compassMarkerPrefab, Transform compassContainer, ChallengeInstance instance)
+    private void SpawnMarkers(ActiveChallenge challenge, ChallengeData data, GameObject worldMarkerPrefab, GameObject compassMarkerPrefab, Transform compassContainer, Transform worldspaceUIContainer, bool spawnMinimapPointer, ChallengeInstance instance)
     {
-        if (worldMarkerPrefab != null)
+        if (worldMarkerPrefab != null && worldspaceUIContainer != null)
         {
-            instance.worldMarker = Instantiate(worldMarkerPrefab, challenge.position, Quaternion.identity);
+            instance.worldMarker = Instantiate(worldMarkerPrefab, worldspaceUIContainer);
             ChallengeWorldMarker marker = instance.worldMarker.GetComponent<ChallengeWorldMarker>();
             if (marker != null)
             {
@@ -334,6 +335,17 @@ public class ChallengeSpawner : MonoBehaviour
                 compassMarker.SetChallenge(challenge);
             }
         }
+        
+        if (spawnMinimapPointer && data.iconData != null)
+        {
+            GameObject pointerObject = new GameObject($"MinimapPointer_{data.challengeName}");
+            pointerObject.transform.position = challenge.position;
+            
+            ChallengeMinimapPointer pointer = pointerObject.AddComponent<ChallengeMinimapPointer>();
+            pointer.SetChallenge(challenge);
+            
+            instance.minimapPointer = pointerObject;
+        }
     }
 
     public void CleanupChallenge(ActiveChallenge challenge)
@@ -348,6 +360,9 @@ public class ChallengeSpawner : MonoBehaviour
 
         if (instance.compassMarker != null)
             Destroy(instance.compassMarker);
+        
+        if (instance.minimapPointer != null)
+            Destroy(instance.minimapPointer);
 
         foreach (GameObject enemy in instance.spawnedEnemies)
         {

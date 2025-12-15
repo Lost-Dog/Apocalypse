@@ -18,10 +18,10 @@ public class UIManagerWiringTool : EditorWindow
             return;
         }
         
-        HUDManager hudManager = gameSystems.GetComponent<HUDManager>();
+        HUDManager hudManager = gameSystems.GetComponentInChildren<HUDManager>();
         if (hudManager == null)
         {
-            Debug.LogError("HUDManager component not found on GameSystems!");
+            Debug.LogError("HUDManager component not found in GameSystems hierarchy!");
             return;
         }
         
@@ -105,10 +105,10 @@ public class UIManagerWiringTool : EditorWindow
         }
         Debug.Log($"✓ GameSystems found");
         
-        HUDManager hudManager = gameSystems.GetComponent<HUDManager>();
+        HUDManager hudManager = gameSystems.GetComponentInChildren<HUDManager>();
         if (hudManager == null)
         {
-            Debug.LogError("✗ HUDManager component missing");
+            Debug.LogError("✗ HUDManager component missing in GameSystems hierarchy");
             return;
         }
         Debug.Log($"✓ HUDManager component exists");

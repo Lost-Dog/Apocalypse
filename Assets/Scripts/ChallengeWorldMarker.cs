@@ -7,22 +7,20 @@ public class ChallengeWorldMarker : MonoBehaviour
     [Header("References")]
     public ActiveChallenge linkedChallenge;
     
-    [Header("Visual Components")]
-    [SerializeField] private GameObject markerPivot;
-    [SerializeField] private SpriteRenderer iconRenderer;
-    [SerializeField] private Light markerLight;
-    [SerializeField] private ParticleSystem markerParticles;
-    
-    [Header("3D Text")]
-    [SerializeField] private TextMeshPro distanceText;
-    [SerializeField] private TextMeshPro challengeNameText;
+    [Header("UI Components")]
+    [SerializeField] private RectTransform markerRoot;
+    [SerializeField] private Image iconImage;
+    [SerializeField] private TextMeshProUGUI distanceText;
+    [SerializeField] private CanvasGroup canvasGroup;
     
     [Header("Settings")]
-    [SerializeField] private float bobSpeed = 1f;
-    [SerializeField] private float bobHeight = 0.5f;
-    [SerializeField] private float rotateSpeed = 30f;
     [SerializeField] private float maxVisibleDistance = 500f;
-    [SerializeField] private float hideWhenCloseDistance = 5f;
+    [SerializeField] private float minVisibleDistance = 10f;
+    [SerializeField] private Vector3 worldOffset = Vector3.up * 2f;
+    [SerializeField] private float distanceUpdateInterval = 0.25f;
+    [SerializeField] private float fadeSpeed = 5f;
+    [SerializeField] private float smoothSpeed = 15f;
+    [SerializeField] private bool worldSpaceMode = true;
     
     [Header("Colors by Difficulty")]
     [SerializeField] private Color easyColor = Color.green;
@@ -31,20 +29,63 @@ public class ChallengeWorldMarker : MonoBehaviour
     [SerializeField] private Color extremeColor = Color.red;
     
     private Transform playerTransform;
-    private Vector3 startPosition;
-    private float bobTimer;
+    private Camera mainCamera;
+    private Canvas parentCanvas;
+    private float distanceUpdateTimer;
+    private bool isVisible;
+    private Vector3 targetScreenPosition;
+    private Vector3 currentScreenPosition;
+    private Vector3 targetWorldPosition;
+    private bool isInitialized;
 
     private void Start()
     {
-        startPosition = transform.position;
-        
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
         {
             playerTransform = player.transform;
         }
 
+        mainCamera = Camera.main;
+        parentCanvas = GetComponentInParent<Canvas>();
+        
+        if (parentCanvas != null && parentCanvas.renderMode == RenderMode.WorldSpace)
+        {
+            worldSpaceMode = true;
+        }
+        
+        if (markerRoot == null)
+        {
+            markerRoot = GetComponent<RectTransform>();
+        }
+        
+        if (canvasGroup == null)
+        {
+            canvasGroup = GetComponent<CanvasGroup>();
+            if (canvasGroup == null)
+            {
+                canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            }
+        }
+
         UpdateMarkerAppearance();
+        
+        if (linkedChallenge != null)
+        {
+            targetWorldPosition = linkedChallenge.position + worldOffset;
+            
+            if (worldSpaceMode)
+            {
+                transform.position = targetWorldPosition;
+            }
+            else if (mainCamera != null)
+            {
+                currentScreenPosition = mainCamera.WorldToScreenPoint(targetWorldPosition);
+                targetScreenPosition = currentScreenPosition;
+            }
+            
+            isInitialized = true;
+        }
     }
 
     private void Update()
@@ -55,57 +96,119 @@ public class ChallengeWorldMarker : MonoBehaviour
             return;
         }
 
-        UpdateBobbing();
-        UpdateRotation();
-        UpdateVisibility();
-        UpdateDistanceDisplay();
-    }
-
-    private void UpdateBobbing()
-    {
-        if (markerPivot == null) return;
-
-        bobTimer += Time.deltaTime * bobSpeed;
-        float newY = Mathf.Sin(bobTimer) * bobHeight;
-        markerPivot.transform.localPosition = new Vector3(0, newY, 0);
-    }
-
-    private void UpdateRotation()
-    {
-        if (markerPivot == null) return;
-
-        markerPivot.transform.Rotate(Vector3.up, rotateSpeed * Time.deltaTime);
-    }
-
-    private void UpdateVisibility()
-    {
-        if (playerTransform == null) return;
-
-        float distance = Vector3.Distance(transform.position, playerTransform.position);
-
-        bool shouldBeVisible = distance <= maxVisibleDistance && distance >= hideWhenCloseDistance;
-
-        if (iconRenderer != null)
+        distanceUpdateTimer += Time.deltaTime;
+        if (distanceUpdateTimer >= distanceUpdateInterval)
         {
-            iconRenderer.enabled = shouldBeVisible;
+            distanceUpdateTimer = 0f;
+            UpdateDistanceDisplay();
+        }
+        
+        UpdateVisibilityFade();
+    }
+    
+    private void LateUpdate()
+    {
+        if (linkedChallenge != null && mainCamera != null && playerTransform != null)
+        {
+            CalculateTargetPosition();
+            UpdateMarkerPosition();
+        }
+    }
+    
+    private void CalculateTargetPosition()
+    {
+        targetWorldPosition = linkedChallenge.position + worldOffset;
+        float distance = Vector3.Distance(targetWorldPosition, playerTransform.position);
+
+        if (distance < minVisibleDistance || distance > maxVisibleDistance)
+        {
+            isVisible = false;
+            return;
         }
 
-        if (distanceText != null)
+        if (worldSpaceMode)
         {
-            distanceText.gameObject.SetActive(shouldBeVisible);
-        }
+            Vector3 viewportPoint = mainCamera.WorldToViewportPoint(targetWorldPosition);
+            bool isOnScreen = viewportPoint.z > 0 && 
+                             viewportPoint.x > 0 && viewportPoint.x < 1 && 
+                             viewportPoint.y > 0 && viewportPoint.y < 1;
 
-        if (challengeNameText != null)
+            if (!isOnScreen)
+            {
+                isVisible = false;
+                return;
+            }
+            
+            isVisible = true;
+        }
+        else
         {
-            challengeNameText.gameObject.SetActive(shouldBeVisible && distance <= 100f);
+            Vector3 screenPos = mainCamera.WorldToScreenPoint(targetWorldPosition);
+
+            bool isOnScreen = screenPos.z > 0 && 
+                             screenPos.x > 0 && screenPos.x < Screen.width && 
+                             screenPos.y > 0 && screenPos.y < Screen.height;
+
+            if (!isOnScreen)
+            {
+                isVisible = false;
+                return;
+            }
+
+            isVisible = true;
+            targetScreenPosition = screenPos;
+            
+            if (!isInitialized)
+            {
+                currentScreenPosition = targetScreenPosition;
+                isInitialized = true;
+            }
+        }
+    }
+
+    private void UpdateMarkerPosition()
+    {
+        if (markerRoot == null || !isVisible)
+            return;
+
+        if (worldSpaceMode)
+        {
+            transform.position = Vector3.Lerp(transform.position, targetWorldPosition, Time.deltaTime * smoothSpeed);
+            
+            if (parentCanvas != null && parentCanvas.renderMode == RenderMode.WorldSpace)
+            {
+                transform.LookAt(transform.position + mainCamera.transform.rotation * Vector3.forward,
+                                mainCamera.transform.rotation * Vector3.up);
+            }
+        }
+        else
+        {
+            currentScreenPosition = Vector3.Lerp(currentScreenPosition, targetScreenPosition, Time.deltaTime * smoothSpeed);
+
+            if (parentCanvas != null && parentCanvas.renderMode == RenderMode.ScreenSpaceOverlay)
+            {
+                markerRoot.position = currentScreenPosition;
+            }
+            else if (parentCanvas != null && parentCanvas.renderMode == RenderMode.ScreenSpaceCamera)
+            {
+                Vector2 localPoint;
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    parentCanvas.GetComponent<RectTransform>(),
+                    currentScreenPosition,
+                    parentCanvas.worldCamera,
+                    out localPoint
+                );
+                markerRoot.localPosition = localPoint;
+            }
         }
     }
 
     private void UpdateDistanceDisplay()
     {
-        if (playerTransform == null || distanceText == null) return;
+        if (distanceText == null || linkedChallenge == null || playerTransform == null)
+            return;
 
-        float distance = Vector3.Distance(transform.position, playerTransform.position);
+        float distance = Vector3.Distance(linkedChallenge.position, playerTransform.position);
 
         if (distance < 1000f)
         {
@@ -115,16 +218,14 @@ public class ChallengeWorldMarker : MonoBehaviour
         {
             distanceText.text = $"{(distance / 1000f):F1}km";
         }
-
-        if (distanceText.transform.parent != null)
-        {
-            distanceText.transform.parent.LookAt(playerTransform);
-        }
-
-        if (challengeNameText != null && challengeNameText.transform.parent != null)
-        {
-            challengeNameText.transform.parent.LookAt(playerTransform);
-        }
+    }
+    
+    private void UpdateVisibilityFade()
+    {
+        if (canvasGroup == null) return;
+        
+        float targetAlpha = isVisible ? 1f : 0f;
+        canvasGroup.alpha = Mathf.Lerp(canvasGroup.alpha, targetAlpha, Time.deltaTime * fadeSpeed);
     }
 
     private void UpdateMarkerAppearance()
@@ -134,26 +235,14 @@ public class ChallengeWorldMarker : MonoBehaviour
 
         Color difficultyColor = GetDifficultyColor(linkedChallenge.challengeData.difficulty);
 
-        if (iconRenderer != null)
+        if (iconImage != null)
         {
-            iconRenderer.color = difficultyColor;
+            iconImage.color = difficultyColor;
         }
 
-        if (markerLight != null)
+        if (distanceText != null)
         {
-            markerLight.color = difficultyColor;
-        }
-
-        if (markerParticles != null)
-        {
-            var main = markerParticles.main;
-            main.startColor = difficultyColor;
-        }
-
-        if (challengeNameText != null)
-        {
-            challengeNameText.text = linkedChallenge.challengeData.challengeName;
-            challengeNameText.color = difficultyColor;
+            distanceText.color = difficultyColor;
         }
     }
 
