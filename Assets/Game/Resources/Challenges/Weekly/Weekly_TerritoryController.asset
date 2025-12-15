@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a08aee3c6de204845a3558c0687ef2a6, type: 3}
+  m_Name: Weekly_TerritoryController
+  m_EditorClassIdentifier: Assembly-CSharp::ChallengeData
+  challengeName: Territory Controller
+  description: Capture 10 control points.
+  challengeType: 2
+  frequency: 2
+  difficulty: 1
+  recommendedLevel: 1
+  requiredPlayerLevel: 1
+  timeLimit: 604800
+  detectionRadius: 0
+  requireNoDeaths: 0
+  requireStealth: 0
+  objectiveDescription: Complete the challenge
+  spawnItems:
+  - itemName: Enemy
+    prefab: {fileID: 5657882254576232896, guid: 92100b7a3b0e2b549865acece1fff48f,
+      type: 3}
+    category: 0
+    minCount: 5
+    maxCount: 8
+    usePoolMode: 0
+    spawnLocation: 0
+    spawnRadius: 10
+    offset: {x: 0, y: 0, z: 0}
+    requireNavMesh: 1
+    randomRotation: 0
+    fixedRotation: {x: 0, y: 0, z: 0}
+    priority: 0
+    required: 0
+  xpReward: 2200
+  currencyReward: 1100
+  guaranteedLootRarity: 3
+  guaranteedLootCount: 2
+  bonusRewards: []
+  challengeIcon: {fileID: 0}
+  difficultyColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  startSound: {fileID: 0}
+  completeSound: {fileID: 0}
+  failSound: {fileID: 0}

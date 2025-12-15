@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdf3c7afa409021439160323fe63f99e, type: 3}
+  m_Name: Mission_10_TheEnforcer
+  m_EditorClassIdentifier: Assembly-CSharp::MissionData
+  missionName: The Enforcer
+  description: A heavily armed rogue leader known as The Enforcer controls the residential
+    district. Take him down to break their grip on the area.
+  levelRequirement: 4
+  isMainStory: 1
+  isBossMission: 1
+  objectives:
+  - type: 2
+    description: Locate The Enforcer's stronghold
+    targetCount: 1
+  - type: 0
+    description: Eliminate The Enforcer's guards
+    targetCount: 15
+  - type: 5
+    description: Defeat The Enforcer
+    targetCount: 1
+  xpReward: 400
+  currencyReward: 200

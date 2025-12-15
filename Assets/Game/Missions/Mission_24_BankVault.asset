@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdf3c7afa409021439160323fe63f99e, type: 3}
+  m_Name: Mission_24_BankVault
+  m_EditorClassIdentifier: Assembly-CSharp::MissionData
+  missionName: Bank Vault
+  description: Rogues are looting the central bank. Secure the vault and recover
+    critical financial records.
+  levelRequirement: 9
+  isMainStory: 0
+  isBossMission: 0
+  objectives:
+  - type: 2
+    description: Reach the central bank
+    targetCount: 1
+  - type: 0
+    description: Eliminate looters
+    targetCount: 28
+  - type: 1
+    description: Secure the vault contents
+    targetCount: 1
+  xpReward: 680
+  currencyReward: 340

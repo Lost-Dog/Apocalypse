@@ -1,0 +1,352 @@
+╔══════════════════════════════════════════════════════════════════╗
+║            WHY 26 PATROL AI ARE SPAWNING AT START - SOLVED       ║
+╚══════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════
+ISSUE
+═══════════════════════════════════════════════════════════════════
+
+You're seeing 26 "Patrol AI" characters spawn at start.
+
+
+═══════════════════════════════════════════════════════════════════
+ROOT CAUSE
+═══════════════════════════════════════════════════════════════════
+
+The CharacterSpawner has MANY civilian prefabs assigned!
+
+PREFABS FOUND IN /Assets/Prefabs/Character_Prefabs/Friendly/:
+  1.  SM_Chr_Biker_Male_01
+  2.  SM_Chr_Business_Male_01
+  3.  SM_Chr_Cool_Female_01
+  4.  SM_Chr_Cool_Male_01
+  5.  SM_Chr_Criminal_Male_01
+  6.  SM_Chr_Eastern_Female_01
+  7.  SM_Chr_Emo_Female_01
+  8.  SM_Chr_Hazmat_Male_01
+  9.  SM_Chr_Homeless_Male_01
+  10. SM_Chr_Hunter_Male_01
+  11. SM_Chr_Islander_Male_01
+  12. SM_Chr_Mechanic_Female_01
+  13. SM_Chr_Nerd_Female_01
+  14. SM_Chr_Nun_Female_01
+  15. SM_Chr_Patient_Female_01
+  16. SM_Chr_Press_Male_01
+  17. SM_Chr_Punk_Female_01
+  18. SM_Chr_RiotCop_Male_01
+  19. SM_Chr_Scout_Female_01
+  20. SM_Chr_Sheriff_Male_01
+  21. SM_Chr_Soldier_Female_01
+  22. SM_Chr_Soldier_Male_01
+  23. SM_Chr_Teen_Female_01
+  24. SM_Chr_Teen_Male_01
+  25. SM_Chr_Waitress_Female_01
+  (+ possibly more from other folders)
+
+ALL of these prefabs have JU_AI_PatrolCharacter component!
+They are ALL "Patrol AI" characters.
+
+
+HOW IT HAPPENS:
+─────────────────
+
+CharacterSpawner.Start():
+  1. InitializePools()
+     ├─ For EACH prefab in civilianPrefabs list (26+)
+     ├─ Creates poolSizePerPrefab instances
+     │   poolSizePerPrefab = Ceil(10 / 26) = 1 per prefab
+     └─ Creates 1 × 26 = 26 pooled instances
+
+  2. SpawnInitialCharacters()
+     ├─ toSpawn = Min(maxActiveCharacters / 2, initialPoolSize)
+     ├─ toSpawn = Min(10 / 2, 10) = 5
+     └─ Spawns 5 ACTIVE characters
+
+RESULT:
+  • 26 pooled instances created (INACTIVE as children of CharacterSpawner)
+  • 5 of them ACTIVATED and positioned around player
+  • You see 26 child GameObjects under CharacterSpawner in hierarchy
+
+
+═══════════════════════════════════════════════════════════════════
+SOLUTION OPTIONS
+═══════════════════════════════════════════════════════════════════
+
+OPTION 1: REDUCE CIVILIAN VARIETY (RECOMMENDED FOR PERFORMANCE)
+────────────────────────────────────────────────────────────────────
+
+Select only 5-10 civilian prefabs instead of all 26.
+
+WHY:
+  • Better performance (smaller pool)
+  • Faster instantiation
+  • Less memory usage
+  • Still enough variety
+
+HOW:
+  1. Select /GameSystems/CharacterSpawner in Hierarchy
+  2. In Inspector, expand "Civilian Prefabs" list
+  3. Reduce the size from 26 to 5-10
+  4. Choose a diverse mix:
+     - SM_Chr_Business_Male_01
+     - SM_Chr_Mechanic_Female_01
+     - SM_Chr_Hunter_Male_01
+     - SM_Chr_Punk_Female_01
+     - SM_Chr_Homeless_Male_01
+     - SM_Chr_Teen_Female_01
+     - SM_Chr_Criminal_Male_01
+     - SM_Chr_Soldier_Male_01
+     - SM_Chr_Cool_Female_01
+     - SM_Chr_Press_Male_01
+
+RESULT:
+  • 10 pooled instances (1 per prefab)
+  • 5 active at a time
+  • Good variety, better performance
+
+
+OPTION 2: INCREASE POOL SIZE PER PREFAB
+────────────────────────────────────────
+
+If you want to keep all 26 prefabs but have more instances:
+
+1. Select /GameSystems/CharacterSpawner
+2. Change "Initial Pool Size" from 10 to 52 (26 × 2)
+3. This creates 2 instances per prefab
+
+RESULT:
+  • 52 pooled instances
+  • 26 can spawn initially (maxActiveCharacters / 2 = 26)
+  • More variety, more memory usage
+
+
+OPTION 3: DISABLE AUTO-SPAWN ENTIRELY
+──────────────────────────────────────
+
+If you don't want ambient civilians at all:
+
+1. Open Spawn Manager Control Panel
+   Division Game → Spawn Management → Spawn Manager Control Panel
+   
+2. Click "Disable Ambient Civilians"
+
+RESULT:
+  • No pool creation
+  • No ambient spawning
+  • Civilians spawn only during challenges
+
+
+OPTION 4: REDUCE MAX ACTIVE CHARACTERS
+───────────────────────────────────────
+
+Keep all 26 prefabs but spawn fewer:
+
+1. Select /GameSystems/CharacterSpawner
+2. Change "Max Active Characters" from 10 to 5
+3. Change "Initial Pool Size" from 10 to 26 (keep 1 per prefab)
+
+RESULT:
+  • 26 pooled instances (1 per prefab)
+  • Only 2-3 spawn initially (maxActive / 2 = 2.5)
+  • Full variety, lower active count
+
+
+═══════════════════════════════════════════════════════════════════
+RECOMMENDED CONFIGURATION
+═══════════════════════════════════════════════════════════════════
+
+BEST BALANCE: Option 1 + Reduced Prefabs
+
+Civilian Prefabs: 8-10 diverse characters
+Max Active Characters: 8-10
+Initial Pool Size: 10 (or 20 for 2 per prefab)
+Spawn Interval: 5 seconds
+
+THIS GIVES YOU:
+  ✓ Good variety (8-10 different character types)
+  ✓ Low memory footprint (10-20 pooled instances)
+  ✓ Smooth performance (fewer AI running)
+  ✓ Living world (civilians spawn around player)
+  ✓ Manageable population density
+
+
+═══════════════════════════════════════════════════════════════════
+HOW TO APPLY THE FIX
+═══════════════════════════════════════════════════════════════════
+
+STEP 1: SELECT CHARACTER SPAWNER
+─────────────────────────────────
+
+1. Open Hierarchy window
+2. Navigate to /GameSystems/CharacterSpawner
+3. Click to select it
+4. Inspector shows CharacterSpawner component
+
+
+STEP 2: REDUCE CIVILIAN PREFABS LIST
+─────────────────────────────────────
+
+1. In Inspector, find "Civilian Prefabs" list
+2. Note the current Size (probably 26 or more)
+3. Click the Size field
+4. Change from 26 to 10
+5. Unity will keep the first 10 prefabs
+
+OR manually select which 10:
+  a. Keep Size at 26
+  b. Set unwanted prefabs to None (delete the reference)
+  c. Click the "-" button to remove empty slots
+  d. Final Size should be 8-10
+
+
+STEP 3: ADJUST POOL SETTINGS
+─────────────────────────────
+
+1. Initial Pool Size: 10
+   └─ Creates 1 instance per prefab (10 total)
+   
+2. Max Active Characters: 8
+   └─ Max 8 active at once
+   
+3. Spawn Interval: 5
+   └─ Spawn every 5 seconds
+
+4. Enable Auto Spawn: ✓ (checked)
+   └─ Auto-spawn enabled
+
+
+STEP 4: SAVE AND TEST
+──────────────────────
+
+1. File → Save (Ctrl+S)
+2. Enter Play Mode
+3. Check Hierarchy: /GameSystems/CharacterSpawner
+4. Count children: Should see ~10 pooled instances
+5. Watch scene: ~4 should be active near player
+
+
+═══════════════════════════════════════════════════════════════════
+WHY THIS HAPPENED
+═══════════════════════════════════════════════════════════════════
+
+The CharacterSpawner was likely set up with:
+  • All 25+ civilian prefabs from Friendly folder assigned
+  • Initial pool creates 1 instance per prefab for variety
+  • Result: 26+ pooled "Patrol AI" GameObjects
+
+THIS IS NOT A BUG!
+
+It's working as designed:
+  ✓ Pooling system prevents runtime instantiation lag
+  ✓ Pre-creates instances for all civilian types
+  ✓ Variety in spawned civilians
+
+BUT:
+  ✗ Too many prefabs = large pool = memory waste
+  ✗ Most instances never used (only spawn 5-10 at a time)
+  ✗ Confusing in Hierarchy
+
+
+FIX:
+  • Reduce prefab variety to match actual spawn count
+  • Keep diversity, reduce waste
+
+
+═══════════════════════════════════════════════════════════════════
+UNDERSTANDING THE MATH
+═══════════════════════════════════════════════════════════════════
+
+CURRENT SETUP (26 prefabs, initialPoolSize=10):
+
+poolSizePerPrefab = Ceil(10 / 26) = Ceil(0.38) = 1
+Total Pool Size = 1 × 26 prefabs = 26 instances
+
+Initial Spawn = Min(maxActive / 2, poolSize)
+Initial Spawn = Min(10 / 2, 10) = 5 active
+
+
+RECOMMENDED SETUP (10 prefabs, initialPoolSize=10):
+
+poolSizePerPrefab = Ceil(10 / 10) = 1
+Total Pool Size = 1 × 10 prefabs = 10 instances
+
+Initial Spawn = Min(8 / 2, 10) = 4 active
+
+
+ALTERNATIVE (10 prefabs, initialPoolSize=20):
+
+poolSizePerPrefab = Ceil(20 / 10) = 2
+Total Pool Size = 2 × 10 prefabs = 20 instances
+
+Initial Spawn = Min(8 / 2, 20) = 4 active
+
+This gives you 2 instances per prefab type for better variety!
+
+
+═══════════════════════════════════════════════════════════════════
+VERIFY THE FIX
+═══════════════════════════════════════════════════════════════════
+
+1. Apply recommended settings
+2. Enter Play Mode
+3. Open Hierarchy
+4. Expand /GameSystems/CharacterSpawner
+5. Count child GameObjects
+
+EXPECTED:
+  • 10 children if initialPoolSize=10, 10 prefabs
+  • 20 children if initialPoolSize=20, 10 prefabs
+  • ~4 of them Active (green), rest Inactive (gray)
+
+6. Watch Console:
+   "CharacterSpawner: Spawned [name] at [position]"
+   Should spawn 1 every 5 seconds until reaching max
+
+
+═══════════════════════════════════════════════════════════════════
+ADVANCED: USE THE DEBUG TOOL
+═══════════════════════════════════════════════════════════════════
+
+I created a debug window for you:
+
+Division Game → Debug → Character Spawner Inspector
+
+This shows:
+  • Civilian Prefabs Count
+  • List of all assigned prefabs
+  • Current settings
+  • Runtime info (active/pooled counts)
+
+Use this to verify your configuration!
+
+
+═══════════════════════════════════════════════════════════════════
+SUMMARY
+═══════════════════════════════════════════════════════════════════
+
+ISSUE:
+  26 "Patrol AI" spawning at start
+
+CAUSE:
+  CharacterSpawner has 26 civilian prefabs assigned
+  InitializePools() creates 1 instance per prefab = 26 pooled instances
+
+SOLUTION:
+  Reduce civilian prefabs from 26 to 8-10
+  
+RECOMMENDED SETTINGS:
+  • Civilian Prefabs: 10 diverse characters
+  • Initial Pool Size: 10-20
+  • Max Active: 8-10
+  • Spawn Interval: 5s
+
+RESULT:
+  ✓ 10-20 pooled instances (not 26)
+  ✓ Good variety
+  ✓ Better performance
+  ✓ Less memory usage
+  ✓ Living world maintained
+
+Apply Option 1 (Reduce Civilian Variety) for best results!
+
+═══════════════════════════════════════════════════════════════════

@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdf3c7afa409021439160323fe63f99e, type: 3}
+  m_Name: Mission_16_TheWarLord
+  m_EditorClassIdentifier: Assembly-CSharp::MissionData
+  missionName: The Warlord
+  description: The commercial district is controlled by a ruthless warlord. Eliminate
+    him to free the district.
+  levelRequirement: 6
+  isMainStory: 1
+  isBossMission: 1
+  objectives:
+  - type: 0
+    description: Fight through the warlord's compound
+    targetCount: 30
+  - type: 5
+    description: Defeat The Warlord
+    targetCount: 1
+  xpReward: 550
+  currencyReward: 275

@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdf3c7afa409021439160323fe63f99e, type: 3}
+  m_Name: Mission_29_TheGeneral
+  m_EditorClassIdentifier: Assembly-CSharp::MissionData
+  missionName: The General
+  description: Face the rogue general in his war room. He's heavily armored and commands
+    elite forces. This is the ultimate test.
+  levelRequirement: 10
+  isMainStory: 1
+  isBossMission: 1
+  objectives:
+  - type: 0
+    description: Fight through elite guards
+    targetCount: 25
+  - type: 5
+    description: Defeat The General (Phase 1)
+    targetCount: 1
+  - type: 0
+    description: Eliminate reinforcements
+    targetCount: 20
+  - type: 5
+    description: Defeat The General (Phase 2)
+    targetCount: 1
+  xpReward: 1200
+  currencyReward: 600

@@ -1,0 +1,421 @@
+═══════════════════════════════════════════════════════════════════
+  CONFIGURING EXISTING MISSIONS WITH MISSION ZONES - COMPLETE GUIDE
+═══════════════════════════════════════════════════════════════════
+
+Your existing missions can now use the Universal Mission Setup system!
+
+This guide shows you how to configure all your existing ChallengeData 
+assets (Supply Drops, Civilian Rescues, Boss Encounters, etc.) with 
+custom Mission Zones and spawn points.
+
+═══════════════════════════════════════════════════════════════════
+QUICK START (5 MINUTES)
+═══════════════════════════════════════════════════════════════════
+
+STEP 1: Open the Configurator
+─────────────────────────────
+Top Menu → Division Game → Challenge System → Configure Existing Missions
+
+
+STEP 2: Set Default Prefabs
+────────────────────────────
+At the top of the window, drag your prefabs:
+  • Default Enemy: Your rogue AI prefab
+  • Default Civilian: Your friendly civilian prefab
+  • Default Boss: Your boss enemy prefab
+  • Default Loot Box: Your supply crate prefab
+
+
+STEP 3: Select Challenges
+──────────────────────────
+You'll see a list of ALL your challenges:
+  • World Events (14 challenges)
+  • Daily (8 challenges)
+  • Weekly (6 challenges)
+
+Click checkboxes OR use quick buttons:
+  • Select All Supply Drops
+  • Select All Civilian Rescue
+  • Select All Boss Fights
+
+
+STEP 4: Create Mission Zones
+─────────────────────────────
+Click: Create Mission Zones for Selected (X)
+
+
+STEP 5: Position & Customize
+─────────────────────────────
+1. Find zones in Hierarchy under MissionZones (they'll be grayed out)
+2. Move zones to map locations (can edit while inactive)
+3. Customize spawn points as needed
+
+IMPORTANT: Zones are created INACTIVE and will be automatically
+activated by ChallengeManager when challenges spawn!
+
+DONE! Your challenges now use custom spawn points! ✓
+
+
+═══════════════════════════════════════════════════════════════════
+YOUR EXISTING CHALLENGES
+═══════════════════════════════════════════════════════════════════
+
+WORLD EVENTS (14)
+─────────────────
+
+Supply Drop:
+  • WE_SupplyDrop_Easy         → 4 enemies, 1 loot box
+  • WE_SupplyDrop_Medium        → 6 enemies, 2 loot boxes
+  • WE_SupplyDrop_Hard          → 8 enemies, 2 loot boxes
+
+Civilian Rescue:
+  • WE_CivilianRescue_Easy      → 4 enemies, 3 civilians
+  • WE_CivilianRescue_Medium    → 6 enemies, 5 civilians
+
+Control Point:
+  • WE_ControlPoint_Medium      → 8 enemies
+  • WE_ControlPoint_Hard        → 10 enemies
+
+Boss Encounter:
+  • WE_BossEncounter_Medium     → 1 boss, 6 guards, 1 loot
+  • WE_BossEncounter_Hard       → 1 boss, 8 guards, 1 loot
+  • WE_BossEncounter_Extreme    → 1 boss, 10 guards, 1 loot
+
+Extraction Defense:
+  • WE_ExtractionDefense_Medium → 12 enemies (waves)
+  • WE_ExtractionDefense_Hard   → 16 enemies (waves)
+
+Hostage Rescue:
+  • WE_HostageRescue_Hard       → 7 enemies, 3 hostages
+
+Rival Agent:
+  • WE_RivalAgent_Extreme       → 1 rival agent, 3 backup
+
+
+DAILY CHALLENGES (8)
+────────────────────
+  • Daily_BossHunter
+  • Daily_Defender
+  • Daily_FlawlessOperator
+  • Daily_GuardianAngel
+  • Daily_Hunter
+  • Daily_Marksman
+  • Daily_ResourceCollector
+  • Daily_ZoneControl ✓ (Already configured!)
+
+
+WEEKLY CHALLENGES (6)
+─────────────────────
+  • Weekly_BossSlayer
+  • Weekly_EliteHunter
+  • Weekly_Humanitarian
+  • Weekly_MasterAgent
+  • Weekly_Sharpshooter
+  • Weekly_TerritoryController
+
+
+═══════════════════════════════════════════════════════════════════
+AUTO-GENERATED SPAWN COUNTS
+═══════════════════════════════════════════════════════════════════
+
+The system automatically creates appropriate spawn points based on 
+mission type and difficulty:
+
+SUPPLY DROP MISSIONS
+────────────────────
+Difficulty    Enemies    Loot Boxes
+Easy          4          1
+Medium        6          2
+Hard          8          2
+Extreme       10         2
+
+
+CIVILIAN RESCUE MISSIONS
+────────────────────────
+Difficulty    Enemies    Civilians
+Easy          4          3
+Medium        6          5
+Hard          8          5
+Extreme       10         5
+
+
+CONTROL POINT MISSIONS
+──────────────────────
+Difficulty    Enemies
+Easy          6
+Medium        8
+Hard          10
+Extreme       12
+
+
+BOSS ENCOUNTER MISSIONS
+───────────────────────
+Difficulty    Boss    Guards    Loot
+Easy          1       4         1
+Medium        1       6         1
+Hard          1       8         1
+Extreme       1       10        1
+
+
+HOSTAGE RESCUE MISSIONS
+───────────────────────
+Difficulty    Enemies    Hostages
+Easy          3          2
+Medium        5          3
+Hard          7          3
+Extreme       9          3
+
+
+EXTRACTION DEFENSE MISSIONS
+───────────────────────────
+Difficulty    Total Enemies (Waves)
+Easy          8
+Medium        12
+Hard          16
+Extreme       20
+
+
+RIVAL AGENT MISSIONS
+────────────────────
+Difficulty    Rival    Backup
+Easy          1        0
+Medium        1        1
+Hard          1        2
+Extreme       1        3
+
+
+═══════════════════════════════════════════════════════════════════
+WORKFLOW EXAMPLES
+═══════════════════════════════════════════════════════════════════
+
+EXAMPLE 1: Configure All Supply Drops
+──────────────────────────────────────
+Goal: Set up all 3 Supply Drop missions with spawn points
+
+1. Open configurator
+2. Set Default Enemy = Rogue AI prefab
+3. Set Default Loot Box = Supply Crate prefab
+4. Click "Select All Supply Drops" button
+5. Click "Create Mission Zones for Selected (3)"
+6. Result:
+   MissionZones/
+   ├─ Small_Supply_Cache (Easy: 4 enemies, 1 loot)
+   ├─ Supply_Drop_Medium (Medium: 6 enemies, 2 loot)
+   └─ Supply_Drop_Hard (Hard: 8 enemies, 2 loot)
+
+
+EXAMPLE 2: Configure All Boss Encounters
+─────────────────────────────────────────
+Goal: Set up all 3 Boss fights
+
+1. Set Default Enemy = Elite Guard prefab
+2. Set Default Boss = Commander Boss prefab
+3. Set Default Loot Box = Epic Loot Crate
+4. Click "Select All Boss Fights"
+5. Create zones
+6. Result:
+   MissionZones/
+   ├─ Rogue_Lieutenant (Boss + 6 guards)
+   ├─ Elite_Commander (Boss + 8 guards)
+   └─ War_Chief (Boss + 10 guards)
+
+
+EXAMPLE 3: Configure Everything at Once
+────────────────────────────────────────
+Goal: Create zones for ALL challenges
+
+1. Set all 4 default prefabs
+2. Don't select anything
+3. Click "Create All Missing Zones"
+4. Confirm dialog
+5. Result: All 28 challenges now have Mission Zones!
+
+
+═══════════════════════════════════════════════════════════════════
+POSITIONING YOUR MISSION ZONES
+═══════════════════════════════════════════════════════════════════
+
+After creating zones, position them in your scene:
+
+METHOD 1: Spread Around Map
+────────────────────────────
+1. Open Hierarchy → MissionZones
+2. Select first zone (e.g., Small_Supply_Cache)
+3. Move to location on map (use Scene view)
+4. Repeat for each zone
+
+
+METHOD 2: Cluster by Type
+──────────────────────────
+Downtown Area:       Supply Drop missions
+Residential Area:    Civilian Rescue missions
+Industrial Zone:     Boss Encounter missions
+Outskirts:          Extraction Defense missions
+
+
+METHOD 3: Difficulty-Based Placement
+─────────────────────────────────────
+Safe Zones (Level 1-3):      All Easy difficulty
+Mid-Tier Areas (Level 4-7):  All Medium difficulty
+Dangerous Zones (Level 8+):  All Hard/Extreme
+
+
+═══════════════════════════════════════════════════════════════════
+CUSTOMIZING SPAWN POINTS
+═══════════════════════════════════════════════════════════════════
+
+After zones are created, customize individual spawn points:
+
+1. Find the Zone
+   Hierarchy → MissionZones → YourMissionName
+
+2. Expand to See Spawn Points
+   Small_Supply_Cache
+   ├─ ZoneMarker (visual disc)
+   └─ SpawnPoints
+       ├─ Enemy_01
+       ├─ Enemy_02
+       ├─ Enemy_03
+       ├─ Enemy_04
+       └─ LootBox_01
+
+3. Customize Position
+   • Move spawn points to custom locations
+   • Rotate to set facing direction
+   • Add/Remove spawn points manually
+
+4. Change Prefabs
+   Select MissionZone → Inspector → Spawn Points:
+   Enemy_01
+   ├─ Category: Enemy
+   └─ Prefab Override: [Change to Sniper AI]
+
+5. Advanced Settings
+   Enable "Use Custom Settings" on any spawn point:
+   ├─ Require NavMesh: ✓
+   ├─ Random Rotation: □
+   ├─ Fixed Rotation: (0, 90, 0)
+   └─ Priority: 10
+
+
+═══════════════════════════════════════════════════════════════════
+INTEGRATION WITH CHALLENGEMANAGER
+═══════════════════════════════════════════════════════════════════
+
+Your configured zones automatically work with the challenge system:
+
+AUTOMATIC FLOW
+──────────────
+1. ChallengeManager decides to spawn "Small Supply Cache"
+   ↓
+2. ChallengeSpawner receives spawn request
+   ↓
+3. Spawner finds nearest MissionZone of type "SupplyDrop"
+   ↓
+4. Spawner uses zone's custom spawn points
+   ↓
+5. Enemies and loot spawn at your positions!
+
+
+FALLBACK BEHAVIOR
+─────────────────
+If no MissionZone is found near the spawn location:
+  • System uses flexible spawning from ChallengeData
+  • Spawns randomly around challenge position
+  • Still works, just not with custom placement
+
+
+═══════════════════════════════════════════════════════════════════
+TIPS & BEST PRACTICES
+═══════════════════════════════════════════════════════════════════
+
+DO:
+✓ Set default prefabs before creating zones
+✓ Position zones in logical map locations
+✓ Test each mission type to ensure spawns work
+✓ Use visual markers to see zone boundaries
+✓ Group similar mission types in same area
+✓ Adjust spawn points after testing gameplay
+
+DON'T:
+✗ Create zones without setting prefabs first
+✗ Leave all zones at world origin
+✗ Overlap mission zones of different types
+✗ Delete SpawnPoints folder (breaks the zone)
+✗ Forget to save scene after positioning
+
+
+═══════════════════════════════════════════════════════════════════
+QUICK ACTIONS REFERENCE
+═══════════════════════════════════════════════════════════════════
+
+SELECTION SHORTCUTS
+───────────────────
+Select All                    → Check all challenges
+Select None                   → Uncheck all
+Select All Supply Drops       → All supply drop missions
+Select All Civilian Rescue    → All rescue missions
+Select All Boss Fights        → All boss encounters
+Select All Control Points     → All control point missions
+Select All Hostage Rescue     → All hostage missions
+Select All Extraction         → All extraction missions
+
+
+CREATE ACTIONS
+──────────────
+Create Mission Zones for Selected (X)
+  → Creates zones only for checked challenges
+
+Create All Missing Zones
+  → Creates zones for ANY challenge without one
+
+
+FILTER OPTIONS
+──────────────
+☑ World Events   → Show/hide 14 world events
+☑ Daily          → Show/hide 8 daily challenges
+☑ Weekly         → Show/hide 6 weekly challenges
+
+
+═══════════════════════════════════════════════════════════════════
+TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════
+
+Problem: "All selected challenges already have zones"
+Solution: Challenges already have Mission Zones. Either:
+          • Select different challenges
+          • Delete existing zones to recreate them
+
+Problem: Zones created but can't find them
+Solution: Look in Hierarchy → MissionZones
+
+Problem: Spawn points not showing in scene
+Solution: • Enable Gizmos in Scene view (top right)
+          • Select the MissionZone to see highlights
+
+Problem: Enemies not spawning at custom points
+Solution: • Check zone is near challenge spawn location
+          • Ensure mission types match
+          • Verify prefabs assigned to spawn points
+
+Problem: Zone has wrong number of spawn points
+Solution: • Manually add/remove spawn points
+          • Or delete zone and recreate
+
+
+═══════════════════════════════════════════════════════════════════
+SUMMARY
+═══════════════════════════════════════════════════════════════════
+
+YOU NOW HAVE:
+
+✓ Configurator tool for all 28 existing challenges
+✓ Auto-generated spawn points per difficulty
+✓ Customizable spawn positions and prefabs
+✓ Strategic mission placement across map
+✓ Test and iterate on mission design
+✓ Easy workflow to extend to future missions
+
+Your Division Game mission system is production-ready!
+
+═══════════════════════════════════════════════════════════════════

@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdf3c7afa409021439160323fe63f99e, type: 3}
+  m_Name: Mission_28_PointOfNoReturn
+  m_EditorClassIdentifier: Assembly-CSharp::MissionData
+  missionName: Point of No Return
+  description: Launch the final assault on the capitol building. This is it - the
+    decisive battle for the city.
+  levelRequirement: 10
+  isMainStory: 1
+  isBossMission: 0
+  objectives:
+  - type: 0
+    description: Breach capitol defenses
+    targetCount: 60
+  - type: 2
+    description: Secure the main entrance
+    targetCount: 1
+  - type: 0
+    description: Clear the lobby and first floor
+    targetCount: 35
+  xpReward: 950
+  currencyReward: 475

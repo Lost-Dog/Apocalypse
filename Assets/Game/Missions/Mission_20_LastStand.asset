@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdf3c7afa409021439160323fe63f99e, type: 3}
+  m_Name: Mission_20_LastStand
+  m_EditorClassIdentifier: Assembly-CSharp::MissionData
+  missionName: Last Stand
+  description: Defend the industrial base against a massive rogue counterattack.
+    Hold the line at all costs.
+  levelRequirement: 8
+  isMainStory: 1
+  isBossMission: 0
+  objectives:
+  - type: 3
+    description: Defend the base perimeter
+    targetCount: 1
+  - type: 4
+    description: Survive for 10 minutes
+    targetCount: 600
+  - type: 0
+    description: Repel enemy waves
+    targetCount: 50
+  xpReward: 650
+  currencyReward: 325

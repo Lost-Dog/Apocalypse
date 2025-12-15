@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdf3c7afa409021439160323fe63f99e, type: 3}
+  m_Name: Mission_30_Endgame
+  m_EditorClassIdentifier: Assembly-CSharp::MissionData
+  missionName: Endgame
+  description: The final mission. Activate the emergency broadcast system and declare
+    the city liberated. Hold the broadcast tower against the last rogue forces.
+  levelRequirement: 10
+  isMainStory: 1
+  isBossMission: 0
+  objectives:
+  - type: 2
+    description: Reach the broadcast tower roof
+    targetCount: 1
+  - type: 1
+    description: Activate the emergency broadcast
+    targetCount: 1
+  - type: 3
+    description: Defend the tower during broadcast
+    targetCount: 1
+  - type: 4
+    description: Hold position for 5 minutes
+    targetCount: 300
+  - type: 0
+    description: Repel final assault
+    targetCount: 75
+  xpReward: 1500
+  currencyReward: 750

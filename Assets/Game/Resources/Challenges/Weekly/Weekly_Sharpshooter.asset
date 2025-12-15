@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a08aee3c6de204845a3558c0687ef2a6, type: 3}
+  m_Name: Weekly_Sharpshooter
+  m_EditorClassIdentifier: Assembly-CSharp::ChallengeData
+  challengeName: Sharpshooter
+  description: Score 150 headshot kills this week.
+  challengeType: 0
+  frequency: 2
+  difficulty: 2
+  recommendedLevel: 1
+  requiredPlayerLevel: 1
+  timeLimit: 604800
+  detectionRadius: 0
+  requireNoDeaths: 0
+  requireStealth: 0
+  objectiveDescription: Complete the challenge
+  spawnItems:
+  - itemName: 
+    prefab: {fileID: 5657882254576232896, guid: 92100b7a3b0e2b549865acece1fff48f,
+      type: 3}
+    category: 0
+    minCount: 10
+    maxCount: 25
+    usePoolMode: 1
+    spawnLocation: 0
+    spawnRadius: 0
+    offset: {x: 0, y: 0, z: 0}
+    requireNavMesh: 1
+    randomRotation: 0
+    fixedRotation: {x: 0, y: 0, z: 0}
+    priority: 0
+    required: 0
+  xpReward: 2400
+  currencyReward: 1200
+  guaranteedLootRarity: 3
+  guaranteedLootCount: 2
+  bonusRewards: []
+  challengeIcon: {fileID: 0}
+  difficultyColor: {r: 1, g: 0.5, b: 0, a: 1}
+  startSound: {fileID: 0}
+  completeSound: {fileID: 0}
+  failSound: {fileID: 0}

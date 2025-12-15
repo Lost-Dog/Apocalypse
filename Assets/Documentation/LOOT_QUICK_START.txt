@@ -1,0 +1,221 @@
+╔══════════════════════════════════════════════════════════════════╗
+║              LOOT SYSTEM - QUICK START GUIDE                    ║
+╚══════════════════════════════════════════════════════════════════╝
+
+═══════════════════════════════════════════════════════════════════
+5-MINUTE SETUP
+═══════════════════════════════════════════════════════════════════
+
+STEP 1: ADD LOOTABLE ITEMS (2 minutes)
+───────────────────────────────────────
+
+1. Hierarchy → /GameSystems → Inspector → LootManager
+2. Expand "Lootable Items Database"
+3. Click + button to add items
+4. Fill in:
+   ✓ Item ID: unique identifier (e.g., "weapon_rifle_001")
+   ✓ Item Name: display name (e.g., "Assault Rifle")
+   ✓ Rarity: Common/Uncommon/Rare/Epic/Legendary
+   ✓ Item Type: Weapon/Armor/Gear/etc
+   ✓ Description: what it does
+
+5. Add 5-10 items to start
+
+
+STEP 2: TEST LOOT DROPS (1 minute)
+───────────────────────────────────
+
+1. Enter Play Mode
+2. In LootManager Inspector → Debug Tools
+3. Click "Drop Common Loot" or "Drop Legendary Loot"
+4. See loot spawn in world near player
+
+
+STEP 3: PICKUP AND CHECK INVENTORY (1 minute)
+──────────────────────────────────────────────
+
+1. Walk to loot drop
+2. Press E to pickup
+3. Hierarchy → PlayerInventory
+4. Inspector shows collected items
+5. View statistics and item details
+
+
+STEP 4: TEST PERSISTENCE (1 minute)
+────────────────────────────────────
+
+1. Still in Play Mode
+2. Pick up several items
+3. Exit Play Mode
+4. Re-enter Play Mode
+5. Check PlayerInventory → items are still there!
+
+
+DONE! ✅
+────────
+
+Your loot system is working!
+
+
+═══════════════════════════════════════════════════════════════════
+EXAMPLE ITEM CONFIGURATION
+═══════════════════════════════════════════════════════════════════
+
+COMMON WEAPON:
+──────────────
+Item ID: weapon_pistol_001
+Item Name: Standard Pistol
+Rarity: Common
+Item Type: Weapon
+Description: Basic sidearm for close combat
+Icon: (leave empty for now)
+World Prefab: (leave empty, uses pool)
+
+
+RARE ARMOR:
+───────────
+Item ID: armor_vest_tactical_001
+Item Name: Tactical Vest
+Rarity: Rare
+Item Type: Armor
+Description: Military-grade body armor
+Icon: (leave empty)
+World Prefab: (leave empty)
+
+
+LEGENDARY GEAR:
+───────────────
+Item ID: gear_dz_exotic_001
+Item Name: Division Tech
+Rarity: Legendary
+Item Type: Collectible
+Description: Rare crafting material from Dark Zone
+Icon: (leave empty)
+World Prefab: (leave empty)
+
+
+═══════════════════════════════════════════════════════════════════
+QUICK REFERENCE
+═══════════════════════════════════════════════════════════════════
+
+DROP LOOT IN CODE:
+──────────────────
+
+GameManager.Instance.lootManager.DropLoot(position, playerLevel);
+
+
+DROP GUARANTEED RARE:
+─────────────────────
+
+GameManager.Instance.lootManager.DropLootWithRarity(
+    position, 
+    playerLevel, 
+    LootManager.Rarity.Epic
+);
+
+
+ACCESS INVENTORY:
+─────────────────
+
+int itemCount = PlayerInventory.Instance.items.Count;
+int totalGearScore = PlayerInventory.Instance.GetTotalGearScore();
+
+
+SAVE/LOAD:
+──────────
+
+PlayerInventory.Instance.SaveInventory();
+PlayerInventory.Instance.LoadInventory();
+
+
+═══════════════════════════════════════════════════════════════════
+RARITY TIERS
+═══════════════════════════════════════════════════════════════════
+
+Common     → White  → 50% chance → GS +0
+Uncommon   → Green  → 25% chance → GS +50
+Rare       → Blue   → 15% chance → GS +100
+Epic       → Purple → 8% chance  → GS +150
+Legendary  → Orange → 2% chance  → GS +200
+
+
+═══════════════════════════════════════════════════════════════════
+GEAR SCORE FORMULA
+═══════════════════════════════════════════════════════════════════
+
+Base: 100
++ (Player Level × 40)
++ (Rarity Bonus)
+± Random (±10)
+
+Example:
+Level 5 Rare = 100 + 200 + 100 = 400 GS
+
+
+═══════════════════════════════════════════════════════════════════
+WHERE IS IT SAVED?
+═══════════════════════════════════════════════════════════════════
+
+PlayerPrefs:
+  • "PlayerInventory_SaveData" (JSON)
+  • "TotalItemsCollected" (int)
+  • "HighestGearScore" (int)
+
+Auto-saves when items added/removed
+Also saves on Application Quit
+
+
+═══════════════════════════════════════════════════════════════════
+TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════
+
+No loot drops:
+  → Add items to Lootable Items Database
+
+Can't pickup:
+  → Player needs "Player" tag
+  → Check pickupRadius on LootItem
+
+Doesn't save:
+  → Check autoSaveOnChange enabled
+  → Check Console for save confirmation
+
+
+═══════════════════════════════════════════════════════════════════
+FILES CREATED
+═══════════════════════════════════════════════════════════════════
+
+Scripts:
+  • LootManager.cs (updated)
+  • PlayerInventory.cs (new)
+  • LootItem.cs (new)
+  • LootItemData class in LootItem.cs
+
+Editor Tools:
+  • LootManagerEditor.cs
+  • PlayerInventoryEditor.cs
+
+Documentation:
+  • LOOT_SYSTEM_COMPLETE_GUIDE.txt
+  • LOOT_QUICK_START.txt (this file)
+
+
+═══════════════════════════════════════════════════════════════════
+NEXT STEPS
+═══════════════════════════════════════════════════════════════════
+
+1. ✓ Add 10-20 lootable items to database
+2. ○ Create visual loot drop prefabs
+3. ○ Design item icons
+4. ○ Connect to UI system
+5. ○ Balance rarity chances
+6. ○ Test at different player levels
+
+
+═══════════════════════════════════════════════════════════════════
+
+Ready to loot! 🎁
+
+For full details, see: LOOT_SYSTEM_COMPLETE_GUIDE.txt
+
+═══════════════════════════════════════════════════════════════════
