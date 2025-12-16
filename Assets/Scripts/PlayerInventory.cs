@@ -108,6 +108,9 @@ public class PlayerInventory : MonoBehaviour
             SaveInventory();
         }
         
+        // Update ProgressionManager with new gear score
+        UpdateProgressionGearScore();
+        
         return true;
     }
     
@@ -118,6 +121,12 @@ public class PlayerInventory : MonoBehaviour
         if (removed && autoSaveOnChange)
         {
             SaveInventory();
+        }
+        
+        // Update ProgressionManager with new gear score
+        if (removed)
+        {
+            UpdateProgressionGearScore();
         }
         
         return removed;
@@ -298,6 +307,72 @@ public class PlayerInventory : MonoBehaviour
         highestGearScore = 0;
         
         Debug.Log("Inventory save data reset");
+    }
+    
+    /// <summary>
+    /// Equip an item (updates equipped status and gear score)
+    /// </summary>
+    public void EquipItem(InventoryItem item)
+    {
+        if (!items.Contains(item)) return;
+        
+        item.isEquipped = true;
+        UpdateProgressionGearScore();
+        
+        if (autoSaveOnChange)
+        {
+            SaveInventory();
+        }
+        
+        Debug.Log($"Equipped: {item.itemName} (GS {item.gearScore})");
+    }
+    
+    /// <summary>
+    /// Unequip an item (updates equipped status and gear score)
+    /// </summary>
+    public void UnequipItem(InventoryItem item)
+    {
+        if (!items.Contains(item)) return;
+        
+        item.isEquipped = false;
+        UpdateProgressionGearScore();
+        
+        if (autoSaveOnChange)
+        {
+            SaveInventory();
+        }
+        
+        Debug.Log($"Unequipped: {item.itemName}");
+    }
+    
+    /// <summary>
+    /// Toggle item equipped status
+    /// </summary>
+    public void ToggleEquip(InventoryItem item)
+    {
+        if (item.isEquipped)
+        {
+            UnequipItem(item);
+        }
+        else
+        {
+            EquipItem(item);
+        }
+    }
+    
+    /// <summary>
+    /// Update ProgressionManager with current gear scores
+    /// </summary>
+    private void UpdateProgressionGearScore()
+    {
+        if (ProgressionManager.Instance != null)
+        {
+            int totalGS = GetTotalGearScore(); // Equipped items only
+            int averageGS = GetAverageGearScore(); // All items
+            
+            ProgressionManager.Instance.UpdateEquippedGearScore(totalGS);
+            ProgressionManager.Instance.UpdateGearScore(averageGS);
+        }
     }
     
     private void OnApplicationQuit()

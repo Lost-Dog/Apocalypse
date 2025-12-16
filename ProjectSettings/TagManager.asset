@@ -2,7 +2,7 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!78 &1
 TagManager:
-  serializedVersion: 2
+  serializedVersion: 3
   tags:
   - DeadZone
   - Bullet
@@ -17,15 +17,17 @@ TagManager:
   - CoverTrigger
   - Vehicle
   - Interactable
+  - Civilian
+  - Friendly
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Player
   - Water
   - UI
   - 
-  - 
+  - Enemy
   - Vehicle
   - Character
   - Bullet
@@ -54,3 +56,5 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  m_RenderingLayers:
+  - Default

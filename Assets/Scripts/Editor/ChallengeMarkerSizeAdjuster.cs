@@ -7,6 +7,7 @@ public class ChallengeMarkerSizeAdjuster : EditorWindow
     private Vector2 markerSize = new Vector2(100, 120);
     private float iconSize = 64f;
     private float distanceTextSize = 24f;
+    private float individualMarkerScale = 1f;
     
     private GameObject canvasObject;
     private GameObject markerPrefab;
@@ -96,6 +97,22 @@ public class ChallengeMarkerSizeAdjuster : EditorWindow
             ApplyCanvasScale();
         }
         EditorGUILayout.EndHorizontal();
+        
+        EditorGUILayout.Space(15);
+        
+        EditorGUILayout.LabelField("Individual Marker Scale", EditorStyles.boldLabel);
+        EditorGUILayout.HelpBox(
+            "Adjust the base scale of each marker independently from canvas scale.\n" +
+            "This is set on the ChallengeWorldMarker prefab.\n\n" +
+            "Useful for fine-tuning size without affecting canvas.",
+            MessageType.None);
+        
+        individualMarkerScale = EditorGUILayout.Slider("Marker Base Scale", individualMarkerScale, 0.5f, 3f);
+        
+        if (GUILayout.Button("Apply Scale to Prefab", GUILayout.Height(30)))
+        {
+            ApplyIndividualMarkerScale();
+        }
         
         EditorGUILayout.Space(15);
         
@@ -219,6 +236,53 @@ public class ChallengeMarkerSizeAdjuster : EditorWindow
                 canvasRect.sizeDelta = markerSize;
                 EditorUtility.SetDirty(canvasRect);
             }
+        }
+    }
+    
+    private void ApplyIndividualMarkerScale()
+    {
+        if (markerPrefab == null)
+        {
+            markerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/ChallengeWorldMarker.prefab");
+        }
+        
+        if (markerPrefab == null)
+        {
+            EditorUtility.DisplayDialog("Error", "ChallengeWorldMarker prefab not found!", "OK");
+            return;
+        }
+        
+        GameObject prefabInstance = PrefabUtility.LoadPrefabContents(AssetDatabase.GetAssetPath(markerPrefab));
+        
+        if (prefabInstance != null)
+        {
+            ChallengeWorldMarker marker = prefabInstance.GetComponent<ChallengeWorldMarker>();
+            if (marker != null)
+            {
+                // Use reflection to set the baseScale field
+                var field = typeof(ChallengeWorldMarker).GetField("baseScale", 
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                
+                if (field != null)
+                {
+                    field.SetValue(marker, individualMarkerScale);
+                }
+            }
+            
+            // Also update transform scale as fallback
+            prefabInstance.transform.localScale = Vector3.one * individualMarkerScale;
+            
+            PrefabUtility.SaveAsPrefabAsset(prefabInstance, AssetDatabase.GetAssetPath(markerPrefab));
+            PrefabUtility.UnloadPrefabContents(prefabInstance);
+            
+            Debug.Log($"<color=green>✓ Individual marker scale set to {individualMarkerScale:F2}</color>");
+            
+            EditorUtility.DisplayDialog(
+                "Scale Applied",
+                $"Marker base scale set to {individualMarkerScale:F2}\n\n" +
+                "Existing markers in scene won't update automatically.\n" +
+                "New spawned markers will use this scale.",
+                "OK");
         }
     }
 }

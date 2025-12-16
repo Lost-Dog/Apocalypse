@@ -175,19 +175,28 @@ public class ChallengeSpawner : MonoBehaviour
     {
         if (data.spawnItems == null || data.spawnItems.Count == 0)
         {
-            Debug.Log($"Challenge {data.challengeName} has no spawn items configured");
+            Debug.LogError($"❌ Challenge '{data.challengeName}' has NO SPAWN ITEMS configured!");
+            Debug.LogError($"Add spawn items in the Challenge Data asset to spawn enemies/objects.");
+            Debug.LogError($"Path: Select challenge data → Inspector → Flexible Spawning System → Spawn Items");
             return;
         }
+        
+        Debug.Log($"📦 Spawning {data.spawnItems.Count} item types for challenge: {data.challengeName}");
         
         List<Vector3> usedPositions = new List<Vector3>();
         List<ChallengeData.SpawnableItem> sortedItems = new List<ChallengeData.SpawnableItem>(data.spawnItems);
         sortedItems.Sort((a, b) => b.priority.CompareTo(a.priority));
         
+        int totalSpawned = 0;
+        int totalFailed = 0;
+        
         foreach (ChallengeData.SpawnableItem item in sortedItems)
         {
             if (item.prefab == null)
             {
-                Debug.LogWarning($"Spawn item '{item.itemName}' has no prefab assigned");
+                string itemDesc = string.IsNullOrEmpty(item.itemName) ? $"[Unnamed {item.category}]" : item.itemName;
+                Debug.LogError($"❌ Spawn item '{itemDesc}' has NO PREFAB assigned! Check '{data.challengeName}' spawn items in Inspector.");
+                totalFailed++;
                 continue;
             }
             
@@ -196,6 +205,7 @@ public class ChallengeSpawner : MonoBehaviour
                 Random.Range(item.minCount, item.maxCount + 1);
             
             int spawnedCount = 0;
+            int failedCount = 0;
             
             for (int i = 0; i < countToSpawn; i++)
             {
@@ -212,17 +222,49 @@ public class ChallengeSpawner : MonoBehaviour
                     CategorizeAndStoreSpawnedObject(spawnedObject, item.category, instance, challenge);
                     usedPositions.Add(spawnPosition);
                     spawnedCount++;
+                    totalSpawned++;
                 }
-                else if (item.required)
+                else
                 {
-                    Debug.LogWarning($"Failed to spawn required item: {item.itemName} ({i + 1}/{countToSpawn})");
+                    failedCount++;
+                    totalFailed++;
+                    
+                    string itemDesc = string.IsNullOrEmpty(item.itemName) ? $"[{item.category}]" : item.itemName;
+                    
+                    if (item.required)
+                    {
+                        Debug.LogError($"❌ Failed to spawn REQUIRED item: {itemDesc} ({i + 1}/{countToSpawn})");
+                        Debug.LogError($"  SpawnMode: {item.spawnLocation} | Radius: {item.spawnRadius}m | RequireNavMesh: {item.requireNavMesh}");
+                        Debug.LogError($"  Check: NavMesh baked, spawn radius > 0 for random modes, no obstructions");
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"⚠️ Failed to spawn: {itemDesc} ({i + 1}/{countToSpawn}) - trying next position");
+                    }
                 }
             }
             
             if (spawnedCount > 0)
             {
-                Debug.Log($"Spawned {spawnedCount}x {item.itemName} ({item.category}) for challenge {data.challengeName}");
+                Debug.Log($"✓ Spawned {spawnedCount}x {item.itemName} ({item.category})");
             }
+            
+            if (failedCount > 0)
+            {
+                Debug.LogWarning($"⚠️ Failed {failedCount}x {item.itemName} spawns (NavMesh/obstruction issues)");
+            }
+        }
+        
+        Debug.Log($"📊 Challenge Spawn Summary: {totalSpawned} spawned, {totalFailed} failed");
+        
+        if (totalSpawned == 0 && totalFailed > 0)
+        {
+            Debug.LogError($"❌ CRITICAL: NO objects spawned for challenge '{data.challengeName}'!");
+            Debug.LogError($"Common fixes:");
+            Debug.LogError($"  1. Bake NavMesh (Window > AI > Navigation > Bake)");
+            Debug.LogError($"  2. Increase spawn radius in challenge data");
+            Debug.LogError($"  3. Check obstructionMask isn't blocking spawns");
+            Debug.LogError($"  4. Move challenge spawn point to valid NavMesh area");
         }
     }
     
@@ -238,26 +280,52 @@ public class ChallengeSpawner : MonoBehaviour
                 break;
                 
             case ChallengeData.SpawnLocationType.RandomInRadius:
-                if (!FindValidSpawnPosition(center, item.spawnRadius, usedPositions, out position, item.requireNavMesh))
+                if (item.spawnRadius <= 0.1f)
+                {
+                    Debug.LogError($"❌ RandomInRadius requires spawnRadius > 0! Current: {item.spawnRadius}m. Using AtCenter instead.");
+                    position = center + item.offset;
+                }
+                else if (!FindValidSpawnPosition(center, item.spawnRadius, usedPositions, out position, item.requireNavMesh))
                     return false;
                 break;
                 
             case ChallengeData.SpawnLocationType.RandomOnEdge:
-                Vector2 randomDirection = Random.insideUnitCircle.normalized;
-                Vector3 edgePoint = center + new Vector3(randomDirection.x, 0, randomDirection.y) * item.spawnRadius;
-                if (!FindValidSpawnPosition(edgePoint, 2f, usedPositions, out position, item.requireNavMesh))
-                    return false;
+                if (item.spawnRadius <= 0.1f)
+                {
+                    Debug.LogError($"❌ RandomOnEdge requires spawnRadius > 0! Current: {item.spawnRadius}m. Spawning at center.");
+                    position = center + item.offset;
+                }
+                else
+                {
+                    Vector2 randomDirection = Random.insideUnitCircle.normalized;
+                    Vector3 edgePoint = center + new Vector3(randomDirection.x, 0, randomDirection.y) * item.spawnRadius;
+                    if (!FindValidSpawnPosition(edgePoint, 2f, usedPositions, out position, item.requireNavMesh))
+                        return false;
+                }
                 break;
                 
             case ChallengeData.SpawnLocationType.AroundPerimeter:
-                float angle = Random.Range(0f, 360f) * Mathf.Deg2Rad;
-                Vector3 perimeterPoint = center + new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)) * item.spawnRadius;
-                if (!FindValidSpawnPosition(perimeterPoint, 2f, usedPositions, out position, item.requireNavMesh))
-                    return false;
+                if (item.spawnRadius <= 0.1f)
+                {
+                    Debug.LogError($"❌ AroundPerimeter requires spawnRadius > 0! Current: {item.spawnRadius}m. Spawning at center.");
+                    position = center + item.offset;
+                }
+                else
+                {
+                    float angle = Random.Range(0f, 360f) * Mathf.Deg2Rad;
+                    Vector3 perimeterPoint = center + new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)) * item.spawnRadius;
+                    if (!FindValidSpawnPosition(perimeterPoint, 2f, usedPositions, out position, item.requireNavMesh))
+                        return false;
+                }
                 break;
                 
             case ChallengeData.SpawnLocationType.Grid:
-                if (!FindValidSpawnPosition(center, item.spawnRadius, usedPositions, out position, item.requireNavMesh))
+                if (item.spawnRadius <= 0.1f)
+                {
+                    Debug.LogError($"❌ Grid requires spawnRadius > 0! Current: {item.spawnRadius}m. Using AtCenter instead.");
+                    position = center + item.offset;
+                }
+                else if (!FindValidSpawnPosition(center, item.spawnRadius, usedPositions, out position, item.requireNavMesh))
                     return false;
                 break;
         }
@@ -286,6 +354,9 @@ public class ChallengeSpawner : MonoBehaviour
                     challengeEnemy = obj.AddComponent<ChallengeEnemy>();
                 }
                 challengeEnemy.Initialize(challenge);
+                
+                // Apply difficulty scaling to enemy
+                ApplyDifficultyScalingToEnemy(obj, challenge);
                 break;
                 
             case ChallengeData.SpawnableCategory.Boss:
@@ -401,6 +472,10 @@ public class ChallengeSpawner : MonoBehaviour
     private bool FindValidSpawnPosition(Vector3 center, float radius, List<Vector3> usedPositions, out Vector3 position, bool requireNavMesh = true)
     {
         position = center;
+        
+        int navMeshMisses = 0;
+        int obstructionBlocks = 0;
+        int spacingRejects = 0;
 
         for (int i = 0; i < maxNavMeshAttempts; i++)
         {
@@ -419,7 +494,19 @@ public class ChallengeSpawner : MonoBehaviour
                             position = hit.position;
                             return true;
                         }
+                        else
+                        {
+                            spacingRejects++;
+                        }
                     }
+                    else
+                    {
+                        obstructionBlocks++;
+                    }
+                }
+                else
+                {
+                    navMeshMisses++;
                 }
             }
             else
@@ -431,8 +518,49 @@ public class ChallengeSpawner : MonoBehaviour
                         position = randomPoint;
                         return true;
                     }
+                    else
+                    {
+                        spacingRejects++;
+                    }
+                }
+                else
+                {
+                    obstructionBlocks++;
                 }
             }
+        }
+
+        // Log detailed failure reason
+        if (requireNavMesh)
+        {
+            NavMeshHit testHit;
+            bool navMeshExists = NavMesh.SamplePosition(center, out testHit, navMeshSampleDistance * 2, NavMesh.AllAreas);
+            
+            if (!navMeshExists)
+            {
+                Debug.LogWarning($"❌ No NavMesh found near {center}! Bake NavMesh or set requireNavMesh=false");
+            }
+            else
+            {
+                Debug.LogWarning($"⚠️ Spawn failed after {maxNavMeshAttempts} attempts | Radius: {radius}m | NavMesh misses: {navMeshMisses} | Obstructions: {obstructionBlocks} | Too close: {spacingRejects}");
+                
+                if (spacingRejects > obstructionBlocks && spacingRejects > navMeshMisses)
+                {
+                    Debug.LogWarning($"  → Increase spawn radius or reduce minimumSpawnDistance (current: {minimumSpawnDistance}m)");
+                }
+                else if (obstructionBlocks > navMeshMisses)
+                {
+                    Debug.LogWarning($"  → Too many obstructions. Check obstructionMask or increase spawn radius");
+                }
+                else
+                {
+                    Debug.LogWarning($"  → NavMesh coverage incomplete. Expand NavMesh bake area or increase radius");
+                }
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"⚠️ Spawn failed (no NavMesh) | Obstructions: {obstructionBlocks} | Too close: {spacingRejects} | Increase radius or reduce minimumSpawnDistance");
         }
 
         return false;
@@ -485,5 +613,91 @@ public class ChallengeSpawner : MonoBehaviour
         }
 
         return count;
+    }
+    
+    /// <summary>
+    /// Apply difficulty scaling to an enemy based on challenge settings
+    /// </summary>
+    private void ApplyDifficultyScalingToEnemy(GameObject enemy, ActiveChallenge challenge)
+    {
+        if (enemy == null || challenge == null)
+            return;
+        
+        // Try to apply to JUTPS health system
+        JUTPS.JUHealth juHealth = enemy.GetComponent<JUTPS.JUHealth>();
+        if (juHealth != null)
+        {
+            float originalHealth = juHealth.MaxHealth;
+            float scaledHealth = originalHealth * challenge.enemyHealthMultiplier;
+            juHealth.MaxHealth = scaledHealth;
+            juHealth.Health = scaledHealth;
+            
+            Debug.Log($"Enemy scaled: Health {originalHealth:F0} → {scaledHealth:F0} (x{challenge.enemyHealthMultiplier:F2})");
+        }
+        
+        // Apply damage scaling
+        ApplyDamageScaling(enemy, challenge.enemyDamageMultiplier);
+        
+        // Apply modifiers
+        ApplyEnemyModifiers(enemy, challenge);
+    }
+    
+    /// <summary>
+    /// Apply challenge modifiers to enemy
+    /// </summary>
+    private void ApplyEnemyModifiers(GameObject enemy, ActiveChallenge challenge)
+    {
+        if (enemy == null || challenge == null || challenge.challengeData == null)
+            return;
+        
+        // Increased enemy speed
+        if (challenge.challengeData.HasModifier(ChallengeData.ChallengeModifier.ModifierType.IncreasedEnemySpeed))
+        {
+            float speedMultiplier = challenge.challengeData.GetModifierValue(ChallengeData.ChallengeModifier.ModifierType.IncreasedEnemySpeed);
+            
+            JUTPS.JUCharacterController charController = enemy.GetComponent<JUTPS.JUCharacterController>();
+            if (charController != null)
+            {
+                charController.WalkSpeed *= speedMultiplier;
+                charController.RunSpeed *= speedMultiplier;
+                Debug.Log($"Enemy speed increased by {speedMultiplier}x");
+            }
+        }
+        
+        // Elite enemies only
+        if (challenge.challengeData.HasModifier(ChallengeData.ChallengeModifier.ModifierType.EliteEnemiesOnly))
+        {
+            // Mark enemy as elite (you may need to adjust based on your enemy system)
+            EnemyKillRewardHandler rewardHandler = enemy.GetComponent<EnemyKillRewardHandler>();
+            if (rewardHandler != null)
+            {
+                // Use reflection to set the private field, or make it public
+                System.Reflection.FieldInfo isEliteField = typeof(EnemyKillRewardHandler).GetField("isElite", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (isEliteField != null)
+                {
+                    isEliteField.SetValue(rewardHandler, true);
+                    Debug.Log("Enemy marked as Elite");
+                }
+            }
+        }
+    }
+    
+    /// <summary>
+    /// Apply damage multiplier to enemy's attacks
+    /// </summary>
+    private void ApplyDamageScaling(GameObject enemy, float damageMultiplier)
+    {
+        // NOTE: JUTPS weapon damage is configured on the bullet prefab, not the weapon itself.
+        // We add a DifficultyDamageMultiplier component that your damage system can check.
+        // If you have custom damage calculations, check for this component and apply the multiplier.
+        
+        DifficultyDamageMultiplier damageComponent = enemy.GetComponent<DifficultyDamageMultiplier>();
+        if (damageComponent == null)
+        {
+            damageComponent = enemy.AddComponent<DifficultyDamageMultiplier>();
+        }
+        damageComponent.multiplier = damageMultiplier;
+        
+        Debug.Log($"Enemy damage scaling applied: x{damageMultiplier:F2}");
     }
 }

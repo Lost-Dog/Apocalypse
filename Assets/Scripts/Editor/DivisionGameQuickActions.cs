@@ -129,8 +129,8 @@ public class DivisionGameQuickActions : EditorWindow
         challenge.challengeType = ChallengeData.ChallengeType.SupplyDrop;
         challenge.recommendedLevel = 3;
         challenge.timeLimit = 300f;
-        challenge.xpReward = 300;
-        challenge.currencyReward = 150;
+        challenge.baseXPReward = 300;
+        challenge.baseCurrencyReward = 150;
         challenge.guaranteedLootRarity = LootManager.Rarity.Uncommon;
         
         challenge.spawnItems.Add(new ChallengeData.SpawnableItem

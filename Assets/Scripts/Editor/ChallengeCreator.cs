@@ -319,8 +319,8 @@ public class ChallengeCreator : EditorWindow
             });
         }
         
-        challenge.xpReward = xpReward;
-        challenge.currencyReward = currencyReward;
+        challenge.baseXPReward = xpReward;
+        challenge.baseCurrencyReward = currencyReward;
         challenge.guaranteedLootRarity = lootRarity;
         challenge.guaranteedLootCount = lootCount;
         

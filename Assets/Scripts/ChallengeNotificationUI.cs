@@ -243,7 +243,7 @@ public class ChallengeNotificationUI : MonoBehaviour
 
         if (rewardText != null)
         {
-            rewardText.text = $"+{challenge.challengeData.xpReward} XP";
+            rewardText.text = $"+{challenge.GetXPReward()} XP";
         }
 
         if (difficultyImage != null)

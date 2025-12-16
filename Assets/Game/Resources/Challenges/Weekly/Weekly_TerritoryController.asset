@@ -17,10 +17,16 @@ MonoBehaviour:
   challengeType: 2
   frequency: 2
   difficulty: 1
+  iconData: {fileID: 0}
   recommendedLevel: 1
   requiredPlayerLevel: 1
   timeLimit: 604800
   detectionRadius: 0
+  requireManualStart: 0
+  allowRetry: 1
+  retryCooldownSeconds: 60
+  maxAttempts: 0
+  showDiscoveryNotification: 1
   requireNoDeaths: 0
   requireStealth: 0
   objectiveDescription: Complete the challenge
@@ -40,13 +46,31 @@ MonoBehaviour:
     fixedRotation: {x: 0, y: 0, z: 0}
     priority: 0
     required: 0
-  xpReward: 2200
-  currencyReward: 1100
+  modifiers: []
+  baseXPReward: 200
+  baseCurrencyReward: 100
   guaranteedLootRarity: 3
   guaranteedLootCount: 2
   bonusRewards: []
+  perfectCompletionBonus: 1
+  perfectCompletionXPMultiplier: 1.5
+  speedCompletionBonus: 1
+  speedThresholdPercentage: 0.5
+  speedCompletionXPMultiplier: 1.25
+  stealthCompletionBonus: 0
+  stealthCompletionXPMultiplier: 1.3
+  enableDifficultyScaling: 1
+  scaleEnemyHealth: 1
+  scaleEnemyDamage: 1
+  scaleRewards: 1
+  healthScalingMultiplier: 1
+  damageScalingMultiplier: 1
+  rewardScalingMultiplier: 1
   challengeIcon: {fileID: 0}
   difficultyColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   startSound: {fileID: 0}
   completeSound: {fileID: 0}
   failSound: {fileID: 0}
+  spawnVFX: {fileID: 1796635450895110, guid: 1103bc5779fcc26419c248d4fd2f8586, type: 3}
+  spawnVFXScale: 2
+  spawnVFXDuration: 0

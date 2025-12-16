@@ -44,11 +44,11 @@ public class LootPickableSpawner : MonoBehaviour
             SpawnInitialLoot();
         }
         
-        if (logSpawnEvents)
-        {
-            Debug.Log($"<color=cyan>LootPickableSpawner: Ready! Max spawns: {maxTotalSpawns}, Spawn interval: {spawnInterval}s</color>");
-            Debug.Log($"<color=cyan>Using LootManager rarity chances - check LootManager for rarity settings</color>");
-        }
+        // if (logSpawnEvents)
+        // {
+        //     Debug.Log($"<color=cyan>LootPickableSpawner: Ready! Max spawns: {maxTotalSpawns}, Spawn interval: {spawnInterval}s</color>");
+        //     Debug.Log($"<color=cyan>Using LootManager rarity chances - check LootManager for rarity settings</color>");
+        // }
     }
     
     private void Update()
@@ -83,10 +83,10 @@ public class LootPickableSpawner : MonoBehaviour
             SpawnRandomLoot();
         }
         
-        if (logSpawnEvents)
-        {
-            Debug.Log($"<color=yellow>LootPickableSpawner: Spawned {initialCount} initial loot items</color>");
-        }
+        // if (logSpawnEvents)
+        // {
+        //     Debug.Log($"<color=yellow>LootPickableSpawner: Spawned {initialCount} initial loot items</color>");
+        // }
     }
     
     private void UpdateAutoSpawn()
@@ -104,10 +104,10 @@ public class LootPickableSpawner : MonoBehaviour
     {
         if (totalSpawnedCount >= maxTotalSpawns)
         {
-            if (logSpawnEvents)
-            {
-                Debug.Log("LootPickableSpawner: Reached max spawn limit");
-            }
+            // if (logSpawnEvents)
+            // {
+            //     Debug.Log("LootPickableSpawner: Reached max spawn limit");
+            // }
             return;
         }
         
@@ -136,10 +136,10 @@ public class LootPickableSpawner : MonoBehaviour
             LootManager.Instance.DropLoot(spawnPosition, playerLevel);
             totalSpawnedCount++;
             
-            if (logSpawnEvents)
-            {
-                Debug.Log($"<color=green>LootPickableSpawner: Spawned loot at {spawnPosition} (Total: {totalSpawnedCount}/{maxTotalSpawns})</color>");
-            }
+            // if (logSpawnEvents)
+            // {
+            //     Debug.Log($"<color=green>LootPickableSpawner: Spawned loot at {spawnPosition} (Total: {totalSpawnedCount}/{maxTotalSpawns})</color>");
+            // }
         }
     }
     
@@ -166,10 +166,10 @@ public class LootPickableSpawner : MonoBehaviour
             }
         }
         
-        if (logSpawnEvents)
-        {
-            Debug.LogWarning("LootPickableSpawner: Failed to find valid spawn position");
-        }
+        // if (logSpawnEvents)
+        // {
+        //     Debug.LogWarning("LootPickableSpawner: Failed to find valid spawn position");
+        // }
         
         return false;
     }
@@ -178,10 +178,10 @@ public class LootPickableSpawner : MonoBehaviour
     {
         totalSpawnedCount = 0;
         
-        if (logSpawnEvents)
-        {
-            Debug.Log("LootPickableSpawner: Spawn count reset");
-        }
+        // if (logSpawnEvents)
+        // {
+        //     Debug.Log("LootPickableSpawner: Spawn count reset");
+        // }
     }
     
     public int GetTotalSpawnedCount()

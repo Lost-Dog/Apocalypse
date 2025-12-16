@@ -12,20 +12,22 @@ public class SurvivalManager : MonoBehaviour
     public ProgressionManager progressionManager;
     
     [Header("Temperature Settings")]
-    [Tooltip("Maximum temperature value (percentage: 0-100)")]
-    [Range(0f, 100f)] public float maxTemperature = 100f;
-    [Tooltip("Current temperature value (percentage: 0-100)")]
-    [Range(0f, 100f)] public float currentTemperature = 100f;
-    [Tooltip("Normal/target temperature when recovering (percentage: 0-100)")]
-    [Range(0f, 100f)] public float normalTemperature = 100f;
+    [Tooltip("Maximum temperature value (normal body temperature in Celsius)")]
+    [Range(0f, 40f)] public float maxTemperature = 36.9f;
+    [Tooltip("Current temperature value (Celsius)")]
+    [Range(0f, 40f)] public float currentTemperature = 36.9f;
+    [Tooltip("Normal/target temperature when recovering (Celsius)")]
+    [Range(0f, 40f)] public float normalTemperature = 36.9f;
     [Tooltip("Minimum temperature before player freezes")]
     public float minTemperature = 0f;
-    [Tooltip("Temperature decrease rate per second (100 to 0 in ~3 minutes)")]
-    public float temperatureDecreaseRate = 0.56f;
-    [Tooltip("Temperature recovery rate per second")]
-    public float temperatureNormalizeRate = 5f;
-    [Tooltip("Critical cold threshold (0-1 as percentage of max)")]
-    [Range(0f, 1f)] public float criticalColdThreshold = 0.2f;
+    [Tooltip("Temperature decrease rate per second (Celsius/sec)")]
+    public float temperatureDecreaseRate = 0.2f;
+    [Tooltip("Temperature recovery rate per second (Celsius/sec)")]
+    public float temperatureNormalizeRate = 2f;
+    [Tooltip("Warning temperature threshold (Celsius) - displays warning below this")]
+    public float warningTemperature = 15f;
+    [Tooltip("Critical cold temperature threshold (Celsius) - causes damage below this")]
+    public float criticalTemperature = 5f;
     
     [Header("Stamina Settings")]
     [Range(0f, 100f)] public float maxStamina = 100f;
@@ -85,7 +87,8 @@ public class SurvivalManager : MonoBehaviour
     private bool isInColdZone = false;
     
     public float TemperaturePercentage => currentTemperature / maxTemperature;
-    public bool IsCriticalCold => TemperaturePercentage <= criticalColdThreshold;
+    public bool IsCriticalCold => currentTemperature <= criticalTemperature;
+    public bool IsWarningCold => currentTemperature <= warningTemperature;
     public bool IsCritical => IsCriticalCold || isInCriticalInfection;
     public float StaminaPercentage => currentStamina / maxStamina;
     public float InfectionPercentage => currentInfection / maxInfection;
@@ -306,7 +309,18 @@ public class SurvivalManager : MonoBehaviour
         if (playerHealth != null && damagePerSecond > 0f)
         {
             float damage = damagePerSecond * damageTickInterval;
+            
+            // Disable blood screen flash for cold damage
+            bool originalFlashSetting = playerHealth.BloodScreenEffect;
+            if (source == "cold")
+            {
+                playerHealth.BloodScreenEffect = false;
+            }
+            
             playerHealth.DoDamage(damage);
+            
+            // Restore original setting
+            playerHealth.BloodScreenEffect = originalFlashSetting;
             
             if (showDebugInfo)
             {
@@ -440,14 +454,13 @@ public class SurvivalManager : MonoBehaviour
     
     public string GetTemperatureStatus()
     {
-        float percentage = TemperaturePercentage * 100f;
+        float temp = currentTemperature;
         
-        if (percentage >= 95f) return "Warm";
-        if (percentage >= 80f) return "Normal";
-        if (percentage >= 60f) return "Cool";
-        if (percentage >= 40f) return "Cold";
-        if (percentage >= 20f) return "Very Cold";
-        if (percentage >= 10f) return "Freezing";
+        if (temp >= 35f) return "Normal";
+        if (temp >= 30f) return "Cool";
+        if (temp >= 20f) return "Cold";
+        if (temp >= 15f) return "Very Cold";
+        if (temp >= 5f) return "Freezing";
         return "Hypothermia";
     }
     
@@ -462,7 +475,7 @@ public class SurvivalManager : MonoBehaviour
     
     private void DisplayDebugInfo()
     {
-        string info = $"[Survival] Temp: {currentTemperature:F1}% ({GetTemperatureStatus()}) | Stamina: {currentStamina:F0}/{maxStamina} | Infection: {currentInfection:F0}/{maxInfection}";
+        string info = $"[Survival] Temp: {currentTemperature:F1}°C ({GetTemperatureStatus()}) | Stamina: {currentStamina:F0}/{maxStamina} | Infection: {currentInfection:F0}/{maxInfection}";
         
         if (isInCriticalCold) info += " [COLD!]";
         if (isInCriticalInfection) info += " [INFECTED!]";

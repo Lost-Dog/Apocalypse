@@ -38,7 +38,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 120}
+  m_SizeDelta: {x: 300, y: 300}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!225 &5125231166083364871
 CanvasGroup:
@@ -75,6 +75,21 @@ MonoBehaviour:
     enemiesKilled: 0
     civiliansRescued: 0
     playerDied: 0
+    state: 0
+    hasBeenPreviewed: 0
+    discoveryTime: 0
+    attemptCount: 0
+    lastFailTime: 0
+    retryCooldown: 0
+    playerLevelAtSpawn: 0
+    actualDifficulty: 0
+    enemyHealthMultiplier: 0
+    enemyDamageMultiplier: 0
+    startTime: 0
+    completionTime: 0
+    tookDamage: 0
+    wasDetected: 0
+    killCount: 0
   markerRoot: {fileID: 6072575779781879239}
   iconImage: {fileID: 7254970151918625068}
   distanceText: {fileID: 4350012907310549983}
@@ -85,7 +100,7 @@ MonoBehaviour:
   distanceUpdateInterval: 0.25
   fadeSpeed: 5
   smoothSpeed: 15
-  worldSpaceMode: 1
+  worldSpaceMode: 0
   easyColor: {r: 0, g: 1, b: 0, a: 1}
   mediumColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   hardColor: {r: 1, g: 0.5, b: 0, a: 1}
@@ -107,10 +122,10 @@ MonoBehaviour:
     m_Right: 0
     m_Top: 0
     m_Bottom: 0
-  m_ChildAlignment: 0
+  m_ChildAlignment: 4
   m_Spacing: 0
-  m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 1
+  m_ChildForceExpandWidth: 0
+  m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 0
   m_ChildControlHeight: 0
   m_ChildScaleWidth: 0
@@ -151,7 +166,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 200, y: 100}
+  m_SizeDelta: {x: 300, y: 77.22342}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8234253759395479211
 CanvasRenderer:
@@ -208,8 +223,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 70
+  m_fontSizeBase: 70
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -247,7 +262,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: -1.3729248, y: -1.4219971, z: 0.56396484, w: 0}
+  m_margin: {x: -1.3729248, y: 0.27600098, z: 0.56396484, w: -0.09289551}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -288,7 +303,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 64, y: 64}
+  m_SizeDelta: {x: 300, y: 222.7766}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3271209436137442689
 CanvasRenderer:

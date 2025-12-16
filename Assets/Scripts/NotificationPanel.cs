@@ -107,7 +107,7 @@ public class NotificationPanel : MonoBehaviour
         {
             canvasGroup.alpha = 1f;
             canvasGroup.interactable = true;
-            canvasGroup.blocksRaycasts = true;
+            canvasGroup.blocksRaycasts = false; // Don't block raycasts - only UI elements should
         }
         
         isShowing = true;

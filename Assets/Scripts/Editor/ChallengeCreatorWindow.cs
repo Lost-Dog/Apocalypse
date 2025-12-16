@@ -530,8 +530,8 @@ public class ChallengeCreatorWindow : EditorWindow
         challenge.recommendedLevel = recommendedLevel;
         challenge.requiredPlayerLevel = requiredLevel;
         
-        challenge.xpReward = xpReward;
-        challenge.currencyReward = currencyReward;
+        challenge.baseXPReward = xpReward;
+        challenge.baseCurrencyReward = currencyReward;
         challenge.guaranteedLootRarity = lootRarity;
         challenge.guaranteedLootCount = lootCount;
         

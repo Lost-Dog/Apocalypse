@@ -29,7 +29,17 @@ namespace JUTPS.FX
             if (pl.CharacterHealth != null)
             {
                 healthvalue = Mathf.Lerp(healthvalue, pl.CharacterHealth.Health / pl.CharacterHealth.MaxHealth, 15 * Time.deltaTime);
-                currentColor = Color.Lerp(Color.white, Color.clear, healthvalue);
+                
+                // Only show overlay when health is below 20%
+                if (healthvalue < 0.2f)
+                {
+                    currentColor = Color.Lerp(Color.white, Color.clear, healthvalue / 0.2f); // Remap 0-20% to full intensity
+                }
+                else
+                {
+                    currentColor = Color.clear;
+                }
+                
                 img.color = Color.Lerp(img.color, currentColor, 5 * Time.deltaTime);
             }
         }

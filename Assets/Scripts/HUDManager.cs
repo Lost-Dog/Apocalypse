@@ -10,6 +10,9 @@ public class HUDManager : MonoBehaviour
     [SerializeField] private LootUIManager lootUIManager;
     [SerializeField] private ChallengeNotificationUI challengeNotificationUI;
     
+    [Header("Status Warnings")]
+    [SerializeField] private GameObject statsWarningsPanel;
+    
     [Header("Health Display")]
     [SerializeField] private Slider healthSlider;
     [SerializeField] private TextMeshProUGUI healthText;
@@ -50,6 +53,12 @@ public class HUDManager : MonoBehaviour
         if (showCompassOnStart && compassPanel != null)
         {
             compassPanel.SetActive(true);
+        }
+        
+        // Always show Stats_Warnings panel
+        if (statsWarningsPanel != null)
+        {
+            statsWarningsPanel.SetActive(true);
         }
         
         isInitialized = true;

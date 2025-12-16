@@ -21,6 +21,15 @@ public class ChallengeWorldMarker : MonoBehaviour
     [SerializeField] private float fadeSpeed = 5f;
     [SerializeField] private float smoothSpeed = 15f;
     [SerializeField] private bool worldSpaceMode = true;
+    [SerializeField] private float baseScale = 1f;
+    [SerializeField] private bool scaleWithDistance = false;
+    [SerializeField] private float minScale = 0.5f;
+    [SerializeField] private float maxScale = 2f;
+    [SerializeField] private float scaleDistance = 100f;
+    
+    [Header("Screen Edge Clamping")]
+    [SerializeField] private bool clampToScreenEdges = true;
+    [SerializeField] private float edgePadding = 50f;
     
     [Header("Colors by Difficulty")]
     [SerializeField] private Color easyColor = Color.green;
@@ -133,7 +142,7 @@ public class ChallengeWorldMarker : MonoBehaviour
                              viewportPoint.x > 0 && viewportPoint.x < 1 && 
                              viewportPoint.y > 0 && viewportPoint.y < 1;
 
-            if (!isOnScreen)
+            if (!isOnScreen && !clampToScreenEdges)
             {
                 isVisible = false;
                 return;
@@ -149,13 +158,20 @@ public class ChallengeWorldMarker : MonoBehaviour
                              screenPos.x > 0 && screenPos.x < Screen.width && 
                              screenPos.y > 0 && screenPos.y < Screen.height;
 
-            if (!isOnScreen)
+            if (!isOnScreen && !clampToScreenEdges)
             {
                 isVisible = false;
                 return;
             }
 
             isVisible = true;
+            
+            // Clamp to screen edges if enabled
+            if (clampToScreenEdges)
+            {
+                screenPos = ClampToScreenEdges(screenPos);
+            }
+            
             targetScreenPosition = screenPos;
             
             if (!isInitialized)
@@ -174,6 +190,19 @@ public class ChallengeWorldMarker : MonoBehaviour
         if (worldSpaceMode)
         {
             transform.position = Vector3.Lerp(transform.position, targetWorldPosition, Time.deltaTime * smoothSpeed);
+            
+            // Apply distance-based scaling
+            if (scaleWithDistance && playerTransform != null)
+            {
+                float distance = Vector3.Distance(transform.position, playerTransform.position);
+                float scaleFactor = Mathf.Lerp(maxScale, minScale, distance / scaleDistance);
+                scaleFactor = Mathf.Clamp(scaleFactor, minScale, maxScale);
+                transform.localScale = Vector3.one * baseScale * scaleFactor;
+            }
+            else
+            {
+                transform.localScale = Vector3.one * baseScale;
+            }
             
             if (parentCanvas != null && parentCanvas.renderMode == RenderMode.WorldSpace)
             {
@@ -226,6 +255,24 @@ public class ChallengeWorldMarker : MonoBehaviour
         
         float targetAlpha = isVisible ? 1f : 0f;
         canvasGroup.alpha = Mathf.Lerp(canvasGroup.alpha, targetAlpha, Time.deltaTime * fadeSpeed);
+    }
+    
+    private Vector3 ClampToScreenEdges(Vector3 screenPos)
+    {
+        // Handle behind camera (z < 0)
+        if (screenPos.z < 0)
+        {
+            // Flip coordinates when behind camera
+            screenPos.x = Screen.width - screenPos.x;
+            screenPos.y = Screen.height - screenPos.y;
+        }
+        
+        // Clamp to screen boundaries with padding
+        screenPos.x = Mathf.Clamp(screenPos.x, edgePadding, Screen.width - edgePadding);
+        screenPos.y = Mathf.Clamp(screenPos.y, edgePadding, Screen.height - edgePadding);
+        screenPos.z = Mathf.Max(screenPos.z, 0); // Ensure positive z
+        
+        return screenPos;
     }
 
     private void UpdateMarkerAppearance()

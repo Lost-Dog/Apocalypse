@@ -34,8 +34,10 @@ public class PlayerStatusIndicators : MonoBehaviour
     [Range(0f, 1f)] public float healthCriticalThreshold = 0.25f;
     
     [Header("Temperature Thresholds")]
-    [Range(0f, 1f)] public float temperatureWarningThreshold = 0.4f;
-    [Range(0f, 1f)] public float temperatureCriticalThreshold = 0.2f;
+    [Tooltip("Temperature warning threshold (Celsius) - warns below this value")]
+    public float temperatureWarningThreshold = 15f;
+    [Tooltip("Temperature critical threshold (Celsius) - critical below this value")]
+    public float temperatureCriticalThreshold = 5f;
     
     [Header("Infection Thresholds")]
     public float infectionWarningThreshold = 50f;
@@ -49,10 +51,10 @@ public class PlayerStatusIndicators : MonoBehaviour
     
     [Header("Panel Behavior")]
     [Tooltip("Should the panel start disabled and only show when warnings are active?")]
-    public bool startDisabled = true;
+    public bool startDisabled = false;
     
     [Tooltip("Hide panel when no warnings are active")]
-    public bool autoHideWhenNoWarnings = true;
+    public bool autoHideWhenNoWarnings = false;
     
     [Header("Audio")]
     [Tooltip("Audio source for playing notification sounds")]
@@ -80,6 +82,10 @@ public class PlayerStatusIndicators : MonoBehaviour
         if (startDisabled)
         {
             gameObject.SetActive(false);
+        }
+        else
+        {
+            gameObject.SetActive(true);
         }
     }
     
@@ -168,14 +174,14 @@ public class PlayerStatusIndicators : MonoBehaviour
         if (survivalManager == null || temperatureIndicator.indicatorObject == null) return;
         if (!survivalManager.enableTemperatureSystem) return;
         
-        float tempPercentage = survivalManager.TemperaturePercentage;
+        float currentTemp = survivalManager.currentTemperature;
         
-        if (tempPercentage <= temperatureCriticalThreshold)
+        if (currentTemp <= temperatureCriticalThreshold)
         {
             SetIndicatorState(temperatureIndicator, true, temperatureIndicator.criticalColor, criticalPulseSpeed);
             UpdateLabel(temperatureIndicator.labelText, "FREEZING");
         }
-        else if (tempPercentage <= temperatureWarningThreshold)
+        else if (currentTemp <= temperatureWarningThreshold)
         {
             SetIndicatorState(temperatureIndicator, true, temperatureIndicator.warningColor, warningPulseSpeed);
             UpdateLabel(temperatureIndicator.labelText, "COLD");

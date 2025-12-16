@@ -10,12 +10,12 @@ public class PlayerTemperatureDisplay : MonoBehaviour
     public Slider temperatureSlider;
     
     [Header("Display Settings")]
-    [Tooltip("Always show as percentage (temperature is now 0-100%)")]
-    public bool showAsPercentage = true;
+    [Tooltip("Show temperature with decimal point")]
+    public bool showDecimal = true;
     public bool showStatus = true;
     public bool showPrefix = false;
     public string prefix = "Temp: ";
-    public string suffix = "%";
+    public string suffix = "°C";
     
     [Header("Auto-Find")]
     public bool autoFindReferences = true;
@@ -58,7 +58,7 @@ public class PlayerTemperatureDisplay : MonoBehaviour
         if (temperatureSlider != null && survivalManager != null)
         {
             temperatureSlider.minValue = 0f;
-            temperatureSlider.maxValue = survivalManager.maxTemperature;
+            temperatureSlider.maxValue = 36.9f;
             temperatureSlider.value = survivalManager.currentTemperature;
         }
     }
@@ -79,7 +79,7 @@ public class PlayerTemperatureDisplay : MonoBehaviour
         
         if (temperatureSlider != null)
         {
-            temperatureSlider.maxValue = survivalManager.maxTemperature;
+            temperatureSlider.maxValue = 36.9f;
             temperatureSlider.value = survivalManager.currentTemperature;
         }
     }
@@ -88,13 +88,13 @@ public class PlayerTemperatureDisplay : MonoBehaviour
     {
         string displayText = "";
         
-        if (showAsPercentage)
+        if (showDecimal)
         {
-            displayText = $"{Mathf.RoundToInt(survivalManager.currentTemperature)}{suffix}";
+            displayText = $"{survivalManager.currentTemperature:F1}{suffix}";
         }
         else
         {
-            displayText = $"{survivalManager.currentTemperature:F1}";
+            displayText = $"{Mathf.RoundToInt(survivalManager.currentTemperature)}{suffix}";
         }
         
         if (showStatus)
@@ -117,12 +117,11 @@ public class PlayerTemperatureDisplay : MonoBehaviour
     {
         float temp = survivalManager.currentTemperature;
         
-        if (temp >= 95f) return "Warm";
-        if (temp >= 80f) return "Normal";
-        if (temp >= 60f) return "Cool";
-        if (temp >= 40f) return "Cold";
-        if (temp >= 20f) return "Very Cold";
-        if (temp >= 10f) return "Freezing";
+        if (temp >= 35f) return "Normal";
+        if (temp >= 30f) return "Cool";
+        if (temp >= 20f) return "Cold";
+        if (temp >= 15f) return "Very Cold";
+        if (temp >= 5f) return "Freezing";
         return "Hypothermia";
     }
 }

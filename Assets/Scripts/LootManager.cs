@@ -119,7 +119,7 @@ public class LootManager : MonoBehaviour
         
         onLootDropped?.Invoke(rarity, gearScore);
         
-        Debug.Log($"Dropped {rarity} loot with Gear Score {gearScore} at {position}");
+        // Debug.Log($"Dropped {rarity} loot with Gear Score {gearScore} at {position}");
     }
     
     public void DropLootWithRarity(Vector3 position, int playerLevel, Rarity forcedRarity)
@@ -145,7 +145,7 @@ public class LootManager : MonoBehaviour
         if (added)
         {
             onItemCollected?.Invoke(itemData, gearScore, rarity);
-            Debug.Log($"Added to inventory: {itemData.itemName} (GS {gearScore})");
+            // Debug.Log($"Added to inventory: {itemData.itemName} (GS {gearScore})");
         }
     }
     
