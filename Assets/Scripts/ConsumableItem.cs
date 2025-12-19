@@ -11,6 +11,12 @@ public class ConsumableItem : LootItemData
     [Tooltip("Stamina restored when consumed")]
     public float staminaRestore = 0f;
     
+    [Tooltip("Hunger restored when consumed (food)")]
+    public float hungerRestore = 0f;
+    
+    [Tooltip("Thirst restored when consumed (water)")]
+    public float thirstRestore = 0f;
+    
     [Tooltip("Temperature change when consumed")]
     public float temperatureChange = 0f;
     
@@ -22,12 +28,6 @@ public class ConsumableItem : LootItemData
     
     [Tooltip("Duration of the effect (0 = instant)")]
     public float effectDuration = 0f;
-    
-    [Tooltip("Can this item be stacked?")]
-    public bool isStackable = true;
-    
-    [Tooltip("Maximum stack size")]
-    public int maxStackSize = 99;
     
     [Tooltip("Cooldown time after use")]
     public float cooldownTime = 0f;
@@ -80,6 +80,34 @@ public class ConsumableItem : LootItemData
         {
             health.Health += healthRestore;
             health.Health = Mathf.Clamp(health.Health, 0f, health.MaxHealth);
+        }
+        
+        if (SurvivalManager.Instance != null)
+        {
+            if (hungerRestore > 0f)
+            {
+                SurvivalManager.Instance.AddHunger(hungerRestore);
+            }
+            
+            if (thirstRestore > 0f)
+            {
+                SurvivalManager.Instance.AddThirst(thirstRestore);
+            }
+            
+            if (staminaRestore > 0f)
+            {
+                SurvivalManager.Instance.AddStamina(staminaRestore);
+            }
+            
+            if (temperatureChange != 0f)
+            {
+                SurvivalManager.Instance.AddTemperature(temperatureChange);
+            }
+            
+            if (infectionChange != 0f)
+            {
+                SurvivalManager.Instance.AddInfection(infectionChange);
+            }
         }
         
         if (GameManager.Instance != null && xpGrant > 0)

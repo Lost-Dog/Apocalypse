@@ -17,6 +17,12 @@ public class ChallengeCompassMarker : MonoBehaviour
 
     private void Start()
     {
+        // Warning if attached to main compass GameObject
+        if (gameObject.name.Contains("HUD_Apocalypse_Compass"))
+        {
+            Debug.LogWarning($"[ChallengeCompassMarker] This component should be on a CHILD marker object, not the main compass GameObject '{gameObject.name}'! The marker functionality may not work correctly.");
+        }
+
         mainCamera = Camera.main;
         
         GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -34,14 +40,42 @@ public class ChallengeCompassMarker : MonoBehaviour
         {
             markerImage = GetComponent<Image>();
         }
+        
+        // If no marker image found and we're on the compass itself, disable this component
+        if (markerImage == null && gameObject.name.Contains("HUD_Apocalypse_Compass"))
+        {
+            Debug.LogWarning($"[ChallengeCompassMarker] No marker image found on compass '{gameObject.name}'. Disabling component to prevent issues.");
+            enabled = false;
+        }
     }
 
     private void Update()
     {
         if (linkedChallenge == null || linkedChallenge.IsCompleted() || linkedChallenge.IsExpired())
         {
-            Destroy(gameObject);
+            // Safety check: Don't destroy the compass itself!
+            // Only destroy if this is a dynamically created marker
+            if (gameObject.name != "HUD_Apocalypse_Compass_01" && 
+                gameObject.name != "HUD_Apocalypse_Compass_02" && 
+                gameObject.name != "HUD_Apocalypse_Compass_03")
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                // If attached to main compass, just hide the marker image
+                if (markerImage != null)
+                {
+                    markerImage.enabled = false;
+                }
+            }
             return;
+        }
+
+        // Show marker if we have a valid challenge
+        if (markerImage != null && !markerImage.enabled)
+        {
+            markerImage.enabled = true;
         }
 
         UpdateMarkerPosition();

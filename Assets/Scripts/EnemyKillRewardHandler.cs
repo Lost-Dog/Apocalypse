@@ -21,11 +21,15 @@ public class EnemyKillRewardHandler : MonoBehaviour
     
     [Header("Health & Stamina on Kill")]
     [SerializeField] private bool restoreHealthOnKill = true;
-    [SerializeField] private float healthRestoreAmount = 20f;
-    [SerializeField] private float healthRestorePercentage = 0f;
+    [Tooltip("Flat health amount to restore")]
+    [SerializeField] private float healthRestoreAmount = 0f;
+    [Tooltip("Percentage of max health to restore (0.1 = 10%)")]
+    [SerializeField] private float healthRestorePercentage = 0.1f;
     [SerializeField] private bool restoreStaminaOnKill = true;
-    [SerializeField] private float staminaRestoreAmount = 30f;
-    [SerializeField] private float staminaRestorePercentage = 0f;
+    [Tooltip("Flat stamina amount to restore")]
+    [SerializeField] private float staminaRestoreAmount = 0f;
+    [Tooltip("Percentage of max stamina to restore (0.1 = 10%)")]
+    [SerializeField] private float staminaRestorePercentage = 0.1f;
     
     private JUHealth health;
     private bool hasRewardedPlayer = false;
@@ -81,6 +85,8 @@ public class EnemyKillRewardHandler : MonoBehaviour
         TryDropLoot(playerBridge);
         RestoreHealthOnKill(player);
         RestoreStaminaOnKill(player);
+        RestoreAmmoOnKill(player);
+        RestoreTemperatureOnKill(player);
     }
     
     private void GiveXPReward(PlayerSystemBridge playerBridge)
@@ -239,6 +245,26 @@ public class EnemyKillRewardHandler : MonoBehaviour
         if (actualRestore > 0f)
         {
             Debug.Log($"Restored {actualRestore:F1} stamina on kill! (Stamina: {staminaSystem.currentStamina:F1}/{staminaSystem.maxStamina})");
+        }
+    }
+    
+    private void RestoreAmmoOnKill(GameObject player)
+    {
+        // Check if player has AmmoOnKillSkill
+        AmmoOnKillSkill ammoSkill = player.GetComponent<AmmoOnKillSkill>();
+        if (ammoSkill != null && ammoSkill.skillActive)
+        {
+            ammoSkill.OnEnemyKilled(gameObject);
+        }
+    }
+    
+    private void RestoreTemperatureOnKill(GameObject player)
+    {
+        // Check if player has TemperatureRestoreOnKill
+        TemperatureRestoreOnKill tempSkill = player.GetComponent<TemperatureRestoreOnKill>();
+        if (tempSkill != null && tempSkill.skillActive)
+        {
+            tempSkill.OnEnemyKilled(gameObject);
         }
     }
 }

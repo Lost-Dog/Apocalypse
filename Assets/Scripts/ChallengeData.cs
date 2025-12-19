@@ -115,6 +115,9 @@ public class ChallengeData : ScriptableObject
         public bool usePoolMode = false;
         
         [Header("Spawn Position")]
+        [Tooltip("Use specific spawn transforms instead of random positions")]
+        public Transform[] customSpawnPoints;
+        
         [Tooltip("How to position the spawned objects")]
         public SpawnLocationType spawnLocation = SpawnLocationType.RandomInRadius;
         

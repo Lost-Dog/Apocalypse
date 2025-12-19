@@ -207,39 +207,77 @@ public class ChallengeSpawner : MonoBehaviour
             int spawnedCount = 0;
             int failedCount = 0;
             
-            for (int i = 0; i < countToSpawn; i++)
+            // Check if custom spawn points are provided
+            bool useCustomSpawnPoints = item.customSpawnPoints != null && item.customSpawnPoints.Length > 0;
+            
+            if (useCustomSpawnPoints)
             {
-                Vector3 spawnPosition;
-                Quaternion spawnRotation;
+                // Spawn at specific transforms
+                Debug.Log($"Using {item.customSpawnPoints.Length} custom spawn points for {item.itemName}");
                 
-                if (GetSpawnTransform(challenge.position, item, usedPositions, out spawnPosition, out spawnRotation))
+                for (int i = 0; i < Mathf.Min(countToSpawn, item.customSpawnPoints.Length); i++)
                 {
-                    GameObject spawnedObject = Instantiate(item.prefab, spawnPosition, spawnRotation);
+                    Transform spawnPoint = item.customSpawnPoints[i];
+                    if (spawnPoint == null)
+                    {
+                        Debug.LogWarning($"Custom spawn point {i} is null for {item.itemName}");
+                        failedCount++;
+                        continue;
+                    }
+                    
+                    GameObject spawnedObject = Instantiate(item.prefab, spawnPoint.position, spawnPoint.rotation);
                     spawnedObject.name = string.IsNullOrEmpty(item.itemName) ? 
                         $"{item.prefab.name}_{i}" : 
                         $"{item.itemName}_{i}";
                     
                     CategorizeAndStoreSpawnedObject(spawnedObject, item.category, instance, challenge);
-                    usedPositions.Add(spawnPosition);
+                    usedPositions.Add(spawnPoint.position);
                     spawnedCount++;
                     totalSpawned++;
                 }
-                else
+                
+                if (countToSpawn > item.customSpawnPoints.Length)
                 {
-                    failedCount++;
-                    totalFailed++;
+                    Debug.LogWarning($"Wanted to spawn {countToSpawn} but only {item.customSpawnPoints.Length} spawn points provided for {item.itemName}");
+                }
+            }
+            else
+            {
+                // Use random spawning (original behavior)
+                for (int i = 0; i < countToSpawn; i++)
+                {
+                    Vector3 spawnPosition;
+                    Quaternion spawnRotation;
                     
-                    string itemDesc = string.IsNullOrEmpty(item.itemName) ? $"[{item.category}]" : item.itemName;
-                    
-                    if (item.required)
+                    if (GetSpawnTransform(challenge.position, item, usedPositions, out spawnPosition, out spawnRotation))
                     {
-                        Debug.LogError($"❌ Failed to spawn REQUIRED item: {itemDesc} ({i + 1}/{countToSpawn})");
-                        Debug.LogError($"  SpawnMode: {item.spawnLocation} | Radius: {item.spawnRadius}m | RequireNavMesh: {item.requireNavMesh}");
-                        Debug.LogError($"  Check: NavMesh baked, spawn radius > 0 for random modes, no obstructions");
+                        GameObject spawnedObject = Instantiate(item.prefab, spawnPosition, spawnRotation);
+                        spawnedObject.name = string.IsNullOrEmpty(item.itemName) ? 
+                            $"{item.prefab.name}_{i}" : 
+                            $"{item.itemName}_{i}";
+                        
+                        CategorizeAndStoreSpawnedObject(spawnedObject, item.category, instance, challenge);
+                        usedPositions.Add(spawnPosition);
+                        spawnedCount++;
+                        totalSpawned++;
                     }
                     else
                     {
-                        Debug.LogWarning($"⚠️ Failed to spawn: {itemDesc} ({i + 1}/{countToSpawn}) - trying next position");
+                        failedCount++;
+                        totalFailed++;
+                        
+                        string itemDesc = string.IsNullOrEmpty(item.itemName) ? $"[{item.category}]" : item.itemName;
+                        
+                        if (item.required)
+                        {
+                            Debug.LogError($"❌ Failed to spawn REQUIRED item: {itemDesc} ({i + 1}/{countToSpawn})");
+                            Debug.LogError($"  SpawnMode: {item.spawnLocation} | Radius: {item.spawnRadius}m | RequireNavMesh: {item.requireNavMesh}");
+                            Debug.LogError($"  Check: NavMesh baked, spawn radius > 0 for random modes, no obstructions");
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"⚠️ Failed to spawn: {itemDesc} ({i + 1}/{countToSpawn}) - trying next position");
+                        }
                     }
                 }
             }
