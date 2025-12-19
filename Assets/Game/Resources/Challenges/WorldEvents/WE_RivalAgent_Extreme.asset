@@ -30,16 +30,57 @@ MonoBehaviour:
   requireNoDeaths: 0
   requireStealth: 0
   objectiveDescription: Complete the challenge
+  sharedSpawnPoints:
+  - {fileID: 0}
   spawnItems:
   - itemName: Legendary_Rouge Agent
+    prefab: {fileID: 4087107557208246455, guid: 3eed6798f0ab4b14289150fc4a4c5158,
+      type: 3}
+    category: 0
+    minCount: 2
+    maxCount: 2
+    usePoolMode: 1
+    customSpawnPoints:
+    - {fileID: 0}
+    - {fileID: 0}
+    spawnLocation: 0
+    spawnRadius: 20
+    offset: {x: 0, y: 0, z: 0}
+    requireNavMesh: 1
+    randomRotation: 1
+    fixedRotation: {x: 0, y: 0, z: 0}
+    priority: 10
+    required: 1
+  - itemName: Elite
     prefab: {fileID: 3089473516772616032, guid: 4a0c54d15d1cda84dac5f960c2af8a63,
       type: 3}
     category: 0
-    minCount: 7
-    maxCount: 12
+    minCount: 3
+    maxCount: 5
     usePoolMode: 1
+    customSpawnPoints:
+    - {fileID: 0}
+    - {fileID: 0}
     spawnLocation: 0
-    spawnRadius: 20
+    spawnRadius: 25
+    offset: {x: 0, y: 0, z: 0}
+    requireNavMesh: 1
+    randomRotation: 1
+    fixedRotation: {x: 0, y: 0, z: 0}
+    priority: 10
+    required: 1
+  - itemName: Patrol
+    prefab: {fileID: 7363399556980340892, guid: 5ed5dd455b845cf41a7bc07197b416f4,
+      type: 3}
+    category: 0
+    minCount: 2
+    maxCount: 3
+    usePoolMode: 1
+    customSpawnPoints:
+    - {fileID: 0}
+    - {fileID: 0}
+    spawnLocation: 0
+    spawnRadius: 25
     offset: {x: 0, y: 0, z: 0}
     requireNavMesh: 1
     randomRotation: 1
@@ -68,9 +109,9 @@ MonoBehaviour:
   rewardScalingMultiplier: 1
   challengeIcon: {fileID: 21300000, guid: d83764e58c7d04946961beaff1cc9dc1, type: 3}
   difficultyColor: {r: 1, g: 0, b: 0, a: 1}
-  startSound: {fileID: 0}
-  completeSound: {fileID: 0}
+  startSound: {fileID: 8300000, guid: d4fccf6a35a12fd4fbdb2bcdd9101b1c, type: 3}
+  completeSound: {fileID: 8300000, guid: 3633cd2e884a7434fbaa68995868170d, type: 3}
   failSound: {fileID: 0}
-  spawnVFX: {fileID: 1796635450895110, guid: 1103bc5779fcc26419c248d4fd2f8586, type: 3}
-  spawnVFXScale: 2
+  spawnVFX: {fileID: 1807292479234486, guid: df0c133e93e92ea43ac4d6bec15faea4, type: 3}
+  spawnVFXScale: 1
   spawnVFXDuration: 0

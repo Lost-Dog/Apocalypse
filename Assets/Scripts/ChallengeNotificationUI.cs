@@ -223,11 +223,39 @@ public class ChallengeNotificationUI : MonoBehaviour
         }
     }
 
+    private string GetChallengePrefix(ActiveChallenge challenge)
+    {
+        switch (challenge.challengeData.challengeType)
+        {
+            case ChallengeData.ChallengeType.SupplyDrop:
+                return "[Mission: Supply Drop] ";
+            case ChallengeData.ChallengeType.HostageRescue:
+                return "[Mission: Hostage Rescue] ";
+            case ChallengeData.ChallengeType.ExtractionDefense:
+                return "[Mission: Extraction] ";
+            default:
+                break;
+        }
+        
+        switch (challenge.challengeData.frequency)
+        {
+            case ChallengeData.ChallengeFrequency.Daily:
+                return "[Daily Challenge] ";
+            case ChallengeData.ChallengeFrequency.Weekly:
+                return "[Weekly Challenge] ";
+            case ChallengeData.ChallengeFrequency.WorldEvent:
+                return "[World Event] ";
+            default:
+                return "[Challenge] ";
+        }
+    }
+    
     private void UpdateChallengeContent(ActiveChallenge challenge)
     {
         if (titleText != null)
         {
-            titleText.text = challenge.challengeData.challengeName;
+            string prefix = GetChallengePrefix(challenge);
+            titleText.text = $"{prefix}{challenge.challengeData.challengeName}";
         }
 
         if (descriptionText != null)
@@ -272,7 +300,19 @@ public class ChallengeNotificationUI : MonoBehaviour
             int totalCount = currentDisplayedChallenge.challengeData.GetEnemyCount();
             if (totalCount == 0)
                 totalCount = currentDisplayedChallenge.challengeData.GetCivilianCount();
-            progressText.text = $"{currentDisplayedChallenge.currentProgress} / {totalCount}";
+            
+            // Use enemiesKilled directly instead of currentProgress for more accurate tracking
+            int actualProgress = currentDisplayedChallenge.enemiesKilled > 0 
+                ? currentDisplayedChallenge.enemiesKilled 
+                : currentDisplayedChallenge.currentProgress;
+                
+            progressText.text = $"{actualProgress} / {totalCount}";
+            
+            // Debug output
+            if (actualProgress != currentDisplayedChallenge.currentProgress)
+            {
+                Debug.LogWarning($"Progress mismatch! enemiesKilled={currentDisplayedChallenge.enemiesKilled}, currentProgress={currentDisplayedChallenge.currentProgress}");
+            }
         }
 
         if (progressSlider != null)
@@ -281,8 +321,13 @@ public class ChallengeNotificationUI : MonoBehaviour
             if (totalCount == 0)
                 totalCount = currentDisplayedChallenge.challengeData.GetCivilianCount();
             
+            // Use enemiesKilled for accuracy
+            int actualProgress = currentDisplayedChallenge.enemiesKilled > 0 
+                ? currentDisplayedChallenge.enemiesKilled 
+                : currentDisplayedChallenge.currentProgress;
+            
             float progress = totalCount > 0 
-                ? (float)currentDisplayedChallenge.currentProgress / totalCount 
+                ? (float)actualProgress / totalCount 
                 : 0f;
             progressSlider.value = progress;
         }

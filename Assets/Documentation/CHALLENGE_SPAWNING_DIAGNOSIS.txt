@@ -1,0 +1,195 @@
+═══════════════════════════════════════════════════════════════════════════════
+  CHALLENGE SPAWNING ISSUE - DIAGNOSIS & FIX
+═══════════════════════════════════════════════════════════════════════════════
+
+ISSUE SUMMARY
+-------------
+Problem: Active challenges are not spawning enemies when world events start
+
+CONSOLE STATUS
+--------------
+✅ Console is now CLEAR of YOUR code errors!
+
+The remaining "errors" are actually WARNINGS from third-party assets:
+  • Julhiecio TPS Controller (uses deprecated Unity 6 APIs)
+  • These are NON-BREAKING and can be safely ignored
+  • They come from the asset itself, not your code
+
+═══════════════════════════════════════════════════════════════════════════════
+
+DIAGNOSIS TOOL CREATED
+----------------------
+
+File: /Assets/Scripts/DebugChallengeInfo.cs
+
+HOW TO USE:
+  1. Enter Play mode
+  2. Press F9 to print challenge system state to console
+  3. Check output for:
+     - How many world event challenges are loaded
+     - How many challenges are active
+     - How many spawn zones exist
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🎯 PRIMARY FIX - MOST LIKELY ROOT CAUSE
+═══════════════════════════════════════════════════════════════════════════════
+
+ISSUE: ChallengeManager has manually-configured world event list
+
+EVIDENCE:
+  • LoadChallenges() only runs if worldEventChallenges.Count == 0 (line 121)
+  • If list was manually populated in Inspector, it won't auto-load
+  • No console log shows "Loaded X world events..." message
+  • This means the world event list is either:
+    a) Empty (size 0 but configured, blocking auto-load)
+    b) Has old/invalid entries
+
+SOLUTION - FORCE AUTO-LOAD:
+───────────────────────────
+
+1. EXIT PLAY MODE (if in Play mode)
+
+2. SELECT: /GameSystems/ChallengeManager in Hierarchy
+
+3. In Inspector, find "World Event Challenges" list:
+   ├─ Click arrow to expand it
+   ├─ Set Size to 0
+   └─ This clears any manually-added entries
+
+4. SAVE SCENE (Ctrl+S)
+
+5. ENTER PLAY MODE
+
+6. CHECK CONSOLE for this message:
+   "Loaded 14 world events, X daily challenges, X weekly challenges"
+
+7. If you see that message, WAIT 60 SECONDS (worldEventSpawnInterval)
+
+8. Challenge should spawn with log:
+   "✓ Spawning challenge '[name]' using Dynamic Zone '[zone]'"
+
+═══════════════════════════════════════════════════════════════════════════════
+
+ALTERNATIVE CAUSES (if primary fix doesn't work)
+═══════════════════════════════════════════════════════════════════════════════
+
+ISSUE 2: NO SPAWN ZONES
+────────────────────────
+Symptom: Debug shows "Spawn Zones: 0"
+Cause: AutoPopulateSpawnZones() looks for "ChallengePoint" in child names
+
+FIX:
+  1. Check /GameSystems/Zones/ChallengeZones for children
+  2. Ensure some children have "ChallengePoint" in their name
+
+───────────────────────────────────────────────────────────────────────────────
+
+ISSUE 3: MISSIONZONE EMPTY SPAWN POINTS
+────────────────────────────────────────
+Symptom: Challenge spawns using MissionZone but 0 enemies appear
+Cause: MissionZone spawnPoints list is empty
+
+FIX:
+  1. Select MissionZone GameObject (e.g., Rogue_Lieutenant)
+  2. In Inspector, find "Spawn Points" list
+  3. For each spawn point:
+     ├─ Add new entry
+     ├─ Set transform to spawn point child GameObject
+     └─ Set prefabOverride to enemy prefab
+
+───────────────────────────────────────────────────────────────────────────────
+
+ISSUE 4: DYNAMICCHALLENGEZONE NO SPAWN POINTS
+──────────────────────────────────────────────
+Symptom: Error "Dynamic Zone 'X' has no spawn points!"
+Cause: Zone children don't contain "SpawnPoint" or start with "Spawn_"
+
+FIX:
+  1. Find the zone GameObject in hierarchy
+  2. Rename spawn point children to include "SpawnPoint"
+     Example: "Boss" → "SpawnPoint_Boss"
+  3. Or prefix with "Spawn_"
+     Example: "Enemy_01" → "Spawn_Enemy_01"
+
+═══════════════════════════════════════════════════════════════════════════════
+
+NEXT STEPS - RECOMMENDED WORKFLOW
+═══════════════════════════════════════════════════════════════════════════════
+
+1. ✅ Apply PRIMARY FIX (clear world event challenges list to Size: 0)
+
+2. ✅ Save scene
+
+3. ✅ Enter Play mode
+
+4. ✅ Press F9 to see debug output
+
+5. ✅ Wait 60 seconds for auto-spawn
+
+6. ✅ Check console for spawning logs
+
+7. ✅ If still no enemies, share F9 debug output
+
+═══════════════════════════════════════════════════════════════════════════════
+
+TECHNICAL DETAILS
+═══════════════════════════════════════════════════════════════════════════════
+
+ChallengeManager.LoadChallenges() Logic:
+────────────────────────────────────────
+```csharp
+private void LoadChallenges()
+{
+    if (worldEventChallenges.Count == 0)  // ← THIS CHECK BLOCKS AUTO-LOAD!
+    {
+        ChallengeData[] loadedChallenges = Resources.LoadAll<ChallengeData>("Challenges");
+        worldEventChallenges = new List<ChallengeData>(
+            loadedChallenges.Where(c => c.frequency == ChallengeData.ChallengeFrequency.WorldEvent)
+        );
+        Debug.Log($"Loaded {worldEventChallenges.Count} world events...");
+    }
+}
+```
+
+If worldEventChallenges.Count > 0 (even if entries are invalid), it WON'T load
+from Resources!
+
+World Event Assets Location:
+────────────────────────────
+/Assets/Game/Resources/Challenges/WorldEvents/
+  ├─ WE_BossEncounter_Extreme.asset
+  ├─ WE_BossEncounter_Hard.asset
+  ├─ WE_BossEncounter_Medium.asset
+  ├─ WE_CivilianRescue_Easy.asset
+  ├─ WE_CivilianRescue_Medium.asset
+  ├─ WE_ControlPoint_Hard.asset
+  ├─ WE_ControlPoint_Medium.asset
+  ├─ WE_ExtractionDefense_Hard.asset
+  ├─ WE_ExtractionDefense_Medium.asset
+  ├─ WE_HostageRescue_Hard.asset
+  ├─ WE_RivalAgent_Extreme.asset
+  ├─ WE_SupplyDrop_Easy.asset
+  ├─ WE_SupplyDrop_Hard.asset
+  └─ WE_SupplyDrop_Medium.asset
+
+Total: 14 world events
+
+Spawn Flow:
+───────────
+1. ChallengeManager.Update() decrements spawnTimer
+2. When timer hits 0, calls SpawnRandomWorldEvent()
+3. Picks random challenge from worldEventChallenges pool
+4. Calls SpawnChallenge()
+5. If !requireManualStart, calls StartChallenge()
+6. Calls SpawnChallengeContentInternal()
+7. Calls ChallengeSpawner.SpawnChallengeContent()
+8. ChallengeSpawner tries in order:
+   a) DynamicChallengeZone (from DynamicZoneManager)
+   b) ControlZone (from ChallengeData.controlZoneReference)
+   c) MissionZone (from ChallengeData.missionZoneOverride)
+9. Spawns enemies based on ChallengeData.spawnItems
+
+═══════════════════════════════════════════════════════════════════════════════
+END OF DOCUMENT
+═══════════════════════════════════════════════════════════════════════════════

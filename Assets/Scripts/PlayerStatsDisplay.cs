@@ -16,6 +16,8 @@ public class PlayerStatsDisplay : MonoBehaviour
     public TextMeshProUGUI temperatureText;
     public TextMeshProUGUI staminaText;
     public TextMeshProUGUI infectionText;
+    public TextMeshProUGUI hungerText;
+    public TextMeshProUGUI thirstText;
     
     [Header("UI Slider Elements (Optional)")]
     public Slider healthSlider;
@@ -23,11 +25,15 @@ public class PlayerStatsDisplay : MonoBehaviour
     public Slider temperatureSlider;
     public Slider staminaSlider;
     public Slider infectionSlider;
+    public Slider hungerSlider;
+    public Slider thirstSlider;
     
     [Header("Display Settings")]
     public bool showTemperaturePrefix = false;
     public bool showStaminaPrefix = false;
     public bool showInfectionPrefix = false;
+    public bool showHungerPrefix = false;
+    public bool showThirstPrefix = false;
     
     [Header("Auto-Find References")]
     public bool autoFindReferences = true;
@@ -126,6 +132,20 @@ public class PlayerStatsDisplay : MonoBehaviour
                 infectionSlider.maxValue = survivalManager.maxInfection;
                 infectionSlider.value = survivalManager.currentInfection;
             }
+            
+            if (hungerSlider != null)
+            {
+                hungerSlider.minValue = 0f;
+                hungerSlider.maxValue = survivalManager.maxHunger;
+                hungerSlider.value = survivalManager.currentHunger;
+            }
+            
+            if (thirstSlider != null)
+            {
+                thirstSlider.minValue = 0f;
+                thirstSlider.maxValue = survivalManager.maxThirst;
+                thirstSlider.value = survivalManager.currentThirst;
+            }
         }
     }
     
@@ -136,6 +156,8 @@ public class PlayerStatsDisplay : MonoBehaviour
         UpdateTemperatureDisplay();
         UpdateStaminaDisplay();
         UpdateInfectionDisplay();
+        UpdateHungerDisplay();
+        UpdateThirstDisplay();
     }
     
     private void UpdateHealthDisplay()
@@ -221,6 +243,66 @@ public class PlayerStatsDisplay : MonoBehaviour
         if (infectionSlider != null)
         {
             infectionSlider.value = survivalManager.currentInfection;
+        }
+    }
+    
+    private void UpdateHungerDisplay()
+    {
+        if (survivalManager == null) return;
+        
+        if (hungerText != null)
+        {
+            string status = survivalManager.GetHungerStatus();
+            string display = showHungerPrefix ? $"Hunger: {Mathf.RoundToInt(survivalManager.currentHunger)}% ({status})" : $"{Mathf.RoundToInt(survivalManager.currentHunger)}% ({status})";
+            hungerText.text = display;
+            
+            if (survivalManager.IsStarving)
+            {
+                hungerText.color = Color.red;
+            }
+            else if (survivalManager.IsHungry)
+            {
+                hungerText.color = Color.yellow;
+            }
+            else
+            {
+                hungerText.color = Color.white;
+            }
+        }
+        
+        if (hungerSlider != null)
+        {
+            hungerSlider.value = survivalManager.currentHunger;
+        }
+    }
+    
+    private void UpdateThirstDisplay()
+    {
+        if (survivalManager == null) return;
+        
+        if (thirstText != null)
+        {
+            string status = survivalManager.GetThirstStatus();
+            string display = showThirstPrefix ? $"Thirst: {Mathf.RoundToInt(survivalManager.currentThirst)}% ({status})" : $"{Mathf.RoundToInt(survivalManager.currentThirst)}% ({status})";
+            thirstText.text = display;
+            
+            if (survivalManager.IsDehydrated)
+            {
+                thirstText.color = Color.red;
+            }
+            else if (survivalManager.IsThirsty)
+            {
+                thirstText.color = new Color(0.3f, 0.7f, 1f);
+            }
+            else
+            {
+                thirstText.color = Color.white;
+            }
+        }
+        
+        if (thirstSlider != null)
+        {
+            thirstSlider.value = survivalManager.currentThirst;
         }
     }
 }

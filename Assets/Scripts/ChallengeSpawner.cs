@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections.Generic;
+using Lovatto.MiniMap;
 
 public class ChallengeSpawner : MonoBehaviour
 {
@@ -11,6 +12,22 @@ public class ChallengeSpawner : MonoBehaviour
     [SerializeField] private float navMeshSampleDistance = 5f;
     [SerializeField] private float minimumSpawnDistance = 3f;
     [SerializeField] private LayerMask obstructionMask;
+    
+    [Header("Spawn Validation")]
+    [Tooltip("Force use NavMesh for all spawns (overrides item settings)")]
+    public bool forceNavMesh = false;
+    [Tooltip("Skip NavMesh checks even if item requires it")]
+    public bool ignoreNavMeshRequirement = true;
+    [Tooltip("Skip obstruction checks (spawn even if position is blocked)")]
+    public bool ignoreObstructionChecks = true;
+
+    [Header("Enemy Setup")]
+    [Tooltip("Icon data for enemies on minimap")]
+    public bl_MiniMapIconData enemyMinimapIcon;
+    [Tooltip("Healthbar prefab to instantiate for enemies")]
+    public GameObject healthBarPrefab;
+    [Tooltip("Maximum number of enemies that can be spawned per challenge")]
+    public int maxEnemiesPerChallenge = 10;
 
     private Dictionary<ActiveChallenge, ChallengeInstance> activeChallengeInstances = new Dictionary<ActiveChallenge, ChallengeInstance>();
 
@@ -48,6 +65,21 @@ public class ChallengeSpawner : MonoBehaviour
         }
 
         ChallengeInstance instance = new ChallengeInstance();
+        
+        if (DynamicZoneManager.Instance != null)
+        {
+            DynamicChallengeZone dynamicZone = DynamicZoneManager.Instance.GetRandomAvailableZone(data.challengeType);
+            if (dynamicZone != null)
+            {
+                DynamicZoneManager.Instance.AssignZoneToChallenge(challenge, dynamicZone);
+                challenge.position = dynamicZone.GetCenterPosition();
+                
+                SpawnMarkers(challenge, data, worldMarkerPrefab, compassMarkerPrefab, compassContainer, worldspaceUIContainer, spawnMinimapPointer, instance);
+                SpawnFromDynamicZone(challenge, data, dynamicZone, instance);
+                activeChallengeInstances[challenge] = instance;
+                return;
+            }
+        }
 
         SpawnMarkers(challenge, data, worldMarkerPrefab, compassMarkerPrefab, compassContainer, worldspaceUIContainer, spawnMinimapPointer, instance);
         
@@ -100,11 +132,11 @@ public class ChallengeSpawner : MonoBehaviour
     
     private void SpawnFromControlZone(ActiveChallenge challenge, ChallengeData data, ControlZone zone, ChallengeInstance instance)
     {
-        Debug.Log($"Spawning challenge '{data.challengeName}' using Control Zone '{zone.zoneName}'");
+        Debug.Log($"<color=yellow>[ChallengeSpawner] Spawning challenge '{data.challengeName}' using Control Zone '{zone.zoneName}'</color>");
         
-        zone.gameObject.SetActive(true);
         instance.activatedControlZone = zone;
         zone.LinkToChallenge(challenge);
+        zone.ActivateAndSpawn();
     }
     
     private MissionZone FindMissionZoneForChallenge(Vector3 position, ChallengeData.ChallengeType type)
@@ -152,6 +184,7 @@ public class ChallengeSpawner : MonoBehaviour
             );
             
             spawnedObject.name = $"{spawnPoint.pointName}";
+            spawnedObject.SetActive(true);
             
             CategorizeAndStoreSpawnedObject(spawnedObject, spawnPoint.category, instance, challenge);
         }
@@ -171,6 +204,104 @@ public class ChallengeSpawner : MonoBehaviour
         }
     }
     
+    private void SpawnFromDynamicZone(ActiveChallenge challenge, ChallengeData data, DynamicChallengeZone zone, ChallengeInstance instance)
+    {
+        Debug.Log($"<color=green>✓ Spawning challenge '{data.challengeName}' using Dynamic Zone '{zone.zoneName}'</color>");
+        
+        if (data.spawnItems == null || data.spawnItems.Count == 0)
+        {
+            Debug.LogWarning($"Challenge '{data.challengeName}' has no spawn items configured!");
+            return;
+        }
+        
+        List<Transform> availableSpawnPoints = zone.GetSpawnPoints();
+        
+        if (availableSpawnPoints.Count == 0)
+        {
+            Debug.LogError($"Dynamic Zone '{zone.zoneName}' has no spawn points!");
+            return;
+        }
+        
+        Debug.Log($"Dynamic Zone has {availableSpawnPoints.Count} spawn points available");
+        
+        int spawnPointIndex = 0;
+        
+        foreach (ChallengeData.SpawnableItem item in data.spawnItems)
+        {
+            if (item.prefab == null)
+            {
+                GameObject defaultPrefab = GetDefaultPrefabForCategory(item.category);
+                if (defaultPrefab == null)
+                {
+                    Debug.LogWarning($"No prefab set for spawn item '{item.itemName}' and no default found for category {item.category}");
+                    continue;
+                }
+                item.prefab = defaultPrefab;
+            }
+            
+            int spawnCount = Random.Range(item.minCount, item.maxCount + 1);
+            
+            // Limit enemy spawns based on maxEnemiesPerChallenge
+            if (item.category == ChallengeData.SpawnableCategory.Enemy)
+            {
+                int remainingSlots = maxEnemiesPerChallenge - instance.spawnedEnemies.Count;
+                if (remainingSlots <= 0)
+                {
+                    Debug.LogWarning($"⚠️ Skipping {item.itemName} - already at max enemy limit ({maxEnemiesPerChallenge})");
+                    continue;
+                }
+                spawnCount = Mathf.Min(spawnCount, remainingSlots);
+            }
+            
+            for (int i = 0; i < spawnCount; i++)
+            {
+                if (spawnPointIndex >= availableSpawnPoints.Count)
+                {
+                    Debug.LogWarning($"Ran out of spawn points! Needed {spawnCount} for '{item.itemName}', only had {availableSpawnPoints.Count} total");
+                    break;
+                }
+                
+                Transform spawnPoint = availableSpawnPoints[spawnPointIndex];
+                spawnPointIndex++;
+                
+                Quaternion spawnRotation = item.randomRotation 
+                    ? Quaternion.Euler(0, Random.Range(0f, 360f), 0) 
+                    : spawnPoint.rotation;
+                
+                GameObject spawnedObject = Instantiate(
+                    item.prefab,
+                    spawnPoint.position,
+                    spawnRotation
+                );
+                
+                spawnedObject.name = $"{item.itemName}_{i}";
+                spawnedObject.SetActive(true);
+                
+                CategorizeAndStoreSpawnedObject(spawnedObject, item.category, instance, challenge);
+                
+                Debug.Log($"  ✓ Spawned {item.itemName} at {spawnPoint.name}");
+            }
+        }
+        
+        Debug.Log($"<color=green>Spawned {instance.spawnedEnemies.Count} enemies, {instance.spawnedCivilians.Count} civilians, {instance.spawnedObjects.Count} objects</color>");
+    }
+    
+    private GameObject GetDefaultPrefabForCategory(ChallengeData.SpawnableCategory category)
+    {
+        if (DynamicZoneManager.Instance == null)
+            return null;
+        
+        switch (category)
+        {
+            case ChallengeData.SpawnableCategory.Enemy:
+                return DynamicZoneManager.Instance.defaultEnemyPrefab;
+            case ChallengeData.SpawnableCategory.Civilian:
+                return DynamicZoneManager.Instance.defaultCivilianPrefab;
+            default:
+                return null;
+        }
+    }
+    
     private void SpawnFlexibleItems(ActiveChallenge challenge, ChallengeData data, ChallengeInstance instance)
     {
         if (data.spawnItems == null || data.spawnItems.Count == 0)
@@ -178,6 +309,15 @@ public class ChallengeSpawner : MonoBehaviour
             Debug.LogError($"❌ Challenge '{data.challengeName}' has NO SPAWN ITEMS configured!");
             Debug.LogError($"Add spawn items in the Challenge Data asset to spawn enemies/objects.");
             Debug.LogError($"Path: Select challenge data → Inspector → Flexible Spawning System → Spawn Items");
+            return;
+        }
+        
+        bool useSharedSpawnPoints = HasValidSharedSpawnPoints(data);
+        
+        if (useSharedSpawnPoints)
+        {
+            Debug.Log($"📦 Using shared spawn point pool for challenge: {data.challengeName}");
+            SpawnUsingSharedPool(challenge, data, instance);
             return;
         }
         
@@ -204,23 +344,42 @@ public class ChallengeSpawner : MonoBehaviour
                 Mathf.Min(item.maxCount, item.minCount) : 
                 Random.Range(item.minCount, item.maxCount + 1);
             
+            // Limit enemy spawns based on maxEnemiesPerChallenge
+            if (item.category == ChallengeData.SpawnableCategory.Enemy)
+            {
+                int remainingSlots = maxEnemiesPerChallenge - instance.spawnedEnemies.Count;
+                if (remainingSlots <= 0)
+                {
+                    Debug.LogWarning($"⚠️ Skipping {item.itemName} - already at max enemy limit ({maxEnemiesPerChallenge})");
+                    continue;
+                }
+                countToSpawn = Mathf.Min(countToSpawn, remainingSlots);
+            }
+            
             int spawnedCount = 0;
             int failedCount = 0;
             
-            // Check if custom spawn points are provided
-            bool useCustomSpawnPoints = item.customSpawnPoints != null && item.customSpawnPoints.Length > 0;
+            bool hasValidCustomSpawnPoints = item.customSpawnPoints != null && 
+                                             item.customSpawnPoints.Length > 0 &&
+                                             System.Array.Exists(item.customSpawnPoints, sp => sp != null);
             
-            if (useCustomSpawnPoints)
+            if (hasValidCustomSpawnPoints)
             {
-                // Spawn at specific transforms
-                Debug.Log($"Using {item.customSpawnPoints.Length} custom spawn points for {item.itemName}");
+                Debug.Log($"✓ Using {item.customSpawnPoints.Length} custom spawn points for {item.itemName}");
                 
                 for (int i = 0; i < Mathf.Min(countToSpawn, item.customSpawnPoints.Length); i++)
                 {
+                    // Check enemy limit before spawning
+                    if (item.category == ChallengeData.SpawnableCategory.Enemy && instance.spawnedEnemies.Count >= maxEnemiesPerChallenge)
+                    {
+                        Debug.LogWarning($"⚠️ Reached max enemy limit ({maxEnemiesPerChallenge}) while spawning {item.itemName}");
+                        break;
+                    }
+                    
                     Transform spawnPoint = item.customSpawnPoints[i];
                     if (spawnPoint == null)
                     {
-                        Debug.LogWarning($"Custom spawn point {i} is null for {item.itemName}");
+                        Debug.LogWarning($"Custom spawn point {i} is null for {item.itemName}, skipping");
                         failedCount++;
                         continue;
                     }
@@ -229,6 +388,7 @@ public class ChallengeSpawner : MonoBehaviour
                     spawnedObject.name = string.IsNullOrEmpty(item.itemName) ? 
                         $"{item.prefab.name}_{i}" : 
                         $"{item.itemName}_{i}";
+                    spawnedObject.SetActive(true);
                     
                     CategorizeAndStoreSpawnedObject(spawnedObject, item.category, instance, challenge);
                     usedPositions.Add(spawnPoint.position);
@@ -243,42 +403,86 @@ public class ChallengeSpawner : MonoBehaviour
             }
             else
             {
-                // Use random spawning (original behavior)
+                Debug.Log($"✓ Using random/procedural spawning for {item.itemName} (spawnLocation: {item.spawnLocation}, radius: {item.spawnRadius}m)");
+                
                 for (int i = 0; i < countToSpawn; i++)
                 {
-                    Vector3 spawnPosition;
-                    Quaternion spawnRotation;
-                    
-                    if (GetSpawnTransform(challenge.position, item, usedPositions, out spawnPosition, out spawnRotation))
+                    // Check enemy limit before spawning
+                    if (item.category == ChallengeData.SpawnableCategory.Enemy && instance.spawnedEnemies.Count >= maxEnemiesPerChallenge)
                     {
-                        GameObject spawnedObject = Instantiate(item.prefab, spawnPosition, spawnRotation);
-                        spawnedObject.name = string.IsNullOrEmpty(item.itemName) ? 
-                            $"{item.prefab.name}_{i}" : 
-                            $"{item.itemName}_{i}";
-                        
-                        CategorizeAndStoreSpawnedObject(spawnedObject, item.category, instance, challenge);
-                        usedPositions.Add(spawnPosition);
-                        spawnedCount++;
-                        totalSpawned++;
+                        Debug.LogWarning($"⚠️ Reached max enemy limit ({maxEnemiesPerChallenge}) while spawning {item.itemName}");
+                        break;
                     }
-                    else
+                    
+                    Vector3 spawnPosition = Vector3.zero;
+                    Quaternion spawnRotation = item.randomRotation ? 
+                        Quaternion.Euler(0, Random.Range(0f, 360f), 0) : 
+                        Quaternion.Euler(item.fixedRotation.x, item.fixedRotation.y, item.fixedRotation.z);
+                    
+                    switch (item.spawnLocation)
                     {
-                        failedCount++;
-                        totalFailed++;
-                        
-                        string itemDesc = string.IsNullOrEmpty(item.itemName) ? $"[{item.category}]" : item.itemName;
-                        
-                        if (item.required)
+                        case ChallengeData.SpawnLocationType.AtCenter:
+                            spawnPosition = challenge.position + item.offset;
+                            break;
+                        case ChallengeData.SpawnLocationType.RandomInRadius:
+                            Vector2 randomCircle = Random.insideUnitCircle * item.spawnRadius;
+                            spawnPosition = challenge.position + new Vector3(randomCircle.x, 0, randomCircle.y) + item.offset;
+                            break;
+                        case ChallengeData.SpawnLocationType.RandomOnEdge:
+                            Vector2 randomEdge = Random.insideUnitCircle.normalized * item.spawnRadius;
+                            spawnPosition = challenge.position + new Vector3(randomEdge.x, 0, randomEdge.y) + item.offset;
+                            break;
+                        case ChallengeData.SpawnLocationType.AroundPerimeter:
+                            float angle = (360f / countToSpawn) * i;
+                            float radians = angle * Mathf.Deg2Rad;
+                            Vector3 perimeterOffset = new Vector3(Mathf.Cos(radians), 0, Mathf.Sin(radians)) * item.spawnRadius;
+                            spawnPosition = challenge.position + perimeterOffset + item.offset;
+                            break;
+                        case ChallengeData.SpawnLocationType.Grid:
+                            int gridSize = Mathf.CeilToInt(Mathf.Sqrt(countToSpawn));
+                            int row = i / gridSize;
+                            int col = i % gridSize;
+                            float spacing = item.spawnRadius * 2f / gridSize;
+                            Vector3 gridOffset = new Vector3((col - gridSize / 2f) * spacing, 0, (row - gridSize / 2f) * spacing);
+                            spawnPosition = challenge.position + gridOffset + item.offset;
+                            break;
+                    }
+                    
+                    // NavMesh validation (optional)
+                    bool shouldCheckNavMesh = forceNavMesh || (item.requireNavMesh && !ignoreNavMeshRequirement);
+                    if (shouldCheckNavMesh)
+                    {
+                        UnityEngine.AI.NavMeshHit hit;
+                        if (UnityEngine.AI.NavMesh.SamplePosition(spawnPosition, out hit, 5f, UnityEngine.AI.NavMesh.AllAreas))
                         {
-                            Debug.LogError($"❌ Failed to spawn REQUIRED item: {itemDesc} ({i + 1}/{countToSpawn})");
-                            Debug.LogError($"  SpawnMode: {item.spawnLocation} | Radius: {item.spawnRadius}m | RequireNavMesh: {item.requireNavMesh}");
-                            Debug.LogError($"  Check: NavMesh baked, spawn radius > 0 for random modes, no obstructions");
+                            spawnPosition = hit.position;
                         }
                         else
                         {
-                            Debug.LogWarning($"⚠️ Failed to spawn: {itemDesc} ({i + 1}/{countToSpawn}) - trying next position");
+                            Debug.LogWarning($"Failed to find NavMesh near position {spawnPosition} for {item.itemName}");
+                            failedCount++;
+                            continue;
                         }
                     }
+                    
+                    // Obstruction check (optional)
+                    if (!ignoreObstructionChecks && Physics.CheckSphere(spawnPosition, 1f))
+                    {
+                        Debug.LogWarning($"Spawn position {spawnPosition} is obstructed for {item.itemName}");
+                        failedCount++;
+                        continue;
+                    }
+                    
+                    GameObject spawnedObject = Instantiate(item.prefab, spawnPosition, spawnRotation);
+                    spawnedObject.name = string.IsNullOrEmpty(item.itemName) ? 
+                        $"{item.prefab.name}_{i}" : 
+                        $"{item.itemName}_{i}";
+                    spawnedObject.SetActive(true);
+                    
+                    CategorizeAndStoreSpawnedObject(spawnedObject, item.category, instance, challenge);
+                    usedPositions.Add(spawnPosition);
+                    spawnedCount++;
+                    totalSpawned++;
                 }
             }
             
@@ -299,10 +503,111 @@ public class ChallengeSpawner : MonoBehaviour
         {
             Debug.LogError($"❌ CRITICAL: NO objects spawned for challenge '{data.challengeName}'!");
             Debug.LogError($"Common fixes:");
-            Debug.LogError($"  1. Bake NavMesh (Window > AI > Navigation > Bake)");
-            Debug.LogError($"  2. Increase spawn radius in challenge data");
-            Debug.LogError($"  3. Check obstructionMask isn't blocking spawns");
-            Debug.LogError($"  4. Move challenge spawn point to valid NavMesh area");
+            Debug.LogError($"  1. Add spawn points to 'Shared Spawn Points' in Challenge Data");
+            Debug.LogError($"  2. Or assign 'Custom Spawn Points' to each spawn item");
+        }
+    }
+    
+    private bool HasValidSharedSpawnPoints(ChallengeData data)
+    {
+        if (data.sharedSpawnPoints == null || data.sharedSpawnPoints.Length == 0)
+            return false;
+        
+        foreach (Transform point in data.sharedSpawnPoints)
+        {
+            if (point != null)
+                return true;
+        }
+        
+        return false;
+    }
+    
+    private void SpawnUsingSharedPool(ActiveChallenge challenge, ChallengeData data, ChallengeInstance instance)
+    {
+        List<Transform> availableSpawnPoints = new List<Transform>(data.sharedSpawnPoints);
+        availableSpawnPoints.RemoveAll(point => point == null);
+        
+        if (availableSpawnPoints.Count == 0)
+        {
+            Debug.LogError($"❌ No valid spawn points in shared pool for '{data.challengeName}'!");
+            return;
+        }
+        
+        List<ChallengeData.SpawnableItem> sortedItems = new List<ChallengeData.SpawnableItem>(data.spawnItems);
+        sortedItems.Sort((a, b) => b.priority.CompareTo(a.priority));
+        
+        int totalSpawned = 0;
+        int totalFailed = 0;
+        
+        foreach (ChallengeData.SpawnableItem item in sortedItems)
+        {
+            if (item.prefab == null)
+            {
+                string itemDesc = string.IsNullOrEmpty(item.itemName) ? $"[Unnamed {item.category}]" : item.itemName;
+                Debug.LogError($"❌ Spawn item '{itemDesc}' has NO PREFAB assigned!");
+                totalFailed++;
+                continue;
+            }
+            
+            int countToSpawn = item.usePoolMode ? 
+                Mathf.Min(item.maxCount, item.minCount) : 
+                Random.Range(item.minCount, item.maxCount + 1);
+            
+            // Limit enemy spawns based on maxEnemiesPerChallenge
+            if (item.category == ChallengeData.SpawnableCategory.Enemy)
+            {
+                int remainingSlots = maxEnemiesPerChallenge - instance.spawnedEnemies.Count;
+                if (remainingSlots <= 0)
+                {
+                    Debug.LogWarning($"⚠️ Skipping {item.itemName} - already at max enemy limit ({maxEnemiesPerChallenge})");
+                    continue;
+                }
+                countToSpawn = Mathf.Min(countToSpawn, remainingSlots);
+            }
+            
+            int spawnedCount = 0;
+            
+            for (int i = 0; i < countToSpawn; i++)
+            {
+                if (availableSpawnPoints.Count == 0)
+                {
+                    Debug.LogWarning($"⚠️ Ran out of spawn points! Spawned {spawnedCount}/{countToSpawn} {item.itemName}");
+                    break;
+                }
+                
+                // Double-check enemy limit before spawning
+                if (item.category == ChallengeData.SpawnableCategory.Enemy && instance.spawnedEnemies.Count >= maxEnemiesPerChallenge)
+                {
+                    Debug.LogWarning($"⚠️ Reached max enemy limit ({maxEnemiesPerChallenge}) while spawning {item.itemName}");
+                    break;
+                }
+                
+                int randomIndex = Random.Range(0, availableSpawnPoints.Count);
+                Transform spawnPoint = availableSpawnPoints[randomIndex];
+                availableSpawnPoints.RemoveAt(randomIndex);
+                
+                GameObject spawnedObject = Instantiate(item.prefab, spawnPoint.position, spawnPoint.rotation);
+                spawnedObject.name = string.IsNullOrEmpty(item.itemName) ? 
+                    $"{item.prefab.name}_{i}" : 
+                    $"{item.itemName}_{i}";
+                spawnedObject.SetActive(true);
+                
+                CategorizeAndStoreSpawnedObject(spawnedObject, item.category, instance, challenge);
+                spawnedCount++;
+                totalSpawned++;
+            }
+            
+            if (spawnedCount > 0)
+            {
+                Debug.Log($"✓ Spawned {spawnedCount}x {item.itemName} from shared pool ({availableSpawnPoints.Count} points remaining)");
+            }
+        }
+        
+        Debug.Log($"<color=green>📊 Shared Pool Summary: {totalSpawned} spawned, {availableSpawnPoints.Count} spawn points unused</color>");
+        
+        if (totalSpawned == 0)
+        {
+            Debug.LogError($"❌ No objects spawned from shared pool!");
         }
     }
     
@@ -380,11 +685,69 @@ public class ChallengeSpawner : MonoBehaviour
         return true;
     }
     
+    private void SetupChallengeEnemyUI(GameObject enemyObject)
+    {
+        // Setup minimap entity
+        bl_MiniMapEntity minimapEntity = enemyObject.GetComponent<bl_MiniMapEntity>();
+        if (minimapEntity == null)
+        {
+            minimapEntity = enemyObject.AddComponent<bl_MiniMapEntity>();
+            
+            if (enemyMinimapIcon != null)
+            {
+                minimapEntity.iconData = enemyMinimapIcon;
+            }
+            
+            minimapEntity.Target = enemyObject.transform;
+            minimapEntity.DestroyWithObject = true;
+            minimapEntity.OffScreen = true;
+            
+            Debug.Log($"  📍 Added minimap entity to {enemyObject.name}");
+        }
+        
+        // Setup healthbar
+        WorldSpaceHealthBar healthBar = enemyObject.GetComponentInChildren<WorldSpaceHealthBar>(true);
+        if (healthBar != null)
+        {
+            healthBar.gameObject.SetActive(true);
+            healthBar.ShowTemporarily(999f);
+            Debug.Log($"✓ Enabled existing health bar UI for challenge enemy: {enemyObject.name}");
+        }
+        else if (healthBarPrefab != null)
+        {
+            // Instantiate healthbar prefab
+            GameObject healthBarObj = Instantiate(healthBarPrefab, enemyObject.transform);
+            healthBarObj.name = "HealthBar";
+            
+            healthBar = healthBarObj.GetComponent<WorldSpaceHealthBar>();
+            if (healthBar != null)
+            {
+                Debug.Log($"  ❤️ Added healthbar to {enemyObject.name}");
+            }
+            else
+            {
+                Debug.LogWarning($"  ⚠️ Healthbar prefab doesn't have WorldSpaceHealthBar component!");
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"⚠️ No WorldSpaceHealthBar found and no healthBarPrefab assigned for: {enemyObject.name}");
+        }
+    }
+    
     private void CategorizeAndStoreSpawnedObject(GameObject obj, ChallengeData.SpawnableCategory category, ChallengeInstance instance, ActiveChallenge challenge)
     {
         switch (category)
         {
             case ChallengeData.SpawnableCategory.Enemy:
+                // Check if we've reached the maximum enemy limit
+                if (instance.spawnedEnemies.Count >= maxEnemiesPerChallenge)
+                {
+                    Debug.LogWarning($"⚠️ Maximum enemy limit reached ({maxEnemiesPerChallenge}). Destroying excess enemy: {obj.name}");
+                    Destroy(obj);
+                    return;
+                }
+                
                 instance.spawnedEnemies.Add(obj);
                 ChallengeEnemy challengeEnemy = obj.GetComponent<ChallengeEnemy>();
                 if (challengeEnemy == null)
@@ -393,7 +756,8 @@ public class ChallengeSpawner : MonoBehaviour
                 }
                 challengeEnemy.Initialize(challenge);
                 
-                // Apply difficulty scaling to enemy
+                SetupChallengeEnemyUI(obj);
+                
                 ApplyDifficultyScalingToEnemy(obj, challenge);
                 break;
                 
@@ -405,6 +769,8 @@ public class ChallengeSpawner : MonoBehaviour
                     bossEnemy = obj.AddComponent<ChallengeEnemy>();
                 }
                 bossEnemy.Initialize(challenge, true);
+                
+                SetupChallengeEnemyUI(obj);
                 break;
                 
             case ChallengeData.SpawnableCategory.Civilian:
@@ -425,6 +791,8 @@ public class ChallengeSpawner : MonoBehaviour
 
     private void SpawnMarkers(ActiveChallenge challenge, ChallengeData data, GameObject worldMarkerPrefab, GameObject compassMarkerPrefab, Transform compassContainer, Transform worldspaceUIContainer, bool spawnMinimapPointer, ChallengeInstance instance)
     {
+        Debug.Log($"[SpawnMarkers] Starting marker spawn for {data.challengeName}");
+        
         if (worldMarkerPrefab != null && worldspaceUIContainer != null)
         {
             instance.worldMarker = Instantiate(worldMarkerPrefab, worldspaceUIContainer);
@@ -433,6 +801,7 @@ public class ChallengeSpawner : MonoBehaviour
             {
                 marker.SetChallenge(challenge);
             }
+            Debug.Log($"✓ World marker spawned for {data.challengeName}");
         }
 
         if (compassMarkerPrefab != null && compassContainer != null)
@@ -442,7 +811,19 @@ public class ChallengeSpawner : MonoBehaviour
             if (compassMarker != null)
             {
                 compassMarker.SetChallenge(challenge);
+                Debug.Log($"✓ Compass marker spawned for {data.challengeName} - Challenge at {challenge.position}");
             }
+            else
+            {
+                Debug.LogError($"❌ Compass marker prefab has no ChallengeCompassMarker component!");
+            }
+        }
+        else
+        {
+            if (compassMarkerPrefab == null)
+                Debug.LogWarning($"⚠️ No compass marker prefab assigned!");
+            if (compassContainer == null)
+                Debug.LogWarning($"⚠️ No compass container assigned!");
         }
         
         if (spawnMinimapPointer && data.iconData != null)
@@ -502,6 +883,11 @@ public class ChallengeSpawner : MonoBehaviour
         if (instance.activatedControlZone != null)
         {
             instance.activatedControlZone.gameObject.SetActive(false);
+        }
+        
+        if (DynamicZoneManager.Instance != null)
+        {
+            DynamicZoneManager.Instance.ReleaseChallengeZone(challenge);
         }
 
         activeChallengeInstances.Remove(challenge);

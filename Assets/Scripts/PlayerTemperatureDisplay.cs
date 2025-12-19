@@ -58,7 +58,7 @@ public class PlayerTemperatureDisplay : MonoBehaviour
         if (temperatureSlider != null && survivalManager != null)
         {
             temperatureSlider.minValue = 0f;
-            temperatureSlider.maxValue = 36.9f;
+            temperatureSlider.maxValue = 100f;
             temperatureSlider.value = survivalManager.currentTemperature;
         }
     }
@@ -79,7 +79,7 @@ public class PlayerTemperatureDisplay : MonoBehaviour
         
         if (temperatureSlider != null)
         {
-            temperatureSlider.maxValue = 36.9f;
+            temperatureSlider.maxValue = 100f;
             temperatureSlider.value = survivalManager.currentTemperature;
         }
     }

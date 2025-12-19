@@ -37,9 +37,11 @@ public class LootUIManager : MonoBehaviour
             audioSource = GetComponent<AudioSource>();
         }
         
-        if (startInactive)
+        // Don't disable the entire GameObject - just hide the notification panel
+        // The manager needs to stay active to receive events!
+        if (lootNotificationPanel != null)
         {
-            gameObject.SetActive(false);
+            lootNotificationPanel.SetActive(false);
         }
     }
     

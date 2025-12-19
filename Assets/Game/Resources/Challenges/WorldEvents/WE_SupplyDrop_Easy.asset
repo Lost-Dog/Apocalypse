@@ -31,21 +31,78 @@ MonoBehaviour:
   requireNoDeaths: 0
   requireStealth: 0
   objectiveDescription: Complete the challenge
+  sharedSpawnPoints:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   spawnItems:
-  - itemName: Zombie Enemey
-    prefab: {fileID: 4420673318631931856, guid: c040e5b3bf715b746a29433408162a9a,
+  - itemName: Patrol
+    prefab: {fileID: 7363399556980340892, guid: 5ed5dd455b845cf41a7bc07197b416f4,
       type: 3}
-    category: 0
+    category: 8
     minCount: 3
     maxCount: 5
     usePoolMode: 0
+    customSpawnPoints:
+    - {fileID: 0}
+    - {fileID: 0}
     spawnLocation: 0
     spawnRadius: 15
     offset: {x: 0, y: 0, z: 0}
     requireNavMesh: 1
     randomRotation: 1
     fixedRotation: {x: 0, y: 0, z: 0}
-    priority: 10
+    priority: 0
+    required: 1
+  - itemName: Elite
+    prefab: {fileID: 3089473516772616032, guid: 4a0c54d15d1cda84dac5f960c2af8a63,
+      type: 3}
+    category: 8
+    minCount: 2
+    maxCount: 3
+    usePoolMode: 0
+    customSpawnPoints:
+    - {fileID: 0}
+    - {fileID: 0}
+    spawnLocation: 0
+    spawnRadius: 25
+    offset: {x: 0, y: 0, z: 0}
+    requireNavMesh: 1
+    randomRotation: 1
+    fixedRotation: {x: 0, y: 0, z: 0}
+    priority: 0
+    required: 1
+  - itemName: Boss
+    prefab: {fileID: 4087107557208246455, guid: 3eed6798f0ab4b14289150fc4a4c5158,
+      type: 3}
+    category: 8
+    minCount: 1
+    maxCount: 2
+    usePoolMode: 0
+    customSpawnPoints:
+    - {fileID: 0}
+    - {fileID: 0}
+    spawnLocation: 0
+    spawnRadius: 30
+    offset: {x: 0, y: 0, z: 0}
+    requireNavMesh: 1
+    randomRotation: 1
+    fixedRotation: {x: 0, y: 0, z: 0}
+    priority: 0
     required: 1
   modifiers: []
   baseXPReward: 200
@@ -69,9 +126,9 @@ MonoBehaviour:
   rewardScalingMultiplier: 1
   challengeIcon: {fileID: 21300000, guid: d83764e58c7d04946961beaff1cc9dc1, type: 3}
   difficultyColor: {r: 0, g: 1, b: 0, a: 1}
-  startSound: {fileID: 0}
-  completeSound: {fileID: 0}
+  startSound: {fileID: 8300000, guid: d4fccf6a35a12fd4fbdb2bcdd9101b1c, type: 3}
+  completeSound: {fileID: 8300000, guid: 3633cd2e884a7434fbaa68995868170d, type: 3}
   failSound: {fileID: 0}
-  spawnVFX: {fileID: 1796635450895110, guid: 1103bc5779fcc26419c248d4fd2f8586, type: 3}
-  spawnVFXScale: 2
+  spawnVFX: {fileID: 1078883351262038, guid: c0e78f58b62fa42439f781de4f53f10a, type: 3}
+  spawnVFXScale: 1
   spawnVFXDuration: 0

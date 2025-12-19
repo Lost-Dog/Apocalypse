@@ -162,8 +162,9 @@ public class WorldSpaceHealthBar : MonoBehaviour
     {
         if (targetTransform == null) return;
         
+        // Directly set position to avoid jitter from lerping
         Vector3 targetPosition = targetTransform.position + worldOffset;
-        transform.position = Vector3.Lerp(transform.position, targetPosition, smoothSpeed * Time.deltaTime);
+        transform.position = targetPosition;
     }
     
     private void UpdateHealthBar()
@@ -176,7 +177,16 @@ public class WorldSpaceHealthBar : MonoBehaviour
         
         if (healthSlider != null)
         {
-            healthSlider.value = Mathf.Lerp(healthSlider.value, healthPercent, smoothSpeed * Time.deltaTime);
+            // Only lerp if there's a significant difference to avoid jitter
+            float difference = Mathf.Abs(healthSlider.value - healthPercent);
+            if (difference > 0.001f)
+            {
+                healthSlider.value = Mathf.Lerp(healthSlider.value, healthPercent, smoothSpeed * Time.deltaTime);
+            }
+            else
+            {
+                healthSlider.value = healthPercent;
+            }
         }
         
         if (fillImage != null)

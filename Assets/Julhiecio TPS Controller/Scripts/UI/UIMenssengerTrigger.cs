@@ -15,19 +15,44 @@ namespace JUTPS.Utilities
         [SerializeField] private string MessageFieldName = "MenssagesPanel";
 
         BoxCollider boxcollider;
-        public void Start()
+        private bool hasTriedToFind = false;
+        
+        private void EnsureMessagePanelFound()
         {
+            if (TextPanel != null) return;
+            if (hasTriedToFind) return;
+            
+            hasTriedToFind = true;
             TextPanel = GameObject.Find(MessageFieldName);
-            TextTarget = TextPanel.GetComponentInChildren<Text>();
+            
+            if (TextPanel != null)
+            {
+                TextTarget = TextPanel.GetComponentInChildren<Text>();
+                
+                if (TextTarget == null)
+                {
+                    Debug.LogWarning($"UIMenssengerTrigger on '{gameObject.name}': Found '{MessageFieldName}' but it has no Text component in children.");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"UIMenssengerTrigger on '{gameObject.name}': Could not find GameObject named '{MessageFieldName}'. Message system will not work.");
+            }
         }
 
         public void ShowMenssage()
         {
+            EnsureMessagePanelFound();
+            if (TextPanel == null || TextTarget == null) return;
+            
             TextPanel.SetActive(true);
             TextTarget.text = TextToShow;
         }
         public void HideMenssage()
         {
+            EnsureMessagePanelFound();
+            if (TextPanel == null || TextTarget == null) return;
+            
             TextPanel.SetActive(false);
             TextTarget.text = "";
         }

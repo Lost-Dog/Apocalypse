@@ -67,6 +67,9 @@ public class TemperatureDial : MonoBehaviour
     [Tooltip("Temperature at which dial shows cold color")]
     public float coldThreshold = 20f;
     
+    [Tooltip("Normal/optimal temperature (100%)")]
+    public float normalTemperature = 100f;
+    
     [Header("Auto-Find")]
     [Tooltip("Automatically find required components")]
     public bool autoFindComponents = true;
@@ -91,11 +94,26 @@ public class TemperatureDial : MonoBehaviour
             FindComponents();
         }
         
+        // Clear text immediately to prevent showing default value
+        if (temperatureText != null)
+        {
+            temperatureText.text = "--";
+            if (showDebugInfo)
+            {
+                Debug.Log($"[TemperatureDial] Cleared text to '--' during initialization");
+            }
+        }
+        
         ValidateComponents();
         SetupDialImage();
         
         if (survivalManager != null)
         {
+            if (showDebugInfo)
+            {
+                Debug.Log($"[TemperatureDial] Initialize - currentTemp: {survivalManager.currentTemperature}, normalTemp: {normalTemperature}, showAsPercentage: {showAsPercentage}");
+            }
+            
             // Set initial fill to current temperature
             float initialFill = CalculateFillAmount(survivalManager.currentTemperature);
             currentFillAmount = initialFill;
@@ -104,6 +122,15 @@ public class TemperatureDial : MonoBehaviour
             if (dialFillImage != null)
             {
                 dialFillImage.fillAmount = initialFill;
+            }
+            
+            // Update text display immediately to prevent showing wrong value
+            UpdateTextDisplay();
+            UpdateDialColor();
+            
+            if (showDebugInfo && temperatureText != null)
+            {
+                Debug.Log($"[TemperatureDial] After UpdateTextDisplay - text: '{temperatureText.text}'");
             }
         }
         
@@ -196,6 +223,9 @@ public class TemperatureDial : MonoBehaviour
         dialFillImage.fillMethod = Image.FillMethod.Radial360;
         dialFillImage.fillOrigin = (int)Image.Origin360.Top; // Start from top
         dialFillImage.fillClockwise = true;
+        
+        // Reset fill to 0 to prevent flash of full dial on start
+        dialFillImage.fillAmount = 0f;
     }
     
     private void Update()
@@ -229,13 +259,14 @@ public class TemperatureDial : MonoBehaviour
     
     private float CalculateFillAmount(float temperature)
     {
-        // Normalize temperature to 0-1 range
-        float normalizedTemp = temperature / survivalManager.maxTemperature;
+        // Normalize temperature to 0-1 range based on normal temperature (37°C)
+        // 0°C = 0% fill, 37°C = 100% fill
+        float normalizedTemp = temperature / normalTemperature;
         
         // Map to fill amount range
         float fillAmount = Mathf.Lerp(minFillAmount, maxFillAmount, normalizedTemp);
         
-        // Clamp to valid range
+        // Clamp to valid range (can go above 100% if temperature exceeds normal)
         return Mathf.Clamp01(fillAmount);
     }
     
@@ -262,7 +293,7 @@ public class TemperatureDial : MonoBehaviour
         else
         {
             // Normal to warm - blend between cold and warm color
-            float t = Mathf.InverseLerp(coldThreshold, survivalManager.maxTemperature, temp);
+            float t = Mathf.InverseLerp(coldThreshold, normalTemperature, temp);
             targetColor = Color.Lerp(coldColor, warmColor, t);
         }
         
@@ -278,11 +309,16 @@ public class TemperatureDial : MonoBehaviour
         
         if (showAsPercentage)
         {
-            displayValue = (survivalManager.currentTemperature / survivalManager.maxTemperature) * 100f;
+            displayValue = (survivalManager.currentTemperature / normalTemperature) * 100f;
         }
         else
         {
             displayValue = survivalManager.currentTemperature;
+        }
+        
+        if (showDebugInfo)
+        {
+            Debug.Log($"[TemperatureDial] UpdateTextDisplay - currentTemp: {survivalManager.currentTemperature}, normalTemp: {normalTemperature}, showAsPercentage: {showAsPercentage}, displayValue: {displayValue}");
         }
         
         // Format with specified decimal places

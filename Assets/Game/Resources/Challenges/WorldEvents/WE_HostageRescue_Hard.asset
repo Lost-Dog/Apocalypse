@@ -30,22 +30,76 @@ MonoBehaviour:
   requireNoDeaths: 0
   requireStealth: 1
   objectiveDescription: Complete the challenge
+  sharedSpawnPoints:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   spawnItems:
-  - itemName: Epic_High Value Target
-    prefab: {fileID: 1904471592243039028, guid: 3f26e7a614b4de14cafa5a43563d65fa,
+  - itemName: Boss
+    prefab: {fileID: 4087107557208246455, guid: 3eed6798f0ab4b14289150fc4a4c5158,
       type: 3}
-    category: 0
+    category: 8
     minCount: 1
-    maxCount: 1
+    maxCount: 2
     usePoolMode: 0
+    customSpawnPoints:
+    - {fileID: 0}
     spawnLocation: 0
-    spawnRadius: 15
+    spawnRadius: 20
     offset: {x: 0, y: 0, z: 0}
-    requireNavMesh: 0
-    randomRotation: 0
+    requireNavMesh: 1
+    randomRotation: 1
     fixedRotation: {x: 0, y: 0, z: 0}
     priority: 0
-    required: 0
+    required: 1
+  - itemName: Patrol
+    prefab: {fileID: 7363399556980340892, guid: 5ed5dd455b845cf41a7bc07197b416f4,
+      type: 3}
+    category: 8
+    minCount: 3
+    maxCount: 5
+    usePoolMode: 0
+    customSpawnPoints:
+    - {fileID: 0}
+    spawnLocation: 0
+    spawnRadius: 20
+    offset: {x: 0, y: 0, z: 0}
+    requireNavMesh: 1
+    randomRotation: 1
+    fixedRotation: {x: 0, y: 0, z: 0}
+    priority: 0
+    required: 1
+  - itemName: Elite
+    prefab: {fileID: 3089473516772616032, guid: 4a0c54d15d1cda84dac5f960c2af8a63,
+      type: 3}
+    category: 8
+    minCount: 2
+    maxCount: 3
+    usePoolMode: 0
+    customSpawnPoints:
+    - {fileID: 0}
+    spawnLocation: 0
+    spawnRadius: 20
+    offset: {x: 0, y: 0, z: 0}
+    requireNavMesh: 1
+    randomRotation: 1
+    fixedRotation: {x: 0, y: 0, z: 0}
+    priority: 0
+    required: 1
   modifiers: []
   baseXPReward: 200
   baseCurrencyReward: 100
@@ -71,6 +125,6 @@ MonoBehaviour:
   startSound: {fileID: 0}
   completeSound: {fileID: 0}
   failSound: {fileID: 0}
-  spawnVFX: {fileID: 1796635450895110, guid: 1103bc5779fcc26419c248d4fd2f8586, type: 3}
+  spawnVFX: {fileID: 1699914565062994, guid: b72bef528f099a14d8eab50350452f58, type: 3}
   spawnVFXScale: 2
   spawnVFXDuration: 0

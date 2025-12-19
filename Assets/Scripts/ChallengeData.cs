@@ -90,6 +90,9 @@ public class ChallengeData : ScriptableObject
     public string objectiveDescription = "Complete the challenge";
     
     [Header("Flexible Spawning System")]
+    [Tooltip("Shared spawn point pool - any spawnable can use any point")]
+    public Transform[] sharedSpawnPoints;
+    
     [Tooltip("Add any prefabs you want to spawn for this challenge")]
     public List<SpawnableItem> spawnItems = new List<SpawnableItem>();
     

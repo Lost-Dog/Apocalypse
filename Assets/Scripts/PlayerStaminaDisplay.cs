@@ -9,6 +9,7 @@ public class PlayerStaminaDisplay : MonoBehaviour
     public JUCharacterController playerController;
     public TextMeshProUGUI staminaText;
     public Slider staminaSlider;
+    public Image staminaDial;
     
     [Header("Stamina Settings")]
     [Range(0f, 100f)] public float currentStamina = 100f;
@@ -22,8 +23,26 @@ public class PlayerStaminaDisplay : MonoBehaviour
     public bool showPrefix = false;
     public string prefix = "Stamina: ";
     
+    [Header("Dial Settings")]
+    [Tooltip("Enable dial fill and color updates")]
+    public bool enableDial = false;
+    
+    [Tooltip("Smooth transition speed for dial")]
+    public float dialTransitionSpeed = 4f;
+    
+    [Header("Dial Colors")]
+    public Color fullStaminaColor = new Color(0f, 1f, 0.2f, 1f); // Bright green
+    public Color highStaminaColor = new Color(0.5f, 1f, 0f, 1f); // Yellow-green
+    public Color moderateStaminaColor = new Color(1f, 0.92f, 0.016f, 1f); // Yellow
+    public Color lowStaminaColor = new Color(1f, 0.5f, 0f, 1f); // Orange
+    public Color criticalStaminaColor = new Color(1f, 0f, 0f, 1f); // Red
+    
     [Header("Auto-Find")]
     public bool autoFindReferences = true;
+    
+    // Private variables for dial
+    private float currentDialFill = 1f;
+    private float targetDialFill = 1f;
     
     private void Start()
     {
@@ -61,6 +80,23 @@ public class PlayerStaminaDisplay : MonoBehaviour
         {
             staminaSlider = GetComponent<Slider>();
         }
+        
+        if (staminaDial == null && enableDial)
+        {
+            staminaDial = GetComponent<Image>();
+            
+            if (staminaDial == null)
+            {
+                staminaDial = GetComponentInChildren<Image>();
+            }
+            
+            if (staminaDial != null && staminaDial.type != Image.Type.Filled)
+            {
+                Debug.LogWarning("PlayerStaminaDisplay: Found Image but it's not set to Filled type. Setting to Radial360.");
+                staminaDial.type = Image.Type.Filled;
+                staminaDial.fillMethod = Image.FillMethod.Radial360;
+            }
+        }
     }
     
     private void InitializeSlider()
@@ -70,6 +106,14 @@ public class PlayerStaminaDisplay : MonoBehaviour
             staminaSlider.minValue = 0f;
             staminaSlider.maxValue = maxStamina;
             staminaSlider.value = currentStamina;
+        }
+        
+        if (staminaDial != null && enableDial)
+        {
+            currentDialFill = currentStamina / maxStamina;
+            targetDialFill = currentDialFill;
+            staminaDial.fillAmount = currentDialFill;
+            UpdateDialColor();
         }
     }
     
@@ -103,6 +147,11 @@ public class PlayerStaminaDisplay : MonoBehaviour
         if (staminaSlider != null)
         {
             staminaSlider.value = currentStamina;
+        }
+        
+        if (staminaDial != null && enableDial)
+        {
+            UpdateDialDisplay();
         }
     }
     
@@ -147,5 +196,61 @@ public class PlayerStaminaDisplay : MonoBehaviour
     public bool HasStamina(float amount)
     {
         return currentStamina >= amount;
+    }
+    
+    private void UpdateDialDisplay()
+    {
+        // Calculate target fill based on stamina percentage
+        targetDialFill = currentStamina / maxStamina;
+        
+        // Smooth interpolation
+        currentDialFill = Mathf.MoveTowards(currentDialFill, targetDialFill, dialTransitionSpeed * Time.deltaTime);
+        
+        // Apply fill amount
+        staminaDial.fillAmount = currentDialFill;
+        
+        // Update color
+        UpdateDialColor();
+    }
+    
+    private void UpdateDialColor()
+    {
+        if (staminaDial == null) return;
+        
+        float staminaPercent = currentDialFill * 100f;
+        Color targetColor;
+        
+        // 5-tier color system based on stamina levels
+        if (staminaPercent >= 75f)
+        {
+            // Full stamina (75-100%)
+            float t = Mathf.InverseLerp(75f, 100f, staminaPercent);
+            targetColor = Color.Lerp(highStaminaColor, fullStaminaColor, t);
+        }
+        else if (staminaPercent >= 50f)
+        {
+            // High stamina (50-75%)
+            float t = Mathf.InverseLerp(50f, 75f, staminaPercent);
+            targetColor = Color.Lerp(moderateStaminaColor, highStaminaColor, t);
+        }
+        else if (staminaPercent >= 25f)
+        {
+            // Moderate stamina (25-50%)
+            float t = Mathf.InverseLerp(25f, 50f, staminaPercent);
+            targetColor = Color.Lerp(lowStaminaColor, moderateStaminaColor, t);
+        }
+        else if (staminaPercent > 0f)
+        {
+            // Low/Critical stamina (0-25%)
+            float t = Mathf.InverseLerp(0f, 25f, staminaPercent);
+            targetColor = Color.Lerp(criticalStaminaColor, lowStaminaColor, t);
+        }
+        else
+        {
+            // Depleted
+            targetColor = criticalStaminaColor;
+        }
+        
+        staminaDial.color = targetColor;
     }
 }

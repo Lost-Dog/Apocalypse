@@ -54,6 +54,8 @@ public class CharacterSpawner : MonoBehaviour
 
     private void Awake()
     {
+        Debug.Log($"<color=yellow>[CharacterSpawner] Awake() called! GameObject active: {gameObject.activeSelf}, enabled: {enabled}</color>");
+        
         if (Instance == null)
         {
             Instance = this;
@@ -67,11 +69,14 @@ public class CharacterSpawner : MonoBehaviour
 
     private void Start()
     {
+        Debug.Log($"<color=yellow>[CharacterSpawner] Start() called! Civilian prefabs count: {civilianPrefabs.Count}, enableAutoSpawn: {enableAutoSpawn}</color>");
+        
         InitializePlayer();
         InitializePools();
         
         if (enableAutoSpawn)
         {
+            Debug.LogWarning($"<color=red>[CharacterSpawner] AUTO-SPAWNING {maxActiveCharacters / 2} INITIAL CHARACTERS!</color>");
             SpawnInitialCharacters();
         }
     }
@@ -113,6 +118,8 @@ public class CharacterSpawner : MonoBehaviour
             return;
         }
 
+        Debug.Log($"<color=orange>[CharacterSpawner] InitializePools() - Creating pools for {civilianPrefabs.Count} prefabs with initialPoolSize: {initialPoolSize}</color>");
+
         foreach (GameObject prefab in civilianPrefabs)
         {
             if (prefab == null) continue;
@@ -120,6 +127,8 @@ public class CharacterSpawner : MonoBehaviour
             Pool pool = new Pool { prefab = prefab };
             
             int poolSizePerPrefab = Mathf.CeilToInt((float)initialPoolSize / civilianPrefabs.Count);
+            
+            Debug.Log($"<color=cyan>[CharacterSpawner] Creating {poolSizePerPrefab} instances of '{prefab.name}'</color>");
             
             for (int i = 0; i < poolSizePerPrefab; i++)
             {
@@ -137,6 +146,7 @@ public class CharacterSpawner : MonoBehaviour
             }
         }
         
+        Debug.Log($"<color=green>[CharacterSpawner] Pool initialization complete! Total pools: {characterPools.Count}</color>");
         RefillAvailablePrefabs();
     }
 

@@ -22,6 +22,9 @@ public class PlayerStatusIndicators : MonoBehaviour
     public StatusIndicator healthIndicator;
     public StatusIndicator temperatureIndicator;
     public StatusIndicator infectionIndicator;
+    public StatusIndicator staminaIndicator;
+    public StatusIndicator hungerIndicator;
+    public StatusIndicator thirstIndicator;
     
     [Header("Auto-Find References")]
     public bool autoFindReferences = true;
@@ -42,6 +45,18 @@ public class PlayerStatusIndicators : MonoBehaviour
     [Header("Infection Thresholds")]
     public float infectionWarningThreshold = 50f;
     public float infectionCriticalThreshold = 75f;
+    
+    [Header("Stamina Thresholds")]
+    [Range(0f, 1f)] public float staminaWarningThreshold = 0.3f;
+    [Range(0f, 1f)] public float staminaCriticalThreshold = 0.15f;
+    
+    [Header("Hunger Thresholds")]
+    [Range(0f, 1f)] public float hungerWarningThreshold = 0.3f;
+    [Range(0f, 1f)] public float hungerCriticalThreshold = 0.15f;
+    
+    [Header("Thirst Thresholds")]
+    [Range(0f, 1f)] public float thirstWarningThreshold = 0.3f;
+    [Range(0f, 1f)] public float thirstCriticalThreshold = 0.15f;
     
     [Header("Visual Effects")]
     public bool enablePulseEffect = true;
@@ -116,6 +131,9 @@ public class PlayerStatusIndicators : MonoBehaviour
         SetIndicatorActive(healthIndicator, false);
         SetIndicatorActive(temperatureIndicator, false);
         SetIndicatorActive(infectionIndicator, false);
+        SetIndicatorActive(staminaIndicator, false);
+        SetIndicatorActive(hungerIndicator, false);
+        SetIndicatorActive(thirstIndicator, false);
     }
     
     private void Update()
@@ -123,6 +141,9 @@ public class PlayerStatusIndicators : MonoBehaviour
         UpdateHealthIndicator();
         UpdateTemperatureIndicator();
         UpdateInfectionIndicator();
+        UpdateStaminaIndicator();
+        UpdateHungerIndicator();
+        UpdateThirstIndicator();
         
         UpdatePanelVisibility();
     }
@@ -133,7 +154,10 @@ public class PlayerStatusIndicators : MonoBehaviour
         
         bool anyActive = healthIndicator.isActive || 
                         temperatureIndicator.isActive || 
-                        infectionIndicator.isActive;
+                        infectionIndicator.isActive ||
+                        staminaIndicator.isActive ||
+                        hungerIndicator.isActive ||
+                        thirstIndicator.isActive;
         
         if (anyActive && !gameObject.activeSelf)
         {
@@ -211,6 +235,75 @@ public class PlayerStatusIndicators : MonoBehaviour
         else
         {
             SetIndicatorActive(infectionIndicator, false);
+        }
+    }
+    
+    private void UpdateStaminaIndicator()
+    {
+        if (survivalManager == null || staminaIndicator.indicatorObject == null) return;
+        if (!survivalManager.enableStaminaSystem) return;
+        
+        float staminaPercentage = survivalManager.currentStamina / survivalManager.maxStamina;
+        
+        if (staminaPercentage <= staminaCriticalThreshold)
+        {
+            SetIndicatorState(staminaIndicator, true, staminaIndicator.criticalColor, criticalPulseSpeed);
+            UpdateLabel(staminaIndicator.labelText, "EXHAUSTED");
+        }
+        else if (staminaPercentage <= staminaWarningThreshold)
+        {
+            SetIndicatorState(staminaIndicator, true, staminaIndicator.warningColor, warningPulseSpeed);
+            UpdateLabel(staminaIndicator.labelText, "LOW STAMINA");
+        }
+        else
+        {
+            SetIndicatorActive(staminaIndicator, false);
+        }
+    }
+    
+    private void UpdateHungerIndicator()
+    {
+        if (survivalManager == null || hungerIndicator.indicatorObject == null) return;
+        if (!survivalManager.enableHungerSystem) return;
+        
+        float hungerPercentage = survivalManager.currentHunger / survivalManager.maxHunger;
+        
+        if (hungerPercentage <= hungerCriticalThreshold)
+        {
+            SetIndicatorState(hungerIndicator, true, hungerIndicator.criticalColor, criticalPulseSpeed);
+            UpdateLabel(hungerIndicator.labelText, "STARVING");
+        }
+        else if (hungerPercentage <= hungerWarningThreshold)
+        {
+            SetIndicatorState(hungerIndicator, true, hungerIndicator.warningColor, warningPulseSpeed);
+            UpdateLabel(hungerIndicator.labelText, "HUNGRY");
+        }
+        else
+        {
+            SetIndicatorActive(hungerIndicator, false);
+        }
+    }
+    
+    private void UpdateThirstIndicator()
+    {
+        if (survivalManager == null || thirstIndicator.indicatorObject == null) return;
+        if (!survivalManager.enableThirstSystem) return;
+        
+        float thirstPercentage = survivalManager.currentThirst / survivalManager.maxThirst;
+        
+        if (thirstPercentage <= thirstCriticalThreshold)
+        {
+            SetIndicatorState(thirstIndicator, true, thirstIndicator.criticalColor, criticalPulseSpeed);
+            UpdateLabel(thirstIndicator.labelText, "DEHYDRATED");
+        }
+        else if (thirstPercentage <= thirstWarningThreshold)
+        {
+            SetIndicatorState(thirstIndicator, true, thirstIndicator.warningColor, warningPulseSpeed);
+            UpdateLabel(thirstIndicator.labelText, "THIRSTY");
+        }
+        else
+        {
+            SetIndicatorActive(thirstIndicator, false);
         }
     }
     

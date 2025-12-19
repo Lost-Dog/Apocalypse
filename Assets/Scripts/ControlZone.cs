@@ -25,6 +25,8 @@ public class ControlZone : MonoBehaviour
     
     [Header("Management")]
     public bool spawnOnStart = false;
+    [Tooltip("If true, zone will only spawn when activated by ChallengeManager/ChallengeSpawner")]
+    public bool requiresManagerActivation = true;
     
     [Header("Status")]
     public bool isCaptured = false;
@@ -63,8 +65,18 @@ public class ControlZone : MonoBehaviour
     
     private void OnEnable()
     {
-        if (!hasSpawned && !spawnOnStart && Application.isPlaying)
+        if (!Application.isPlaying)
+            return;
+            
+        if (requiresManagerActivation)
         {
+            Debug.Log($"<color=cyan>[ControlZone] '{zoneName}' enabled - waiting for manager activation (requiresManagerActivation=true)</color>");
+            return;
+        }
+        
+        if (!hasSpawned && spawnOnStart)
+        {
+            Debug.Log($"<color=yellow>[ControlZone] '{zoneName}' spawning enemies on enable (spawnOnStart=true)</color>");
             SpawnEnemies();
         }
     }
@@ -171,6 +183,7 @@ public class ControlZone : MonoBehaviour
             if (enemySpawnPoints[i] != null)
             {
                 GameObject enemy = Instantiate(enemyPrefab, enemySpawnPoints[i].position, enemySpawnPoints[i].rotation);
+                enemy.SetActive(true);
                 
                 if (enemy != null)
                 {
@@ -221,6 +234,19 @@ public class ControlZone : MonoBehaviour
     public void LinkToChallenge(ActiveChallenge challenge)
     {
         linkedChallenge = challenge;
+    }
+    
+    public void ActivateAndSpawn()
+    {
+        if (hasSpawned)
+        {
+            Debug.LogWarning($"<color=orange>[ControlZone] '{zoneName}' already spawned, skipping...</color>");
+            return;
+        }
+        
+        Debug.Log($"<color=green>[ControlZone] '{zoneName}' activated by manager - spawning enemies!</color>");
+        gameObject.SetActive(true);
+        SpawnEnemies();
     }
 
     private void OnTriggerEnter(Collider other)

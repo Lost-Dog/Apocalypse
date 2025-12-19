@@ -59,6 +59,13 @@ public class ChallengeManager : MonoBehaviour
         }
 
         audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
+            audioSource.spatialBlend = 0f; // 2D sound for UI
+            Debug.Log("Added AudioSource to ChallengeManager for playing challenge sounds");
+        }
     }
     
     private void Start()

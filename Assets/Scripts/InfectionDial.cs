@@ -15,6 +15,9 @@ public class InfectionDial : MonoBehaviour
     [Tooltip("The Image component with Image Type = Filled (Radial)")]
     public Image dialFillImage;
     
+    [Tooltip("Optional needle/pointer transform to rotate (like a speedometer)")]
+    public Transform needleTransform;
+    
     [Tooltip("Optional text to display infection value")]
     public TMP_Text infectionText;
     
@@ -32,6 +35,22 @@ public class InfectionDial : MonoBehaviour
     
     [Tooltip("Enable smooth interpolation")]
     public bool smoothFill = true;
+    
+    [Header("Needle Rotation Settings")]
+    [Tooltip("Enable needle rotation (alternative to radial fill)")]
+    public bool enableNeedleRotation = false;
+    
+    [Tooltip("Lock fill amount at max (for speedometer-style dials where only needle rotates)")]
+    public bool lockFillAtMax = false;
+    
+    [Tooltip("Minimum rotation angle (degrees) - typically -120 for left")]
+    public float minRotationAngle = -120f;
+    
+    [Tooltip("Maximum rotation angle (degrees) - typically 120 for right")]
+    public float maxRotationAngle = 120f;
+    
+    [Tooltip("Rotation axis (usually Z for 2D UI)")]
+    public Vector3 rotationAxis = Vector3.forward;
     
     [Header("Color Settings")]
     [Tooltip("Color when infection is low/none (healthy)")]
@@ -111,6 +130,10 @@ public class InfectionDial : MonoBehaviour
             {
                 dialFillImage.fillAmount = initialFill;
             }
+            
+            // Update text display immediately to prevent showing wrong value
+            UpdateTextDisplay();
+            UpdateDialColor();
         }
         
         isInitialized = true;
@@ -172,6 +195,21 @@ public class InfectionDial : MonoBehaviour
         {
             infectionText = GetComponentInChildren<TMP_Text>();
         }
+        
+        // Find needle/pointer transform
+        if (needleTransform == null)
+        {
+            Transform needleSearch = transform.Find("Needle");
+            if (needleSearch == null) needleSearch = transform.Find("Pointer");
+            if (needleSearch == null) needleSearch = transform.Find("IMG_Dial_Indicator");
+            if (needleSearch == null) needleSearch = transform.Find("Indicator");
+            if (needleSearch == null) needleSearch = transform.Find("Arrow");
+            
+            if (needleSearch != null)
+            {
+                needleTransform = needleSearch;
+            }
+        }
     }
     
     private void ValidateComponents()
@@ -202,6 +240,9 @@ public class InfectionDial : MonoBehaviour
         dialFillImage.fillMethod = Image.FillMethod.Radial360;
         dialFillImage.fillOrigin = (int)Image.Origin360.Top; // Start from top
         dialFillImage.fillClockwise = true;
+        
+        // Reset fill to 0 to prevent flash of full dial on start
+        dialFillImage.fillAmount = 0f;
     }
     
     private void Update()
@@ -216,21 +257,53 @@ public class InfectionDial : MonoBehaviour
     
     private void UpdateDialFill()
     {
-        // Calculate target fill based on current infection
-        targetFillAmount = CalculateFillAmount(survivalManager.currentInfection);
-        
-        // Smooth interpolation or instant update
-        if (smoothFill)
+        // For speedometer-style dials with needles, lock fill at max
+        if (enableNeedleRotation && lockFillAtMax)
         {
-            currentFillAmount = Mathf.MoveTowards(currentFillAmount, targetFillAmount, fillTransitionSpeed * Time.deltaTime);
+            targetFillAmount = maxFillAmount;
+            currentFillAmount = maxFillAmount;
         }
         else
         {
-            currentFillAmount = targetFillAmount;
+            // Calculate target fill based on current infection
+            targetFillAmount = CalculateFillAmount(survivalManager.currentInfection);
+            
+            // Smooth interpolation or instant update
+            if (smoothFill)
+            {
+                currentFillAmount = Mathf.MoveTowards(currentFillAmount, targetFillAmount, fillTransitionSpeed * Time.deltaTime);
+            }
+            else
+            {
+                currentFillAmount = targetFillAmount;
+            }
         }
         
-        // Apply fill amount to dial
-        dialFillImage.fillAmount = currentFillAmount;
+        // Apply fill amount to dial image if it exists
+        if (dialFillImage != null)
+        {
+            dialFillImage.fillAmount = currentFillAmount;
+        }
+        
+        // Rotate needle if enabled and exists
+        if (enableNeedleRotation && needleTransform != null)
+        {
+            float normalizedValue = survivalManager.currentInfection / survivalManager.maxInfection;
+            float targetAngle = Mathf.Lerp(minRotationAngle, maxRotationAngle, normalizedValue);
+            Vector3 currentRotation = needleTransform.localEulerAngles;
+            
+            if (smoothFill)
+            {
+                float currentAngle = needleTransform.localEulerAngles.z;
+                if (currentAngle > 180) currentAngle -= 360;
+                float smoothAngle = Mathf.MoveTowards(currentAngle, targetAngle, fillTransitionSpeed * 60f * Time.deltaTime);
+                needleTransform.localEulerAngles = rotationAxis * smoothAngle;
+            }
+            else
+            {
+                needleTransform.localEulerAngles = rotationAxis * targetAngle;
+            }
+        }
     }
     
     private float CalculateFillAmount(float infection)

@@ -28,7 +28,7 @@ RectTransform:
   m_GameObject: {fileID: 2266767654734932839}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 7539254611048263986}
@@ -38,7 +38,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 300, y: 300}
+  m_SizeDelta: {x: 120, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!225 &5125231166083364871
 CanvasGroup:
@@ -49,8 +49,8 @@ CanvasGroup:
   m_GameObject: {fileID: 2266767654734932839}
   m_Enabled: 1
   m_Alpha: 1
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
 --- !u!114 &2517980970241824734
 MonoBehaviour:
@@ -69,8 +69,8 @@ MonoBehaviour:
     position: {x: 0, y: 0, z: 0}
     timeRemaining: 0
     isCompleted: 0
-    isDaily: 0
-    isWeekly: 0
+    isDaily: 1
+    isWeekly: 1
     currentProgress: 0
     enemiesKilled: 0
     civiliansRescued: 0
@@ -94,8 +94,8 @@ MonoBehaviour:
   iconImage: {fileID: 7254970151918625068}
   distanceText: {fileID: 4350012907310549983}
   canvasGroup: {fileID: 5125231166083364871}
-  maxVisibleDistance: 500
-  minVisibleDistance: 5
+  maxVisibleDistance: 800
+  minVisibleDistance: 10
   worldOffset: {x: 0, y: 2, z: 0}
   distanceUpdateInterval: 0.25
   fadeSpeed: 5
@@ -107,7 +107,7 @@ MonoBehaviour:
   maxScale: 2
   scaleDistance: 100
   clampToScreenEdges: 1
-  edgePadding: 50
+  edgePadding: 100
   easyColor: {r: 0, g: 1, b: 0, a: 1}
   mediumColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   hardColor: {r: 1, g: 0.5, b: 0, a: 1}

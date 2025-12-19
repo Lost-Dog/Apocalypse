@@ -85,6 +85,14 @@ public class MissionZone : MonoBehaviour
             item.randomRotation = firstPoint.useCustomSettings ? firstPoint.randomRotation : true;
             item.priority = firstPoint.useCustomSettings ? firstPoint.priority : 0;
             
+            // Populate customSpawnPoints array with transforms from this group
+            Transform[] spawnTransforms = new Transform[group.Value.Count];
+            for (int i = 0; i < group.Value.Count; i++)
+            {
+                spawnTransforms[i] = group.Value[i].transform;
+            }
+            item.customSpawnPoints = spawnTransforms;
+            
             linkedChallengeData.spawnItems.Add(item);
         }
         

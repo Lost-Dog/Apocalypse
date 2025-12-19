@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.Events;
 using JUTPS;
+using JUTPS.InventorySystem;
+using JUTPS.WeaponSystem;
+using JUTPS.ItemSystem;
 
 public class SafeZone : MonoBehaviour
 {
@@ -15,24 +18,28 @@ public class SafeZone : MonoBehaviour
     public bool cureInfection = true;
     [Tooltip("Enable temperature normalization")]
     public bool normalizeTemperature = true;
-    
-    [Header("Restoration Rates")]
-    [Tooltip("Health restored per second")]
-    public float healthRestoreRate = 10f;
-    [Tooltip("Stamina restored per second")]
-    public float staminaRestoreRate = 20f;
-    [Tooltip("Infection reduced per second")]
-    public float infectionCureRate = 5f;
-    [Tooltip("Temperature adjustment speed")]
-    public float temperatureNormalizeSpeed = 2f;
+    [Tooltip("Enable hunger restoration")]
+    public bool restoreHunger = true;
+    [Tooltip("Enable thirst restoration")]
+    public bool restoreThirst = true;
     
     [Header("Restoration Settings")]
+    [Tooltip("Duration to fully replenish all stats (in seconds)")]
+    public float replenishDuration = 5f;
+    [Tooltip("Use smooth lerp transition for stat restoration")]
+    public bool useSmoothTransition = true;
     [Tooltip("Delay before restoration starts (seconds)")]
-    public float restoreDelay = 1f;
+    public float restoreDelay = 0f;
     [Tooltip("Only restore when player is idle (not moving)")]
     public bool requireIdle = false;
     [Tooltip("Maximum distance player can move while idle")]
     public float idleMovementThreshold = 0.1f;
+    
+    [Header("Ammo & Grenades")]
+    [Tooltip("Replenish all weapon ammo to full when entering")]
+    public bool replenishAmmo = true;
+    [Tooltip("Number of grenades to add when entering")]
+    public int grenadestoAdd = 3;
     
     [Header("Visual Feedback")]
     [Tooltip("Particle effect to spawn when player enters")]
@@ -68,6 +75,7 @@ public class SafeZone : MonoBehaviour
     private JUHealth playerHealth;
     private SurvivalManager survivalManager;
     private JUCharacterController playerController;
+    private JUInventory playerInventory;
     private bool playerInZone = false;
     private float timeInZone = 0f;
     private Vector3 lastPlayerPosition;
@@ -75,6 +83,16 @@ public class SafeZone : MonoBehaviour
     private AudioSource audioSource;
     private Renderer zoneRenderer;
     private Material originalMaterial;
+    private bool hasReplenishedAmmo = false;
+    
+    // Stat restoration tracking
+    private float restorationProgress = 0f;
+    private float startHealth;
+    private float startStamina;
+    private float startTemperature;
+    private float startInfection;
+    private float startHunger;
+    private float startThirst;
     
     private void Start()
     {
@@ -169,12 +187,14 @@ public class SafeZone : MonoBehaviour
                 survivalManager = FindFirstObjectByType<SurvivalManager>();
             }
             playerController = other.GetComponent<JUCharacterController>();
+            playerInventory = other.GetComponent<JUInventory>();
             
             if (playerHealth != null)
             {
                 playerInZone = true;
                 timeInZone = 0f;
                 lastPlayerPosition = other.transform.position;
+                hasReplenishedAmmo = false;
                 
                 OnPlayerEnterZone();
             }
@@ -221,6 +241,28 @@ public class SafeZone : MonoBehaviour
         if (survivalManager != null)
         {
             survivalManager.SetInSafeZone(true);
+        }
+        
+        // Capture initial stat values for smooth restoration
+        restorationProgress = 0f;
+        if (playerHealth != null)
+        {
+            startHealth = playerHealth.Health;
+        }
+        if (survivalManager != null)
+        {
+            startStamina = survivalManager.currentStamina;
+            startTemperature = survivalManager.currentTemperature;
+            startInfection = survivalManager.currentInfection;
+            startHunger = survivalManager.currentHunger;
+            startThirst = survivalManager.currentThirst;
+        }
+        
+        // Replenish ammo and add grenades
+        if (replenishAmmo && !hasReplenishedAmmo)
+        {
+            ReplenishAmmoAndGrenades();
+            hasReplenishedAmmo = true;
         }
         
         if (enterEffect != null)
@@ -276,46 +318,180 @@ public class SafeZone : MonoBehaviour
         playerHealth = null;
         survivalManager = null;
         playerController = null;
+        playerInventory = null;
+    }
+    
+    private void ReplenishAmmoAndGrenades()
+    {
+        if (playerInventory == null)
+        {
+            Debug.LogWarning("[SafeZone] No JUInventory found on player - cannot replenish ammo");
+            return;
+        }
+        
+        int weaponsReplenished = 0;
+        int grenadesAdded = 0;
+        
+        // Replenish all weapons in right hand
+        if (playerInventory.HoldableItensRightHand != null)
+        {
+            foreach (var item in playerInventory.HoldableItensRightHand)
+            {
+                if (item is Weapon weapon)
+                {
+                    // Calculate max ammo based on magazine size
+                    int maxAmmo = weapon.BulletsPerMagazine * 10; // 10 magazines worth
+                    weapon.TotalBullets = maxAmmo;
+                    weapon.BulletsAmounts = weapon.BulletsPerMagazine; // Full magazine
+                    weaponsReplenished++;
+                    Debug.Log($"<color=cyan>[SafeZone] Replenished {weapon.ItemName}: {maxAmmo} total bullets</color>");
+                }
+                else if (item.ItemName.ToLower().Contains("grenade") || item.ItemName.ToLower().Contains("granade"))
+                {
+                    item.ItemQuantity += grenadestoAdd;
+                    grenadesAdded += grenadestoAdd;
+                }
+            }
+        }
+        
+        // Replenish all weapons in left hand
+        if (playerInventory.HoldableItensLeftHand != null)
+        {
+            foreach (var item in playerInventory.HoldableItensLeftHand)
+            {
+                if (item is Weapon weapon)
+                {
+                    int maxAmmo = weapon.BulletsPerMagazine * 10;
+                    weapon.TotalBullets = maxAmmo;
+                    weapon.BulletsAmounts = weapon.BulletsPerMagazine;
+                    weaponsReplenished++;
+                    Debug.Log($"<color=cyan>[SafeZone] Replenished {weapon.ItemName}: {maxAmmo} total bullets</color>");
+                }
+                else if (item.ItemName.ToLower().Contains("grenade") || item.ItemName.ToLower().Contains("granade"))
+                {
+                    item.ItemQuantity += grenadestoAdd;
+                    grenadesAdded += grenadestoAdd;
+                }
+            }
+        }
+        
+        // Also check all items (for grenades that might be stored differently)
+        if (playerInventory.AllItems != null)
+        {
+            foreach (var item in playerInventory.AllItems)
+            {
+                if (item.ItemName.ToLower().Contains("grenade") || item.ItemName.ToLower().Contains("granade"))
+                {
+                    if (item is ThrowableItem)
+                    {
+                        // Check if we haven't already added to this item
+                        bool alreadyProcessed = false;
+                        if (playerInventory.HoldableItensRightHand != null)
+                        {
+                            foreach (var handItem in playerInventory.HoldableItensRightHand)
+                            {
+                                if (handItem == item)
+                                {
+                                    alreadyProcessed = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!alreadyProcessed && playerInventory.HoldableItensLeftHand != null)
+                        {
+                            foreach (var handItem in playerInventory.HoldableItensLeftHand)
+                            {
+                                if (handItem == item)
+                                {
+                                    alreadyProcessed = true;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        if (!alreadyProcessed)
+                        {
+                            item.ItemQuantity += grenadestoAdd;
+                            grenadesAdded += grenadestoAdd;
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (weaponsReplenished > 0 || grenadesAdded > 0)
+        {
+            Debug.Log($"<color=green>[SafeZone] Replenished {weaponsReplenished} weapon(s) and added {grenadesAdded} grenade(s)</color>");
+        }
     }
     
     private void RestorePlayerStats()
     {
         if (playerHealth == null) return;
         
+        // Increment restoration progress
+        restorationProgress += Time.deltaTime / replenishDuration;
+        restorationProgress = Mathf.Clamp01(restorationProgress);
+        
         bool isRestoring = false;
         
+        // Calculate smooth lerp value
+        float t = useSmoothTransition ? Mathf.SmoothStep(0f, 1f, restorationProgress) : restorationProgress;
+        
+        // Restore Health
         if (restoreHealth && playerHealth.Health < playerHealth.MaxHealth)
         {
-            playerHealth.Health += healthRestoreRate * Time.deltaTime;
-            playerHealth.Health = Mathf.Min(playerHealth.Health, playerHealth.MaxHealth);
+            float targetHealth = playerHealth.MaxHealth;
+            playerHealth.Health = Mathf.Lerp(startHealth, targetHealth, t);
             isRestoring = true;
         }
         
         if (survivalManager != null)
         {
+            // Restore Stamina
             if (restoreStamina && survivalManager.currentStamina < survivalManager.maxStamina)
             {
-                survivalManager.ModifyStamina(staminaRestoreRate * Time.deltaTime);
+                float targetStamina = survivalManager.maxStamina;
+                survivalManager.currentStamina = Mathf.Lerp(startStamina, targetStamina, t);
                 isRestoring = true;
             }
             
+            // Cure Infection (reduce to 0)
             if (cureInfection && survivalManager.currentInfection > 0f)
             {
-                survivalManager.CureInfection(infectionCureRate * Time.deltaTime);
+                survivalManager.currentInfection = Mathf.Lerp(startInfection, 0f, t);
                 isRestoring = true;
             }
             
+            // NOTE: Temperature normalization disabled - SurvivalManager.UpdateTemperature() already handles this
+            // Having both active causes oscillation between 36.9-37°C
+            /*
+            // Normalize Temperature
             if (normalizeTemperature && Mathf.Abs(survivalManager.currentTemperature - survivalManager.normalTemperature) > 0.1f)
             {
-                survivalManager.currentTemperature = Mathf.Lerp(
-                    survivalManager.currentTemperature,
-                    survivalManager.normalTemperature,
-                    temperatureNormalizeSpeed * Time.deltaTime
-                );
+                survivalManager.currentTemperature = Mathf.Lerp(startTemperature, survivalManager.normalTemperature, t);
+                isRestoring = true;
+            }
+            */
+            
+            // Restore Hunger
+            if (restoreHunger && survivalManager.currentHunger < survivalManager.maxHunger)
+            {
+                float targetHunger = survivalManager.maxHunger;
+                survivalManager.currentHunger = Mathf.Lerp(startHunger, targetHunger, t);
+                isRestoring = true;
+            }
+            
+            // Restore Thirst
+            if (restoreThirst && survivalManager.currentThirst < survivalManager.maxThirst)
+            {
+                float targetThirst = survivalManager.maxThirst;
+                survivalManager.currentThirst = Mathf.Lerp(startThirst, targetThirst, t);
                 isRestoring = true;
             }
         }
         
+        // Start or continue healing effects
         if (isRestoring)
         {
             if (activeHealingEffect == null && healingEffect != null)
@@ -325,6 +501,7 @@ public class SafeZone : MonoBehaviour
         }
         else
         {
+            // All stats fully restored
             if (activeHealingEffect != null)
             {
                 StopHealing();

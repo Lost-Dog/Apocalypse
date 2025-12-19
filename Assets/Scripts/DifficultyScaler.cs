@@ -75,6 +75,11 @@ public class DifficultyScaler : MonoBehaviour
     {
         hasAppliedScaling = false;
         
+        if (health == null)
+        {
+            health = GetComponent<JUHealth>();
+        }
+        
         if (autoScaleToPlayerLevel)
         {
             ApplyScaling(GetEffectiveLevel());
@@ -118,6 +123,11 @@ public class DifficultyScaler : MonoBehaviour
     
     private void ApplyStatsToCharacter()
     {
+        if (health == null)
+        {
+            health = GetComponent<JUHealth>();
+        }
+        
         if (health != null)
         {
             health.MaxHealth = scaledHealth;
@@ -131,7 +141,10 @@ public class DifficultyScaler : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"{gameObject.name}: DifficultyScaler could not find JUHealth component!");
+            if (showDebugLogs)
+            {
+                Debug.LogWarning($"{gameObject.name}: DifficultyScaler could not find JUHealth component!");
+            }
         }
     }
     

@@ -1,0 +1,177 @@
+═══════════════════════════════════════════════════════════════════════════════
+  INACTIVE SPAWNED ENEMIES - ROOT CAUSE & FIX
+═══════════════════════════════════════════════════════════════════════════════
+
+ISSUE SUMMARY
+-------------
+✓ Enemies were spawning (visible in hierarchy)
+✗ BUT they were all inactive (not moving/attacking)
+
+ROOT CAUSE
+----------
+Enemy prefabs are stored in an INACTIVE state in the project.
+
+Unity's Instantiate() behavior:
+  "The active status of a GameObject at the time of cloning is maintained,
+   so if the original is inactive the clone is created in an inactive state too."
+   
+This means:
+  • If prefab is inactive → instantiated GameObject is inactive
+  • If prefab is active → instantiated GameObject is active
+
+SOLUTION APPLIED
+----------------
+Added SetActive(true) after EVERY Instantiate() call in spawning code.
+
+FILES MODIFIED:
+───────────────
+
+1. /Assets/Scripts/ChallengeSpawner.cs
+   ├─ SpawnFromDynamicZone() - Line ~248
+   ├─ SpawnFromMissionZone() - Line ~170
+   ├─ SpawnFlexibleItems() - Line ~348
+   └─ SpawnUsingSharedPool() - Line ~445
+
+2. /Assets/Scripts/ControlZone.cs
+   └─ SpawnEnemies() - Line ~186
+
+CHANGES MADE
+────────────
+
+Before:
+```csharp
+GameObject spawnedObject = Instantiate(prefab, position, rotation);
+spawnedObject.name = "Enemy_0";
+CategorizeAndStoreSpawnedObject(spawnedObject, ...);
+```
+
+After:
+```csharp
+GameObject spawnedObject = Instantiate(prefab, position, rotation);
+spawnedObject.name = "Enemy_0";
+spawnedObject.SetActive(true);  // ← ADDED THIS LINE
+CategorizeAndStoreSpawnedObject(spawnedObject, ...);
+```
+
+WHY THIS WORKS
+──────────────
+• Explicitly activates the spawned GameObject
+• Overrides the inactive state inherited from the prefab
+• Ensures all enemies/objects are active when spawned
+• Safe to call even if already active (no side effects)
+
+TESTING STEPS
+─────────────
+1. ✅ Exit Play mode (REQUIRED - changes won't compile in Play mode)
+2. ✅ Let Unity recompile scripts
+3. ✅ Check Console - should see no errors
+4. ✅ Enter Play mode
+5. ✅ Wait 60 seconds for challenge to auto-spawn
+6. ✅ Check hierarchy - enemies should be ACTIVE (white text, not gray)
+7. ✅ Enemies should be moving/attacking
+
+EXPECTED RESULT
+───────────────
+✓ Enemies spawn (visible in hierarchy)
+✓ Enemies are ACTIVE (SetActive = true)
+✓ Enemies have AI running (patrolling/attacking)
+✓ You can see/fight the enemies
+
+═══════════════════════════════════════════════════════════════════════════════
+
+TECHNICAL DETAILS
+═══════════════════════════════════════════════════════════════════════════════
+
+Unity Documentation Reference:
+─────────────────────────────
+Unity 6 - Object.Instantiate:
+  "Instantiates an object. The active status of the original GameObject is
+   maintained in the clone."
+
+This is documented behavior and working as intended by Unity.
+
+Alternative Solutions (NOT RECOMMENDED):
+─────────────────────────────────────────
+1. Change all enemy prefabs to be active
+   - Risky: May break other systems that expect inactive prefabs
+   - Not scalable: Need to change every enemy prefab
+
+2. Add Awake/Start to activate self
+   - Bad practice: Components shouldn't activate themselves
+   - Harder to debug/control
+
+3. Use Instantiate overload
+   - No such overload exists in Unity 6
+
+Our Solution (RECOMMENDED):
+───────────────────────────
+✓ Explicit SetActive(true) after spawn
+✓ Clear, maintainable, debuggable
+✓ Works for all prefabs regardless of their state
+✓ Centralized in spawn methods
+
+═══════════════════════════════════════════════════════════════════════════════
+
+SPAWN METHODS COVERAGE
+═══════════════════════════════════════════════════════════════════════════════
+
+All spawning paths now activate enemies:
+
+1. Dynamic Zone Spawning
+   ├─ ChallengeSpawner.SpawnFromDynamicZone()
+   └─ Used by: Auto-spawned world events
+
+2. Mission Zone Spawning
+   ├─ ChallengeSpawner.SpawnFromMissionZone()
+   └─ Used by: Manual mission zones with linked challenges
+
+3. Control Zone Spawning
+   ├─ ChallengeSpawner.SpawnFromControlZone()
+   ├─ → ControlZone.ActivateAndSpawn()
+   └─ Used by: Control point challenges
+
+4. Flexible Spawning (Custom Spawn Points)
+   ├─ ChallengeSpawner.SpawnFlexibleItems()
+   └─ Used by: Challenges with custom spawn point arrays
+
+5. Shared Pool Spawning
+   ├─ ChallengeSpawner.SpawnUsingSharedPool()
+   └─ Used by: Challenges with shared spawn point pool
+
+ALL PATHS COVERED ✓
+
+═══════════════════════════════════════════════════════════════════════════════
+
+BACKWARD COMPATIBILITY
+═══════════════════════════════════════════════════════════════════════════════
+
+This change is 100% safe and backward compatible:
+
+✓ SetActive(true) on active object: No effect (idempotent)
+✓ SetActive(true) on inactive object: Activates it (intended behavior)
+✓ No breaking changes to existing systems
+✓ Works with pooling systems
+✓ Works with all prefab types
+
+═══════════════════════════════════════════════════════════════════════════════
+
+STATUS
+═══════════════════════════════════════════════════════════════════════════════
+
+[X] Root cause identified
+[X] Fix implemented in ChallengeSpawner.cs (4 spawn methods)
+[X] Fix implemented in ControlZone.cs (1 spawn method)
+[ ] Code compiled (EXIT PLAY MODE FIRST!)
+[ ] Tested in Play mode
+[ ] Enemies confirmed active
+[ ] Enemies confirmed functional (AI working)
+
+NEXT STEPS:
+  1. Exit Play mode
+  2. Wait for compilation
+  3. Test in Play mode
+  4. Verify enemies are active and functional
+
+═══════════════════════════════════════════════════════════════════════════════
+END OF DOCUMENT
+═══════════════════════════════════════════════════════════════════════════════

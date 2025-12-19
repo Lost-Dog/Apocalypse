@@ -31,20 +31,36 @@ MonoBehaviour:
   requireStealth: 0
   objectiveDescription: Complete the challenge
   spawnItems:
-  - itemName: 
-    prefab: {fileID: 1082915869594634, guid: 1099c32bb8860d34e9d77177fdc8ddf6, type: 3}
+  - itemName: Enemy Threats
+    prefab: {fileID: 3089473516772616032, guid: 4a0c54d15d1cda84dac5f960c2af8a63,
+      type: 3}
     category: 0
-    minCount: 0
-    maxCount: 0
+    minCount: 15
+    maxCount: 25
     usePoolMode: 0
-    spawnLocation: 0
-    spawnRadius: 15
+    spawnLocation: 1
+    spawnRadius: 25
+    offset: {x: 0, y: 0, z: 0}
+    requireNavMesh: 1
+    randomRotation: 1
+    fixedRotation: {x: 0, y: 0, z: 0}
+    priority: 5
+    required: 1
+  - itemName: Civilians to Rescue
+    prefab: {fileID: 4420673318631931856, guid: c040e5b3bf715b746a29433408162a9a,
+      type: 3}
+    category: 2
+    minCount: 50
+    maxCount: 50
+    usePoolMode: 0
+    spawnLocation: 3
+    spawnRadius: 20
     offset: {x: 0, y: 0, z: 0}
     requireNavMesh: 0
-    randomRotation: 0
+    randomRotation: 1
     fixedRotation: {x: 0, y: 0, z: 0}
-    priority: 0
-    required: 0
+    priority: 10
+    required: 1
   modifiers: []
   baseXPReward: 200
   baseCurrencyReward: 100

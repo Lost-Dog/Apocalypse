@@ -20,8 +20,12 @@ public class ConsumableItem : LootItemData
     [Tooltip("Temperature change when consumed")]
     public float temperatureChange = 0f;
     
-    [Tooltip("Infection change when consumed")]
+    [Tooltip("Infection change when consumed (use negative for cure)")]
     public float infectionChange = 0f;
+    
+    [Tooltip("Percentage of infection to cure (0-100). Pauses infection growth at cured level.")]
+    [Range(0f, 100f)]
+    public float infectionCurePercentage = 0f;
     
     [Tooltip("XP granted when consumed")]
     public int xpGrant = 0;
@@ -106,7 +110,20 @@ public class ConsumableItem : LootItemData
             
             if (infectionChange != 0f)
             {
-                SurvivalManager.Instance.AddInfection(infectionChange);
+                if (infectionChange < 0f)
+                {
+                    SurvivalManager.Instance.CureInfection(-infectionChange);
+                }
+                else
+                {
+                    SurvivalManager.Instance.AddInfection(infectionChange);
+                }
+            }
+            
+            // Apply partial infection cure (pauses growth)
+            if (infectionCurePercentage > 0f)
+            {
+                SurvivalManager.Instance.CureInfectionPartial(infectionCurePercentage);
             }
         }
         

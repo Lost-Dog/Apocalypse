@@ -12,7 +12,7 @@ public class ChallengeCompletionNotifier : MonoBehaviour
     [SerializeField] private Image backgroundImage;
     
     [Header("Display Settings")]
-    [SerializeField] private float displayDuration = 3f;
+    [SerializeField] private float displayDuration = 4f;
     [SerializeField] private float fadeInDuration = 0.3f;
     [SerializeField] private float fadeOutDuration = 0.3f;
     
@@ -140,10 +140,10 @@ public class ChallengeCompletionNotifier : MonoBehaviour
     
     private void OnChallengeExpired(ActiveChallenge challenge)
     {
-        string title = "MISSION EXPIRED";
+        string title = "CHALLENGE FAILED";
         string description = challenge.challengeData.challengeName + "\nTime limit exceeded";
         
-        ShowNotification(title, description, expiredColor);
+        ShowNotification(title, description, failedColor);
     }
     
     private void OnChallengeFailed(ActiveChallenge challenge)
