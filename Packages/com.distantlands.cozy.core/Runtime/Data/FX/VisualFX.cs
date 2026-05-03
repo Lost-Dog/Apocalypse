@@ -55,8 +55,8 @@ namespace DistantLands.Cozy.Data
             if (_volume == null)
             {
 #if COZY_URP 
-                if (weather.GetFXRuntimeRef<Volume>(name))
-                    _volume = weather.GetFXRuntimeRef<Volume>(name);
+                if (weatherSphere.GetFXRuntimeRef<Volume>(name))
+                    _volume = weatherSphere.GetFXRuntimeRef<Volume>(name);
 #elif UNITY_POST_PROCESSING_STACK_V2
                 _volume = weather.GetFXRuntimeRef<PostProcessVolume>(name);
 #endif
@@ -69,7 +69,7 @@ namespace DistantLands.Cozy.Data
                 _volume = new GameObject().AddComponent<PostProcessVolume>();
 #endif
                 _volume.gameObject.name = name;
-                _volume.transform.parent = weather.visualFXParent;
+                _volume.transform.parent = weatherSphere.visualFXParent;
                 _volume.transform.position = Vector3.zero;
                 _volume.transform.rotation = Quaternion.identity;
                 _volume.profile = effectSettings;

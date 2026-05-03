@@ -96,15 +96,17 @@ namespace DistantLands.Cozy
                     {
                         float dec = sat.declination * Mathf.Sin(Mathf.PI * 2 * (((weatherSphere.modifiedDayPercentage - 0.5f) + (float)(weatherSphere.timeModule.currentDay + sat.rotationPeriodOffset + weatherSphere.timeModule.DaysPerYear * weatherSphere.timeModule.currentYear) % sat.declinationPeriod) / sat.declinationPeriod));
                         sat.orbitRef.localEulerAngles = new Vector3(0, weatherSphere.sunDirection + sat.satelliteDirection, weatherSphere.sunPitch + sat.satellitePitch + dec);
-                        sat.satelliteRotation = (weatherSphere.modifiedDayPercentage - 0.5f + (float)(sat.rotationPeriodOffset + weatherSphere.timeModule.AbsoluteDay) % sat.rotationPeriod) / sat.rotationPeriod * 360;
-                        sat.orbitRef.GetChild(0).localEulerAngles = Vector3.right * ((360 * weatherSphere.modifiedDayPercentage) + sat.satelliteRotation + sat.orbitOffset - 90);
+                        sat.satelliteRotation = ((360 * weatherSphere.modifiedDayPercentage) + sat.orbitOffset - 90) + (weatherSphere.modifiedDayPercentage - 0.5f + (float)(sat.rotationPeriodOffset + weatherSphere.timeModule.AbsoluteDay) % sat.rotationPeriod) / sat.rotationPeriod * 360;
+                        sat.orbitRef.GetChild(0).localEulerAngles = Vector3.right * sat.satelliteRotation;
                     }
                     else
                     {
                         sat.orbitRef.localEulerAngles = new Vector3(0, weatherSphere.sunDirection + sat.satelliteDirection, weatherSphere.sunPitch + sat.satellitePitch);
-                        sat.orbitRef.GetChild(0).localEulerAngles = Vector3.right * ((360 * weatherSphere.dayPercentage) + sat.orbitOffset);
-                        sat.satelliteRotation += Time.deltaTime * sat.satelliteRotateSpeed;
-                        sat.moonRef.localEulerAngles = sat.initialRotation + sat.satelliteRotateAxis.normalized * sat.satelliteRotation;
+                        // sat.orbitRef.GetChild(0).localEulerAngles = Vector3.right * ((360 * weatherSphere.dayPercentage) + sat.orbitOffset - 90);
+                        sat.satelliteRotation =  ((360 * weatherSphere.modifiedDayPercentage) + sat.orbitOffset - 90);
+                        sat.orbitRef.GetChild(0).localEulerAngles = Vector3.right * sat.satelliteRotation;
+
+                        sat.moonRef.localEulerAngles = sat.initialRotation + sat.satelliteRotateAxis.normalized * Time.timeSinceLevelLoad * sat.satelliteRotateSpeed;
                     }
                 }
 

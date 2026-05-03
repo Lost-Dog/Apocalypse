@@ -2,6 +2,9 @@ using UnityEngine;
 using UnityEditor;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
+#if ZEPHYR
+using DistantLands.Zephyr;
+#endif
 
 namespace DistantLands.Cozy.EditorScripts
 {
@@ -49,7 +52,13 @@ namespace DistantLands.Cozy.EditorScripts
             else
                 compassDirection = windDirInCardinalDirection.z > 0 ? "E" : "W";
 
-            status.text = $"Wind: {Mathf.Round(windModule.WindSpeedInKnots * 10f) / 10f} {compassDirection}";
+            string statusString = $"Wind: {Mathf.Round(windModule.WindSpeedInKnots * 10f) / 10f} {compassDirection}";
+
+            #if ZEPHYR
+            statusString += "\nZephyr Enabled";
+            #endif
+            
+            status.text = statusString;
 
             VisualElement lowerContainer = widget.Q<VisualElement>("lower-container");
             lowerContainer.Add(Weathervane());
@@ -150,6 +159,14 @@ namespace DistantLands.Cozy.EditorScripts
             PropertyField windZone = new PropertyField();
             windZone.BindProperty(serializedObject.FindProperty("windZone"));
             SelectionContainer.Add(windZone);
+
+
+#if ZEPHYR
+            if (ZephyrWind.Instance){
+                HelpBox zephyrInfo = new HelpBox("Zephyr found in the scene! Wind settings will be managed by COZY automatically through this module.", HelpBoxMessageType.Info);
+                SelectionContainer.Add(zephyrInfo);
+            }
+#endif
 
             PropertyField windMultiplier = new PropertyField();
             windMultiplier.BindProperty(serializedObject.FindProperty("windMultiplier"));

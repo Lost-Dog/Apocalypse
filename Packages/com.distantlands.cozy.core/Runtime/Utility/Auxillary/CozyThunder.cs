@@ -3,7 +3,8 @@
 
 
 using UnityEngine;
-#if UNITY_EDITOR 
+
+#if UNITY_EDITOR
 using UnityEditor;
 #endif
 
@@ -29,6 +30,28 @@ namespace DistantLands.Cozy
         private float m_WakeAmount;
         private float m_ThunderDelay;
 
+        private delegate void OnStopThunder();
+        private static OnStopThunder onStopThunder;
+        public static void StopThunder()
+        {
+            onStopThunder.Invoke();
+        }
+
+        // Destroys the thunder when the stopThunder delegate runs
+        void DestroyThunder()
+        {
+            Destroy(gameObject);
+        }
+
+        //Add listeners
+        void OnEnable()
+        {
+            onStopThunder += DestroyThunder;
+        }
+        void OnDisable()
+        {
+            onStopThunder -= DestroyThunder;
+        }
 
 
         // Start is called before the first frame update

@@ -52,20 +52,20 @@ namespace DistantLands.Cozy.EditorScripts
             asset.CloneTree(root);
 
             switch (forecastProfile.startWeatherWith)
-                {
-                    case ForecastProfile.StartWeatherWith.InitialForecast:
-                        InitialForecast.style.display = DisplayStyle.Flex;
-                        InitialWeather.style.display = DisplayStyle.None;
-                        break;  
-                    case ForecastProfile.StartWeatherWith.InitialProfile:
-                        InitialForecast.style.display = DisplayStyle.None;
-                        InitialWeather.style.display = DisplayStyle.Flex;
-                        break;  
-                    case ForecastProfile.StartWeatherWith.Random:
-                        InitialForecast.style.display = DisplayStyle.None;
-                        InitialWeather.style.display = DisplayStyle.None;
-                        break;  
-                }
+            {
+                case ForecastProfile.StartWeatherWith.InitialForecast:
+                    InitialForecast.style.display = DisplayStyle.Flex;
+                    InitialWeather.style.display = DisplayStyle.None;
+                    break;
+                case ForecastProfile.StartWeatherWith.InitialProfile:
+                    InitialForecast.style.display = DisplayStyle.None;
+                    InitialWeather.style.display = DisplayStyle.Flex;
+                    break;
+                case ForecastProfile.StartWeatherWith.Random:
+                    InitialForecast.style.display = DisplayStyle.None;
+                    InitialWeather.style.display = DisplayStyle.None;
+                    break;
+            }
 
             StartWith.RegisterCallback((ChangeEvent<string> evt) =>
             {
@@ -74,15 +74,15 @@ namespace DistantLands.Cozy.EditorScripts
                     case "initialForecast":
                         InitialForecast.style.display = DisplayStyle.Flex;
                         InitialWeather.style.display = DisplayStyle.None;
-                        break;  
+                        break;
                     case "initialProfile":
                         InitialForecast.style.display = DisplayStyle.None;
                         InitialWeather.style.display = DisplayStyle.Flex;
-                        break;  
+                        break;
                     case "random":
                         InitialForecast.style.display = DisplayStyle.None;
                         InitialWeather.style.display = DisplayStyle.None;
-                        break;  
+                        break;
                 }
             });
 
@@ -102,7 +102,7 @@ namespace DistantLands.Cozy.EditorScripts
 
             ChanceEffector.LimitType limitType = (ChanceEffector.LimitType)ChancesByVariableLimit.value;
             List<WeatherProfile> adjustedProfiles = forecastProfile.profilesToForecast
-                                                        .Where(x => x.chance.HasLimit(limitType))
+                                                        .Where(x => x != null && x.chance.HasLimit(limitType))
                                                         .ToList();
 
 
@@ -115,7 +115,7 @@ namespace DistantLands.Cozy.EditorScripts
                 container.AddToClassList("swatch");
                 container.RegisterCallback<ClickEvent>((ClickEvent evt) =>
                 {
-                    Selection.activeObject = forecastProfile.profilesToForecast.First(x => x == profile);
+                    Selection.activeObject = forecastProfile.profilesToForecast.First(x => x != null && x == profile);
                 });
 
 

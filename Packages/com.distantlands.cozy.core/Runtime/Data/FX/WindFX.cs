@@ -50,7 +50,7 @@ namespace DistantLands.Cozy.Data
         public override bool InitializeEffect(CozyWeather weather)
         {
 
-            weatherSphere = weather ? weather : CozyWeather.instance;
+            base.InitializeEffect(weather);
 
             if (!weatherSphere.windModule)
                 return false;

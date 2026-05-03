@@ -49,19 +49,19 @@ namespace DistantLands.Cozy.Data
 
             if (runtimeRef == null)
             {
-                if (weather.GetFXRuntimeRef<CozyThunderManager>(name))
+                if (weatherSphere.GetFXRuntimeRef<CozyThunderManager>(name))
                 {
-                    runtimeRef = weather.GetFXRuntimeRef<CozyThunderManager>(name);
+                    runtimeRef = weatherSphere.GetFXRuntimeRef<CozyThunderManager>(name);
                     return true;
                 }
 
                 runtimeRef = new GameObject().AddComponent<CozyThunderManager>();
 
                 runtimeRef.gameObject.name = name;
-                runtimeRef.transform.parent = weather.thunderFXParent;
+                runtimeRef.transform.parent = weatherSphere.thunderFXParent;
                 runtimeRef.transform.localPosition = Vector3.zero;
                 runtimeRef.transform.localRotation = Quaternion.identity;
-                runtimeRef.weatherSphere = weather;
+                runtimeRef.weatherSphere = weatherSphere;
                 runtimeRef.thunderFX = this;
 
             }

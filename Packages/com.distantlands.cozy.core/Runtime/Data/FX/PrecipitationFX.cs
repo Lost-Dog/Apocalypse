@@ -40,13 +40,13 @@ namespace DistantLands.Cozy.Data
 
             climateModule.snowSpeed += snowAccumulationSpeed * Mathf.Clamp01(transitionTimeModifier.Evaluate(i)) * (climateModule.snowAmount < maximumSnowAmount ? 1 : 0);
             climateModule.rainSpeed += rainAccumulationSpeed * Mathf.Clamp01(transitionTimeModifier.Evaluate(i)) * (climateModule.groundwaterAmount < maximumRainAmount ? 1 : 0);
-            
+
         }
 
         public override bool InitializeEffect(CozyWeather weather)
         {
 
-            weatherSphere = weather ? weather : CozyWeather.instance;
+            base.InitializeEffect(weather);
 
             if (!weatherSphere.climateModule)
                 return false;

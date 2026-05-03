@@ -127,7 +127,7 @@ namespace DistantLands.Cozy.EditorScripts
         {
             if (satelliteModule.satellites.Length == 0)
                 return;
-                
+
             OrbitGraphKey.Clear();
 
             VisualElement infoHolder = new VisualElement();
@@ -214,13 +214,14 @@ namespace DistantLands.Cozy.EditorScripts
                     SatelliteProfile sat = satelliteModule.satellites[i];
 
                     painter.strokeColor = OrbitColors.Evaluate((float)i / satelliteModule.satellites.Length);
-                    float satAngle = 90 + ((360 * satelliteModule.weatherSphere.modifiedDayPercentage) + sat.satelliteRotation + sat.orbitOffset);
+                    float satAngle = 180 + sat.satelliteRotation;
+
                     float satRadius = height * 0.45f - ((i + 1) * 15);
 
                     painter.BeginPath();
                     painter.Arc(new Vector2(width / 2, height / 2), satRadius,
-                                satAngle + 7,
-                                satAngle + 353,
+                                Mathf.Repeat(satAngle + 7, 360),
+                                Mathf.Repeat(satAngle + 353, 360),
                                 ArcDirection.Clockwise);
                     painter.Stroke();
 

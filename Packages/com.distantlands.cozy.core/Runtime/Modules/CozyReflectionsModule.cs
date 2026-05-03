@@ -55,7 +55,7 @@ namespace DistantLands.Cozy
 
             if (updateFrequency == UpdateFrequency.onAwake || updateFrequency == UpdateFrequency.onHour)
             {
-                RenderReflections();
+                StartCoroutine(RenderReflections());
             }
             if (updateFrequency == UpdateFrequency.onHour)
             {
@@ -88,8 +88,7 @@ namespace DistantLands.Cozy
             {
                 if (framesLeft < 0)
                 {
-
-                    RenderReflections();
+                    StartCoroutine(RenderReflections());
                     framesLeft = framesBetweenRenders + 6;
 
                 }
@@ -113,7 +112,7 @@ namespace DistantLands.Cozy
         protected void RefreshReflectionsOnSceneChange()
         {
             if (refreshOnSceneChange)
-                RenderReflections();
+                StartCoroutine(RenderReflections());
         }
 
         public int ToLayer(LayerMask mask)

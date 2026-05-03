@@ -54,14 +54,14 @@ namespace DistantLands.Cozy.Data
 
             if (runtimeRef == null)
             {
-                runtimeRef = weather.GetFXRuntimeRef<AudioSource>(name);
+                runtimeRef = weatherSphere.GetFXRuntimeRef<AudioSource>(name);
                 if (runtimeRef)
                     return true;
 
                 runtimeRef = new GameObject().AddComponent<AudioSource>();
 
                 runtimeRef.gameObject.name = name;
-                runtimeRef.transform.parent = weather.audioFXParent;
+                runtimeRef.transform.parent = weatherSphere.audioFXParent;
                 runtimeRef.transform.localPosition = Vector3.zero;
                 runtimeRef.transform.localRotation = Quaternion.identity;
                 runtimeRef.clip = clip;

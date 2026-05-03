@@ -198,6 +198,7 @@ namespace DistantLands.Cozy.EditorScripts
 
         public void UpdateWheel()
         {
+            if (DistributionMap == null || DistributionMapKey == null) return;
 
             DistributionMap.Clear();
             DistributionMapKey.Clear();

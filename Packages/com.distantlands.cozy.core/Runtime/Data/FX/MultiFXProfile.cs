@@ -46,12 +46,11 @@ namespace DistantLands.Cozy.Data
 
         public override bool InitializeEffect(CozyWeather weather)
         {
-            if (weather == null)
-                weather = CozyWeather.instance;
+            base.InitializeEffect(weather);
 
             foreach (MultiFXType i in multiFX)
             {
-                i.FX.InitializeEffect(weather);
+                i.FX.InitializeEffect(weatherSphere);
             }
 
             return true;

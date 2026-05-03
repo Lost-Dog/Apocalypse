@@ -849,7 +849,7 @@ namespace DistantLands.Cozy.EditorScripts
 
             Vector3 sunDir = weatherSphere.sunTransform.forward;
             Vector3 sunNormal = weatherSphere.sunTransform.right;
-            Vector3 north = Vector3.Cross(weatherSphere.sunTransform.parent.forward, Vector3.up);
+            Vector3 north = -Vector3.Cross(weatherSphere.sunTransform.parent.forward, Vector3.up);
             Vector3 west = weatherSphere.sunTransform.parent.forward;
             Vector3 pos = weatherSphere.transform.position;
             GUIStyle textStyleSec = new GUIStyle();

@@ -50,20 +50,20 @@ namespace DistantLands.Cozy.Data
 
             if (runtimeRef == null)
             {
-                runtimeRef = weather.GetFXRuntimeRef<CozyParticles>(name);
+                runtimeRef = weatherSphere.GetFXRuntimeRef<CozyParticles>(name);
                 if (runtimeRef)
                     return true;
 
                 runtimeRef = Instantiate(particleSystem).GetComponent<CozyParticles>();
 
                 runtimeRef.gameObject.name = name;
-                runtimeRef.transform.parent = weather.particleFXParent;
+                runtimeRef.transform.parent = weatherSphere.particleFXParent;
                 runtimeRef.transform.localPosition = Vector3.zero;
                 runtimeRef.transform.localRotation = Quaternion.identity;
 
                 runtimeRef.SetupTriggers();
                 if (autoScale)
-                    runtimeRef.transform.localScale *= weather.transform.GetChild(0).localScale.x;
+                    runtimeRef.transform.localScale *= weatherSphere.transform.GetChild(0).localScale.x;
             }
 
             return true;

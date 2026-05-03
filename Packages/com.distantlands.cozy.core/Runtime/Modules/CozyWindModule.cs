@@ -42,6 +42,9 @@ namespace DistantLands.Cozy
             set { m_WindDirection = value; }
         }
 
+#if ZEPHYR
+        public DistantLands.Zephyr.ZephyrWind zephyrWind;
+#endif
 
 
         void Start()
@@ -53,6 +56,11 @@ namespace DistantLands.Cozy
 
             m_WindTime = 0;
             m_Seed = Random.value * 1000;
+
+
+#if ZEPHYR
+        zephyrWind = DistantLands.Zephyr.ZephyrWind.Instance;
+#endif
 
 
         }
@@ -92,6 +100,13 @@ namespace DistantLands.Cozy
                 Shader.SetGlobalFloat("CZY_WindTime", m_WindTime);
                 Shader.SetGlobalVector("CZY_WindDirection", m_WindDirection * windAmount * windMultiplier);
             }
+
+#if ZEPHYR
+            if (zephyrWind) {
+                zephyrWind.TargetDirection = m_WindDirection;
+                zephyrWind.targetWindStrength = windAmount * windMultiplier;
+            }
+#endif
 
         }
 
