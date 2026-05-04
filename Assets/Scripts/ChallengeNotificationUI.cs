@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 using System.Collections.Generic;
+using GameCreator.Runtime.Characters;
 
 public class ChallengeNotificationUI : MonoBehaviour
 {
@@ -95,10 +96,10 @@ public class ChallengeNotificationUI : MonoBehaviour
         }
         else
         {
-            JUTPS.JUCharacterController playerController = Object.FindFirstObjectByType<JUTPS.JUCharacterController>();
-            if (playerController != null)
+            Character character = Object.FindFirstObjectByType<Character>();
+            if (character != null)
             {
-                playerTransform = playerController.transform;
+                playerTransform = character.transform;
             }
         }
         

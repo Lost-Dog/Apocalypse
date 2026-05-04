@@ -1,7 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using JUTPS;
+using GameCreator.Runtime.Common;
+using GameCreator.Runtime.Stats;
 
 public class PlayerStatusIndicators : MonoBehaviour
 {
@@ -26,11 +27,14 @@ public class PlayerStatusIndicators : MonoBehaviour
     public StatusIndicator hungerIndicator;
     public StatusIndicator thirstIndicator;
     
+    private const string HealthAttributeId = "health";
+
     [Header("Auto-Find References")]
     public bool autoFindReferences = true;
-    public JUHealth playerHealth;
     public SurvivalManager survivalManager;
     public PlayerInfectionDisplay infectionDisplay;
+
+    private Traits playerTraits;
     
     [Header("Health Thresholds")]
     [Range(0f, 1f)] public float healthWarningThreshold = 0.5f;
@@ -106,24 +110,18 @@ public class PlayerStatusIndicators : MonoBehaviour
     
     private void FindReferences()
     {
-        if (playerHealth == null)
+        if (playerTraits == null)
         {
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            GameObject player = ShortcutPlayer.Instance;
             if (player != null)
-            {
-                playerHealth = player.GetComponent<JUHealth>();
-            }
+                playerTraits = player.GetComponent<Traits>();
         }
-        
+
         if (survivalManager == null)
-        {
             survivalManager = FindFirstObjectByType<SurvivalManager>();
-        }
-        
+
         if (infectionDisplay == null)
-        {
             infectionDisplay = FindFirstObjectByType<PlayerInfectionDisplay>();
-        }
     }
     
     private void InitializeIndicators()
@@ -173,10 +171,16 @@ public class PlayerStatusIndicators : MonoBehaviour
     
     private void UpdateHealthIndicator()
     {
-        if (playerHealth == null || healthIndicator.indicatorObject == null) return;
-        
-        float healthPercentage = playerHealth.Health / playerHealth.MaxHealth;
-        
+        if (playerTraits == null || healthIndicator.indicatorObject == null) return;
+
+        float healthPercentage = 1f;
+        try
+        {
+            RuntimeAttributeData health = playerTraits.RuntimeAttributes.Get(HealthAttributeId);
+            healthPercentage = (float)(health.Value / health.MaxValue);
+        }
+        catch (System.Exception) { return; }
+
         if (healthPercentage <= healthCriticalThreshold)
         {
             SetIndicatorState(healthIndicator, true, healthIndicator.criticalColor, criticalPulseSpeed);

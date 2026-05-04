@@ -1,5 +1,4 @@
 using UnityEngine;
-using JUTPS;
 
 /// <summary>
 /// Skill that restores player temperature when killing enemies
@@ -34,8 +33,6 @@ public class TemperatureRestoreOnKill : MonoBehaviour
     [Header("Debug")]
     public bool debugMode = false;
     
-    private JUCharacterController characterController;
-    private JUHealth health;
     private SurvivalManager survivalManager;
     private AudioSource audioSource;
     private int killCount = 0;
@@ -64,15 +61,7 @@ public class TemperatureRestoreOnKill : MonoBehaviour
     public void ActivateSkill()
     {
         // Get required components
-        characterController = GetComponent<JUCharacterController>();
-        health = GetComponent<JUHealth>();
         survivalManager = SurvivalManager.Instance;
-        
-        if (characterController == null)
-        {
-            Debug.LogError("[TemperatureRestoreOnKill] No JUCharacterController found!");
-            return;
-        }
         
         if (survivalManager == null)
         {

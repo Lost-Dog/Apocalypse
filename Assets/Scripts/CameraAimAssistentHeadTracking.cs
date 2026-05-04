@@ -1,12 +1,11 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using JUTPS;
-using JU.CharacterSystem.AI;
+using GameCreator.Runtime.Characters;
+using GameCreator.Runtime.Common;
 
-namespace JUTPS.CameraSystems
+namespace RVR.Camera
 {
-    [AddComponentMenu("JU TPS/Cameras/Aim Assistant System/JU Aim Assistent (Head Tracking)")]
+    [AddComponentMenu("RVR/Camera/Aim Assistant (Head Tracking)")]
     public class CameraAimAssistentHeadTracking : MonoBehaviour
     {
         [System.Serializable]
@@ -14,11 +13,13 @@ namespace JUTPS.CameraSystems
         {
             public string Tag = "Enemy";
             public float UpOffset;
+
             public TargetTagOffset(string tag, float upOffset)
             {
                 Tag = tag;
                 UpOffset = upOffset;
             }
+
             public static float GetUpOffset(TargetTagOffset[] targetTagList, GameObject objectTag)
             {
                 if (objectTag == null || targetTagList == null) return 0;
@@ -26,16 +27,12 @@ namespace JUTPS.CameraSystems
                 foreach (TargetTagOffset tag in targetTagList)
                 {
                     if (tag.Tag == objectTag.tag)
-                    {
                         return tag.UpOffset;
-                    }
                 }
 
                 return 0;
             }
         }
-
-        private JUCameraController targetCamera;
 
         [Header("Detection Settings")]
         public float DistanceToDetect = 50;
@@ -44,150 +41,144 @@ namespace JUTPS.CameraSystems
         public TargetTagOffset[] TargetsTagsAndOffsets = new[] { new TargetTagOffset("Enemy", 1) };
 
         [Header("Head Tracking")]
-        [Tooltip("Automatically aim at enemy head transform instead of using UpOffset")]
+        [Tooltip("Automatically aim at the target's head transform instead of using UpOffset")]
         public bool trackHeadTransform = true;
-        
-        [Tooltip("Fallback UpOffset if head transform not found")]
+
+        [Tooltip("Fallback UpOffset if head transform is not found")]
         public float fallbackHeadOffset = 1.5f;
 
         [Header("Debug")]
         public bool showDebugRays = false;
 
+        private UnityEngine.Camera activeCamera;
         private float UpOffset => TargetTagOffset.GetUpOffset(TargetsTagsAndOffsets, ObjectInCameraCenter);
         private string[] AllTags;
         private GameObject ObjectInCameraCenter;
 
-        void Start()
+        private void Start()
         {
-            targetCamera = GetComponent<JUCameraController>();
+            // Resolve the active camera via GC2 shortcut, falling back to Camera.main
+            activeCamera = ShortcutMainCamera.Get<UnityEngine.Camera>();
+            if (activeCamera == null)
+                activeCamera = UnityEngine.Camera.main;
 
-            List<string> taglist = new List<string>();
+            var tagList = new List<string>();
             foreach (TargetTagOffset tag in TargetsTagsAndOffsets)
-            {
-                taglist.Add(tag.Tag);
-            }
-            AllTags = taglist.ToArray();
+                tagList.Add(tag.Tag);
+
+            AllTags = tagList.ToArray();
         }
 
-        void Update()
+        private void Update()
         {
-            ObjectInCameraCenter = targetCamera.GetObjectOnCameraCenter(DistanceToDetect, TargetLayer);
+            if (activeCamera == null) return;
+
+            ObjectInCameraCenter = GetObjectOnCameraCenter();
             if (ObjectInCameraCenter == null) return;
 
             for (int i = 0; i < AllTags.Length; i++)
             {
-                if (ObjectInCameraCenter.CompareTag(AllTags[i]))
-                {
-                    Vector3 targetPosition = GetAimPosition(ObjectInCameraCenter);
-                    
-                    if (showDebugRays)
-                    {
-                        Debug.DrawLine(targetCamera.mCamera.transform.position, targetPosition, Color.red);
-                    }
+                if (!ObjectInCameraCenter.CompareTag(AllTags[i])) continue;
 
-                    Vector3 TargetRotationEuler = Quaternion.LookRotation((targetPosition - targetCamera.mCamera.transform.position).normalized).eulerAngles;
+                Vector3 targetPosition = GetAimPosition(ObjectInCameraCenter);
 
-                    targetCamera.rotytarget = Mathf.LerpAngle(targetCamera.rotytarget, TargetRotationEuler.y, AssistentForce * Time.deltaTime);
-                    targetCamera.rotxtarget = Mathf.LerpAngle(targetCamera.rotxtarget, TargetRotationEuler.x, AssistentForce * Time.deltaTime);
-                    break;
-                }
+                if (showDebugRays)
+                    Debug.DrawLine(activeCamera.transform.position, targetPosition, Color.red);
+
+                // Steer the camera transform toward the aim position.
+                // GC2's camera shot system writes position/rotation in LateUpdate, so we nudge
+                // the transform here (Update) which the shot system will blend from each frame.
+                Vector3 toTarget = (targetPosition - activeCamera.transform.position).normalized;
+                Quaternion desiredRotation = Quaternion.LookRotation(toTarget);
+
+                activeCamera.transform.rotation = Quaternion.Slerp(
+                    activeCamera.transform.rotation,
+                    desiredRotation,
+                    AssistentForce * Time.deltaTime
+                );
+                break;
             }
+        }
+
+        /// <summary>
+        /// Casts a ray from the centre of the screen and returns the first hit object
+        /// within <see cref="DistanceToDetect"/> on <see cref="TargetLayer"/>.
+        /// </summary>
+        private GameObject GetObjectOnCameraCenter()
+        {
+            Ray ray = activeCamera.ScreenPointToRay(new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0f));
+
+            if (Physics.Raycast(ray, out RaycastHit hit, DistanceToDetect, TargetLayer))
+                return hit.collider.gameObject;
+
+            return null;
         }
 
         private Vector3 GetAimPosition(GameObject target)
         {
             if (!trackHeadTransform)
-            {
-                // Use original UpOffset method
-                return target.transform.position + transform.up * UpOffset;
-            }
+                return target.transform.position + Vector3.up * UpOffset;
 
-            // Try to find head transform
             Transform headTransform = FindHeadTransform(target);
-            
-            if (headTransform != null)
-            {
-                // Aim at actual head position
-                return headTransform.position;
-            }
-            else
-            {
-                // Fallback to offset method
-                return target.transform.position + transform.up * fallbackHeadOffset;
-            }
+
+            return headTransform != null
+                ? headTransform.position
+                : target.transform.position + Vector3.up * fallbackHeadOffset;
         }
 
+        /// <summary>
+        /// Resolves the head bone of a target, preferring GC2 Character's animator,
+        /// then falling back to a direct Animator search and common bone name lookups.
+        /// </summary>
         private Transform FindHeadTransform(GameObject target)
         {
-            // Method 1: Check for JU AI components that have Head reference
-            JU_AI_PatrolCharacter patrolAI = target.GetComponent<JU_AI_PatrolCharacter>();
-            if (patrolAI != null && patrolAI.Head != null)
+            // Method 1: GC2 Character — get head bone from the model's Animator
+            Character gc2Character = target.GetComponent<Character>();
+            if (gc2Character != null)
             {
-                return patrolAI.Head;
+                Animator characterAnimator = gc2Character.GetComponentInChildren<Animator>();
+                if (characterAnimator != null && characterAnimator.isHuman)
+                {
+                    Transform head = characterAnimator.GetBoneTransform(HumanBodyBones.Head);
+                    if (head != null) return head;
+                }
             }
 
-            JU_AI_Zombie zombieAI = target.GetComponent<JU_AI_Zombie>();
-            if (zombieAI != null && zombieAI.Head != null)
-            {
-                return zombieAI.Head;
-            }
-
-            // Method 2: Try to find via Animator
+            // Method 2: Direct Animator on the target (non-GC2 characters or legacy setups)
             Animator animator = target.GetComponent<Animator>();
             if (animator != null && animator.isHuman)
             {
                 Transform head = animator.GetBoneTransform(HumanBodyBones.Head);
-                if (head != null)
-                {
-                    return head;
-                }
+                if (head != null) return head;
             }
 
-            // Method 3: Search for common head bone names
-            Transform headByName = FindChildByName(target.transform, "Head");
-            if (headByName != null)
-            {
-                return headByName;
-            }
+            // Method 3: Common head bone name variants
+            Transform headByName = FindChildByName(target.transform, "Head")
+                                ?? FindChildByName(target.transform, "head")
+                                ?? FindChildByName(target.transform, "mixamorig:Head");
 
-            headByName = FindChildByName(target.transform, "head");
-            if (headByName != null)
-            {
-                return headByName;
-            }
-
-            // Method 4: Try "mixamorig:Head" for Mixamo rigs
-            headByName = FindChildByName(target.transform, "mixamorig:Head");
-            if (headByName != null)
-            {
-                return headByName;
-            }
-
-            return null;
-        }
-
-        private Transform FindChildByName(Transform parent, string name)
-        {
-            foreach (Transform child in parent.GetComponentsInChildren<Transform>())
-            {
-                if (child.name == name)
-                {
-                    return child;
-                }
-            }
-            return null;
+            return headByName;
         }
 
         /// <summary>
-        /// Get the current target being aimed at
+        /// Searches all descendants for a Transform with the exact given name.
         /// </summary>
-        public GameObject GetCurrentTarget()
+        private Transform FindChildByName(Transform parent, string boneName)
         {
-            return ObjectInCameraCenter;
+            foreach (Transform child in parent.GetComponentsInChildren<Transform>(true))
+            {
+                if (child.name == boneName) return child;
+            }
+            return null;
         }
 
         /// <summary>
-        /// Get the current aim position (including head tracking)
+        /// Returns the GameObject currently centered in the camera's aim.
+        /// </summary>
+        public GameObject GetCurrentTarget() => ObjectInCameraCenter;
+
+        /// <summary>
+        /// Returns the world-space aim position for the current target, including head tracking.
         /// </summary>
         public Vector3 GetCurrentAimPosition()
         {
@@ -200,10 +191,10 @@ namespace JUTPS.CameraSystems
             if (!showDebugRays || ObjectInCameraCenter == null) return;
 
             Vector3 aimPos = GetAimPosition(ObjectInCameraCenter);
-            
+
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(aimPos, 0.2f);
-            
+
             Gizmos.color = Color.yellow;
             Gizmos.DrawLine(transform.position, aimPos);
         }

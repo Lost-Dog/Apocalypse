@@ -1,0 +1,211 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b10556c0de742244900b26ed60d64dd, type: 3}
+  m_Name: NGMxMEventDef_FenceClearReallyHigh
+  m_EditorClassIdentifier: 
+  Id: 24
+  EventName: FenceClearReallyHigh
+  EventType: 0
+  Priority: -1
+  ContactCountToMatch: 1
+  ContactCountToWarp: 1
+  ExitWithMotion: 1
+  MatchPose: 0
+  MatchTrajectory: 0
+  MatchRequireTags: 0
+  FavourTagMethod: 2
+  PostEventTrajectoryMode: 1
+  MatchTiming: 0
+  ExactTimeMatch: 0
+  TimingWeight: 0
+  TimingWarpType: 0
+  MatchPosition: 1
+  PositionWeight: 10
+  MotionWarpType: 2
+  WarpTimeScaling: 0
+  ContactCountToTimeScale: 1
+  MinWarpTimeScale: 0.9
+  MaxWarpTimeScale: 1.2
+  MatchRotation: 1
+  RotationWeight: 10
+  RotationWarpType: 2
+  m_targetEventNamingModule: {fileID: 11400000, guid: 3aa41de24efa994468aa90984fb042e3,
+    type: 2}
+  m_targetAnimData: {fileID: 11400000, guid: a82f80c6723800c43889ad44f58c2b49, type: 2}
+  NGEventType: 5
+  eventTypeName: 
+  NGMovementType: 1
+  zRangeToContact: {x: 1, y: 2}
+  yRangeToContact: {x: 1.35, y: 3.4}
+  maxPlatformDepth: 1
+  speedRange: {x: 0, y: 50}
+  contactInfos:
+  - warpable: 1
+    relativePosition: {x: 0, y: 1, z: 0}
+  vaultObstacleLengthRange: {x: 0.1, y: 3}
+  animationClipInfos:
+  - actions:
+    - actionType: 1
+      actionSubType: 8
+      actionSubType2: 1
+      lockToStartingRotation: 0
+      timeStartNormalized: 0.25
+      timeStopNormalized: 0.31
+      timeFadeInGameTime: 0.1
+      timeFadeOutGameTime: 0.1
+      onStart:
+        m_PersistentCalls:
+          m_Calls: []
+      onStop:
+        m_PersistentCalls:
+          m_Calls: []
+      clipNameHash: 0
+    - actionType: 1
+      actionSubType: 3
+      actionSubType2: 1
+      lockToStartingRotation: 0
+      timeStartNormalized: 0.27
+      timeStopNormalized: 0.29
+      timeFadeInGameTime: 0.1
+      timeFadeOutGameTime: 0.1
+      onStart:
+        m_PersistentCalls:
+          m_Calls: []
+      onStop:
+        m_PersistentCalls:
+          m_Calls: []
+      clipNameHash: 0
+    - actionType: 1
+      actionSubType: 4
+      actionSubType2: 1
+      lockToStartingRotation: 0
+      timeStartNormalized: 0.35
+      timeStopNormalized: 0.49
+      timeFadeInGameTime: 0.1
+      timeFadeOutGameTime: 0.1
+      onStart:
+        m_PersistentCalls:
+          m_Calls: []
+      onStop:
+        m_PersistentCalls:
+          m_Calls: []
+      clipNameHash: 0
+    - actionType: 1
+      actionSubType: 2
+      actionSubType2: 2
+      lockToStartingRotation: 0
+      timeStartNormalized: 0.37
+      timeStopNormalized: 0.51
+      timeFadeInGameTime: 0.1
+      timeFadeOutGameTime: 0.1
+      onStart:
+        m_PersistentCalls:
+          m_Calls: []
+      onStop:
+        m_PersistentCalls:
+          m_Calls: []
+      clipNameHash: 0
+    - actionType: 1
+      actionSubType: 1
+      actionSubType2: 2
+      lockToStartingRotation: 0
+      timeStartNormalized: 0.39
+      timeStopNormalized: 0.555
+      timeFadeInGameTime: 0.1
+      timeFadeOutGameTime: 0.1
+      onStart:
+        m_PersistentCalls:
+          m_Calls: []
+      onStop:
+        m_PersistentCalls:
+          m_Calls: []
+      clipNameHash: 0
+    clip: {fileID: 1716557699704780350, guid: b8dc554ec70f0a942a44764581939682, type: 3}
+    clipName: vault_reallyhigh_sprint-to-wallplant-upjump-ledgegrab-switch-sides-drop180-shorterhold
+  - actions:
+    - actionType: 1
+      actionSubType: 8
+      actionSubType2: 1
+      lockToStartingRotation: 0
+      timeStartNormalized: 0.33
+      timeStopNormalized: 0.4
+      timeFadeInGameTime: 0.1
+      timeFadeOutGameTime: 0.1
+      onStart:
+        m_PersistentCalls:
+          m_Calls: []
+      onStop:
+        m_PersistentCalls:
+          m_Calls: []
+      clipNameHash: 0
+    - actionType: 1
+      actionSubType: 3
+      actionSubType2: 1
+      lockToStartingRotation: 0
+      timeStartNormalized: 0.375
+      timeStopNormalized: 0.42
+      timeFadeInGameTime: 0.1
+      timeFadeOutGameTime: 0.1
+      onStart:
+        m_PersistentCalls:
+          m_Calls: []
+      onStop:
+        m_PersistentCalls:
+          m_Calls: []
+      clipNameHash: 0
+    - actionType: 1
+      actionSubType: 4
+      actionSubType2: 1
+      lockToStartingRotation: 0
+      timeStartNormalized: 0.5
+      timeStopNormalized: 0.72
+      timeFadeInGameTime: 0.1
+      timeFadeOutGameTime: 0.1
+      onStart:
+        m_PersistentCalls:
+          m_Calls: []
+      onStop:
+        m_PersistentCalls:
+          m_Calls: []
+      clipNameHash: 0
+    - actionType: 1
+      actionSubType: 2
+      actionSubType2: 2
+      lockToStartingRotation: 0
+      timeStartNormalized: 0.51
+      timeStopNormalized: 0.75
+      timeFadeInGameTime: 0.1
+      timeFadeOutGameTime: 0.1
+      onStart:
+        m_PersistentCalls:
+          m_Calls: []
+      onStop:
+        m_PersistentCalls:
+          m_Calls: []
+      clipNameHash: 0
+    - actionType: 1
+      actionSubType: 1
+      actionSubType2: 2
+      lockToStartingRotation: 0
+      timeStartNormalized: 0.54
+      timeStopNormalized: 0.84
+      timeFadeInGameTime: 0.1
+      timeFadeOutGameTime: 0.1
+      onStart:
+        m_PersistentCalls:
+          m_Calls: []
+      onStop:
+        m_PersistentCalls:
+          m_Calls: []
+      clipNameHash: 0
+    clip: {fileID: 7034448286802903018, guid: 6f81f64262584734ea2c74eab0ff6fb0, type: 3}
+    clipName: vault_reallyhigh_sprint-to-wallplant-upjump-ledgegrab-two-hand-vault

@@ -1,104 +1,94 @@
 using UnityEngine;
 using UnityEngine.Events;
-using JUTPS;
+using GameCreator.Runtime.Stats;
 
 /// <summary>
-/// Applies continuous fire/burn damage to the player when they enter the explosion trigger.
-/// Supports burn VFX effects on the player.
+/// Applies continuous fire/burn damage to any GC2 Traits-bearing character that enters the trigger.
+/// Damage is subtracted directly from the configured health Attribute on the character's Traits component.
 /// </summary>
 public class ExplosionDamage : MonoBehaviour
 {
+    private const string DefaultHealthAttributeId = "health";
+
     [Header("Damage Settings")]
-    [Tooltip("Fire damage per second")]
+    [Tooltip("Fire damage per second while inside the trigger")]
     public float fireBaseDamage = 5f;
-    
-    [Tooltip("Burn damage per second (continues after leaving)")]
+
+    [Tooltip("Burn damage per second that continues after leaving")]
     public float burnDamagePerSecond = 2f;
-    
-    [Tooltip("How long the burn effect lasts after leaving the explosion")]
+
+    [Tooltip("How long the burn effect lasts after the character leaves the trigger")]
     public float burnDuration = 3f;
-    
-    [Tooltip("Damage tick interval (how often damage is applied)")]
+
+    [Tooltip("How often damage is applied (seconds between ticks)")]
     public float damageTickInterval = 0.5f;
-    
+
+    [Tooltip("GC2 Attribute ID to subtract damage from (must match the Traits component)")]
+    public string healthAttributeId = DefaultHealthAttributeId;
+
     [Header("Trigger Settings")]
+    [Tooltip("Tag used to identify the player")]
+    public string playerTag = "Player";
+
     [Tooltip("Radius of the damage trigger sphere")]
     public float damageRadius = 5f;
-    
-    [Tooltip("Tag to check for player")]
-    public string playerTag = "Player";
-    
+
     [Header("Visual Effects")]
-    [Tooltip("Burn VFX prefab to spawn on player")]
+    [Tooltip("Burn VFX prefab to spawn on the player")]
     public GameObject burnVFXPrefab;
-    
+
     [Tooltip("Position offset for VFX attachment")]
     public Vector3 vfxOffset = Vector3.zero;
-    
-    [Tooltip("Should VFX be attached to player?")]
+
+    [Tooltip("Attach VFX to the player instead of spawning at world position")]
     public bool attachVFXToPlayer = true;
-    
+
     [Header("Audio")]
-    [Tooltip("Sound to play when player enters fire")]
+    [Tooltip("Sound played when the player enters fire")]
     public AudioClip fireEnterSound;
-    
-    [Tooltip("Looping burn sound")]
+
+    [Tooltip("Looping sound while in fire")]
     public AudioClip burnLoopSound;
-    
+
     [Range(0f, 1f)]
     public float soundVolume = 0.7f;
-    
+
     [Header("Events")]
     public UnityEvent onPlayerEnterFire;
     public UnityEvent onPlayerExitFire;
     public UnityEvent onBurnStart;
     public UnityEvent onBurnEnd;
-    
+
     [Header("Debug")]
     public bool showDebugInfo = false;
-    
-    // Private variables
-    private JUHealth playerHealth;
+
+    // Runtime state
+    private Traits playerTraits;
     private GameObject playerObject;
-    private bool playerInFire = false;
-    private float damageTimer = 0f;
-    private float burnTimer = 0f;
-    private bool isBurning = false;
+    private bool playerInFire;
+    private float damageTimer;
+    private float burnTimer;
+    private bool isBurning;
     private GameObject activeBurnVFX;
     private AudioSource audioSource;
     private SphereCollider triggerCollider;
-    
+
     private void Start()
     {
         SetupTrigger();
         SetupAudio();
     }
-    
+
     private void SetupTrigger()
     {
-        // Check for existing sphere collider
         triggerCollider = GetComponent<SphereCollider>();
-        
         if (triggerCollider == null)
-        {
-            // Add sphere collider if none exists
             triggerCollider = gameObject.AddComponent<SphereCollider>();
-            if (showDebugInfo)
-            {
-                Debug.Log($"[ExplosionDamage] Added SphereCollider to '{gameObject.name}'");
-            }
-        }
-        
-        // Configure as trigger
+
         triggerCollider.isTrigger = true;
         triggerCollider.radius = damageRadius;
-        
-        if (showDebugInfo)
-        {
-            Debug.Log($"[ExplosionDamage] Trigger configured - Radius: {damageRadius}");
-        }
     }
-    
+
     private void SetupAudio()
     {
         audioSource = GetComponent<AudioSource>();
@@ -106,315 +96,217 @@ public class ExplosionDamage : MonoBehaviour
         {
             audioSource = gameObject.AddComponent<AudioSource>();
             audioSource.playOnAwake = false;
-            audioSource.spatialBlend = 1f; // 3D sound
+            audioSource.spatialBlend = 1f;
             audioSource.volume = soundVolume;
         }
     }
-    
+
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag(playerTag))
-        {
-            playerHealth = other.GetComponent<JUHealth>();
-            playerObject = other.gameObject;
-            
-            if (playerHealth != null)
-            {
-                playerInFire = true;
-                damageTimer = 0f;
-                
-                OnPlayerEnterFire();
-            }
-        }
+        if (!other.CompareTag(playerTag)) return;
+
+        playerTraits = other.GetComponent<Traits>();
+        playerObject = other.gameObject;
+
+        if (playerTraits == null) return;
+
+        playerInFire = true;
+        damageTimer = 0f;
+        OnPlayerEnterFire();
     }
-    
+
     private void OnTriggerStay(Collider other)
     {
-        if (other.CompareTag(playerTag) && playerInFire && playerHealth != null)
-        {
+        if (other.CompareTag(playerTag) && playerInFire && playerTraits != null)
             ApplyFireDamage();
-        }
     }
-    
+
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag(playerTag) && playerInFire)
-        {
-            playerInFire = false;
-            OnPlayerExitFire();
-            StartBurnEffect();
-        }
+        if (!other.CompareTag(playerTag) || !playerInFire) return;
+
+        playerInFire = false;
+        OnPlayerExitFire();
+        StartBurnEffect();
     }
-    
+
     private void Update()
     {
-        // Handle burn damage after leaving fire
         if (isBurning && !playerInFire)
-        {
             ApplyBurnDamage();
-        }
     }
-    
+
+    // DAMAGE -----------------------------------------------------------------------------------------
+
     private void ApplyFireDamage()
     {
         damageTimer -= Time.deltaTime;
-        
-        if (damageTimer <= 0f)
-        {
-            damageTimer = damageTickInterval;
-            
-            if (playerHealth != null && fireBaseDamage > 0f)
-            {
-                float damage = fireBaseDamage * damageTickInterval;
-                
-                JUHealth.DamageInfo damageInfo = new JUHealth.DamageInfo
-                {
-                    Damage = damage,
-                    HitPosition = playerObject.transform.position,
-                    HitDirection = (playerObject.transform.position - transform.position).normalized,
-                    HitOriginPosition = transform.position,
-                    HitOwner = gameObject
-                };
-                
-                playerHealth.DoDamage(damageInfo);
-                
-                if (showDebugInfo)
-                {
-                    Debug.Log($"[ExplosionDamage] Applied {damage} fire damage to player");
-                }
-            }
-        }
+        if (damageTimer > 0f) return;
+
+        damageTimer = damageTickInterval;
+        float damage = fireBaseDamage * damageTickInterval;
+        SubtractHealth(damage);
+
+        if (showDebugInfo)
+            Debug.Log($"[ExplosionDamage] Applied {damage:F1} fire damage");
     }
-    
+
     private void ApplyBurnDamage()
     {
         burnTimer -= Time.deltaTime;
         damageTimer -= Time.deltaTime;
-        
+
         if (burnTimer <= 0f)
         {
-            // Burn effect expired
             StopBurnEffect();
             return;
         }
-        
-        if (damageTimer <= 0f)
+
+        if (damageTimer > 0f) return;
+
+        damageTimer = damageTickInterval;
+        float damage = burnDamagePerSecond * damageTickInterval;
+        SubtractHealth(damage);
+
+        if (showDebugInfo)
+            Debug.Log($"[ExplosionDamage] Applied {damage:F1} burn damage ({burnTimer:F1}s remaining)");
+    }
+
+    /// <summary>
+    /// Subtracts the given amount from the player's health Attribute via GC2 Traits.
+    /// </summary>
+    private void SubtractHealth(float amount)
+    {
+        if (playerTraits == null || amount <= 0f) return;
+
+        try
         {
-            damageTimer = damageTickInterval;
-            
-            if (playerHealth != null && burnDamagePerSecond > 0f)
-            {
-                float damage = burnDamagePerSecond * damageTickInterval;
-                
-                JUHealth.DamageInfo damageInfo = new JUHealth.DamageInfo
-                {
-                    Damage = damage,
-                    HitPosition = playerObject.transform.position,
-                    HitDirection = Vector3.zero,
-                    HitOriginPosition = transform.position,
-                    HitOwner = gameObject
-                };
-                
-                playerHealth.DoDamage(damageInfo);
-                
-                if (showDebugInfo)
-                {
-                    Debug.Log($"[ExplosionDamage] Applied {damage} burn damage to player ({burnTimer:F1}s remaining)");
-                }
-            }
+            RuntimeAttributeData healthAttr = playerTraits.RuntimeAttributes.Get(healthAttributeId);
+            if (healthAttr != null)
+                healthAttr.Value -= amount;
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning($"[ExplosionDamage] Could not apply damage — {e.Message}");
         }
     }
-    
+
+    // EVENTS -----------------------------------------------------------------------------------------
+
     private void OnPlayerEnterFire()
     {
-        if (showDebugInfo)
-        {
-            Debug.Log($"[ExplosionDamage] Player entered fire zone");
-        }
-        
-        // Play enter sound
+        if (showDebugInfo) Debug.Log("[ExplosionDamage] Player entered fire zone");
+
         if (audioSource != null && fireEnterSound != null)
-        {
             audioSource.PlayOneShot(fireEnterSound, soundVolume);
-        }
-        
-        // Start looping burn sound
+
         if (audioSource != null && burnLoopSound != null)
         {
             audioSource.clip = burnLoopSound;
             audioSource.loop = true;
             audioSource.Play();
         }
-        
-        // Spawn burn VFX
+
         SpawnBurnVFX();
-        
-        // Invoke event
         onPlayerEnterFire?.Invoke();
     }
-    
+
     private void OnPlayerExitFire()
     {
-        if (showDebugInfo)
-        {
-            Debug.Log($"[ExplosionDamage] Player exited fire zone");
-        }
-        
-        // Stop looping sound
+        if (showDebugInfo) Debug.Log("[ExplosionDamage] Player exited fire zone");
+
         if (audioSource != null && audioSource.isPlaying)
-        {
             audioSource.Stop();
-        }
-        
-        // Invoke event
+
         onPlayerExitFire?.Invoke();
     }
-    
+
     private void StartBurnEffect()
     {
         isBurning = true;
         burnTimer = burnDuration;
         damageTimer = 0f;
-        
-        if (showDebugInfo)
-        {
-            Debug.Log($"[ExplosionDamage] Started burn effect ({burnDuration}s duration)");
-        }
-        
-        // Keep VFX playing during burn
-        // VFX was already spawned in OnPlayerEnterFire
-        
+
+        if (showDebugInfo) Debug.Log($"[ExplosionDamage] Burn started ({burnDuration}s)");
+
         onBurnStart?.Invoke();
     }
-    
+
     private void StopBurnEffect()
     {
         isBurning = false;
         burnTimer = 0f;
-        
-        if (showDebugInfo)
-        {
-            Debug.Log($"[ExplosionDamage] Stopped burn effect");
-        }
-        
-        // Remove burn VFX
+
+        if (showDebugInfo) Debug.Log("[ExplosionDamage] Burn ended");
+
         RemoveBurnVFX();
-        
         onBurnEnd?.Invoke();
     }
-    
+
+    // VFX --------------------------------------------------------------------------------------------
+
     private void SpawnBurnVFX()
     {
-        if (burnVFXPrefab == null || playerObject == null)
-            return;
-        
-        // Remove existing VFX first
+        if (burnVFXPrefab == null || playerObject == null) return;
+
         RemoveBurnVFX();
-        
-        if (attachVFXToPlayer)
-        {
-            // Attach to player
-            activeBurnVFX = Instantiate(burnVFXPrefab, playerObject.transform);
-            activeBurnVFX.transform.localPosition = vfxOffset;
-        }
-        else
-        {
-            // Spawn at player position
-            activeBurnVFX = Instantiate(burnVFXPrefab, playerObject.transform.position + vfxOffset, Quaternion.identity);
-        }
-        
-        if (showDebugInfo)
-        {
-            Debug.Log($"[ExplosionDamage] Spawned burn VFX on player");
-        }
+
+        activeBurnVFX = attachVFXToPlayer
+            ? Instantiate(burnVFXPrefab, playerObject.transform.position + vfxOffset, Quaternion.identity, playerObject.transform)
+            : Instantiate(burnVFXPrefab, playerObject.transform.position + vfxOffset, Quaternion.identity);
     }
-    
+
     private void RemoveBurnVFX()
     {
-        if (activeBurnVFX != null)
-        {
-            // Stop particle system before destroying
-            ParticleSystem ps = activeBurnVFX.GetComponent<ParticleSystem>();
-            if (ps != null)
-            {
-                ps.Stop();
-            }
-            
-            Destroy(activeBurnVFX, 2f); // Delay to allow particles to fade
-            activeBurnVFX = null;
-            
-            if (showDebugInfo)
-            {
-                Debug.Log($"[ExplosionDamage] Removed burn VFX from player");
-            }
-        }
+        if (activeBurnVFX == null) return;
+
+        ParticleSystem ps = activeBurnVFX.GetComponent<ParticleSystem>();
+        if (ps != null) ps.Stop();
+
+        Destroy(activeBurnVFX, 2f);
+        activeBurnVFX = null;
     }
-    
+
+    // LIFECYCLE --------------------------------------------------------------------------------------
+
     private void OnDisable()
     {
-        // Clean up when disabled
-        if (playerInFire)
-        {
-            playerInFire = false;
-        }
-        
-        if (isBurning)
-        {
-            StopBurnEffect();
-        }
-        
-        if (audioSource != null && audioSource.isPlaying)
-        {
-            audioSource.Stop();
-        }
+        playerInFire = false;
+        if (isBurning) StopBurnEffect();
+        if (audioSource != null && audioSource.isPlaying) audioSource.Stop();
     }
-    
-    private void OnDestroy()
-    {
-        // Clean up VFX
-        RemoveBurnVFX();
-    }
-    
-    // Public API
-    
+
+    private void OnDestroy() => RemoveBurnVFX();
+
+    // PUBLIC API -------------------------------------------------------------------------------------
+
     /// <summary>
-    /// Set the damage radius of the trigger sphere
+    /// Updates the damage trigger sphere radius at runtime.
     /// </summary>
     public void SetDamageRadius(float radius)
     {
         damageRadius = radius;
-        if (triggerCollider != null)
-        {
-            triggerCollider.radius = radius;
-        }
+        if (triggerCollider != null) triggerCollider.radius = radius;
     }
-    
+
     /// <summary>
-    /// Force stop burn effect on player
+    /// Immediately clears any active burn effect on the player.
     /// </summary>
     public void ClearBurnEffect()
     {
-        if (isBurning)
-        {
-            StopBurnEffect();
-        }
+        if (isBurning) StopBurnEffect();
     }
-    
+
     /// <summary>
-    /// Check if player is currently burning
+    /// Returns true if the player is currently in fire or still burning.
     /// </summary>
-    public bool IsPlayerBurning()
-    {
-        return isBurning || playerInFire;
-    }
-    
+    public bool IsPlayerBurning() => isBurning || playerInFire;
+
     private void OnDrawGizmosSelected()
     {
-        // Visualize damage radius in editor
-        Gizmos.color = new Color(1f, 0.5f, 0f, 0.3f); // Orange semi-transparent
+        Gizmos.color = new Color(1f, 0.5f, 0f, 0.3f);
         Gizmos.DrawSphere(transform.position, damageRadius);
-        
-        Gizmos.color = new Color(1f, 0.3f, 0f, 0.8f); // Orange outline
+        Gizmos.color = new Color(1f, 0.3f, 0f, 0.8f);
         Gizmos.DrawWireSphere(transform.position, damageRadius);
     }
 }

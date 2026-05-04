@@ -1,15 +1,25 @@
 using UnityEngine;
 using UnityEngine.Events;
-using JUTPS;
+using GameCreator.Runtime.Characters;
+using GameCreator.Runtime.Stats;
+using System;
 
 public class SurvivalManager : MonoBehaviour
 {
     public static SurvivalManager Instance { get; private set; }
     
     [Header("Player Reference")]
-    public JUCharacterController playerController;
-    public JUHealth playerHealth;
+    public Character playerCharacter;
+    public Traits playerTraits;
     public ProgressionManager progressionManager;
+
+    // Minimum world-move speed to be considered "moving" for stamina/hunger/thirst drain.
+    private const float MoveThreshold = 0.1f;
+    // Minimum speed to be considered sprinting (above walk speed).
+    [Tooltip("World-space speed threshold above which the character is considered sprinting")]
+    public float sprintSpeedThreshold = 3f;
+
+    private const string HealthAttributeId = "health";
     
     [Header("Temperature Settings")]
     [Tooltip("Maximum temperature value (100% = optimal)")]
@@ -185,39 +195,33 @@ public class SurvivalManager : MonoBehaviour
     
     private void FindPlayerReferences()
     {
-        if (playerController == null)
+        if (playerCharacter == null)
         {
             GameObject player = GameObject.FindGameObjectWithTag("Player");
             if (player != null)
             {
-                playerController = player.GetComponent<JUCharacterController>();
+                playerCharacter = player.GetComponent<Character>();
+                playerTraits    = player.GetComponent<Traits>();
             }
         }
-        
-        if (playerController != null && playerHealth == null)
+        else if (playerTraits == null)
         {
-            playerHealth = playerController.GetComponent<JUHealth>();
+            playerTraits = playerCharacter.GetComponent<Traits>();
         }
-        
+
         if (progressionManager == null)
         {
             progressionManager = FindFirstObjectByType<ProgressionManager>();
         }
-        
-        if (playerController == null)
-        {
-            Debug.LogWarning("SurvivalManager: Could not find player controller!");
-        }
-        
-        if (playerHealth == null)
-        {
-            Debug.LogWarning("SurvivalManager: Could not find player health!");
-        }
-        
+
+        if (playerCharacter == null)
+            Debug.LogWarning("SurvivalManager: Could not find GC2 Character on player!");
+
+        if (playerTraits == null)
+            Debug.LogWarning("SurvivalManager: Could not find Traits on player!");
+
         if (progressionManager == null)
-        {
             Debug.LogWarning("SurvivalManager: Could not find ProgressionManager!");
-        }
     }
     
     private void Update()
@@ -305,7 +309,8 @@ public class SurvivalManager : MonoBehaviour
     {
         float staminaChange = 0f;
         
-        if (playerController != null && playerController.IsRunning)
+        if (playerCharacter != null && playerCharacter.Driver != null &&
+            playerCharacter.Driver.WorldMoveDirection.magnitude > MoveThreshold)
         {
             staminaChange -= staminaDrainRateRunning * Time.deltaTime;
         }
@@ -400,59 +405,54 @@ public class SurvivalManager : MonoBehaviour
     
     private void ApplyTemperatureEffects()
     {
-        if (!enableColdDamage || !isInCriticalCold || playerHealth == null)
+        if (!enableColdDamage || !isInCriticalCold || playerTraits == null)
             return;
-        
+
         damageTimer -= Time.deltaTime;
-        
+
         if (damageTimer <= 0f)
         {
             ApplyDamage(coldDamagePerSecond, "cold");
             damageTimer = damageTickInterval;
         }
-        
-        if (currentTemperature <= 0f && !playerHealth.IsDead)
+
+        if (currentTemperature <= 0f && playerCharacter != null && !playerCharacter.IsDead)
         {
             onPlayerFroze?.Invoke();
         }
     }
-    
+
     private void ApplyInfectionEffects()
     {
-        if (!isInCriticalInfection || playerHealth == null)
+        if (!isInCriticalInfection || playerTraits == null)
             return;
-        
+
         infectionDamageTimer -= Time.deltaTime;
-        
+
         if (infectionDamageTimer <= 0f)
         {
             ApplyDamage(infectionDamagePerSecond, "infection");
             infectionDamageTimer = damageTickInterval;
         }
     }
-    
+
     private void ApplyDamage(float damagePerSecond, string source)
     {
-        if (playerHealth != null && damagePerSecond > 0f)
+        if (playerTraits == null || damagePerSecond <= 0f) return;
+
+        try
         {
+            RuntimeAttributeData health = playerTraits.RuntimeAttributes.Get(HealthAttributeId);
             float damage = damagePerSecond * damageTickInterval;
-            
-            // Disable blood screen flash for cold damage
-            bool originalFlashSetting = playerHealth.BloodScreenEffect;
-            if (source == "cold")
-            {
-                playerHealth.BloodScreenEffect = false;
-            }
-            
-            playerHealth.DoDamage(damage);
-            
-            // Restore original setting
-            playerHealth.BloodScreenEffect = originalFlashSetting;
-            
+            health.Value -= damage;
+
             if (showDebugInfo)
-            {
-                Debug.Log($"{source} damage: {damage} HP");
-            }
+                Debug.Log($"{source} damage: {damage:F1} HP (remaining: {health.Value:F1})");
+        }
+        catch (Exception e)
+        {
+            if (showDebugInfo)
+                Debug.LogWarning($"SurvivalManager.ApplyDamage ({source}): {e.Message}");
         }
     }
     
@@ -640,9 +640,18 @@ public class SurvivalManager : MonoBehaviour
         ResetInfection();
         ResetHunger();
         ResetThirst();
-        if (playerHealth != null)
+        if (playerTraits != null)
         {
-            playerHealth.Health = playerHealth.MaxHealth;
+            try
+            {
+                RuntimeAttributeData health = playerTraits.RuntimeAttributes.Get(HealthAttributeId);
+                health.Value = health.MaxValue;
+            }
+            catch (Exception e)
+            {
+                if (showDebugInfo)
+                    Debug.LogWarning($"SurvivalManager.ResetAllStats: {e.Message}");
+            }
         }
     }
     
@@ -711,8 +720,9 @@ public class SurvivalManager : MonoBehaviour
             return;
         
         float decreaseRate = hungerDecreaseRate;
-        
-        if (playerController != null && playerController.IsSprinting)
+
+        if (playerCharacter != null && playerCharacter.Driver != null &&
+            playerCharacter.Driver.WorldMoveDirection.magnitude > sprintSpeedThreshold)
         {
             decreaseRate *= hungerRunningMultiplier;
         }
@@ -743,18 +753,27 @@ public class SurvivalManager : MonoBehaviour
             {
                 hungerDamageTimer = damageTickInterval;
                 
-                if (playerHealth != null)
+                if (playerTraits != null)
                 {
-                    playerHealth.DoDamage(hungerDamagePerSecond * damageTickInterval);
-                    
-                    if (showDebugInfo)
-                        Debug.Log($"<color=red>💀 Starvation damage: {hungerDamagePerSecond * damageTickInterval:F1} HP</color>");
-                    
-                    if (playerHealth.Health <= 0f)
+                    try
                     {
-                        onPlayerDiedOfHunger?.Invoke();
+                        RuntimeAttributeData health = playerTraits.RuntimeAttributes.Get(HealthAttributeId);
+                        health.Value -= hungerDamagePerSecond * damageTickInterval;
+
                         if (showDebugInfo)
-                            Debug.LogError("<color=red>💀 PLAYER DIED OF STARVATION!</color>");
+                            Debug.Log($"<color=red>💀 Starvation damage: {hungerDamagePerSecond * damageTickInterval:F1} HP</color>");
+
+                        if (health.Value <= 0)
+                        {
+                            onPlayerDiedOfHunger?.Invoke();
+                            if (showDebugInfo)
+                                Debug.LogError("<color=red>💀 PLAYER DIED OF STARVATION!</color>");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        if (showDebugInfo)
+                            Debug.LogWarning($"SurvivalManager hunger damage: {e.Message}");
                     }
                 }
             }
@@ -767,8 +786,9 @@ public class SurvivalManager : MonoBehaviour
             return;
         
         float decreaseRate = thirstDecreaseRate;
-        
-        if (playerController != null && playerController.IsSprinting)
+
+        if (playerCharacter != null && playerCharacter.Driver != null &&
+            playerCharacter.Driver.WorldMoveDirection.magnitude > sprintSpeedThreshold)
         {
             decreaseRate *= thirstRunningMultiplier;
         }
@@ -804,18 +824,27 @@ public class SurvivalManager : MonoBehaviour
             {
                 thirstDamageTimer = damageTickInterval;
                 
-                if (playerHealth != null)
+                if (playerTraits != null)
                 {
-                    playerHealth.DoDamage(thirstDamagePerSecond * damageTickInterval);
-                    
-                    if (showDebugInfo)
-                        Debug.Log($"<color=cyan>💧 Dehydration damage: {thirstDamagePerSecond * damageTickInterval:F1} HP</color>");
-                    
-                    if (playerHealth.Health <= 0f)
+                    try
                     {
-                        onPlayerDiedOfThirst?.Invoke();
+                        RuntimeAttributeData health = playerTraits.RuntimeAttributes.Get(HealthAttributeId);
+                        health.Value -= thirstDamagePerSecond * damageTickInterval;
+
                         if (showDebugInfo)
-                            Debug.LogError("<color=cyan>💀 PLAYER DIED OF DEHYDRATION!</color>");
+                            Debug.Log($"<color=cyan>💧 Dehydration damage: {thirstDamagePerSecond * damageTickInterval:F1} HP</color>");
+
+                        if (health.Value <= 0)
+                        {
+                            onPlayerDiedOfThirst?.Invoke();
+                            if (showDebugInfo)
+                                Debug.LogError("<color=cyan>💀 PLAYER DIED OF DEHYDRATION!</color>");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        if (showDebugInfo)
+                            Debug.LogWarning($"SurvivalManager thirst damage: {e.Message}");
                     }
                 }
             }

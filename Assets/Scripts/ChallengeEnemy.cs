@@ -1,3 +1,4 @@
+using GameCreator.Runtime.Characters;
 using UnityEngine;
 
 public class ChallengeEnemy : MonoBehaviour
@@ -5,53 +6,48 @@ public class ChallengeEnemy : MonoBehaviour
     private ActiveChallenge linkedChallenge;
     private bool isBoss;
     private bool isDead;
-    private JUTPS.JUHealth juHealth;
+    private Character character;
 
+    /// <summary>
+    /// Links this enemy to an active challenge and subscribes to the GC2 death event.
+    /// </summary>
     public void Initialize(ActiveChallenge challenge, bool boss = false)
     {
         linkedChallenge = challenge;
-        isBoss = boss;
-        isDead = false;
-        
-        // Hook into JUTPS health system
-        juHealth = GetComponent<JUTPS.JUHealth>();
-        if (juHealth != null)
+        isBoss          = boss;
+        isDead          = false;
+
+        character = GetComponent<Character>();
+        if (character != null)
         {
-            juHealth.OnDeath.AddListener(OnEnemyDeath);
+            character.EventDie += OnEnemyDeath;
         }
         else
         {
-            Debug.LogWarning($"ChallengeEnemy on {gameObject.name}: No JUHealth component found!");
+            Debug.LogWarning($"ChallengeEnemy on {gameObject.name}: No GC2 Character component found!");
         }
     }
 
     public void OnEnemyDeath()
     {
-        if (isDead || linkedChallenge == null)
-            return;
+        if (isDead || linkedChallenge == null) return;
 
         isDead = true;
 
         if (ChallengeManager.Instance != null)
         {
             ChallengeManager.Instance.OnEnemyKilled(linkedChallenge);
-            
             Debug.Log($"Challenge enemy killed! {linkedChallenge.enemiesKilled}/{linkedChallenge.challengeData.GetEnemyCount()}");
         }
     }
 
     private void OnDestroy()
     {
-        // Remove listener
-        if (juHealth != null)
-        {
-            juHealth.OnDeath.RemoveListener(OnEnemyDeath);
-        }
-        
-        // Fallback: if health system didn't trigger death but object is being destroyed
+        if (character != null)
+            character.EventDie -= OnEnemyDeath;
+
+        // Fallback: if the object was destroyed before the death event fired
         if (!isDead && linkedChallenge != null && ChallengeManager.Instance != null)
-        {
             OnEnemyDeath();
-        }
     }
 }

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using System.Collections.Generic;
 using Lovatto.MiniMap;
+using GameCreator.Runtime.Stats;
 
 public class ChallengeSpawner : MonoBehaviour
 {
@@ -679,35 +680,6 @@ public class ChallengeSpawner : MonoBehaviour
             
             Debug.Log($"  📍 Added minimap entity to {enemyObject.name}");
         }
-        
-        // Setup healthbar
-        WorldSpaceHealthBar healthBar = enemyObject.GetComponentInChildren<WorldSpaceHealthBar>(true);
-        if (healthBar != null)
-        {
-            healthBar.gameObject.SetActive(true);
-            healthBar.ShowTemporarily(999f);
-            Debug.Log($"✓ Enabled existing health bar UI for challenge enemy: {enemyObject.name}");
-        }
-        else if (healthBarPrefab != null)
-        {
-            // Instantiate healthbar prefab
-            GameObject healthBarObj = Instantiate(healthBarPrefab, enemyObject.transform);
-            healthBarObj.name = "HealthBar";
-            
-            healthBar = healthBarObj.GetComponent<WorldSpaceHealthBar>();
-            if (healthBar != null)
-            {
-                Debug.Log($"  ❤️ Added healthbar to {enemyObject.name}");
-            }
-            else
-            {
-                Debug.LogWarning($"  ⚠️ Healthbar prefab doesn't have WorldSpaceHealthBar component!");
-            }
-        }
-        else
-        {
-            Debug.LogWarning($"⚠️ No WorldSpaceHealthBar found and no healthBarPrefab assigned for: {enemyObject.name}");
-        }
     }
     
     private void CategorizeAndStoreSpawnedObject(GameObject obj, ChallengeData.SpawnableCategory category, ChallengeInstance instance, ActiveChallenge challenge)
@@ -1094,16 +1066,21 @@ public class ChallengeSpawner : MonoBehaviour
         if (enemy == null || challenge == null)
             return;
         
-        // Try to apply to JUTPS health system
-        JUTPS.JUHealth juHealth = enemy.GetComponent<JUTPS.JUHealth>();
-        if (juHealth != null)
+        Traits traits = enemy.GetComponent<Traits>();
+        if (traits != null)
         {
-            float originalHealth = juHealth.MaxHealth;
-            float scaledHealth = originalHealth * challenge.enemyHealthMultiplier;
-            juHealth.MaxHealth = scaledHealth;
-            juHealth.Health = scaledHealth;
-            
-            Debug.Log($"Enemy scaled: Health {originalHealth:F0} → {scaledHealth:F0} (x{challenge.enemyHealthMultiplier:F2})");
+            try
+            {
+                RuntimeAttributeData health = traits.RuntimeAttributes.Get("health");
+                float originalHealth = (float)health.Value;
+                float scaledHealth = originalHealth * challenge.enemyHealthMultiplier;
+                health.Value = scaledHealth;
+                Debug.Log($"Enemy scaled: Health {originalHealth:F0} → {scaledHealth:F0} (x{challenge.enemyHealthMultiplier:F2})");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"{enemy.name}: ChallengeSpawner could not scale health — {e.Message}");
+            }
         }
         
         // Apply damage scaling
@@ -1121,17 +1098,16 @@ public class ChallengeSpawner : MonoBehaviour
         if (enemy == null || challenge == null || challenge.challengeData == null)
             return;
         
-        // Increased enemy speed
+        // Increased enemy speed — adjust NavMeshAgent speed
         if (challenge.challengeData.HasModifier(ChallengeData.ChallengeModifier.ModifierType.IncreasedEnemySpeed))
         {
             float speedMultiplier = challenge.challengeData.GetModifierValue(ChallengeData.ChallengeModifier.ModifierType.IncreasedEnemySpeed);
             
-            JUTPS.JUCharacterController charController = enemy.GetComponent<JUTPS.JUCharacterController>();
-            if (charController != null)
+            NavMeshAgent agent = enemy.GetComponent<NavMeshAgent>();
+            if (agent != null)
             {
-                charController.WalkSpeed *= speedMultiplier;
-                charController.RunSpeed *= speedMultiplier;
-                Debug.Log($"Enemy speed increased by {speedMultiplier}x");
+                agent.speed *= speedMultiplier;
+                Debug.Log($"Enemy speed increased by {speedMultiplier}x (NavMeshAgent.speed = {agent.speed:F2})");
             }
         }
         

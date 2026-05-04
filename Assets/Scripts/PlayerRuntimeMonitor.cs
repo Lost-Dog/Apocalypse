@@ -18,16 +18,6 @@ public class PlayerRuntimeMonitor : MonoBehaviour
         Debug.Log($"[PlayerMonitor] Tag: {tag}");
         startPosition = transform.position;
         
-        // Check for JUAutoDestroy component
-        var autoDestroy = GetComponent<JUTPS.Utilities.JUAutoDestroy>();
-        if (autoDestroy != null)
-        {
-            Debug.LogError("[PlayerMonitor] ❌ FOUND JUAutoDestroy COMPONENT!");
-            Debug.LogError("[PlayerMonitor] This will destroy the player!");
-            Debug.LogError("[PlayerMonitor] REMOVING IT NOW...");
-            Destroy(autoDestroy);
-        }
-        
         // Log all components
         Debug.Log("[PlayerMonitor] Components on player:");
         foreach (var component in GetComponents<Component>())

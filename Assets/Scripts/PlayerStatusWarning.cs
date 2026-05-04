@@ -1,7 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using JUTPS;
+using GameCreator.Runtime.Common;
+using GameCreator.Runtime.Stats;
 
 public class PlayerStatusWarning : MonoBehaviour
 {
@@ -12,9 +13,11 @@ public class PlayerStatusWarning : MonoBehaviour
     
     [Header("Auto-Find References")]
     public bool autoFindReferences = true;
-    public JUHealth playerHealth;
     public SurvivalManager survivalManager;
     public PlayerInfectionDisplay infectionDisplay;
+
+    private const string HealthAttributeId = "health";
+    private Traits playerTraits;
     
     [Header("Threshold Settings")]
     [Range(0f, 1f)] public float healthLowThreshold = 0.3f;
@@ -89,24 +92,18 @@ public class PlayerStatusWarning : MonoBehaviour
             }
         }
         
-        if (playerHealth == null)
+        if (playerTraits == null)
         {
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            GameObject player = ShortcutPlayer.Instance;
             if (player != null)
-            {
-                playerHealth = player.GetComponent<JUHealth>();
-            }
+                playerTraits = player.GetComponent<Traits>();
         }
-        
+
         if (survivalManager == null)
-        {
             survivalManager = FindFirstObjectByType<SurvivalManager>();
-        }
-        
+
         if (infectionDisplay == null)
-        {
             infectionDisplay = FindFirstObjectByType<PlayerInfectionDisplay>();
-        }
     }
     
     private void Update()
@@ -137,13 +134,18 @@ public class PlayerStatusWarning : MonoBehaviour
         bool infectionLow = false;
         bool infectionCritical = false;
         
-        if (playerHealth != null)
+        if (playerTraits != null)
         {
-            float healthPercentage = playerHealth.Health / playerHealth.MaxHealth;
-            healthCritical = healthPercentage <= healthCriticalThreshold;
-            healthLow = !healthCritical && healthPercentage <= healthLowThreshold;
+            try
+            {
+                RuntimeAttributeData health = playerTraits.RuntimeAttributes.Get(HealthAttributeId);
+                float healthPercentage = (float)(health.Value / health.MaxValue);
+                healthCritical = healthPercentage <= healthCriticalThreshold;
+                healthLow      = !healthCritical && healthPercentage <= healthLowThreshold;
+            }
+            catch (System.Exception) { }
         }
-        
+
         if (survivalManager != null && survivalManager.enableTemperatureSystem)
         {
             float tempPercentage = survivalManager.TemperaturePercentage;

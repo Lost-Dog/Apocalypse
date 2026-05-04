@@ -184,13 +184,15 @@ public class ControlZone : MonoBehaviour
             {
                 GameObject enemy = Instantiate(enemyPrefab, enemySpawnPoints[i].position, enemySpawnPoints[i].rotation);
                 enemy.SetActive(true);
-                
+
                 if (enemy != null)
                 {
-                    JUTPS.JUHealth health = enemy.GetComponent<JUTPS.JUHealth>();
-                    if (health != null)
+                    GameCreator.Runtime.Characters.Character character =
+                        enemy.GetComponent<GameCreator.Runtime.Characters.Character>();
+
+                    if (character != null)
                     {
-                        health.OnDeath.AddListener(() => OnEnemyKilled());
+                        character.EventDie += () => OnEnemyKilled();
                     }
                 }
             }

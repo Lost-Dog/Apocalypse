@@ -1,0 +1,19 @@
+#ConnectionsButtons {
+    flex-direction: row;
+    flex-wrap: wrap;
+    background-color: var(--gc-color-bg-dark);
+    border-width: var(--gc-common-border-width);
+    border-color: var(--gc-color-border-default);
+    border-radius: var(--gc-common-border-radius);
+    padding: 5px 3px;
+}
+
+#ConnectionsButtons FloatField {
+    flex-grow: 0;
+    width: 80px;
+    margin-right: 3px;
+}
+
+#ConnectionsButtons Button {
+    flex-grow: 1;
+}

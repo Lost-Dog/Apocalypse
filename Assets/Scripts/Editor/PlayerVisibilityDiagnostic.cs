@@ -103,14 +103,14 @@ public class PlayerVisibilityDiagnostic : EditorWindow
                 }
             }
             
-            // Search for JUCharacterController component
+            // Search for GC2 Character component as last resort
             if (player == null)
             {
-                var controllers = Object.FindObjectsByType<JUTPS.JUCharacterController>(FindObjectsSortMode.None);
-                if (controllers.Length > 0)
+                var characters = Object.FindObjectsByType<GameCreator.Runtime.Characters.Character>(FindObjectsSortMode.None);
+                if (characters.Length > 0)
                 {
-                    player = controllers[0].gameObject;
-                    Debug.LogWarning($"⚠️ Found JUCharacterController on '{player.name}' but it lacks 'Player' tag!");
+                    player = characters[0].gameObject;
+                    Debug.LogWarning($"⚠️ Found GC2 Character on '{player.name}' but it lacks 'Player' tag!");
                 }
             }
             
@@ -255,15 +255,15 @@ public class PlayerVisibilityDiagnostic : EditorWindow
                 }
             }
             
-            // If still not found, search for objects with JUCharacterController
+            // If still not found, search for GC2 Character component
             if (player == null)
             {
-                var controllers = Object.FindObjectsByType<JUTPS.JUCharacterController>(FindObjectsSortMode.None);
-                if (controllers.Length > 0)
+                var characters = Object.FindObjectsByType<GameCreator.Runtime.Characters.Character>(FindObjectsSortMode.None);
+                if (characters.Length > 0)
                 {
-                    player = controllers[0].gameObject;
+                    player = characters[0].gameObject;
                     player.tag = "Player";
-                    Debug.Log($"✓ Found JUCharacterController on '{player.name}' and set tag to 'Player'");
+                    Debug.Log($"✓ Found GC2 Character on '{player.name}' and set tag to 'Player'");
                 }
             }
             
@@ -325,7 +325,7 @@ public class PlayerVisibilityDiagnostic : EditorWindow
         Debug.Log($"Camera: {mainCamera.name}");
         Debug.Log($"Player: {player.name}");
         Debug.Log($"Distance: {Vector3.Distance(mainCamera.transform.position, player.transform.position):F2}m");
-        Debug.Log("Camera should auto-follow player with 'Player' tag if using JUTPS camera system");
+        Debug.Log("Camera should auto-follow player with 'Player' tag via GC2 camera shot system.");
     }
 
     private void ResetPlayerPosition()
@@ -570,18 +570,18 @@ public class PlayerVisibilityDiagnostic : EditorWindow
         
         // Check components
         Debug.Log("\nComponents:");
-        var controller = player.GetComponent<JUTPS.JUCharacterController>();
-        var rigidbody = player.GetComponent<Rigidbody>();
-        var collider = player.GetComponent<Collider>();
-        
-        Debug.Log($"  JUCharacterController: {(controller != null ? "✓" : "❌")}");
+        var character  = player.GetComponent<GameCreator.Runtime.Characters.Character>();
+        var rigidbody  = player.GetComponent<Rigidbody>();
+        var collider   = player.GetComponent<Collider>();
+
+        Debug.Log($"  GC2 Character: {(character != null ? "✓" : "❌")}");
         Debug.Log($"  Rigidbody: {(rigidbody != null ? "✓" : "❌")}");
         Debug.Log($"  Collider: {(collider != null ? "✓" : "❌")}");
-        
-        if (controller != null)
+
+        if (character != null)
         {
-            Debug.Log($"  Controller enabled: {controller.enabled}");
-            Debug.Log($"  IsDead: {controller.IsDead}");
+            Debug.Log($"  Character enabled: {character.enabled}");
+            Debug.Log($"  IsDead: {character.IsDead}");
         }
         
         Debug.Log("\n═══════════════════════════════════════");

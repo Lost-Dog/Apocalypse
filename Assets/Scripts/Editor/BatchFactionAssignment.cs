@@ -320,58 +320,5 @@ namespace ApocalypseEditor
             
             AssetDatabase.SaveAssets();
         }
-
-        [MenuItem("GameObject/Faction/Add Faction Integration to Selected", false, 40)]
-        public static void AddFactionIntegration()
-        {
-            if (Selection.gameObjects == null || Selection.gameObjects.Length == 0)
-            {
-                EditorUtility.DisplayDialog("No Selection", "Please select one or more GameObjects.", "OK");
-                return;
-            }
-
-            int added = 0;
-            int skipped = 0;
-
-            foreach (var obj in Selection.gameObjects)
-            {
-                if (obj == null)
-                    continue;
-
-                if (obj.GetComponent<JUTPSFactionIntegration>() != null)
-                {
-                    Debug.LogWarning($"{obj.name} already has JUTPSFactionIntegration. Skipping.", obj);
-                    skipped++;
-                    continue;
-                }
-
-                var integration = Undo.AddComponent<JUTPSFactionIntegration>(obj);
-                EditorUtility.SetDirty(integration);
-                
-                if (PrefabUtility.IsPartOfPrefabInstance(obj))
-                {
-                    PrefabUtility.RecordPrefabInstancePropertyModifications(integration);
-                }
-
-                added++;
-            }
-
-            string message = $"Added JUTPSFactionIntegration to {added} object(s).";
-            if (skipped > 0)
-            {
-                message += $"\nSkipped {skipped} object(s) that already had the component.";
-            }
-
-            Debug.Log(message);
-            EditorUtility.DisplayDialog("Faction Integration Added", message, "OK");
-            
-            AssetDatabase.SaveAssets();
-        }
-
-        [MenuItem("GameObject/Faction/Add Faction Integration to Selected", true)]
-        public static bool ValidateFactionIntegrationAdd()
-        {
-            return Selection.gameObjects != null && Selection.gameObjects.Length > 0;
-        }
     }
 }

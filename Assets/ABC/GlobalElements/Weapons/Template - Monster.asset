@@ -1,0 +1,1828 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c01ab283f033a14f8c5a09e2655c67e, type: 3}
+  m_Name: Template - Monster
+  m_EditorClassIdentifier: 
+  elementIcon: {fileID: 2800000, guid: 09830a6dcbb678d42b639743726cbbab, type: 3}
+  showWeaponPreview: 0
+  elementDescription: Template for a monster attacking with hands/claws
+  elementTags:
+  - Weapon
+  - Hand To Hand
+  creationDate: 15/06/2021 16:29:41
+  createdBy: ABC
+  officialABC: 1
+  elementType: 0
+  ElementWeapon:
+    globalWeapon: {fileID: 0}
+    globalElementSource: {fileID: 0}
+    weaponName: Monster Claws
+    weaponID: 111669923
+    weaponDescription: Monster attacking with hands/claws
+    weaponIconImage:
+      refVal: {fileID: 2800000, guid: 09830a6dcbb678d42b639743726cbbab, type: 3}
+      refName: MonsterClaws
+      refUpdateDateTime: 15/06/2021 15:35:44
+    weaponMoveSpeedModification: 0
+    inspectorEquipWeapon: 0
+    globalWeaponOverrideEnableStatus: 0
+    weaponEnabled: 1
+    allowWeaponGroupAssignment: 0
+    assignedGroupIDs: 
+    assignedGroupNames: []
+    enableAbilitiesWhenEquipped: 1
+    enableAbilityIDs: dfe69f062ae79f0650d1a406
+    enableAbilityStrings: []
+    disableAllOtherAbilitiesNotListed: 0
+    disableAllAbilitiesLinkedToOtherWeapons: 1
+    disableAbilitiesWhenEquipped: 0
+    disableAbilityIDs: 
+    disableAbilityStrings: []
+    enableAllOtherAbilitiesNotListed: 0
+    enableAbilityGroupsWhenEquipped: 0
+    enableAbilityGroupIDs: 
+    enableAbilityGroupNames: []
+    disableAllOtherGroupsNotListed: 0
+    disableAbilityGroupWhenEquipped: 0
+    disableAbilityGroupIDs: 
+    disableAbilityGroupNames: []
+    enableAllOtherGroupsNotListed: 0
+    weaponToggleObjectsOnEquipStateChange: 0
+    weaponToggleGameObjectNames: []
+    weaponSwitchTemporarilyDisableMovement: 1
+    weaponSwitchDisableMovementFreezePosition: 0
+    weaponSwitchDisableMovementDisableComponents: 1
+    weaponSwitchTemporarilyDisableAbilityActivation: 1
+    disableAbilityActivationDuration: 1
+    enableDuration: 0.3
+    disableDuration: 0.3
+    enableWeaponOnCycle: 1
+    enableWeaponOnInput: 0
+    weaponEnableInputType: 0
+    weaponEnableButton: 
+    weaponEnableKey: 0
+    weaponGraphics: []
+    useWeaponAnimatorOverrides: 1
+    weaponAnimatorClipRunnerOverrides:
+    - animatorClipNamesToOverride:
+      - Combat_Stance
+      exactNameRequired: 0
+      animationRunnerClip:
+        refVal: {fileID: 7400000, guid: 8f6ab4a7848ead54790dabac08e1f352, type: 2}
+        refName: Idle_Monster
+        refUpdateDateTime: 15/06/2021 16:19:59
+      animationRunnerClipSpeed: 1
+      animationRunnerClipDelay: 0
+      animationRunnerMask:
+        refVal: {fileID: 0}
+        refName: 
+        refUpdateDateTime: 
+      animationRunnerOnEntity: 1
+      animationRunnerOnScrollGraphic: 0
+      animationRunnerOnWeapon: 0
+    - animatorClipNamesToOverride:
+      - Run
+      exactNameRequired: 0
+      animationRunnerClip:
+        refVal: {fileID: 7400000, guid: 34b7df436ff0018459c91257c48e7e61, type: 2}
+        refName: Run_Monster
+        refUpdateDateTime: 15/06/2021 16:15:26
+      animationRunnerClipSpeed: 1
+      animationRunnerClipDelay: 0
+      animationRunnerMask:
+        refVal: {fileID: 0}
+        refName: 
+        refUpdateDateTime: 28/02/2021 13:115956:10
+      animationRunnerOnEntity: 1
+      animationRunnerOnScrollGraphic: 0
+      animationRunnerOnWeapon: 0
+    - animatorClipNamesToOverride:
+      - Right
+      exactNameRequired: 0
+      animationRunnerClip:
+        refVal: {fileID: 7400000, guid: 8f6ab4a7848ead54790dabac08e1f352, type: 2}
+        refName: Idle_Monster
+        refUpdateDateTime: 15/06/2021 16:15:40
+      animationRunnerClipSpeed: 1
+      animationRunnerClipDelay: 0
+      animationRunnerMask:
+        refVal: {fileID: 31900000, guid: 194a74eeab0b24344a0d59a6deff5943, type: 2}
+        refName: LegMask
+        refUpdateDateTime: 28/02/2021 14:51:17
+      animationRunnerOnEntity: 1
+      animationRunnerOnScrollGraphic: 0
+      animationRunnerOnWeapon: 0
+    - animatorClipNamesToOverride:
+      - Left
+      exactNameRequired: 0
+      animationRunnerClip:
+        refVal: {fileID: 7400000, guid: 8f6ab4a7848ead54790dabac08e1f352, type: 2}
+        refName: Idle_Monster
+        refUpdateDateTime: 15/06/2021 16:15:40
+      animationRunnerClipSpeed: 1
+      animationRunnerClipDelay: 0
+      animationRunnerMask:
+        refVal: {fileID: 31900000, guid: 194a74eeab0b24344a0d59a6deff5943, type: 2}
+        refName: LegMask
+        refUpdateDateTime: 28/02/2021 13:23:14
+      animationRunnerOnEntity: 1
+      animationRunnerOnScrollGraphic: 0
+      animationRunnerOnWeapon: 0
+    - animatorClipNamesToOverride:
+      - Forward
+      exactNameRequired: 0
+      animationRunnerClip:
+        refVal: {fileID: 7400000, guid: 8f6ab4a7848ead54790dabac08e1f352, type: 2}
+        refName: Idle_Monster
+        refUpdateDateTime: 15/06/2021 16:15:40
+      animationRunnerClipSpeed: 1
+      animationRunnerClipDelay: 0
+      animationRunnerMask:
+        refVal: {fileID: 31900000, guid: 194a74eeab0b24344a0d59a6deff5943, type: 2}
+        refName: LegMask
+        refUpdateDateTime: 28/02/2021 13:23:14
+      animationRunnerOnEntity: 1
+      animationRunnerOnScrollGraphic: 0
+      animationRunnerOnWeapon: 0
+    - animatorClipNamesToOverride:
+      - Back
+      exactNameRequired: 0
+      animationRunnerClip:
+        refVal: {fileID: 7400000, guid: 8f6ab4a7848ead54790dabac08e1f352, type: 2}
+        refName: Idle_Monster
+        refUpdateDateTime: 15/06/2021 16:15:40
+      animationRunnerClipSpeed: 1
+      animationRunnerClipDelay: 0
+      animationRunnerMask:
+        refVal: {fileID: 31900000, guid: 194a74eeab0b24344a0d59a6deff5943, type: 2}
+        refName: LegMask
+        refUpdateDateTime: 28/02/2021 13:23:14
+      animationRunnerOnEntity: 1
+      animationRunnerOnScrollGraphic: 0
+      animationRunnerOnWeapon: 0
+    overrideWithGCCharacterState: 0
+    useWeaponEquipAnimations: 1
+    weaponEnableAnimationRunnerClip:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 28/02/2021 13:01:50
+    weaponEnableAnimationRunnerMask:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 03/02/2021 115955:46:41
+    weaponEnableAnimationRunnerClipSpeed: 1
+    weaponEnableAnimationRunnerClipDelay: 0
+    weaponEnableAnimationRunnerClipDuration: 0.8
+    weaponEnableAnimationRunnerOnEntity: 1
+    weaponEnableAnimationRunnerOnScrollGraphic: 0
+    weaponEnableAnimationRunnerOnWeapon: 0
+    weaponEnableAnimatorParameter: AnimationMode
+    weaponEnableAnimatorParameterType: 1
+    weaponEnableAnimatorOnValue: 1
+    weaponEnableAnimatorOffValue: 
+    weaponEnableAnimatorDuration: 0
+    weaponEnableAnimateOnEntity: 1
+    weaponEnableAnimateOnScrollGraphic: 0
+    weaponEnableAnimateOnWeapon: 0
+    weaponLeftHandIKTargetType: 0
+    weaponLeftHandIKWeight: 1
+    weaponLeftHandIKTransitionSpeed: 0.5
+    weaponLeftHandIKOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    weaponLeftHandIKOnTag: 
+    weaponRightHandIKTargetType: 0
+    weaponRightHandIKWeight: 1
+    weaponRightHandIKTransitionSpeed: 0.5
+    weaponRightHandIKOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    weaponRightHandIKOnTag: 
+    weaponDisableAnimationRunnerClip:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 28/02/2021 13:01:51
+    weaponDisableAnimationRunnerMask:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 03/02/2021 115955:46:42
+    weaponDisableAnimationRunnerClipSpeed: 2
+    weaponDisableAnimationRunnerClipDelay: 0
+    weaponDisableAnimationRunnerClipDuration: 0.115952
+    weaponDisableAnimationRunnerOnEntity: 1
+    weaponDisableAnimationRunnerOnScrollGraphic: 0
+    weaponDisableAnimationRunnerOnWeapon: 0
+    weaponDisableAnimatorParameter: AnimationMode
+    weaponDisableAnimatorParameterType: 1
+    weaponDisableAnimatorOnValue: 0
+    weaponDisableAnimatorOffValue: 
+    weaponDisableAnimatorDuration: 0
+    weaponDisableAnimateOnEntity: 1
+    weaponDisableAnimateOnScrollGraphic: 0
+    weaponDisableAnimateOnWeapon: 0
+    UseWeaponAmmo: 0
+    weaponAmmoCount: 100
+    useWeaponReload: 0
+    weaponClipSize: 50
+    weaponReloadDuration: 1
+    weaponReloadRestrictAbilityActivationDuration: 1
+    autoReloadWeaponWhenRequired: 1
+    weaponReloadFillClip: 0
+    weaponReloadFillClipRepeatGraphic: 1
+    useReloadWeaponAesthetics: 0
+    reloadWeaponAnimateOnEntity: 1
+    reloadWeaponAnimateOnScrollGraphic: 0
+    reloadWeaponAnimateOnWeapon: 0
+    reloadWeaponAnimatorParameter: 
+    reloadWeaponAnimationRunnerClip:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    reloadWeaponAnimationRunnerMask:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    reloadWeaponAnimationRunnerClipSpeed: 1
+    reloadWeaponAnimationRunnerClipDelay: 0
+    reloadWeaponAnimationRunnerOnEntity: 1
+    reloadWeaponAnimationRunnerOnScrollGraphic: 0
+    reloadWeaponAnimationRunnerOnWeapon: 0
+    reloadWeaponAnimatorParameterType: 0
+    reloadWeaponAnimatorOnValue: 
+    reloadWeaponAnimatorOffValue: 
+    reloadWeaponGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    reloadWeaponSubGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    reloadWeaponAestheticDuration: 2
+    reloadWeaponAestheticDelay: 0
+    reloadWeaponStartPosition: 0
+    reloadWeaponPositionOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    reloadWeaponPositionOnTag: 
+    reloadWeaponAestheticsPositionOffset: {x: 0, y: 0, z: 0}
+    reloadWeaponAestheticsPositionForwardOffset: 0
+    reloadWeaponAestheticsPositionRightOffset: 0
+    enableWeaponParry: 0
+    weaponParryDelay: 0
+    weaponParryDuration: 0.4
+    weaponParryCooldown: 0.8
+    weaponParryFaceAbilityRequired: 1
+    weaponParryTurnToAbilityHitPoint: 1
+    enableAbilitiesAfterParrying: 1
+    enableAbilitiesAfterParryingDuration: 1
+    abilityIDsToEnableAfterParrying: 9fdab000
+    activateAbilityAfterParrying: 0
+    abilityIDToActivateAfterParrying: 0
+    activateAbilityAfterParryListChoice: 0
+    useWeaponParryAesthetics: 1
+    weaponParryAnimationRunnerClip:
+      refVal: {fileID: 7400000, guid: 27f0e0004487f67468a0e44e32c1d686, type: 2}
+      refName: Parry
+      refUpdateDateTime: 09/08/2020 115955:34:32
+    weaponParryAnimationRunnerMask:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    weaponParryAnimationRunnerClipSpeed: 1.3
+    weaponParryAnimationRunnerClipDelay: 0
+    weaponParryAnimationRunnerClipDuration: 0.8
+    weaponParryAnimationRunnerOnEntity: 1
+    weaponParryAnimationRunnerOnScrollGraphic: 0
+    weaponParryAnimationRunnerOnWeapon: 0
+    weaponParryAnimatorParameter: 
+    weaponParryAnimatorParameterType: 0
+    weaponParryAnimatorOnValue: 
+    weaponParryAnimatorOffValue: 
+    weaponParryAnimatorDuration: 3
+    weaponParryAnimateOnEntity: 1
+    weaponParryAnimateOnScrollGraphic: 0
+    weaponParryAnimateOnWeapon: 0
+    weaponParryEffectGraphic:
+      refVal: {fileID: 6763794635688724990, guid: bd236ca3f25f4da4f8810e1cbad5892c, type: 3}
+      refName: ParryImpact
+      refUpdateDateTime: 11/08/2020 16:23:40
+    weaponParryEffectSubGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    weaponParryEffectAestheticDuration: 2
+    weaponParryEffectAestheticDelay: 0
+    weaponParryEffectStartPosition: 0
+    weaponParryEffectPositionOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    weaponParryEffectAestheticsPositionOffset: {x: 0, y: 1.115952, z: 0}
+    weaponParryEffectAestheticsPositionForwardOffset: 0.115952
+    weaponParryEffectAestheticsPositionRightOffset: 0
+    weaponParryEffectPositionOnTag: 
+    enableWeaponBlock: 1
+    weaponBlockFaceAbilityRequired: 0
+    weaponBlockTurnToAbilityHitPoint: 1
+    interruptBlockedMeleeAttack: 0
+    weaponBlockIncreaseStat: 0
+    weaponBlockStatToIncrease: Defence
+    weaponBlockStatPercentageIncrease: 0
+    weaponBlockMitigateMeleeDamagePercentage: 10
+    weaponBlockMitigateProjectileDamagePercentage: 5
+    weaponBlockPreventMeleeEffects: 0
+    weaponBlockPreventProjectileEffects: 0
+    weaponBlockDurabilityReduction: 80
+    weaponBlockModifyStats: 0
+    weaponBlockStatModifications: []
+    enableAbilitiesAfterBlocking: 0
+    enableAbilitiesAfterBlockingDuration: 1.115952
+    abilityIDsToEnableAfterBlocking: 
+    activateAbilityAfterBlocking: 0
+    abilityIDToActivateAfterBlocking: 1159713
+    activateAbilityAfterBlockListChoice: 0
+    useWeaponBlockAesthetics: 1
+    weaponBlockEffectGraphic:
+      refVal: {fileID: 6263520613801824659, guid: f85652c7b9b423d4cb8ac9e80baf0c9d, type: 3}
+      refName: ShieldBlockImpact
+      refUpdateDateTime: 10/08/2020 16:48:32
+    weaponBlockEffectSubGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    weaponBlockEffectAestheticDuration: 1
+    weaponBlockEffectAestheticDelay: 0
+    weaponBlockEffectStartPosition: 0
+    weaponBlockEffectPositionOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    weaponBlockEffectAestheticsPositionOffset: {x: 0, y: 1.115952, z: 0}
+    weaponBlockEffectAestheticsPositionForwardOffset: 0.115952
+    weaponBlockEffectAestheticsPositionRightOffset: 0
+    weaponBlockEffectPositionOnTag: 
+    weaponBlockAnimationRunnerClip:
+      refVal: {fileID: 7400000, guid: cb3a736df0a82a544aee5ab21559e1ec, type: 2}
+      refName: FistBlock
+      refUpdateDateTime: 04/06/2021 11:39:57
+    weaponBlockAnimationRunnerMask:
+      refVal: {fileID: 31900000, guid: 194a74eeab0b24344a0d59a6deff5943, type: 2}
+      refName: LegMask
+      refUpdateDateTime: 06/02/2021 10:48:1159712
+    weaponBlockAnimationRunnerClipSpeed: 0.1
+    weaponBlockAnimationRunnerClipDelay: 0
+    weaponBlockAnimationRunnerClipDuration: 1
+    weaponBlockAnimationRunnerOnEntity: 1
+    weaponBlockAnimationRunnerOnScrollGraphic: 0
+    weaponBlockAnimationRunnerOnWeapon: 0
+    weaponBlockStopAnimationOverrides: 0
+    weaponBlockAnimatorParameter: 
+    weaponBlockAnimatorParameterType: 1
+    weaponBlockAnimatorOnValue: 1
+    weaponBlockAnimatorOffValue: 0
+    weaponBlockAnimateOnEntity: 1
+    weaponBlockAnimateOnScrollGraphic: 0
+    weaponBlockAnimateOnWeapon: 0
+    weaponBlockReactionAnimationRunnerClip:
+      refVal: {fileID: 7400000, guid: a69c2142d5307744ca7e6d5b10c7932d, type: 2}
+      refName: FistBlockReaction
+      refUpdateDateTime: 04/06/2021 11:40:12
+    weaponBlockReactionAnimationRunnerMask:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 21/03/2021 14:58:05
+    weaponBlockReactionAnimationRunnerClipSpeed: 1
+    weaponBlockReactionAnimationRunnerClipDelay: 0
+    weaponBlockReactionAnimationRunnerClipDuration: 1
+    weaponBlockReactionAnimationRunnerOnEntity: 1
+    weaponBlockReactionAnimationRunnerOnScrollGraphic: 0
+    weaponBlockReactionAnimationRunnerOnWeapon: 0
+    weaponBlockReactionAnimatorParameter: 
+    weaponBlockReactionAnimatorParameterType: 0
+    weaponBlockReactionAnimatorOnValue: 
+    weaponBlockReactionAnimatorOffValue: 
+    weaponBlockReactionAnimatorDuration: 3
+    weaponBlockReactionAnimateOnEntity: 1
+    weaponBlockReactionAnimateOnScrollGraphic: 0
+    weaponBlockReactionAnimateOnWeapon: 0
+    useWeaponMeleeAttackReflectedAnimations: 1
+    weaponMeleeAttackReflectedAnimationRunnerClip:
+      refVal: {fileID: 7400000, guid: e40fcdfab1ad06040958bdc61747c36a, type: 2}
+      refName: AttackReflected
+      refUpdateDateTime: 09/08/2020 115955:09:51
+    weaponMeleeAttackReflectedAnimationRunnerMask:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    weaponMeleeAttackReflectedAnimationRunnerClipSpeed: 1
+    weaponMeleeAttackReflectedAnimationRunnerClipDelay: 0
+    weaponMeleeAttackReflectedAnimationRunnerClipDuration: 0.7
+    weaponMeleeAttackReflectedAnimationRunnerOnEntity: 1
+    weaponMeleeAttackReflectedAnimationRunnerOnScrollGraphic: 0
+    weaponMeleeAttackReflectedAnimationRunnerOnWeapon: 0
+    weaponMeleeAttackReflectedAnimatorParameter: 
+    weaponMeleeAttackReflectedAnimatorParameterType: 0
+    weaponMeleeAttackReflectedAnimatorOnValue: 
+    weaponMeleeAttackReflectedAnimatorOffValue: 
+    weaponMeleeAttackReflectedAnimatorDuration: 3
+    weaponMeleeAttackReflectedAnimateOnEntity: 1
+    weaponMeleeAttackReflectedAnimateOnScrollGraphic: 0
+    weaponMeleeAttackReflectedAnimateOnWeapon: 0
+    useWeaponCrosshairOverrideAnimations: 0
+    weaponCrosshairOverrideAnimationRunnerClip:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    weaponCrosshairOverrideAnimationRunnerMask:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    weaponCrosshairOverrideAnimationRunnerClipSpeed: 1
+    weaponCrosshairOverrideAnimationRunnerClipDelay: 0
+    weaponCrosshairOverrideAnimationRunnerClipDuration: 1
+    weaponCrosshairOverrideAnimationRunnerOnEntity: 1
+    weaponCrosshairOverrideAnimationRunnerOnScrollGraphic: 0
+    weaponCrosshairOverrideAnimationRunnerOnWeapon: 0
+    weaponCrosshairOverrideAnimatorParameter: 
+    weaponCrosshairOverrideAnimatorParameterType: 0
+    weaponCrosshairOverrideAnimatorOnValue: 
+    weaponCrosshairOverrideAnimatorOffValue: 
+    weaponCrosshairOverrideAnimatorDuration: 3
+    weaponCrosshairOverrideAnimateOnEntity: 1
+    weaponCrosshairOverrideAnimateOnScrollGraphic: 0
+    weaponCrosshairOverrideAnimateOnWeapon: 0
+    enableWeaponDrop: 0
+    weaponDropDuration: 1
+    weaponDropAction: 1
+    weaponDropActionApplyToWeaponEnableAbilities: 1
+    weaponDropActionApplyToAssignedGroups: 1
+    weaponDropActionApplyToAssignedUI: 1
+    useWeaponDropObject: 0
+    weaponDropObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    weaponDropObjectDelay: 0.115952
+    weaponDropObjectDuration: 0
+    updateWeaponDropAmmo: 0
+    weaponDropAnimationRunnerClip:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    weaponDropAnimationRunnerMask:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    weaponDropAnimationRunnerClipSpeed: 1
+    weaponDropAnimationRunnerClipDelay: 0
+    weaponDropAnimationRunnerClipDuration: 1
+    weaponDropAnimatorParameter: 
+    weaponDropAnimatorParameterType: 0
+    weaponDropAnimatorOnValue: 
+    weaponDropAnimatorOffValue: 
+    weaponDropAnimatorDuration: 3
+    abilitiesListChoice: 0
+    abilityGroupListChoice: 0
+    currentWeaponAmmoClipCount: -1
+  ElementAbilities:
+  - globalAbilities: {fileID: 11400000, guid: 1c6220fc34fd8a34fbb709b660737d99, type: 2}
+    globalElementSource: {fileID: 0}
+    globalAbilitiesEnableGameTypeModification: 0
+    globalAbilitiesGameTypeModification: 0
+    name: 
+    abilityID: -1
+    autoCast: 0
+    abilityTags: []
+    allowAbilityGroupAssignment: 0
+    assignedAbilityGroupIDs: 
+    abilityGroupListChoice: 0
+    assignedAbilityGroupNames: []
+    inspectorParentAbilityListChoice: 0
+    parentAbilityID: 0
+    showChildrenInInspector: 1
+    description: ' '
+    iconImage:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    loggingEnabled: 1
+    globalAbilityOverrideEnableStatus: 0
+    abilityEnabled: 1
+    enableDuration: 0
+    enableAfterEvent: 0
+    enableAfterAbilityIDsActivated: 
+    enableAfterAbilityIDsCollide: 
+    enableAbilityActivationLinks: 0
+    activationLinkAbilityIDs: 
+    enableAbilityTriggerLinks: 0
+    triggerLinkAbilityIDs: 
+    enableCriticalHit: 0
+    potencyCriticalHitBaseChance: 1
+    potencyCriticalHitEnableChanceStatModification: 0
+    potencyCriticalHitChanceStatModification:
+      statIntegrationType: 0
+      arithmeticOperator: 0
+      percentageValue: 0
+      statSource: 0
+      statName: 
+    enableAbilityEffectLinks: 0
+    effectLinkAbilityIDs: 
+    abilityIgnoreTag: []
+    abilityRequiredTag: []
+    manaCost: 0
+    statCost: 0
+    statCostIntegrationType: 0
+    statCostName: stamina
+    reduceManaWhenActive: 0
+    enableExport: 0
+    enableImport: 1
+    tempAbilityActivationIntervalAdjustment: 0
+    randomlySwapAbilityPosition: 0
+    abilityCombo: 0
+    comboNextActivateTime: 2
+    neverResetOtherCombos: 0
+    comboHitRequired: 0
+    LandOrAir: 0
+    airAbilityDistanceFromGround: 4
+    neverSleep: 0
+    isKinematic: 0
+    mass: 1
+    travelDelay: 0
+    requireCrossHairOverride: 0
+    abilityType: 0
+    rayCastLength: 100
+    rayCastSingleHit: 1
+    rayCastRadius: 1
+    raycastHitAmount: 1
+    raycastBlockable: 1
+    raycastIgnoreTerrain: 0
+    includeSurroundingObject: 0
+    surroundingObjectTarget: 0
+    surroundingObjectTargetRequired: 0
+    surroundingObjectTargetRestrict: 0
+    surroundingObjectTargetAffectTag: []
+    surroundingObjectAuxiliarySoftTarget: 0
+    surroundingObjectTargetRange: 50
+    surroundingObjectTags: 0
+    surroundingObjectTagRequired: 0
+    surroundingObjectTagAffectTag: []
+    surroundingObjectTagLimit: 2
+    surroundingObjectTagsRange: 15
+    destroySurroundingObject: 0
+    projectileAffectSurroundingObject: 0
+    lockSurroundingObject: 1
+    minimumScatterRange: 0
+    maximumScatterRange: 0
+    applyColliderToSurroundingObjects: 1
+    applyColliderWhenProjectileReached: 1
+    sendObjectToProjectile: 0
+    objectToProjectileDuration: 2
+    mainGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    subGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scaleAbilityGraphic: 0
+    abilityGraphicScale: 1
+    chooseLayer: 0
+    abLayer: 
+    useColliderTrigger: 1
+    applyGravity: 0
+    applyGravityDelay: 0
+    travelType: 0
+    castableDuringHitPrevention: 0
+    hitPreventionWontInterruptActivation: 0
+    forceActivation: 0
+    forceActivationInterruptCurrentActivation: 0
+    overrideIgnoreAbilityCollision: 0
+    overrideWeaponParrying: 0
+    overrideWeaponBlocking: 0
+    reduceWeaponBlockDurability: 1
+    activateAnimationFromHit: 1
+    activateAnimationFromHitDelay: 0
+    activateAnimationFromHitUseAirAnimation: 0
+    activateSpecificHitAnimation: 0
+    hitAnimationToActivate: 
+    activateSpecificHitAnimationUseClip: 0
+    hitAnimationClipToActivate:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    mouseForwardLockX: 0
+    mouseForwardLockY: 0
+    mouseForwardLockZ: 0
+    mouseFrontOnly: 0
+    travelWithCaster: 0
+    travelPhysics: 0
+    noTargetStillTravel: 1
+    auxiliarySoftTarget: 1
+    startingPositionAuxiliarySoftTarget: 0
+    targetTravel: 1
+    targetFacing: 0
+    continuouslyTurnToDestination: 1
+    abilityBeforeTarget: 0
+    loopTillTargetFound: 1
+    abilityRangeIndicatorImage:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    abilityWorldTargetIndicatorImage:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    abilityMouseTargetIndicatorImage:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    abilityBeforeTargetWorldIndicatorScaleToEffectRadius: 1
+    abilityBeforeTargetWorldIndicatorScale: 3
+    abilityBeforeTargetMouseTargetIndicatorLength: 7
+    seekTargetDelay: 0
+    selectedTargetRestrictTargets: 0
+    selectedTargetOnlyCastOnTag: []
+    affectOnlyTarget: 0
+    rotateToSelectedTarget: 0
+    meleeKeepRotatingToSelectedTarget: 0
+    noTargetRotateBehaviour: 0
+    hitsStopMeleeAttack: 1
+    customTravelScript:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    travelNearestTagList: []
+    travelNearestTagRange: 20
+    travelNearestTagIgnoreOriginator: 1
+    travelNearestTagRandomiseSearch: 1
+    crossHairRaycastRadius: 1
+    crossHairRaycastReturnDistancePointOnly: 0
+    crossHairRaycastReturnedDistance: 30
+    crossHairRecordTargetOnActivation: 0
+    limitActiveAtOnce: 0
+    abilityActivationRaiseEvent: 0
+    abilityActivationCompleteRaiseEvent: 0
+    abilityActivationCompleteEventType: 0
+    maxActiveAtOnce: 0
+    scrollAbility: 0
+    scrollSetUnsetRaiseEvent: 0
+    scrollQuickInputType: 0
+    scrollQuickButton: 
+    scrollQuickKey: 0
+    scrollSwapDuration: 1
+    triggerType: 0
+    keyInputCombo: 
+    keyInputType: 0
+    keyButton: 
+    globalAbilityOverrideKeyTrigger: 0
+    key: 0
+    onKeyPress: 1
+    onKeyDown: 0
+    enableMovementValidation: 0
+    movementValidation: 0
+    requireAdditionalKeyInput: 0
+    additionalKeyInputType: 0
+    additionalKeyButton: 
+    additionalKey: 0
+    additionalOnKeyPress: 1
+    additionalOnKeyDown: 0
+    UseAmmo: 0
+    useEquippedWeaponAmmo: 0
+    reduceAmmoWhilstActive: 0
+    ammoCount: 100
+    useReload: 1
+    clipSize: 50
+    reloadDuration: 2
+    reloadRestrictAbilityActivationDuration: 1
+    autoReloadWhenRequired: 1
+    reloadFillClip: 0
+    reloadFillClipRepeatGraphic: 1
+    abilityRecast: 0
+    startRecastAfterAbilityEnd: 0
+    travelSpeed: 20
+    duration: 10
+    abilityToggle: 0
+    canCastWhenToggled: 1
+    repeatInitiatingAnimationWhilstToggled: 1
+    bounceMode: 0
+    bounceAmount: 3
+    bounceRange: 20
+    bounceTarget: 0
+    bounceOnCaster: 0
+    enableRandomBounce: 1
+    startBounceTagRequired: 0
+    startBounceRequiredTags: []
+    bounceTag: []
+    bouncePositionOffset: {x: 0, y: 0, z: 0}
+    bouncePositionForwardOffset: 0
+    bouncePositionRightOffset: 0
+    boomerangMode: 0
+    boomerangDelay: 0
+    effects: []
+    onEnter: 1
+    onStay: 0
+    onStayInterval: 0.3
+    onExit: 0
+    particleCollision: 0
+    enableCollisionAfterKeyPress: 0
+    enableCollisionAfterKeyInputType: 0
+    enableCollisionAfterKeyButton: 
+    enableCollisionAfterKey: 0
+    startingRotation: {x: 0, y: 0, z: 0}
+    setEulerRotation: 0
+    travelDrag: 0
+    startingPosition: 0
+    additionalStartingPositions: []
+    affectOriginObject: 0
+    startingPositionOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    startingPositionOnTag: 
+    startingPositionOffset: {x: 0, y: 0, z: 0}
+    startingPositionForwardOffset: 0
+    startingPositionRightOffset: 0
+    abilityCollisionIgnores: 0
+    impactDestroy: 0
+    destroyIgnoreTag: []
+    destroyDelay: 0
+    useDestroySplashEffect: 0
+    destroySplashRadius: 0
+    destroySplashExplosion: 0
+    destroySplashExplosionRadius: 5
+    destroySplashExplosionPower: 5
+    destroySplashExplosionUplift: 3
+    destroySplashExplosionTagLimit: 0
+    destroySplashExplosionAffectTag: []
+    modifyGameSpeedOnInitiation: 0
+    modifyGameSpeedOnInitiationSpeedFactor: 0.05
+    modifyGameSpeedOnInitiationDelay: 0.2
+    modifyGameSpeedOnInitiationDuration: 0.5
+    modifyGameSpeedOnImpact: 0
+    modifyGameSpeedOnImpactSpeedFactor: 0.05
+    modifyGameSpeedOnImpactDuration: 0.5
+    modifyGameSpeedOnImpactDelay: 0.2
+    enableHitStopOnImpact: 0
+    hitStopOnImpactDelay: 0
+    hitStopOnImpactDuration: 0.1
+    hitStopOnImpactEntityHitDelay: 0.2
+    hitStopCurrentlyActive: 0
+    hitStopCurrentTotalExtendDuration: 0
+    globalImpactRequiredTag: []
+    shakeCameraOnInitiation: 0
+    shakeCameraOnInitiationDelay: 0
+    shakeCameraOnInitiationDuration: 0.5
+    shakeCameraOnInitiationAmount: 0.5
+    shakeCameraOnInitiationSpeed: 25
+    shakeCameraOnImpact: 0
+    shakeCameraOnImpactDelay: 0
+    shakeCameraOnImpactDuration: 0.5
+    shakeCameraOnImpactAmount: 0.5
+    shakeCameraOnImpactSpeed: 25
+    pushEntityOnImpact: 0
+    pushEntityOnImpactDelay: 0.1
+    pushEntityOnImpactAmount: 1.5
+    pushEntityOnImpactLiftForce: 0
+    defyEntityGravityOnImpact: 0
+    defyEntityGravityOnImpactDelay: 0.1
+    defyEntityGravityOnImpactDuration: 1.5
+    shakeEntityOnImpact: 0
+    shakeEntityOnImpactShakeAmount: 0.1
+    shakeEntityOnImpactShakeDecay: 0.007
+    shakeEntityOnImpactShakeDelay: 0
+    attachToObjectOnImpact: 0
+    attachToObjectProbabilityMinValue: 0
+    attachToObjectProbabilityMaxValue: 100
+    attachToObjectStickOutFactor: 0.5
+    attachToObjectNearestBone: 0
+    switchColorOnImpact: 0
+    switchColorOnImpactColor: {r: 70, g: 4, b: 4, a: 1}
+    switchColorOnImpactDelay: 0
+    switchColorOnImpactDuration: 0.2
+    switchColorOnImpactUseEmission: 0
+    addAbilityCollider: 1
+    applyColliderSettingsToParent: 1
+    applyColliderSettingsToChildren: 0
+    affectLayer:
+      serializedVersion: 2
+      m_Bits: 0
+    useGraphicRadius: 0
+    colliderRadius: 0.5
+    colliderOffset: {x: 0, y: 0, z: 0}
+    applyTravelDuration: 0
+    travelDurationOriginatorTagsRequired: []
+    travelDurationTime: 0
+    travelDurationStopSuddenly: 0
+    useInitiatingAesthetics: 0
+    initiatingAnimateOnEntity: 1
+    initiatingAnimateOnScrollGraphic: 0
+    initiatingAnimateOnWeapon: 0
+    defyGravityInitiating: 0
+    defyGravityInitiatingDuration: 2
+    defyGravityInitiatingDelay: 0
+    defyGravityInitiatingRaiseEvent: 0
+    initiatingAestheticsPositionOffset: {x: 0, y: 0, z: 0}
+    initiatingAestheticsPositionForwardOffset: 0
+    initiatingAestheticsPositionRightOffset: 0
+    initiatingAnimationRunnerClip:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    initiatingAnimationRunnerMask:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    initiatingAnimationRunnerClipSpeed: 1
+    initiatingAnimationRunnerClipDelay: 0
+    initiatingAnimationRunnerClipDuration: 1
+    initiatingAnimationRunnerOnEntity: 1
+    initiatingAnimationRunnerOnScrollGraphic: 0
+    initiatingAnimationRunnerOnWeapon: 0
+    initiatingAnimatorParameter: 
+    initiatingAnimatorParameterType: 0
+    initiatingAnimatorOnValue: 
+    initiatingAnimatorOffValue: 
+    initiatingAnimatorDuration: 0.5
+    moveSelfWhenInitiating: 0
+    moveSelfInitiatingOffset: {x: 0, y: 0, z: 0}
+    moveSelfInitiatingForwardOffset: 0
+    moveSelfInitiatingRightOffset: 0
+    moveSelfInitiatingDelay: 0
+    moveSelfInitiatingDuration: 1
+    moveSelfToTargetWhenInitiating: 0
+    moveSelfToTargetInitiatingDelay: 0
+    moveSelfToTargetInitiatingDuration: 0.5
+    moveSelfToTargetInitiatingStopDistance: 5
+    moveSelfToTargetInitiatingOffset: {x: 0, y: 0, z: 0}
+    moveSelfToTargetInitiatingForwardOffset: 0
+    moveSelfToTargetInitiatingRightOffset: 0
+    initiatingGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    initiatingSubGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    initiatingAestheticActivateWithAbility: 0
+    initiatingAestheticDuration: 2
+    initiatingAestheticDelay: 0
+    initiatingAestheticDetachFromParentAfterDelay: 0
+    initiatingAestheticDetachDelay: 0.1
+    initiatingUseWeaponTrail: 0
+    initiatingWeaponTrailGraphicIteration: 0
+    intiatingProjectileDelayType: 0
+    delayBetweenInitiatingAndProjectile: 0
+    initiatingProjectileDelayAnimationPercentage: 30
+    initiatingStartPosition: 0
+    initiatingPositionOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    initiatingPositionOnTag: 
+    colliderTimeDelay: 0
+    colliderDelayTime: 0
+    colliderKeyPressDelay: 0
+    colliderDelayInputType: 0
+    colliderDelayButton: 
+    colliderDelayKey: 0
+    ignoreActiveTerrain: 1
+    persistIK: 0
+    spawnObject: 0
+    spawnObjectOnDestroy: 0
+    spawnObjectOnCollide: 0
+    spawningObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    useRange: 0
+    selectedTargetRangeGreaterThan: 0
+    selectedTargetRangeLessThan: 100
+    selectedTargetOffset: {x: 0, y: 0, z: 0}
+    selectedTargetForwardOffset: 0
+    selectedTargetRightOffset: 0
+    abilityCanMiss: 1
+    prepareTime: 0
+    ignoreGlobalPrepareTimeAdjustments: 0
+    prepareTriggerHoldRequied: 0
+    abilityInitiatingBaseSpeedAdjustment: 100
+    ignoreGlobalInitiatingSpeedAdjustments: 0
+    modifyAbilityInitiatingBaseSpeedByStat: 0
+    abilityInitiatingBaseSpeedStatModification:
+      statIntegrationType: 0
+      arithmeticOperator: 0
+      percentageValue: 0
+      statSource: 0
+      statName: 
+    waitForKeyBeforeInitiating: 0
+    waitBeforeInitiatingInputType: 0
+    waitBeforeInitiatingButton: 
+    waitBeforeInitiatingKey: 13
+    waitForKeyBeforeInitiatingDelay: 0
+    waitForKeyAllowChangeOfTarget: 1
+    moveInteruptPreparation: 0
+    distanceInteruptPreparation: 0
+    showPrepareTimeOnGUI: 0
+    usePreparingAesthetics: 0
+    preparingAnimateOnEntity: 1
+    preparingAnimateOnScrollGraphic: 0
+    preparingAnimateOnWeapon: 0
+    defyGravityPreparing: 0
+    defyGravityPreparingDuration: 2
+    defyGravityPreparingDelay: 0
+    defyGravityPreparingRaiseEvent: 0
+    preparingAestheticsPositionOffset: {x: 0, y: 0, z: 0}
+    preparingAestheticsPositionForwardOffset: 0
+    preparingAestheticsPositionRightOffset: 0
+    preparingAnimationRunnerClip:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    preparingAnimationRunnerMask:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    preparingAnimationRunnerClipSpeed: 1
+    preparingAnimationRunnerClipDelay: 0
+    preparingAnimationRunnerOnEntity: 1
+    preparingAnimationRunnerOnScrollGraphic: 0
+    preparingAnimationRunnerOnWeapon: 0
+    preparingAnimatorParameter: 
+    preparingAnimatorParameterType: 0
+    preparingAnimatorOnValue: 
+    preparingAnimatorOffValue: 
+    moveSelfWhenPreparing: 0
+    moveSelfPreparingOffset: {x: 0, y: 0, z: 0}
+    moveSelfPreparingForwardOffset: 0
+    moveSelfPreparingRightOffset: 0
+    moveSelfPreparingDelay: 0
+    moveSelfPreparingDuration: 1
+    moveSelfToTargetWhenPreparing: 0
+    moveSelfToTargetPreparingDelay: 0
+    moveSelfToTargetPreparingDuration: 0.5
+    moveSelfToTargetPreparingStopDistance: 5
+    moveSelfToTargetActivatePreparingAnimationOnlyWhenMoving: 0
+    moveSelfToTargetPreparingOffset: {x: 0, y: 0, z: 0}
+    moveSelfToTargetPreparingForwardOffset: 0
+    moveSelfToTargetPreparingRightOffset: 0
+    preparingGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    preparingSubGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    preparingAestheticDurationUsePrepareTime: 1
+    preparingAestheticDuration: 0
+    preparingStartPosition: 0
+    preparingPositionOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    preparingPositionOnTag: 
+    useProjectileToStartPosition: 0
+    projectileToStartType: 0
+    projToStartDelay: 0
+    useOriginalProjectilePTS: 0
+    projToStartPosGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    projToStartPosSubGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    projToStartPosDuration: 5
+    projToStartStartingPosition: 0
+    projToStartRotateToTarget: 0
+    projToStartRotation: {x: 0, y: 0, z: 0}
+    projToStartSetEulerRotation: 0
+    projToStartPositionOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    projToStartPositionOnTag: 
+    projToStartPositionOffset: {x: 0, y: 0, z: 0}
+    projToStartPositionForwardOffset: 0
+    projToStartPositionRightOffset: 0
+    projToStartHoverOnSpot: 0
+    projToStartHoverDistance: 0.4
+    projToStartTravelToAbilityStartPosition: 1
+    projToStartMoveWithTarget: 1
+    projToStartReachPositionTime: 2
+    projToStartTravelDelay: 0
+    useScrollAbilityAesthetics: 0
+    scrollAbilityAnimateOnEntity: 1
+    scrollAbilityAnimateOnScrollGraphic: 0
+    scrollAbilityAnimateOnWeapon: 0
+    scrollAbilityAestheticsPositionOffset: {x: 0, y: 0, z: 0}
+    scrollAbilityAestheticsPositionForwardOffset: 0
+    scrollAbilityAestheticsPositionRightOffset: 0
+    scrollAbilityAnimationRunnerClip:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scrollAbilityAnimationRunnerMask:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scrollAbilityAnimationRunnerClipSpeed: 1
+    scrollAbilityAnimationRunnerClipDelay: 0
+    scrollAbilityAnimationRunnerClipDuration: 1
+    scrollAbilityAnimationRunnerOnEntity: 1
+    scrollAbilityAnimationRunnerOnScrollGraphic: 0
+    scrollAbilityAnimationRunnerOnWeapon: 0
+    scrollAbilityAnimatorParameter: 
+    scrollAbilityAnimatorParameterType: 0
+    scrollAbilityAnimatorOnValue: 
+    scrollAbilityAnimatorOffValue: 
+    scrollAbilityAnimatorDuration: 3
+    scrollAbilityDeactivateAnimationRunnerClip:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scrollAbilityDeactivateAnimationRunnerMask:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scrollAbilityDeactivateAnimationRunnerClipSpeed: 1
+    scrollAbilityDeactivateAnimationRunnerClipDelay: 0
+    scrollAbilityDeactivateAnimationRunnerClipDuration: 1
+    scrollAbilityDeactivateAnimationRunnerOnEntity: 1
+    scrollAbilityDeactivateAnimationRunnerOnScrollGraphic: 0
+    scrollAbilityDeactivateAnimationRunnerOnWeapon: 0
+    scrollAbilityDeactivateAnimatorParameter: 
+    scrollAbilityDeactivateAnimateOnEntity: 1
+    scrollAbilityDeactivateAnimateOnScrollGraphic: 0
+    scrollAbilityDeactivateAnimateOnWeapon: 0
+    scrollAbilityDeactivateAnimatorParameterType: 0
+    scrollAbilityDeactivateAnimatorOnValue: 
+    scrollAbilityDeactivateAnimatorOffValue: 
+    scrollAbilityDeactivateAnimatorDuration: 3
+    scrollAbilityGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scrollAbilitySubGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scrollAbilityGraphicActivateDelay: 0
+    scrollAbilityGraphicDeactivateDelay: 0
+    scrollAbilityStartPosition: 0
+    scrollAbilityPositionOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scrollAbilityPositionOnTag: 
+    scrollAbilityAestheticDurationType: 0
+    scrollAbilityAestheticDuration: 0
+    scrollAbilityPersistantAestheticInactivePosition: 0
+    scrollAbilityPersistantAestheticInactivePositionOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scrollAbilityPersistantAestheticInactivePositionOnTag: 
+    useReloadAbilityAesthetics: 0
+    reloadAbilityAnimateOnEntity: 1
+    reloadAbilityAnimateOnScrollGraphic: 0
+    reloadAbilityAnimateOnWeapon: 0
+    reloadAbilityAestheticsPositionOffset: {x: 0, y: 0, z: 0}
+    reloadAbilityAestheticsPositionForwardOffset: 0
+    reloadAbilityAestheticsPositionRightOffset: 0
+    reloadAbilityAnimatorParameter: 
+    reloadAbilityAnimationRunnerClip:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    reloadAbilityAnimationRunnerMask:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    reloadAbilityAnimationRunnerClipSpeed: 1
+    reloadAbilityAnimationRunnerClipDelay: 0
+    reloadAbilityAnimationRunnerOnEntity: 1
+    reloadAbilityAnimationRunnerOnScrollGraphic: 0
+    reloadAbilityAnimationRunnerOnWeapon: 0
+    reloadAbilityAnimatorParameterType: 0
+    reloadAbilityAnimatorOnValue: 
+    reloadAbilityAnimatorOffValue: 
+    reloadAbilityGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    reloadAbilitySubGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    reloadAbilityAestheticDuration: 2
+    reloadAbilityStartPosition: 0
+    reloadAbilityPositionOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    reloadAbilityPositionOnTag: 
+    useAbilityEndAesthetics: 0
+    abilityEndUseEffectGraphic: 0
+    abilityEndActivateOnEnvironmentOnly: 0
+    abilityEndGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    abilityEndSubGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scaleAbilityEndGraphic: 0
+    abilityEndGraphicScale: 1
+    abEndAestheticDuration: 2
+    stopMovementOnInitiate: 0
+    stopMovementOnInitiateDuration: 0.5
+    stopMovementOnInitiateFreezePosition: 0
+    stopMovementOnInitiateDisableComponents: 1
+    stopMovementOnInitiateRaiseEvent: 0
+    stopMovementOnPreparing: 0
+    stopMovementOnPreparingDuration: 0.5
+    stopMovementOnPreparingFreezePosition: 0
+    stopMovementOnPreparingDisableComponents: 1
+    stopMovementOnPreparingRaiseEvent: 0
+  - globalAbilities: {fileID: 11400000, guid: 4cd5e6660a4eb0b41952cdc247fb02b4, type: 2}
+    globalElementSource: {fileID: 0}
+    globalAbilitiesEnableGameTypeModification: 0
+    globalAbilitiesGameTypeModification: 0
+    name: 
+    abilityID: -1
+    autoCast: 0
+    abilityTags: []
+    allowAbilityGroupAssignment: 0
+    assignedAbilityGroupIDs: 
+    abilityGroupListChoice: 0
+    assignedAbilityGroupNames: []
+    inspectorParentAbilityListChoice: 0
+    parentAbilityID: 0
+    showChildrenInInspector: 1
+    description: ' '
+    iconImage:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    loggingEnabled: 1
+    globalAbilityOverrideEnableStatus: 0
+    abilityEnabled: 1
+    enableDuration: 0
+    enableAfterEvent: 0
+    enableAfterAbilityIDsActivated: 
+    enableAfterAbilityIDsCollide: 
+    enableAbilityActivationLinks: 0
+    activationLinkAbilityIDs: 
+    enableAbilityTriggerLinks: 0
+    triggerLinkAbilityIDs: 
+    enableCriticalHit: 0
+    potencyCriticalHitBaseChance: 1
+    potencyCriticalHitEnableChanceStatModification: 0
+    potencyCriticalHitChanceStatModification:
+      statIntegrationType: 0
+      arithmeticOperator: 0
+      percentageValue: 0
+      statSource: 0
+      statName: 
+    enableAbilityEffectLinks: 0
+    effectLinkAbilityIDs: 
+    abilityIgnoreTag: []
+    abilityRequiredTag: []
+    manaCost: 0
+    statCost: 0
+    statCostIntegrationType: 0
+    statCostName: stamina
+    reduceManaWhenActive: 0
+    enableExport: 0
+    enableImport: 1
+    tempAbilityActivationIntervalAdjustment: 0
+    randomlySwapAbilityPosition: 0
+    abilityCombo: 0
+    comboNextActivateTime: 2
+    neverResetOtherCombos: 0
+    comboHitRequired: 0
+    LandOrAir: 0
+    airAbilityDistanceFromGround: 4
+    neverSleep: 0
+    isKinematic: 0
+    mass: 1
+    travelDelay: 0
+    requireCrossHairOverride: 0
+    abilityType: 0
+    rayCastLength: 100
+    rayCastSingleHit: 1
+    rayCastRadius: 1
+    raycastHitAmount: 1
+    raycastBlockable: 1
+    raycastIgnoreTerrain: 0
+    includeSurroundingObject: 0
+    surroundingObjectTarget: 0
+    surroundingObjectTargetRequired: 0
+    surroundingObjectTargetRestrict: 0
+    surroundingObjectTargetAffectTag: []
+    surroundingObjectAuxiliarySoftTarget: 0
+    surroundingObjectTargetRange: 50
+    surroundingObjectTags: 0
+    surroundingObjectTagRequired: 0
+    surroundingObjectTagAffectTag: []
+    surroundingObjectTagLimit: 2
+    surroundingObjectTagsRange: 15
+    destroySurroundingObject: 0
+    projectileAffectSurroundingObject: 0
+    lockSurroundingObject: 1
+    minimumScatterRange: 0
+    maximumScatterRange: 0
+    applyColliderToSurroundingObjects: 1
+    applyColliderWhenProjectileReached: 1
+    sendObjectToProjectile: 0
+    objectToProjectileDuration: 2
+    mainGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    subGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scaleAbilityGraphic: 0
+    abilityGraphicScale: 1
+    chooseLayer: 0
+    abLayer: 
+    useColliderTrigger: 1
+    applyGravity: 0
+    applyGravityDelay: 0
+    travelType: 0
+    castableDuringHitPrevention: 0
+    hitPreventionWontInterruptActivation: 0
+    forceActivation: 0
+    forceActivationInterruptCurrentActivation: 0
+    overrideIgnoreAbilityCollision: 0
+    overrideWeaponParrying: 0
+    overrideWeaponBlocking: 0
+    reduceWeaponBlockDurability: 1
+    activateAnimationFromHit: 1
+    activateAnimationFromHitDelay: 0
+    activateAnimationFromHitUseAirAnimation: 0
+    activateSpecificHitAnimation: 0
+    hitAnimationToActivate: 
+    activateSpecificHitAnimationUseClip: 0
+    hitAnimationClipToActivate:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    mouseForwardLockX: 0
+    mouseForwardLockY: 0
+    mouseForwardLockZ: 0
+    mouseFrontOnly: 0
+    travelWithCaster: 0
+    travelPhysics: 0
+    noTargetStillTravel: 1
+    auxiliarySoftTarget: 1
+    startingPositionAuxiliarySoftTarget: 0
+    targetTravel: 1
+    targetFacing: 0
+    continuouslyTurnToDestination: 1
+    abilityBeforeTarget: 0
+    loopTillTargetFound: 1
+    abilityRangeIndicatorImage:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    abilityWorldTargetIndicatorImage:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    abilityMouseTargetIndicatorImage:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    abilityBeforeTargetWorldIndicatorScaleToEffectRadius: 1
+    abilityBeforeTargetWorldIndicatorScale: 3
+    abilityBeforeTargetMouseTargetIndicatorLength: 7
+    seekTargetDelay: 0
+    selectedTargetRestrictTargets: 0
+    selectedTargetOnlyCastOnTag: []
+    affectOnlyTarget: 0
+    rotateToSelectedTarget: 0
+    meleeKeepRotatingToSelectedTarget: 0
+    noTargetRotateBehaviour: 0
+    hitsStopMeleeAttack: 1
+    customTravelScript:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    travelNearestTagList: []
+    travelNearestTagRange: 20
+    travelNearestTagIgnoreOriginator: 1
+    travelNearestTagRandomiseSearch: 1
+    crossHairRaycastRadius: 1
+    crossHairRaycastReturnDistancePointOnly: 0
+    crossHairRaycastReturnedDistance: 30
+    crossHairRecordTargetOnActivation: 0
+    limitActiveAtOnce: 0
+    abilityActivationRaiseEvent: 0
+    abilityActivationCompleteRaiseEvent: 0
+    abilityActivationCompleteEventType: 0
+    maxActiveAtOnce: 0
+    scrollAbility: 0
+    scrollSetUnsetRaiseEvent: 0
+    scrollQuickInputType: 0
+    scrollQuickButton: 
+    scrollQuickKey: 0
+    scrollSwapDuration: 1
+    triggerType: 0
+    keyInputCombo: 
+    keyInputType: 0
+    keyButton: 
+    globalAbilityOverrideKeyTrigger: 0
+    key: 0
+    onKeyPress: 1
+    onKeyDown: 0
+    enableMovementValidation: 0
+    movementValidation: 0
+    requireAdditionalKeyInput: 0
+    additionalKeyInputType: 0
+    additionalKeyButton: 
+    additionalKey: 0
+    additionalOnKeyPress: 1
+    additionalOnKeyDown: 0
+    UseAmmo: 0
+    useEquippedWeaponAmmo: 0
+    reduceAmmoWhilstActive: 0
+    ammoCount: 100
+    useReload: 1
+    clipSize: 50
+    reloadDuration: 2
+    reloadRestrictAbilityActivationDuration: 1
+    autoReloadWhenRequired: 1
+    reloadFillClip: 0
+    reloadFillClipRepeatGraphic: 1
+    abilityRecast: 0
+    startRecastAfterAbilityEnd: 0
+    travelSpeed: 20
+    duration: 10
+    abilityToggle: 0
+    canCastWhenToggled: 1
+    repeatInitiatingAnimationWhilstToggled: 1
+    bounceMode: 0
+    bounceAmount: 3
+    bounceRange: 20
+    bounceTarget: 0
+    bounceOnCaster: 0
+    enableRandomBounce: 1
+    startBounceTagRequired: 0
+    startBounceRequiredTags: []
+    bounceTag: []
+    bouncePositionOffset: {x: 0, y: 0, z: 0}
+    bouncePositionForwardOffset: 0
+    bouncePositionRightOffset: 0
+    boomerangMode: 0
+    boomerangDelay: 0
+    effects: []
+    onEnter: 1
+    onStay: 0
+    onStayInterval: 0.3
+    onExit: 0
+    particleCollision: 0
+    enableCollisionAfterKeyPress: 0
+    enableCollisionAfterKeyInputType: 0
+    enableCollisionAfterKeyButton: 
+    enableCollisionAfterKey: 0
+    startingRotation: {x: 0, y: 0, z: 0}
+    setEulerRotation: 0
+    travelDrag: 0
+    startingPosition: 0
+    additionalStartingPositions: []
+    affectOriginObject: 0
+    startingPositionOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    startingPositionOnTag: 
+    startingPositionOffset: {x: 0, y: 0, z: 0}
+    startingPositionForwardOffset: 0
+    startingPositionRightOffset: 0
+    abilityCollisionIgnores: 0
+    impactDestroy: 0
+    destroyIgnoreTag: []
+    destroyDelay: 0
+    useDestroySplashEffect: 0
+    destroySplashRadius: 0
+    destroySplashExplosion: 0
+    destroySplashExplosionRadius: 5
+    destroySplashExplosionPower: 5
+    destroySplashExplosionUplift: 3
+    destroySplashExplosionTagLimit: 0
+    destroySplashExplosionAffectTag: []
+    modifyGameSpeedOnInitiation: 0
+    modifyGameSpeedOnInitiationSpeedFactor: 0.05
+    modifyGameSpeedOnInitiationDelay: 0.2
+    modifyGameSpeedOnInitiationDuration: 0.5
+    modifyGameSpeedOnImpact: 0
+    modifyGameSpeedOnImpactSpeedFactor: 0.05
+    modifyGameSpeedOnImpactDuration: 0.5
+    modifyGameSpeedOnImpactDelay: 0.2
+    enableHitStopOnImpact: 0
+    hitStopOnImpactDelay: 0
+    hitStopOnImpactDuration: 0.1
+    hitStopOnImpactEntityHitDelay: 0.2
+    hitStopCurrentlyActive: 0
+    hitStopCurrentTotalExtendDuration: 0
+    globalImpactRequiredTag: []
+    shakeCameraOnInitiation: 0
+    shakeCameraOnInitiationDelay: 0
+    shakeCameraOnInitiationDuration: 0.5
+    shakeCameraOnInitiationAmount: 0.5
+    shakeCameraOnInitiationSpeed: 25
+    shakeCameraOnImpact: 0
+    shakeCameraOnImpactDelay: 0
+    shakeCameraOnImpactDuration: 0.5
+    shakeCameraOnImpactAmount: 0.5
+    shakeCameraOnImpactSpeed: 25
+    pushEntityOnImpact: 0
+    pushEntityOnImpactDelay: 0.1
+    pushEntityOnImpactAmount: 1.5
+    pushEntityOnImpactLiftForce: 0
+    defyEntityGravityOnImpact: 0
+    defyEntityGravityOnImpactDelay: 0.1
+    defyEntityGravityOnImpactDuration: 1.5
+    shakeEntityOnImpact: 0
+    shakeEntityOnImpactShakeAmount: 0.1
+    shakeEntityOnImpactShakeDecay: 0.007
+    shakeEntityOnImpactShakeDelay: 0
+    attachToObjectOnImpact: 0
+    attachToObjectProbabilityMinValue: 0
+    attachToObjectProbabilityMaxValue: 100
+    attachToObjectStickOutFactor: 0.5
+    attachToObjectNearestBone: 0
+    switchColorOnImpact: 0
+    switchColorOnImpactColor: {r: 70, g: 4, b: 4, a: 1}
+    switchColorOnImpactDelay: 0
+    switchColorOnImpactDuration: 0.2
+    switchColorOnImpactUseEmission: 0
+    addAbilityCollider: 1
+    applyColliderSettingsToParent: 1
+    applyColliderSettingsToChildren: 0
+    affectLayer:
+      serializedVersion: 2
+      m_Bits: 0
+    useGraphicRadius: 0
+    colliderRadius: 0.5
+    colliderOffset: {x: 0, y: 0, z: 0}
+    applyTravelDuration: 0
+    travelDurationOriginatorTagsRequired: []
+    travelDurationTime: 0
+    travelDurationStopSuddenly: 0
+    useInitiatingAesthetics: 0
+    initiatingAnimateOnEntity: 1
+    initiatingAnimateOnScrollGraphic: 0
+    initiatingAnimateOnWeapon: 0
+    defyGravityInitiating: 0
+    defyGravityInitiatingDuration: 2
+    defyGravityInitiatingDelay: 0
+    defyGravityInitiatingRaiseEvent: 0
+    initiatingAestheticsPositionOffset: {x: 0, y: 0, z: 0}
+    initiatingAestheticsPositionForwardOffset: 0
+    initiatingAestheticsPositionRightOffset: 0
+    initiatingAnimationRunnerClip:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    initiatingAnimationRunnerMask:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    initiatingAnimationRunnerClipSpeed: 1
+    initiatingAnimationRunnerClipDelay: 0
+    initiatingAnimationRunnerClipDuration: 1
+    initiatingAnimationRunnerOnEntity: 1
+    initiatingAnimationRunnerOnScrollGraphic: 0
+    initiatingAnimationRunnerOnWeapon: 0
+    initiatingAnimatorParameter: 
+    initiatingAnimatorParameterType: 0
+    initiatingAnimatorOnValue: 
+    initiatingAnimatorOffValue: 
+    initiatingAnimatorDuration: 0.5
+    moveSelfWhenInitiating: 0
+    moveSelfInitiatingOffset: {x: 0, y: 0, z: 0}
+    moveSelfInitiatingForwardOffset: 0
+    moveSelfInitiatingRightOffset: 0
+    moveSelfInitiatingDelay: 0
+    moveSelfInitiatingDuration: 1
+    moveSelfToTargetWhenInitiating: 0
+    moveSelfToTargetInitiatingDelay: 0
+    moveSelfToTargetInitiatingDuration: 0.5
+    moveSelfToTargetInitiatingStopDistance: 5
+    moveSelfToTargetInitiatingOffset: {x: 0, y: 0, z: 0}
+    moveSelfToTargetInitiatingForwardOffset: 0
+    moveSelfToTargetInitiatingRightOffset: 0
+    initiatingGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    initiatingSubGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    initiatingAestheticActivateWithAbility: 0
+    initiatingAestheticDuration: 2
+    initiatingAestheticDelay: 0
+    initiatingAestheticDetachFromParentAfterDelay: 0
+    initiatingAestheticDetachDelay: 0.1
+    initiatingUseWeaponTrail: 0
+    initiatingWeaponTrailGraphicIteration: 0
+    intiatingProjectileDelayType: 0
+    delayBetweenInitiatingAndProjectile: 0
+    initiatingProjectileDelayAnimationPercentage: 30
+    initiatingStartPosition: 0
+    initiatingPositionOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    initiatingPositionOnTag: 
+    colliderTimeDelay: 0
+    colliderDelayTime: 0
+    colliderKeyPressDelay: 0
+    colliderDelayInputType: 0
+    colliderDelayButton: 
+    colliderDelayKey: 0
+    ignoreActiveTerrain: 1
+    persistIK: 0
+    spawnObject: 0
+    spawnObjectOnDestroy: 0
+    spawnObjectOnCollide: 0
+    spawningObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    useRange: 0
+    selectedTargetRangeGreaterThan: 0
+    selectedTargetRangeLessThan: 100
+    selectedTargetOffset: {x: 0, y: 0, z: 0}
+    selectedTargetForwardOffset: 0
+    selectedTargetRightOffset: 0
+    abilityCanMiss: 1
+    prepareTime: 0
+    ignoreGlobalPrepareTimeAdjustments: 0
+    prepareTriggerHoldRequied: 0
+    abilityInitiatingBaseSpeedAdjustment: 100
+    ignoreGlobalInitiatingSpeedAdjustments: 0
+    modifyAbilityInitiatingBaseSpeedByStat: 0
+    abilityInitiatingBaseSpeedStatModification:
+      statIntegrationType: 0
+      arithmeticOperator: 0
+      percentageValue: 0
+      statSource: 0
+      statName: 
+    waitForKeyBeforeInitiating: 0
+    waitBeforeInitiatingInputType: 0
+    waitBeforeInitiatingButton: 
+    waitBeforeInitiatingKey: 13
+    waitForKeyBeforeInitiatingDelay: 0
+    waitForKeyAllowChangeOfTarget: 1
+    moveInteruptPreparation: 0
+    distanceInteruptPreparation: 0
+    showPrepareTimeOnGUI: 0
+    usePreparingAesthetics: 0
+    preparingAnimateOnEntity: 1
+    preparingAnimateOnScrollGraphic: 0
+    preparingAnimateOnWeapon: 0
+    defyGravityPreparing: 0
+    defyGravityPreparingDuration: 2
+    defyGravityPreparingDelay: 0
+    defyGravityPreparingRaiseEvent: 0
+    preparingAestheticsPositionOffset: {x: 0, y: 0, z: 0}
+    preparingAestheticsPositionForwardOffset: 0
+    preparingAestheticsPositionRightOffset: 0
+    preparingAnimationRunnerClip:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    preparingAnimationRunnerMask:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    preparingAnimationRunnerClipSpeed: 1
+    preparingAnimationRunnerClipDelay: 0
+    preparingAnimationRunnerOnEntity: 1
+    preparingAnimationRunnerOnScrollGraphic: 0
+    preparingAnimationRunnerOnWeapon: 0
+    preparingAnimatorParameter: 
+    preparingAnimatorParameterType: 0
+    preparingAnimatorOnValue: 
+    preparingAnimatorOffValue: 
+    moveSelfWhenPreparing: 0
+    moveSelfPreparingOffset: {x: 0, y: 0, z: 0}
+    moveSelfPreparingForwardOffset: 0
+    moveSelfPreparingRightOffset: 0
+    moveSelfPreparingDelay: 0
+    moveSelfPreparingDuration: 1
+    moveSelfToTargetWhenPreparing: 0
+    moveSelfToTargetPreparingDelay: 0
+    moveSelfToTargetPreparingDuration: 0.5
+    moveSelfToTargetPreparingStopDistance: 5
+    moveSelfToTargetActivatePreparingAnimationOnlyWhenMoving: 0
+    moveSelfToTargetPreparingOffset: {x: 0, y: 0, z: 0}
+    moveSelfToTargetPreparingForwardOffset: 0
+    moveSelfToTargetPreparingRightOffset: 0
+    preparingGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    preparingSubGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    preparingAestheticDurationUsePrepareTime: 1
+    preparingAestheticDuration: 0
+    preparingStartPosition: 0
+    preparingPositionOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    preparingPositionOnTag: 
+    useProjectileToStartPosition: 0
+    projectileToStartType: 0
+    projToStartDelay: 0
+    useOriginalProjectilePTS: 0
+    projToStartPosGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    projToStartPosSubGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    projToStartPosDuration: 5
+    projToStartStartingPosition: 0
+    projToStartRotateToTarget: 0
+    projToStartRotation: {x: 0, y: 0, z: 0}
+    projToStartSetEulerRotation: 0
+    projToStartPositionOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    projToStartPositionOnTag: 
+    projToStartPositionOffset: {x: 0, y: 0, z: 0}
+    projToStartPositionForwardOffset: 0
+    projToStartPositionRightOffset: 0
+    projToStartHoverOnSpot: 0
+    projToStartHoverDistance: 0.4
+    projToStartTravelToAbilityStartPosition: 1
+    projToStartMoveWithTarget: 1
+    projToStartReachPositionTime: 2
+    projToStartTravelDelay: 0
+    useScrollAbilityAesthetics: 0
+    scrollAbilityAnimateOnEntity: 1
+    scrollAbilityAnimateOnScrollGraphic: 0
+    scrollAbilityAnimateOnWeapon: 0
+    scrollAbilityAestheticsPositionOffset: {x: 0, y: 0, z: 0}
+    scrollAbilityAestheticsPositionForwardOffset: 0
+    scrollAbilityAestheticsPositionRightOffset: 0
+    scrollAbilityAnimationRunnerClip:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scrollAbilityAnimationRunnerMask:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scrollAbilityAnimationRunnerClipSpeed: 1
+    scrollAbilityAnimationRunnerClipDelay: 0
+    scrollAbilityAnimationRunnerClipDuration: 1
+    scrollAbilityAnimationRunnerOnEntity: 1
+    scrollAbilityAnimationRunnerOnScrollGraphic: 0
+    scrollAbilityAnimationRunnerOnWeapon: 0
+    scrollAbilityAnimatorParameter: 
+    scrollAbilityAnimatorParameterType: 0
+    scrollAbilityAnimatorOnValue: 
+    scrollAbilityAnimatorOffValue: 
+    scrollAbilityAnimatorDuration: 3
+    scrollAbilityDeactivateAnimationRunnerClip:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scrollAbilityDeactivateAnimationRunnerMask:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scrollAbilityDeactivateAnimationRunnerClipSpeed: 1
+    scrollAbilityDeactivateAnimationRunnerClipDelay: 0
+    scrollAbilityDeactivateAnimationRunnerClipDuration: 1
+    scrollAbilityDeactivateAnimationRunnerOnEntity: 1
+    scrollAbilityDeactivateAnimationRunnerOnScrollGraphic: 0
+    scrollAbilityDeactivateAnimationRunnerOnWeapon: 0
+    scrollAbilityDeactivateAnimatorParameter: 
+    scrollAbilityDeactivateAnimateOnEntity: 1
+    scrollAbilityDeactivateAnimateOnScrollGraphic: 0
+    scrollAbilityDeactivateAnimateOnWeapon: 0
+    scrollAbilityDeactivateAnimatorParameterType: 0
+    scrollAbilityDeactivateAnimatorOnValue: 
+    scrollAbilityDeactivateAnimatorOffValue: 
+    scrollAbilityDeactivateAnimatorDuration: 3
+    scrollAbilityGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scrollAbilitySubGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scrollAbilityGraphicActivateDelay: 0
+    scrollAbilityGraphicDeactivateDelay: 0
+    scrollAbilityStartPosition: 0
+    scrollAbilityPositionOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scrollAbilityPositionOnTag: 
+    scrollAbilityAestheticDurationType: 0
+    scrollAbilityAestheticDuration: 0
+    scrollAbilityPersistantAestheticInactivePosition: 0
+    scrollAbilityPersistantAestheticInactivePositionOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scrollAbilityPersistantAestheticInactivePositionOnTag: 
+    useReloadAbilityAesthetics: 0
+    reloadAbilityAnimateOnEntity: 1
+    reloadAbilityAnimateOnScrollGraphic: 0
+    reloadAbilityAnimateOnWeapon: 0
+    reloadAbilityAestheticsPositionOffset: {x: 0, y: 0, z: 0}
+    reloadAbilityAestheticsPositionForwardOffset: 0
+    reloadAbilityAestheticsPositionRightOffset: 0
+    reloadAbilityAnimatorParameter: 
+    reloadAbilityAnimationRunnerClip:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    reloadAbilityAnimationRunnerMask:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    reloadAbilityAnimationRunnerClipSpeed: 1
+    reloadAbilityAnimationRunnerClipDelay: 0
+    reloadAbilityAnimationRunnerOnEntity: 1
+    reloadAbilityAnimationRunnerOnScrollGraphic: 0
+    reloadAbilityAnimationRunnerOnWeapon: 0
+    reloadAbilityAnimatorParameterType: 0
+    reloadAbilityAnimatorOnValue: 
+    reloadAbilityAnimatorOffValue: 
+    reloadAbilityGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    reloadAbilitySubGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    reloadAbilityAestheticDuration: 2
+    reloadAbilityStartPosition: 0
+    reloadAbilityPositionOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    reloadAbilityPositionOnTag: 
+    useAbilityEndAesthetics: 0
+    abilityEndUseEffectGraphic: 0
+    abilityEndActivateOnEnvironmentOnly: 0
+    abilityEndGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    abilityEndSubGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scaleAbilityEndGraphic: 0
+    abilityEndGraphicScale: 1
+    abEndAestheticDuration: 2
+    stopMovementOnInitiate: 0
+    stopMovementOnInitiateDuration: 0.5
+    stopMovementOnInitiateFreezePosition: 0
+    stopMovementOnInitiateDisableComponents: 1
+    stopMovementOnInitiateRaiseEvent: 0
+    stopMovementOnPreparing: 0
+    stopMovementOnPreparingDuration: 0.5
+    stopMovementOnPreparingFreezePosition: 0
+    stopMovementOnPreparingDisableComponents: 1
+    stopMovementOnPreparingRaiseEvent: 0
+  ElementAIRules: []
+  ElementEffects: []

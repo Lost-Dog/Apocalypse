@@ -1,0 +1,27 @@
+# Motion-Matching Controller Integration - Game Creator
+
+TODO 
+* MMC Configuration Wizard:
+
+    * Add Game Creator 1 dependency-checking
+
+    * Add option to set default character state to the one that has MMLC animations
+
+
+v1.0.0 - Initial Release Version (Minimum MMLC Version:  v0.3.1)
+
+* MMCGameCreator1 Component handles proper insertion of MMLC into a Game Creator 1 character's PlayableGraph.
+
+* Added Automatic Game Creator 1 character configuration for both inserting new characters to the scene and modifying existing GC1 characters
+
+* Added option to dependency tab to correct Y-offset of all MMLC animations to allow seamless switching
+
+* Added Custom Actions, Triggers, and Conditions for GC1
+
+* Added Traversal Module support and examples for Traversal, Melee, and Shooter
+
+Known Issues:
+
+* Changing Models doesn't currently work.  Solution is on roadmap: In the next major update, a custom Action for model change will be added to properly destroy and reinitialize all MMLC/MxM functions on model change
+
+* See https://threepeatgames.com/mmc_gc1 for more up-to-date features and issues.

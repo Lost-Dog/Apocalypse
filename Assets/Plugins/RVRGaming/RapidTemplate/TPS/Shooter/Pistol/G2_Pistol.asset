@@ -1,0 +1,721 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7635ada77d9fe448ea6057df7e0d1972, type: 3}
+  m_Name: G2_Pistol
+  m_EditorClassIdentifier: 
+  m_Id:
+    m_SerializedID:
+      m_String: eb2dea1b-e314-4b72-bb5b-b89ad9fad1aa
+  m_Title:
+    m_Property:
+      rid: 4927313575564280238
+  m_Description:
+    m_Property:
+      rid: 4927313575564280360
+  m_Icon:
+    m_Property:
+      rid: 4927313575564280240
+  m_Color:
+    m_Property:
+      rid: 4927313575564280241
+  m_HitReaction: {fileID: 11400000, guid: a02d0bb15d27ee140877dc4706633999, type: 2}
+  m_ParriedReaction: {fileID: 0}
+  m_OnEquip:
+    m_Instructions:
+      m_Instructions: []
+  m_OnUnequip:
+    m_Instructions:
+      m_Instructions: []
+  m_OnDodge:
+    m_Instructions:
+      m_Instructions: []
+  m_State:
+    m_StateType: 2
+    m_AnimationClip:
+      m_Property:
+        rid: 4927313575564280242
+    m_RuntimeController: {fileID: 0}
+    m_State: {fileID: 11400000, guid: f4e25072b2aa31143a388c84c48a1681, type: 2}
+    m_AvatarMask: {fileID: 0}
+  m_Layer:
+    m_Property:
+      rid: 4927313575564280243
+  m_Magazine:
+    m_Ammo: {fileID: 11400000, guid: 7a2fdc60f34f51345837d7f8ca35f1c2, type: 2}
+    m_HasMagazine:
+      m_Property:
+        rid: 4927313575564280244
+    m_MagazineSize:
+      m_Property:
+        rid: 4927313575564280245
+    m_AutoReload:
+      m_Property:
+        rid: 4927313575564280246
+  m_Muzzle:
+    m_Position: {x: 0, y: 0.06, z: 0.1}
+    m_Rotation: {x: 0, y: 0, z: 0}
+  m_Fire:
+    m_ProjectilesPerShot:
+      m_Property:
+        rid: 4927313575564280247
+    m_CartridgesPerShot:
+      m_Property:
+        rid: 4927313575564280248
+    m_Mode: 0
+    m_AutoLoading: 0
+    m_AutoLoadDuration:
+      m_Property:
+        rid: 4927313575564280249
+    m_FireRate:
+      m_Property:
+        rid: 4927313575564280250
+    m_Burst:
+      m_Property:
+        rid: 4927313575564280251
+    m_MinChargeTime:
+      m_Property:
+        rid: 4927313575564280252
+    m_MaxChargeTime:
+      m_Property:
+        rid: 4927313575564280253
+    m_AutoRelease:
+      m_Property:
+        rid: 4927313575564280254
+    m_Duration:
+      m_Property:
+        rid: 4927313575564280255
+    m_FireAnimation:
+      m_Property:
+        rid: 4927313575564280256
+    m_FireAvatarMask: {fileID: 0}
+    m_TransitionIn: 0.1
+    m_TransitionOut: 0.25
+    m_RootMotion: 0
+    m_FireAudio:
+      m_Property:
+        rid: 4927313575564280257
+    m_EmptyAudio:
+      m_Property:
+        rid: 4927313575564280258
+    m_LoadStartAudio:
+      m_Property:
+        rid: 4927313575564280259
+    m_LoadLoopAudio:
+      m_Property:
+        rid: 4927313575564280260
+    m_LoadMinPitch:
+      m_Property:
+        rid: 4927313575564280261
+    m_LoadMaxPitch:
+      m_Property:
+        rid: 4927313575564280262
+    m_MuzzleEffect:
+      m_Property:
+        rid: 4927313575564280263
+      usePooling: 1
+      size: 5
+      hasDuration: 1
+      duration: 5
+    m_Force:
+      m_IsEnabled: 1
+      m_Value: 10
+    m_Power:
+      m_Property:
+        rid: 2172926764394742094
+    m_BlockedAudio:
+      m_Property:
+        rid: 6714101242565755126
+    m_ParriedAudio:
+      m_Property:
+        rid: 6714101242565755127
+  m_Projectile:
+    m_Shot:
+      m_Type:
+        rid: 4927313575564280264
+    m_ImpactSound: {fileID: 11400000, guid: 94835769787f3df4598efce5e575a5e9, type: 2}
+    m_ImpactEffect:
+      m_Property:
+        rid: 2172926764394742095
+      usePooling: 0
+      size: 5
+      hasDuration: 0
+      duration: 10
+  m_Accuracy:
+    m_MaxSpreadX:
+      m_Property:
+        rid: 4927313575564280373
+    m_MaxSpreadY:
+      m_Property:
+        rid: 4927313575564280374
+    m_SpreadBias:
+      m_Property:
+        rid: 4927313575564280267
+    m_AccuracyRecover:
+      m_Property:
+        rid: 4927313575564280268
+    m_MotionAccuracy:
+      m_Property:
+        rid: 4927313575564280269
+    m_AirborneAccuracy:
+      m_Property:
+        rid: 4927313575564280270
+    m_AccuracyKick:
+      m_Property:
+        rid: 4927313575564280271
+  m_Recoil:
+    m_UseRecoil:
+      m_Property:
+        rid: 4927313575564280272
+    m_Camera:
+      m_Property:
+        rid: 4927313575564280273
+    m_RecoilX:
+      m_Property:
+        rid: 4927313575564280274
+    m_RecoilY:
+      m_Property:
+        rid: 4927313575564280275
+    m_RecoilDuration:
+      m_Property:
+        rid: 4927313575564280276
+  m_Shell:
+    m_Position: {x: 0.02, y: 0.07, z: -0.01}
+    m_Rotation: {x: 335, y: 90, z: -9.4}
+    m_Prefab:
+      m_Property:
+        rid: 4927313575564280277
+      usePooling: 1
+      size: 5
+      hasDuration: 1
+      duration: 5
+    m_Force:
+      m_Property:
+        rid: 4927313575564280278
+    m_Torque:
+      m_Property:
+        rid: 4927313575564280279
+  m_Jam:
+    m_Chance:
+      m_Property:
+        rid: 4927313575564280280
+    m_Animation:
+      m_Property:
+        rid: 4927313575564280281
+    m_Mask: {fileID: 0}
+    m_Speed:
+      m_Property:
+        rid: 4927313575564280282
+    m_TransitionIn: 0.1
+    m_TransitionOut: 0.25
+    m_Audio:
+      m_Property:
+        rid: 4927313575564280283
+  m_Sights:
+    m_Sights:
+    - rid: 4927313575564280284
+    - rid: 4927313575564280743
+    - rid: 4927313575564280744
+    - rid: 4927313575564280745
+    - rid: 4927313575564280746
+    - rid: 4927313575564280747
+  m_Reloads:
+    m_State:
+      m_StateType: 2
+      m_AnimationClip:
+        m_Property:
+          rid: 4927313575564280285
+      m_RuntimeController: {fileID: 0}
+      m_State: {fileID: 0}
+      m_AvatarMask: {fileID: 0}
+    m_Layer:
+      m_Property:
+        rid: 4927313575564280286
+    m_Reloads:
+    - rid: 4927313575564280287
+  m_CanShoot:
+    m_Conditions:
+      m_Conditions: []
+  m_OnShoot:
+    m_Instructions:
+      m_Instructions:
+      - rid: 4927313575564280791
+  m_OnStartReload:
+    m_Instructions:
+      m_Instructions: []
+  m_OnFinishReload:
+    m_Instructions:
+      m_Instructions: []
+  m_CanBeBlocked:
+    m_Conditions:
+      m_Conditions: []
+  m_CanBeParried:
+    m_Conditions:
+      m_Conditions: []
+  m_CanHit:
+    m_Conditions:
+      m_Conditions: []
+  m_OnHit:
+    m_Instructions:
+      m_Instructions:
+      - rid: 8553766691508847584
+      - rid: 8553766691508847586
+  m_Animations:
+    m_Idle: {fileID: 7400000, guid: d213aa3d0e8a4174d98c28b42eafa74d, type: 2}
+    m_Empty: {fileID: 7400000, guid: 67430d62883af6640bf7eccdfcc34a58, type: 2}
+    m_Shoot: {fileID: 7400000, guid: 73133217adcc1624a863a9f7bdd95a5d, type: 2}
+    m_ReloadQuick: {fileID: 7400000, guid: d213aa3d0e8a4174d98c28b42eafa74d, type: 2}
+    m_ReloadDry: {fileID: 0}
+    m_JamEnter: {fileID: 0}
+    m_JamExit: {fileID: 0}
+    m_Jammed: {fileID: 0}
+    m_ChargeProgressMin: {fileID: 0}
+    m_ChargeProgressMax: {fileID: 0}
+  m_Controller: {fileID: 5188588808077418224}
+  <EditorModelPath>k__BackingField: Assets/Plugins/RVRGaming/RapidTemplate/TPS/Shooter/Pistol/Prefabs/G2_Pistol.prefab
+  references:
+    version: 2
+    RefIds:
+    - rid: 2172926764394742094
+      type: {class: GetDecimalConstantOne, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 2172926764394742095
+      type: {class: GetGameObjectNone, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280238
+      type: {class: GetStringString, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: G2 Pistol
+    - rid: 4927313575564280240
+      type: {class: GetSpriteNone, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280241
+      type: {class: GetColorColorsWhite, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280242
+      type: {class: GetAnimationInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: {fileID: 0}
+    - rid: 4927313575564280243
+      type: {class: GetDecimalInteger, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 7
+    - rid: 4927313575564280244
+      type: {class: GetBoolTrue, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280245
+      type: {class: GetDecimalInteger, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 12
+    - rid: 4927313575564280246
+      type: {class: GetBoolTrue, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280247
+      type: {class: GetDecimalConstantOne, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280248
+      type: {class: GetDecimalConstantOne, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280249
+      type: {class: GetDecimalConstantOne, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280250
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 10
+    - rid: 4927313575564280251
+      type: {class: GetDecimalInteger, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 3
+    - rid: 4927313575564280252
+      type: {class: GetDecimalConstantZero, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280253
+      type: {class: GetDecimalConstantOne, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280254
+      type: {class: GetBoolFalse, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280255
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 2
+    - rid: 4927313575564280256
+      type: {class: GetAnimationNone, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280257
+      type: {class: GetAudioClip, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: {fileID: 8300000, guid: 564e33e65fdf16a498a8f62a016d9db8, type: 3}
+    - rid: 4927313575564280258
+      type: {class: GetAudioClip, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: {fileID: 8300000, guid: 062fc0df7fcb8a443a1a8b1794ec29ec, type: 3}
+    - rid: 4927313575564280259
+      type: {class: GetAudioNone, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280260
+      type: {class: GetAudioNone, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280261
+      type: {class: GetDecimalConstantOne, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280262
+      type: {class: GetDecimalConstantOnePointFive, ns: GameCreator.Runtime.Common,
+        asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280263
+      type: {class: GetGameObjectInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_GameObject: {fileID: 4522833466608549157, guid: 704383ea75234ff42bbb45709ce3d8d0,
+          type: 3}
+    - rid: 4927313575564280264
+      type: {class: ShotRaycast, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_LayerMask:
+          serializedVersion: 2
+          m_Bits: 211
+        m_MaxDistance:
+          m_Property:
+            rid: 4927313575564280288
+        m_Pierces:
+          m_Property:
+            rid: 4927313575564280289
+        m_UseLineRenderer: 1
+        m_Duration:
+          m_Property:
+            rid: 4927313575564280290
+        m_LineMaterial:
+          m_Property:
+            rid: 4927313575564280291
+        m_Color:
+          m_Property:
+            rid: 4927313575564280292
+        m_Width:
+          m_Property:
+            rid: 4927313575564280369
+        m_TextureMode: 0
+        m_TextureAlign: 0
+    - rid: 4927313575564280267
+      type: {class: GetDecimalConstantOne, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280268
+      type: {class: GetDecimalConstantOne, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280269
+      type: {class: GetDecimalConstantPointFive, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280270
+      type: {class: GetDecimalConstantPointFive, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280271
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.25
+    - rid: 4927313575564280272
+      type: {class: GetBoolCharacterIsPlayer, ns: GameCreator.Runtime.Characters,
+        asm: GameCreator.Runtime.Core}
+      data:
+        m_Character:
+          m_Property:
+            rid: 4927313575564280294
+    - rid: 4927313575564280273
+      type: {class: GetGameObjectCameraMain, ns: GameCreator.Runtime.Cameras, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280274
+      type: {class: GetDecimalRandomRange, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_MinValue:
+          m_Property:
+            rid: 4927313575564280295
+        m_MaxValue:
+          m_Property:
+            rid: 4927313575564280296
+    - rid: 4927313575564280275
+      type: {class: GetDecimalRandomRange, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_MinValue:
+          m_Property:
+            rid: 4927313575564280297
+        m_MaxValue:
+          m_Property:
+            rid: 4927313575564280298
+    - rid: 4927313575564280276
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.15
+    - rid: 4927313575564280277
+      type: {class: GetGameObjectInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_GameObject: {fileID: 5088369029739084615, guid: e789cd0979e3afe408661a383bf49be7,
+          type: 3}
+    - rid: 4927313575564280278
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 5
+    - rid: 4927313575564280279
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 180
+    - rid: 4927313575564280280
+      type: {class: GetDecimalConstantZero, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280281
+      type: {class: GetAnimationNone, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280282
+      type: {class: GetDecimalConstantOne, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280283
+      type: {class: GetAudioClip, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: {fileID: 0}
+    - rid: 4927313575564280284
+      type: {class: SightItem, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Id:
+          m_String: idle
+        m_Sight: {fileID: 11400000, guid: 4d418ea96d0388748a1435740bd0ea26, type: 2}
+        m_ScopeThrough: 0
+        m_ScopePosition: {x: 0, y: 0.25, z: 0}
+        m_ScopeRotation: {x: 0, y: 0, z: 0}
+        m_ScopeDistance: 0.25
+    - rid: 4927313575564280285
+      type: {class: GetAnimationInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: {fileID: 0}
+    - rid: 4927313575564280286
+      type: {class: GetDecimalInteger, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 9
+    - rid: 4927313575564280287
+      type: {class: ReloadItem, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_SkipWhenFull: 0
+        m_Conditions:
+          m_Conditions:
+            m_Conditions: []
+        m_Asset: {fileID: 11400000, guid: d39b8930bf2078b478cf022a163dddcd, type: 2}
+    - rid: 4927313575564280288
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 20
+    - rid: 4927313575564280289
+      type: {class: GetDecimalConstantZero, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280290
+      type: {class: GetDecimalConstantPointFive, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280291
+      type: {class: GetMaterialInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Material: {fileID: 2100000, guid: 4eb1664b1cfbc4946a4e48d216af667f, type: 2}
+    - rid: 4927313575564280292
+      type: {class: GetColorColorsWhite, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280294
+      type: {class: GetGameObjectSelf, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280295
+      type: {class: GetDecimalConstantMinusOne, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280296
+      type: {class: GetDecimalConstantOne, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280297
+      type: {class: GetDecimalConstantOne, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280298
+      type: {class: GetDecimalConstantTwo, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280360
+      type: {class: GetStringEmpty, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280369
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.01
+    - rid: 4927313575564280373
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 1.5
+    - rid: 4927313575564280374
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 1.5
+    - rid: 4927313575564280743
+      type: {class: SightItem, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Id:
+          m_String: aim-ads
+        m_Sight: {fileID: 11400000, guid: ae7c9c833cb89d34ba5433a972bccfe4, type: 2}
+        m_ScopeThrough: 0
+        m_ScopePosition: {x: 0, y: 0.25, z: 0}
+        m_ScopeRotation: {x: 0, y: 0, z: 0}
+        m_ScopeDistance: 0.25
+    - rid: 4927313575564280744
+      type: {class: SightItem, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Id:
+          m_String: aim-cover
+        m_Sight: {fileID: 11400000, guid: b4d0c9a179df85b4a931ff5038db6a08, type: 2}
+        m_ScopeThrough: 0
+        m_ScopePosition: {x: 0, y: 0.25, z: 0}
+        m_ScopeRotation: {x: 0, y: 0, z: 0}
+        m_ScopeDistance: 0.25
+    - rid: 4927313575564280745
+      type: {class: SightItem, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Id:
+          m_String: aim-peak-r
+        m_Sight: {fileID: 11400000, guid: 8a88211c97beccf49b7ce20158e010d3, type: 2}
+        m_ScopeThrough: 0
+        m_ScopePosition: {x: 0, y: 0.25, z: 0}
+        m_ScopeRotation: {x: 0, y: 0, z: 0}
+        m_ScopeDistance: 0.25
+    - rid: 4927313575564280746
+      type: {class: SightItem, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Id:
+          m_String: aim-peak-l
+        m_Sight: {fileID: 11400000, guid: d276b472386b3854897868785c8b6b62, type: 2}
+        m_ScopeThrough: 0
+        m_ScopePosition: {x: 0, y: 0.25, z: 0}
+        m_ScopeRotation: {x: 0, y: 0, z: 0}
+        m_ScopeDistance: 0.25
+    - rid: 4927313575564280747
+      type: {class: SightItem, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Id:
+          m_String: blindfire
+        m_Sight: {fileID: 11400000, guid: ca969fcf38429ed4ead2891184264b4b, type: 2}
+        m_ScopeThrough: 0
+        m_ScopePosition: {x: 0, y: 0.25, z: 0}
+        m_ScopeRotation: {x: 0, y: 0, z: 0}
+        m_ScopeDistance: 0.25
+    - rid: 4927313575564280791
+      type: {class: InstructionShooterEjectShell, ns: GameCreator.Runtime.Shooter,
+        asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 4927313575564280792
+        m_Weapon:
+          m_Property:
+            rid: 4927313575564280793
+    - rid: 4927313575564280792
+      type: {class: GetGameObjectSelf, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 4927313575564280793
+      type: {class: GetWeaponShooterInstance, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Weapon: {fileID: 11400000}
+    - rid: 6714101242565755126
+      type: {class: GetAudioNone, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 6714101242565755127
+      type: {class: GetAudioNone, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766691508847584
+      type: {class: InstructionLogicRunActions, ns: GameCreator.Runtime.VisualScripting,
+        asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Actions:
+          m_Property:
+            rid: 8553766691508847585
+        m_WaitToFinish: 1
+    - rid: 8553766691508847585
+      type: {class: GetGameObjectActions, ns: GameCreator.Runtime.VisualScripting,
+        asm: GameCreator.Runtime.Core}
+      data:
+        m_Actions: {fileID: -2124234612317477778, guid: 80f7f07c678d3d14797c705eb34eb58e,
+          type: 3}
+    - rid: 8553766691508847586
+      type: {class: InstructionStatsChangeAttribute, ns: GameCreator.Runtime.Stats,
+        asm: GameCreator.Runtime.Stats}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Target:
+          m_Property:
+            rid: 8553766691508847587
+        m_Attribute:
+          m_Property:
+            rid: 8553766691508847588
+        m_Change:
+          m_Operation: 2
+          m_Value:
+            m_Property:
+              rid: 8553766691508847589
+    - rid: 8553766691508847587
+      type: {class: GetGameObjectTarget, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766691508847588
+      type: {class: GetAttributeInstance, ns: GameCreator.Runtime.Stats, asm: GameCreator.Runtime.Stats}
+      data:
+        m_Attribute: {fileID: 11400000, guid: 821adf9569828cc43a30b3371cf35e9f, type: 2}
+    - rid: 8553766691508847589
+      type: {class: GetDecimalGlobalName, ns: GameCreator.Runtime.Variables, asm: GameCreator.Runtime.Core}
+      data:
+        m_Variable:
+          m_TypeID:
+            m_String: number
+          m_Variable: {fileID: 11400000, guid: 3f9ce994ee28753449204afa72b3f4dd, type: 2}
+          m_Name:
+            m_String: PlayerDmg
+            m_ID: -167661741
+--- !u!221 &5188588808077418224
+AnimatorOverrideController:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Weapon
+  m_Controller: {fileID: 9100000, guid: 13225967cfe9449fab4175586dd51f19, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: 8b99b8920e3c74bf38cc5b725b0504a9, type: 2}
+    m_OverrideClip: {fileID: 0}
+  - m_OriginalClip: {fileID: 7400000, guid: 4b4a5943d05cf42fcb907c9d78cfb6c2, type: 2}
+    m_OverrideClip: {fileID: 0}
+  - m_OriginalClip: {fileID: 7400000, guid: 1efc8b256a180481f8755de61b201af5, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 67430d62883af6640bf7eccdfcc34a58, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: b4de5b5bb6f88497c8d17dc41d7d60cf, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: d213aa3d0e8a4174d98c28b42eafa74d, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 79af51254fe5b45b39b2dfe59e487b95, type: 2}
+    m_OverrideClip: {fileID: 0}
+  - m_OriginalClip: {fileID: 7400000, guid: 3ffc1fd1243a34ffd90855e95468852b, type: 2}
+    m_OverrideClip: {fileID: 0}
+  - m_OriginalClip: {fileID: 7400000, guid: 97f666d52615f44bd9d76cf19c9d2c86, type: 2}
+    m_OverrideClip: {fileID: 0}
+  - m_OriginalClip: {fileID: 7400000, guid: 9f44dbe24364e4ece814a7ab9bab293b, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 73133217adcc1624a863a9f7bdd95a5d, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: b947eb4672e994a76a0d5e37f5c2dbdc, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: d213aa3d0e8a4174d98c28b42eafa74d, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: a032dcd01ac0e476b956b7ab2fe946d7, type: 2}
+    m_OverrideClip: {fileID: 0}

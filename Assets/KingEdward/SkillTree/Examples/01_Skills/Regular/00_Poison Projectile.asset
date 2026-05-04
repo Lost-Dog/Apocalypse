@@ -1,0 +1,308 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8aa59a8eedbb95843887ff2a6d4dbf70, type: 3}
+  m_Name: 00_Poison Projectile
+  m_EditorClassIdentifier: Assembly-CSharp::KingEdward.SkillTree.Skill
+  m_UniqueID: c8790499-8399-4305-9e5e-e196145ae22b
+  m_AssetGUID: ea9f138139087924588399ffde906f25
+  m_SkillName:
+    m_Property:
+      rid: 1574977403793441425
+  m_Description:
+    m_Property:
+      rid: 1574977403793441426
+  m_Icon:
+    m_Property:
+      rid: 1574977403793441427
+  m_Cost:
+    m_Property:
+      rid: 8846357265638490672
+  m_Prerequisites: []
+  m_OnUnlock:
+    m_Instructions:
+      m_Instructions: []
+  m_OnUse:
+    m_Instructions:
+      m_Instructions: []
+  m_OnLevelUp:
+    m_Instructions:
+      m_Instructions: []
+  m_ReapplyOnUnlockOnLoad: 0
+  m_ExecuteBeforeChange: 1
+  m_IsActiveSkill: 1
+  m_UseSequencer: 1
+  m_AnimationClip: {fileID: 9217343813813738419, guid: 14f8868489eacc24599315f9ee1d190d, type: 3}
+  m_AvatarMask: {fileID: 0}
+  m_UseRootMotion: 1
+  m_Sequencer:
+    m_Tracks:
+    - rid: 1574977403793441429
+    - rid: 1574977403793441430
+  m_UseChargeStateWithIndicator: 0
+  m_ChargeState:
+    m_StateType: 2
+    m_AnimationClip:
+      m_Property:
+        rid: 7697259098104922636
+    m_RuntimeController: {fileID: 0}
+    m_State: {fileID: 0}
+    m_AvatarMask: {fileID: 0}
+  m_ChargeStateLayer: 0
+  m_IsChannelSkill: 0
+  m_ChannelState:
+    m_StateType: 2
+    m_AnimationClip:
+      m_Property:
+        rid: 7697259098104922637
+    m_RuntimeController: {fileID: 0}
+    m_State: {fileID: 0}
+    m_AvatarMask: {fileID: 0}
+  m_ChannelStateLayer: 0
+  m_OnChannelTick:
+    m_Instructions:
+      m_Instructions: []
+  m_ChannelConditions:
+    m_Conditions:
+      m_Conditions: []
+  m_CanInterruptOthers: 0
+  m_CanBeInterrupted: 1
+  m_IndicatorConfig:
+    type: 0
+    m_Radius:
+      m_Property:
+        rid: 7697259098104922638
+    m_MinRadius:
+      m_Property:
+        rid: 7697259098104922639
+    m_MaxRadius:
+      m_Property:
+        rid: 7697259098104922640
+    m_ExpandDuration:
+      m_Property:
+        rid: 7697259098104922641
+    m_ConeAngle:
+      m_Property:
+        rid: 7697259098104922642
+    m_Range:
+      m_Property:
+        rid: 7697259098104922643
+    m_GroundOffset:
+      m_Property:
+        rid: 7697259098104922644
+    material: {fileID: 0}
+    color: {r: 1, g: 0.3, b: 0.2, a: 0.4}
+    borderColor: {r: 1, g: 0.2, b: 0.1, a: 0.8}
+    showBorder: 1
+    fixedAtCharacter: 0
+  m_CooldownDuration:
+    m_Property:
+      rid: 1574977403793441431
+  m_HasStacks: 0
+  m_StackUsesBeforeCooldown:
+    m_Property:
+      rid: 7697259098104922645
+  m_UseStackTime: 0
+  m_StackWindowDuration:
+    m_Property:
+      rid: 7697259098104922646
+  m_MaxLevel: 3
+  m_CanLevelUp: 1
+  m_CanUnlock:
+    m_Conditions:
+      m_Conditions: []
+  m_CanUse:
+    m_Conditions:
+      m_Conditions: []
+  m_CanLevelUpConditions:
+    m_Conditions:
+      m_Conditions: []
+  m_SpecificLevelUp:
+  - targetLevel: 0
+    useGeneralConditionsToo: 0
+    conditions:
+      m_Conditions:
+        m_Conditions: []
+    onLevelUp:
+      m_Instructions:
+        m_Instructions: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 1574977403793441425
+      type: {class: GetStringString, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: Poison Projectile
+    - rid: 1574977403793441426
+      type: {class: GetStringString, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: Shoots posion projectiles that deal damage and make a poison pond
+          on hit
+    - rid: 1574977403793441427
+      type: {class: GetSpriteInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Sprite: {fileID: 21300000, guid: f2751a2efacc3674abc0d7fce34b663d, type: 3}
+    - rid: 1574977403793441429
+      type: {class: TrackSkillTreePhases, ns: KingEdward.SkillTree, asm: KingEdward.SkillTree}
+      data:
+        m_Clips:
+        - rid: 1574977403793441432
+    - rid: 1574977403793441430
+      type: {class: TrackSkillTreeClips, ns: KingEdward.SkillTree, asm: KingEdward.SkillTree}
+      data:
+        m_Clips:
+        - rid: 8846357221571297355
+    - rid: 1574977403793441431
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 3
+    - rid: 1574977403793441432
+      type: {class: ClipSkillTreePhases, ns: KingEdward.SkillTree, asm: KingEdward.SkillTree}
+      data:
+        m_Time: 0.34650245
+        m_Duration: 0.2718883
+        m_CastEnd: 0.3
+        m_ReleaseEnd: 0.7
+        m_CastSpeed:
+          m_Property:
+            rid: 8846357234665390525
+        m_ReleaseSpeed:
+          m_Property:
+            rid: 8846357224158397155
+        m_RecoverySpeed:
+          m_Property:
+            rid: 8846357234665390526
+    - rid: 7697259098104922636
+      type: {class: GetAnimationInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: {fileID: 0}
+    - rid: 7697259098104922637
+      type: {class: GetAnimationInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: {fileID: 0}
+    - rid: 7697259098104922638
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 3
+    - rid: 7697259098104922639
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 1
+    - rid: 7697259098104922640
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 6
+    - rid: 7697259098104922641
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 2
+    - rid: 7697259098104922642
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 60
+    - rid: 7697259098104922643
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 8
+    - rid: 7697259098104922644
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.05
+    - rid: 7697259098104922645
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 1
+    - rid: 7697259098104922646
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0
+    - rid: 8846357221571297355
+      type: {class: ClipSkillTreeInstructions, ns: KingEdward.SkillTree, asm: KingEdward.SkillTree}
+      data:
+        m_Time: 0.43333334
+        m_Duration: 0
+        m_Instructions:
+          m_Instructions:
+            m_Instructions:
+            - rid: 8846357265638490395
+    - rid: 8846357224158397155
+      type: {class: GetDecimalConstantOne, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8846357234665390525
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 2
+    - rid: 8846357234665390526
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 3
+    - rid: 8846357265638490395
+      type: {class: InstructionGameObjectInstantiateMultipleCurve, ns: KingEdward.SkillTree, asm: KingEdward.SkillTree}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_GameObject:
+          m_Property:
+            rid: 8846357265638490396
+          usePooling: 1
+          size: 5
+          hasDuration: 1
+          duration: 3
+        m_Position:
+          m_Property:
+            rid: 8846357265638490397
+        m_Rotation:
+          m_Property:
+            rid: 8846357265638490398
+        m_Parent:
+          m_Property:
+            rid: 8846357265638490399
+        m_AlignReference:
+          m_Property:
+            rid: 8846357265638490403
+        m_Count:
+          m_Property:
+            rid: 8846357265638490401
+        m_Save:
+          m_Property:
+            rid: 8846357265638490402
+        m_SideOffset: 0.4
+        m_BaseForwardOffset: 1
+        m_ForwardMultiplier: 0.5
+        m_AlignWithReference: 1
+    - rid: 8846357265638490396
+      type: {class: GetGameObjectInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_GameObject: {fileID: 4262191404277904847, guid: f489ef0ef3eb41f4c9c661ece85a0d6d, type: 3}
+    - rid: 8846357265638490397
+      type: {class: GetPositionCharactersPlayer, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8846357265638490398
+      type: {class: GetRotationCharactersPlayer, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Space: 1
+    - rid: 8846357265638490399
+      type: {class: GetGameObjectNone, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8846357265638490401
+      type: {class: GetDecimalInteger, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 4
+    - rid: 8846357265638490402
+      type: {class: SetGameObjectNone, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8846357265638490403
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8846357265638490672
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 1

@@ -1,0 +1,1881 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &426799399631747483
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6952372706249794797}
+  - component: {fileID: 8788298552729291516}
+  m_Layer: 0
+  m_Name: Conditions
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6952372706249794797
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 426799399631747483}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 888806447207760106}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8788298552729291516
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 426799399631747483}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 721fb82976bce47f38247178301b66c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Branches:
+    m_Branches:
+    - rid: 8553766369904296117
+    - rid: 8553766369904296357
+    - rid: 8553766554679378673
+    - rid: 8553766529027277432
+    - rid: 8553766529027277456
+    - rid: 8553766554679378716
+  references:
+    version: 2
+    RefIds:
+    - rid: 8553766369904296117
+      type: {class: Branch, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Description: No Gun - Cover
+        m_ConditionList:
+          m_Conditions:
+          - rid: 8553766369904296386
+          - rid: 8553766529027277491
+        m_InstructionList:
+          m_Instructions:
+          - rid: 8553766375737000014
+          - rid: 8553766369904296325
+          - rid: 8553766375737000021
+          - rid: 8553766375737000024
+          - rid: 8553766375737000027
+          - rid: 8553766691508847213
+    - rid: 8553766369904296325
+      type: {class: InstructionCommonTimeWait, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Seconds:
+          m_Property:
+            rid: 8553766369904296326
+        m_Mode:
+          m_UpdateTime: 0
+    - rid: 8553766369904296326
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.33
+    - rid: 8553766369904296357
+      type: {class: Branch, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Description: Secondary - Cover
+        m_ConditionList:
+          m_Conditions:
+          - rid: 8553766373797921741
+          - rid: 8553766529027277493
+          - rid: 8553766554679378764
+        m_InstructionList:
+          m_Instructions:
+          - rid: 8553766369904296358
+          - rid: 8553766369904296359
+          - rid: 8553766554679378160
+          - rid: 8553766554679378163
+          - rid: 8553766369904296417
+          - rid: 8553766369904296412
+          - rid: 8553766369904296414
+          - rid: 8553766556951905212
+          - rid: 8553766373797921133
+          - rid: 8553766691508847217
+    - rid: 8553766369904296358
+      type: {class: InstructionCharacterGesture, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766369904296363
+        m_AnimationClip:
+          m_Property:
+            rid: 8553766369904296364
+        m_AvatarMask: {fileID: 31900000, guid: 71ae81024f998ef4a8bc3fcc0db6c778, type: 2}
+        m_BlendMode: 0
+        m_Delay:
+          m_Property:
+            rid: 8553766369904296365
+        m_Speed:
+          m_Property:
+            rid: 8553766369904296366
+        m_UseRootMotion: 0
+        m_TransitionIn:
+          m_Property:
+            rid: 8553766369904296367
+        m_TransitionOut:
+          m_Property:
+            rid: 8553766369904296368
+        m_WaitToComplete: 0
+    - rid: 8553766369904296359
+      type: {class: InstructionCommonTimeWait, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Seconds:
+          m_Property:
+            rid: 8553766369904296369
+        m_Mode:
+          m_UpdateTime: 0
+    - rid: 8553766369904296363
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766369904296364
+      type: {class: GetAnimationInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: {fileID: 7400000, guid: 9d48cc5439198db4db858bf4aabb2a19, type: 2}
+    - rid: 8553766369904296365
+      type: {class: GetDecimalConstantZero, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766369904296366
+      type: {class: GetDecimalConstantOne, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766369904296367
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.1
+    - rid: 8553766369904296368
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.1
+    - rid: 8553766369904296369
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.33
+    - rid: 8553766369904296386
+      type: {class: ConditionShooterHasEquipped, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Sign: 0
+        m_Character:
+          m_Property:
+            rid: 8553766369904296387
+        m_Weapon:
+          m_Property:
+            rid: 8553766369904296388
+    - rid: 8553766369904296387
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766369904296388
+      type: {class: GetWeaponShooterCharacter, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Character:
+          m_Property:
+            rid: 8553766369904296389
+    - rid: 8553766369904296389
+      type: {class: GetGameObjectSelf, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766369904296412
+      type: {class: InstructionCommonTimeWait, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Seconds:
+          m_Property:
+            rid: 8553766369904296413
+        m_Mode:
+          m_UpdateTime: 0
+    - rid: 8553766369904296413
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.5
+    - rid: 8553766369904296414
+      type: {class: InstructionCharacterRemoveProp, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766369904296415
+        m_Type: 0
+        m_Prop:
+          m_Property:
+            rid: 8553766369904296416
+    - rid: 8553766369904296415
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766369904296416
+      type: {class: GetGameObjectInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_GameObject: {fileID: 1474398612432461410, guid: 79a01dff58625124787da83fb9bf6efe, type: 3}
+    - rid: 8553766369904296417
+      type: {class: InstructionShooterUnequipWeapon, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766369904296418
+        m_Weapon:
+          m_Property:
+            rid: 8553766369904296420
+    - rid: 8553766369904296418
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766369904296420
+      type: {class: GetWeaponShooterCharacter, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Character:
+          m_Property:
+            rid: 8553766369904296422
+    - rid: 8553766369904296422
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766373797921133
+      type: {class: InstructionShooterEquipWeapon, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766373797921134
+        m_Weapon:
+          m_Property:
+            rid: 8553766373797921135
+        m_Model:
+          m_Property:
+            rid: 8553766373797921136
+    - rid: 8553766373797921134
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766373797921135
+      type: {class: GetWeaponShooterInstance, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Weapon: {fileID: 11400000, guid: 14506e4e1c04af04f85ded4f3e7d33de, type: 2}
+    - rid: 8553766373797921136
+      type: {class: GetGameObjectCharactersLastPropAttached, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766373797921741
+      type: {class: ConditionTextContains, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Sign: 1
+        m_Text:
+          m_Property:
+            rid: 8553766373797921742
+        m_Substring:
+          m_Property:
+            rid: 8553766373797921743
+    - rid: 8553766373797921742
+      type: {class: GetStringGlobalName, ns: GameCreator.Runtime.Variables, asm: GameCreator.Runtime.Core}
+      data:
+        m_Variable:
+          m_TypeID:
+            m_String: string
+          m_Variable: {fileID: 11400000, guid: ff26b045879f1f14589722bd171e506c, type: 2}
+          m_Name:
+            m_String: Weapon-Class
+            m_ID: 1609281996
+    - rid: 8553766373797921743
+      type: {class: GetStringString, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: Primary
+    - rid: 8553766375737000014
+      type: {class: InstructionCharacterGesture, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766375737000015
+        m_AnimationClip:
+          m_Property:
+            rid: 8553766375737000016
+        m_AvatarMask: {fileID: 31900000, guid: 71ae81024f998ef4a8bc3fcc0db6c778, type: 2}
+        m_BlendMode: 0
+        m_Delay:
+          m_Property:
+            rid: 8553766375737000017
+        m_Speed:
+          m_Property:
+            rid: 8553766375737000018
+        m_UseRootMotion: 0
+        m_TransitionIn:
+          m_Property:
+            rid: 8553766375737000019
+        m_TransitionOut:
+          m_Property:
+            rid: 8553766375737000020
+        m_WaitToComplete: 0
+    - rid: 8553766375737000015
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766375737000016
+      type: {class: GetAnimationInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: {fileID: 7400000, guid: fb052b82e54bc3541b2a4ef6d1cc5d55, type: 2}
+    - rid: 8553766375737000017
+      type: {class: GetDecimalConstantZero, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766375737000018
+      type: {class: GetDecimalConstantOne, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766375737000019
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.1
+    - rid: 8553766375737000020
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.1
+    - rid: 8553766375737000021
+      type: {class: InstructionCharacterRemoveProp, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766375737000022
+        m_Type: 0
+        m_Prop:
+          m_Property:
+            rid: 8553766375737000023
+    - rid: 8553766375737000022
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766375737000023
+      type: {class: GetGameObjectInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_GameObject: {fileID: 1474398612432461410, guid: 79a01dff58625124787da83fb9bf6efe, type: 3}
+    - rid: 8553766375737000024
+      type: {class: InstructionCharacterAttachProp, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766375737000025
+        m_Type: 0
+        m_Prop:
+          m_Property:
+            rid: 8553766556951905211
+        m_Handle:
+          m_Type: 1
+          m_Bone:
+            m_Type: 1
+            m_Human: 18
+            m_Path: 
+          m_LocalPosition: {x: 0, y: 0, z: 0}
+          m_LocalRotation: {x: 0, y: 0, z: 0}
+          m_Handle: {fileID: 11400000, guid: 390f6f21e52a14940bb4979fce7ae366, type: 2}
+    - rid: 8553766375737000025
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766375737000027
+      type: {class: InstructionShooterEquipWeapon, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766375737000028
+        m_Weapon:
+          m_Property:
+            rid: 8553766375737000029
+        m_Model:
+          m_Property:
+            rid: 8553766375737000030
+    - rid: 8553766375737000028
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766375737000029
+      type: {class: GetWeaponShooterInstance, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Weapon: {fileID: 11400000, guid: 14506e4e1c04af04f85ded4f3e7d33de, type: 2}
+    - rid: 8553766375737000030
+      type: {class: GetGameObjectCharactersLastPropAttached, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766529027277432
+      type: {class: Branch, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Description: No Gun - No Cover
+        m_ConditionList:
+          m_Conditions:
+          - rid: 8553766529027277433
+        m_InstructionList:
+          m_Instructions:
+          - rid: 8553766529027277434
+          - rid: 8553766529027277435
+          - rid: 8553766529027277436
+          - rid: 8553766556951905218
+          - rid: 8553766529027277438
+          - rid: 8553766691508847225
+    - rid: 8553766529027277433
+      type: {class: ConditionShooterHasEquipped, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Sign: 0
+        m_Character:
+          m_Property:
+            rid: 8553766529027277439
+        m_Weapon:
+          m_Property:
+            rid: 8553766529027277440
+    - rid: 8553766529027277434
+      type: {class: InstructionCharacterGesture, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766529027277441
+        m_AnimationClip:
+          m_Property:
+            rid: 8553766529027277442
+        m_AvatarMask: {fileID: 0}
+        m_BlendMode: 0
+        m_Delay:
+          m_Property:
+            rid: 8553766529027277443
+        m_Speed:
+          m_Property:
+            rid: 8553766529027277444
+        m_UseRootMotion: 0
+        m_TransitionIn:
+          m_Property:
+            rid: 8553766529027277445
+        m_TransitionOut:
+          m_Property:
+            rid: 8553766529027277446
+        m_WaitToComplete: 0
+    - rid: 8553766529027277435
+      type: {class: InstructionCommonTimeWait, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Seconds:
+          m_Property:
+            rid: 8553766529027277447
+        m_Mode:
+          m_UpdateTime: 0
+    - rid: 8553766529027277436
+      type: {class: InstructionCharacterRemoveProp, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766529027277448
+        m_Type: 0
+        m_Prop:
+          m_Property:
+            rid: 8553766529027277449
+    - rid: 8553766529027277438
+      type: {class: InstructionShooterEquipWeapon, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766529027277452
+        m_Weapon:
+          m_Property:
+            rid: 8553766529027277453
+        m_Model:
+          m_Property:
+            rid: 8553766529027277454
+    - rid: 8553766529027277439
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766529027277440
+      type: {class: GetWeaponShooterCharacter, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Character:
+          m_Property:
+            rid: 8553766529027277455
+    - rid: 8553766529027277441
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766529027277442
+      type: {class: GetAnimationInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: {fileID: 7400000, guid: fb052b82e54bc3541b2a4ef6d1cc5d55, type: 2}
+    - rid: 8553766529027277443
+      type: {class: GetDecimalConstantZero, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766529027277444
+      type: {class: GetDecimalConstantOne, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766529027277445
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.1
+    - rid: 8553766529027277446
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.1
+    - rid: 8553766529027277447
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.33
+    - rid: 8553766529027277448
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766529027277449
+      type: {class: GetGameObjectInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_GameObject: {fileID: 1474398612432461410, guid: 79a01dff58625124787da83fb9bf6efe, type: 3}
+    - rid: 8553766529027277452
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766529027277453
+      type: {class: GetWeaponShooterInstance, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Weapon: {fileID: 11400000, guid: 14506e4e1c04af04f85ded4f3e7d33de, type: 2}
+    - rid: 8553766529027277454
+      type: {class: GetGameObjectCharactersLastPropAttached, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766529027277455
+      type: {class: GetGameObjectSelf, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766529027277456
+      type: {class: Branch, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Description: Secondary - No Cover
+        m_ConditionList:
+          m_Conditions:
+          - rid: 8553766529027277457
+          - rid: 8553766554679378767
+        m_InstructionList:
+          m_Instructions:
+          - rid: 8553766529027277458
+          - rid: 8553766529027277459
+          - rid: 8553766577789993236
+          - rid: 8553766554679378166
+          - rid: 8553766529027277462
+          - rid: 8553766529027277463
+          - rid: 8553766529027277464
+          - rid: 8553766556951905221
+          - rid: 8553766529027277466
+          - rid: 8553766691508847229
+    - rid: 8553766529027277457
+      type: {class: ConditionTextContains, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Sign: 1
+        m_Text:
+          m_Property:
+            rid: 8553766529027277467
+        m_Substring:
+          m_Property:
+            rid: 8553766529027277468
+    - rid: 8553766529027277458
+      type: {class: InstructionCharacterGesture, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766529027277469
+        m_AnimationClip:
+          m_Property:
+            rid: 8553766529027277470
+        m_AvatarMask: {fileID: 0}
+        m_BlendMode: 0
+        m_Delay:
+          m_Property:
+            rid: 8553766529027277471
+        m_Speed:
+          m_Property:
+            rid: 8553766529027277472
+        m_UseRootMotion: 0
+        m_TransitionIn:
+          m_Property:
+            rid: 8553766529027277473
+        m_TransitionOut:
+          m_Property:
+            rid: 8553766529027277474
+        m_WaitToComplete: 0
+    - rid: 8553766529027277459
+      type: {class: InstructionCommonTimeWait, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Seconds:
+          m_Property:
+            rid: 8553766529027277475
+        m_Mode:
+          m_UpdateTime: 0
+    - rid: 8553766529027277462
+      type: {class: InstructionShooterUnequipWeapon, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766529027277480
+        m_Weapon:
+          m_Property:
+            rid: 8553766529027277481
+    - rid: 8553766529027277463
+      type: {class: InstructionCommonTimeWait, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Seconds:
+          m_Property:
+            rid: 8553766529027277482
+        m_Mode:
+          m_UpdateTime: 0
+    - rid: 8553766529027277464
+      type: {class: InstructionCharacterRemoveProp, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766529027277483
+        m_Type: 0
+        m_Prop:
+          m_Property:
+            rid: 8553766529027277484
+    - rid: 8553766529027277466
+      type: {class: InstructionShooterEquipWeapon, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766529027277487
+        m_Weapon:
+          m_Property:
+            rid: 8553766529027277488
+        m_Model:
+          m_Property:
+            rid: 8553766529027277489
+    - rid: 8553766529027277467
+      type: {class: GetStringGlobalName, ns: GameCreator.Runtime.Variables, asm: GameCreator.Runtime.Core}
+      data:
+        m_Variable:
+          m_TypeID:
+            m_String: string
+          m_Variable: {fileID: 11400000, guid: ff26b045879f1f14589722bd171e506c, type: 2}
+          m_Name:
+            m_String: Weapon-Class
+            m_ID: 1609281996
+    - rid: 8553766529027277468
+      type: {class: GetStringString, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: Primary
+    - rid: 8553766529027277469
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766529027277470
+      type: {class: GetAnimationInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: {fileID: 7400000, guid: 9d48cc5439198db4db858bf4aabb2a19, type: 2}
+    - rid: 8553766529027277471
+      type: {class: GetDecimalConstantZero, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766529027277472
+      type: {class: GetDecimalConstantOne, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766529027277473
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.1
+    - rid: 8553766529027277474
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.1
+    - rid: 8553766529027277475
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.33
+    - rid: 8553766529027277480
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766529027277481
+      type: {class: GetWeaponShooterCharacter, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Character:
+          m_Property:
+            rid: 8553766529027277490
+    - rid: 8553766529027277482
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.5
+    - rid: 8553766529027277483
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766529027277484
+      type: {class: GetGameObjectInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_GameObject: {fileID: 1474398612432461410, guid: 79a01dff58625124787da83fb9bf6efe, type: 3}
+    - rid: 8553766529027277487
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766529027277488
+      type: {class: GetWeaponShooterInstance, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Weapon: {fileID: 11400000, guid: 14506e4e1c04af04f85ded4f3e7d33de, type: 2}
+    - rid: 8553766529027277489
+      type: {class: GetGameObjectCharactersLastPropAttached, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766529027277490
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766529027277491
+      type: {class: ConditionCharacterIsInCover, ns: GameCreator.Runtime.VisualScripting, asm: Assembly-CSharp-firstpass}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Sign: 1
+        m_Character:
+          m_Property:
+            rid: 8553766529027277492
+    - rid: 8553766529027277492
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766529027277493
+      type: {class: ConditionCharacterIsInCover, ns: GameCreator.Runtime.VisualScripting, asm: Assembly-CSharp-firstpass}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Sign: 1
+        m_Character:
+          m_Property:
+            rid: 8553766529027277494
+    - rid: 8553766529027277494
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378160
+      type: {class: InstructionCharacterRemoveProp, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766554679378161
+        m_Type: 0
+        m_Prop:
+          m_Property:
+            rid: 8553766577789993235
+    - rid: 8553766554679378161
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378163
+      type: {class: InstructionCharacterAttachProp, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766554679378164
+        m_Type: 0
+        m_Prop:
+          m_Property:
+            rid: 8553766554679378165
+        m_Handle:
+          m_Type: 1
+          m_Bone:
+            m_Type: 1
+            m_Human: 54
+            m_Path: 
+          m_LocalPosition: {x: 0, y: 0, z: -0.07}
+          m_LocalRotation: {x: 0, y: -180, z: 0}
+          m_Handle: {fileID: 11400000, guid: 7453b62632f4e604199c8860b52add72, type: 2}
+    - rid: 8553766554679378164
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378165
+      type: {class: GetGameObjectInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_GameObject: {fileID: 3475055516451038826, guid: bc159fe46cb16a04a847728469ca429c, type: 3}
+    - rid: 8553766554679378166
+      type: {class: InstructionCharacterAttachProp, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766554679378167
+        m_Type: 0
+        m_Prop:
+          m_Property:
+            rid: 8553766554679378168
+        m_Handle:
+          m_Type: 1
+          m_Bone:
+            m_Type: 1
+            m_Human: 54
+            m_Path: 
+          m_LocalPosition: {x: 0, y: 0, z: -0.07}
+          m_LocalRotation: {x: 0, y: -180, z: 0}
+          m_Handle: {fileID: 11400000, guid: 7453b62632f4e604199c8860b52add72, type: 2}
+    - rid: 8553766554679378167
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378168
+      type: {class: GetGameObjectInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_GameObject: {fileID: 3475055516451038826, guid: bc159fe46cb16a04a847728469ca429c, type: 3}
+    - rid: 8553766554679378673
+      type: {class: Branch, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Description: Reserve - Cover
+        m_ConditionList:
+          m_Conditions:
+          - rid: 8553766554679378674
+          - rid: 8553766554679378675
+          - rid: 8553766554679378761
+        m_InstructionList:
+          m_Instructions:
+          - rid: 8553766554679378676
+          - rid: 8553766554679378677
+          - rid: 8553766577789993242
+          - rid: 8553766554679378680
+          - rid: 8553766554679378682
+          - rid: 8553766554679378683
+          - rid: 8553766554679378684
+          - rid: 8553766556951905215
+          - rid: 8553766554679378686
+          - rid: 8553766691508847221
+    - rid: 8553766554679378674
+      type: {class: ConditionTextContains, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Sign: 1
+        m_Text:
+          m_Property:
+            rid: 8553766554679378687
+        m_Substring:
+          m_Property:
+            rid: 8553766554679378688
+    - rid: 8553766554679378675
+      type: {class: ConditionCharacterIsInCover, ns: GameCreator.Runtime.VisualScripting, asm: Assembly-CSharp-firstpass}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Sign: 1
+        m_Character:
+          m_Property:
+            rid: 8553766554679378689
+    - rid: 8553766554679378676
+      type: {class: InstructionCharacterGesture, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766554679378690
+        m_AnimationClip:
+          m_Property:
+            rid: 8553766554679378691
+        m_AvatarMask: {fileID: 31900000, guid: 71ae81024f998ef4a8bc3fcc0db6c778, type: 2}
+        m_BlendMode: 0
+        m_Delay:
+          m_Property:
+            rid: 8553766554679378692
+        m_Speed:
+          m_Property:
+            rid: 8553766554679378693
+        m_UseRootMotion: 0
+        m_TransitionIn:
+          m_Property:
+            rid: 8553766554679378694
+        m_TransitionOut:
+          m_Property:
+            rid: 8553766554679378695
+        m_WaitToComplete: 0
+    - rid: 8553766554679378677
+      type: {class: InstructionCommonTimeWait, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Seconds:
+          m_Property:
+            rid: 8553766554679378696
+        m_Mode:
+          m_UpdateTime: 0
+    - rid: 8553766554679378680
+      type: {class: InstructionCharacterAttachProp, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766554679378701
+        m_Type: 0
+        m_Prop:
+          m_Property:
+            rid: 8553766554679378702
+        m_Handle:
+          m_Type: 1
+          m_Bone:
+            m_Type: 1
+            m_Human: 54
+            m_Path: 
+          m_LocalPosition: {x: 0, y: 0, z: -0.07}
+          m_LocalRotation: {x: 0, y: -180, z: 0}
+          m_Handle: {fileID: 11400000, guid: 6596d00ccbd4e3a448b1f8ca7e9633c7, type: 2}
+    - rid: 8553766554679378682
+      type: {class: InstructionShooterUnequipWeapon, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766554679378705
+        m_Weapon:
+          m_Property:
+            rid: 8553766554679378706
+    - rid: 8553766554679378683
+      type: {class: InstructionCommonTimeWait, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Seconds:
+          m_Property:
+            rid: 8553766554679378707
+        m_Mode:
+          m_UpdateTime: 0
+    - rid: 8553766554679378684
+      type: {class: InstructionCharacterRemoveProp, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766554679378708
+        m_Type: 0
+        m_Prop:
+          m_Property:
+            rid: 8553766554679378709
+    - rid: 8553766554679378686
+      type: {class: InstructionShooterEquipWeapon, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766554679378712
+        m_Weapon:
+          m_Property:
+            rid: 8553766554679378713
+        m_Model:
+          m_Property:
+            rid: 8553766554679378714
+    - rid: 8553766554679378687
+      type: {class: GetStringGlobalName, ns: GameCreator.Runtime.Variables, asm: GameCreator.Runtime.Core}
+      data:
+        m_Variable:
+          m_TypeID:
+            m_String: string
+          m_Variable: {fileID: 11400000, guid: ff26b045879f1f14589722bd171e506c, type: 2}
+          m_Name:
+            m_String: Weapon-Class
+            m_ID: 1609281996
+    - rid: 8553766554679378688
+      type: {class: GetStringString, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: Primary
+    - rid: 8553766554679378689
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378690
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378691
+      type: {class: GetAnimationInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: {fileID: 7400000, guid: 9d48cc5439198db4db858bf4aabb2a19, type: 2}
+    - rid: 8553766554679378692
+      type: {class: GetDecimalConstantZero, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378693
+      type: {class: GetDecimalConstantOne, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378694
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.1
+    - rid: 8553766554679378695
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.1
+    - rid: 8553766554679378696
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.33
+    - rid: 8553766554679378701
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378702
+      type: {class: GetGameObjectInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_GameObject: {fileID: 1857413424230998305, guid: f192979ea6cff674c9a057903f4d41da, type: 3}
+    - rid: 8553766554679378705
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378706
+      type: {class: GetWeaponShooterCharacter, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Character:
+          m_Property:
+            rid: 8553766554679378715
+    - rid: 8553766554679378707
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.5
+    - rid: 8553766554679378708
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378709
+      type: {class: GetGameObjectInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_GameObject: {fileID: 1474398612432461410, guid: 79a01dff58625124787da83fb9bf6efe, type: 3}
+    - rid: 8553766554679378712
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378713
+      type: {class: GetWeaponShooterInstance, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Weapon: {fileID: 11400000, guid: 14506e4e1c04af04f85ded4f3e7d33de, type: 2}
+    - rid: 8553766554679378714
+      type: {class: GetGameObjectCharactersLastPropAttached, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378715
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378716
+      type: {class: Branch, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Description: Reserve - No Cover
+        m_ConditionList:
+          m_Conditions:
+          - rid: 8553766554679378717
+          - rid: 8553766554679378757
+        m_InstructionList:
+          m_Instructions:
+          - rid: 8553766554679378718
+          - rid: 8553766554679378719
+          - rid: 8553766577789993239
+          - rid: 8553766554679378722
+          - rid: 8553766554679378724
+          - rid: 8553766554679378725
+          - rid: 8553766554679378726
+          - rid: 8553766556951905224
+          - rid: 8553766554679378728
+          - rid: 8553766691508847233
+    - rid: 8553766554679378717
+      type: {class: ConditionTextContains, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Sign: 1
+        m_Text:
+          m_Property:
+            rid: 8553766554679378729
+        m_Substring:
+          m_Property:
+            rid: 8553766554679378730
+    - rid: 8553766554679378718
+      type: {class: InstructionCharacterGesture, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766554679378731
+        m_AnimationClip:
+          m_Property:
+            rid: 8553766554679378732
+        m_AvatarMask: {fileID: 0}
+        m_BlendMode: 0
+        m_Delay:
+          m_Property:
+            rid: 8553766554679378733
+        m_Speed:
+          m_Property:
+            rid: 8553766554679378734
+        m_UseRootMotion: 0
+        m_TransitionIn:
+          m_Property:
+            rid: 8553766554679378735
+        m_TransitionOut:
+          m_Property:
+            rid: 8553766554679378736
+        m_WaitToComplete: 0
+    - rid: 8553766554679378719
+      type: {class: InstructionCommonTimeWait, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Seconds:
+          m_Property:
+            rid: 8553766554679378737
+        m_Mode:
+          m_UpdateTime: 0
+    - rid: 8553766554679378722
+      type: {class: InstructionCharacterAttachProp, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766554679378742
+        m_Type: 0
+        m_Prop:
+          m_Property:
+            rid: 8553766554679378743
+        m_Handle:
+          m_Type: 1
+          m_Bone:
+            m_Type: 1
+            m_Human: 54
+            m_Path: 
+          m_LocalPosition: {x: 0, y: 0, z: -0.07}
+          m_LocalRotation: {x: 0, y: -180, z: 0}
+          m_Handle: {fileID: 11400000, guid: 6596d00ccbd4e3a448b1f8ca7e9633c7, type: 2}
+    - rid: 8553766554679378724
+      type: {class: InstructionShooterUnequipWeapon, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766554679378746
+        m_Weapon:
+          m_Property:
+            rid: 8553766554679378747
+    - rid: 8553766554679378725
+      type: {class: InstructionCommonTimeWait, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Seconds:
+          m_Property:
+            rid: 8553766554679378748
+        m_Mode:
+          m_UpdateTime: 0
+    - rid: 8553766554679378726
+      type: {class: InstructionCharacterRemoveProp, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766554679378749
+        m_Type: 0
+        m_Prop:
+          m_Property:
+            rid: 8553766554679378750
+    - rid: 8553766554679378728
+      type: {class: InstructionShooterEquipWeapon, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766554679378753
+        m_Weapon:
+          m_Property:
+            rid: 8553766554679378754
+        m_Model:
+          m_Property:
+            rid: 8553766554679378755
+    - rid: 8553766554679378729
+      type: {class: GetStringGlobalName, ns: GameCreator.Runtime.Variables, asm: GameCreator.Runtime.Core}
+      data:
+        m_Variable:
+          m_TypeID:
+            m_String: string
+          m_Variable: {fileID: 11400000, guid: ff26b045879f1f14589722bd171e506c, type: 2}
+          m_Name:
+            m_String: Weapon-Class
+            m_ID: 1609281996
+    - rid: 8553766554679378730
+      type: {class: GetStringString, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: Primary
+    - rid: 8553766554679378731
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378732
+      type: {class: GetAnimationInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: {fileID: 7400000, guid: 9d48cc5439198db4db858bf4aabb2a19, type: 2}
+    - rid: 8553766554679378733
+      type: {class: GetDecimalConstantZero, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378734
+      type: {class: GetDecimalConstantOne, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378735
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.1
+    - rid: 8553766554679378736
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.1
+    - rid: 8553766554679378737
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.33
+    - rid: 8553766554679378742
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378743
+      type: {class: GetGameObjectInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_GameObject: {fileID: 1857413424230998305, guid: f192979ea6cff674c9a057903f4d41da, type: 3}
+    - rid: 8553766554679378746
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378747
+      type: {class: GetWeaponShooterCharacter, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Character:
+          m_Property:
+            rid: 8553766554679378756
+    - rid: 8553766554679378748
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.5
+    - rid: 8553766554679378749
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378750
+      type: {class: GetGameObjectInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_GameObject: {fileID: 1474398612432461410, guid: 79a01dff58625124787da83fb9bf6efe, type: 3}
+    - rid: 8553766554679378753
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378754
+      type: {class: GetWeaponShooterInstance, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Weapon: {fileID: 11400000, guid: 14506e4e1c04af04f85ded4f3e7d33de, type: 2}
+    - rid: 8553766554679378755
+      type: {class: GetGameObjectCharactersLastPropAttached, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378756
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378757
+      type: {class: ConditionShooterHasEquipped, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Sign: 1
+        m_Character:
+          m_Property:
+            rid: 8553766554679378758
+        m_Weapon:
+          m_Property:
+            rid: 8553766554679378760
+    - rid: 8553766554679378758
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378760
+      type: {class: GetWeaponShooterInstance, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Weapon: {fileID: 11400000, guid: 7c617e83e41cec447ba700d0e5aa8851, type: 2}
+    - rid: 8553766554679378761
+      type: {class: ConditionShooterHasEquipped, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Sign: 1
+        m_Character:
+          m_Property:
+            rid: 8553766554679378762
+        m_Weapon:
+          m_Property:
+            rid: 8553766554679378763
+    - rid: 8553766554679378762
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378763
+      type: {class: GetWeaponShooterInstance, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Weapon: {fileID: 11400000, guid: 7c617e83e41cec447ba700d0e5aa8851, type: 2}
+    - rid: 8553766554679378764
+      type: {class: ConditionShooterHasEquipped, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Sign: 1
+        m_Character:
+          m_Property:
+            rid: 8553766554679378765
+        m_Weapon:
+          m_Property:
+            rid: 8553766554679378766
+    - rid: 8553766554679378765
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378766
+      type: {class: GetWeaponShooterInstance, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Weapon: {fileID: 11400000, guid: 3dbf12f3069d9ab459c296510a143ef0, type: 2}
+    - rid: 8553766554679378767
+      type: {class: ConditionShooterHasEquipped, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Sign: 1
+        m_Character:
+          m_Property:
+            rid: 8553766554679378768
+        m_Weapon:
+          m_Property:
+            rid: 8553766554679378769
+    - rid: 8553766554679378768
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766554679378769
+      type: {class: GetWeaponShooterInstance, ns: GameCreator.Runtime.Shooter, asm: GameCreator.Runtime.Shooter}
+      data:
+        m_Weapon: {fileID: 11400000, guid: 3dbf12f3069d9ab459c296510a143ef0, type: 2}
+    - rid: 8553766556951905211
+      type: {class: GetGameObjectGlobalName, ns: GameCreator.Runtime.Variables, asm: GameCreator.Runtime.Core}
+      data:
+        m_Variable:
+          m_TypeID:
+            m_String: game-object
+          m_Variable: {fileID: 11400000, guid: ff26b045879f1f14589722bd171e506c, type: 2}
+          m_Name:
+            m_String: Model-Primary
+            m_ID: -446666765
+    - rid: 8553766556951905212
+      type: {class: InstructionCharacterAttachProp, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766556951905213
+        m_Type: 0
+        m_Prop:
+          m_Property:
+            rid: 8553766556951905214
+        m_Handle:
+          m_Type: 1
+          m_Bone:
+            m_Type: 1
+            m_Human: 18
+            m_Path: 
+          m_LocalPosition: {x: 0, y: 0, z: 0}
+          m_LocalRotation: {x: 0, y: 0, z: 0}
+          m_Handle: {fileID: 11400000, guid: 390f6f21e52a14940bb4979fce7ae366, type: 2}
+    - rid: 8553766556951905213
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766556951905214
+      type: {class: GetGameObjectGlobalName, ns: GameCreator.Runtime.Variables, asm: GameCreator.Runtime.Core}
+      data:
+        m_Variable:
+          m_TypeID:
+            m_String: game-object
+          m_Variable: {fileID: 11400000, guid: ff26b045879f1f14589722bd171e506c, type: 2}
+          m_Name:
+            m_String: Model-Primary
+            m_ID: -446666765
+    - rid: 8553766556951905215
+      type: {class: InstructionCharacterAttachProp, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766556951905216
+        m_Type: 0
+        m_Prop:
+          m_Property:
+            rid: 8553766556951905217
+        m_Handle:
+          m_Type: 1
+          m_Bone:
+            m_Type: 1
+            m_Human: 18
+            m_Path: 
+          m_LocalPosition: {x: 0, y: 0, z: 0}
+          m_LocalRotation: {x: 0, y: 0, z: 0}
+          m_Handle: {fileID: 11400000, guid: 390f6f21e52a14940bb4979fce7ae366, type: 2}
+    - rid: 8553766556951905216
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766556951905217
+      type: {class: GetGameObjectGlobalName, ns: GameCreator.Runtime.Variables, asm: GameCreator.Runtime.Core}
+      data:
+        m_Variable:
+          m_TypeID:
+            m_String: game-object
+          m_Variable: {fileID: 11400000, guid: ff26b045879f1f14589722bd171e506c, type: 2}
+          m_Name:
+            m_String: Model-Primary
+            m_ID: -446666765
+    - rid: 8553766556951905218
+      type: {class: InstructionCharacterAttachProp, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766556951905219
+        m_Type: 0
+        m_Prop:
+          m_Property:
+            rid: 8553766556951905220
+        m_Handle:
+          m_Type: 1
+          m_Bone:
+            m_Type: 1
+            m_Human: 18
+            m_Path: 
+          m_LocalPosition: {x: 0, y: 0, z: 0}
+          m_LocalRotation: {x: 0, y: 0, z: 0}
+          m_Handle: {fileID: 11400000, guid: 390f6f21e52a14940bb4979fce7ae366, type: 2}
+    - rid: 8553766556951905219
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766556951905220
+      type: {class: GetGameObjectGlobalName, ns: GameCreator.Runtime.Variables, asm: GameCreator.Runtime.Core}
+      data:
+        m_Variable:
+          m_TypeID:
+            m_String: game-object
+          m_Variable: {fileID: 11400000, guid: ff26b045879f1f14589722bd171e506c, type: 2}
+          m_Name:
+            m_String: Model-Primary
+            m_ID: -446666765
+    - rid: 8553766556951905221
+      type: {class: InstructionCharacterAttachProp, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766556951905222
+        m_Type: 0
+        m_Prop:
+          m_Property:
+            rid: 8553766556951905223
+        m_Handle:
+          m_Type: 1
+          m_Bone:
+            m_Type: 1
+            m_Human: 18
+            m_Path: 
+          m_LocalPosition: {x: 0, y: 0, z: 0}
+          m_LocalRotation: {x: 0, y: 0, z: 0}
+          m_Handle: {fileID: 11400000, guid: 390f6f21e52a14940bb4979fce7ae366, type: 2}
+    - rid: 8553766556951905222
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766556951905223
+      type: {class: GetGameObjectGlobalName, ns: GameCreator.Runtime.Variables, asm: GameCreator.Runtime.Core}
+      data:
+        m_Variable:
+          m_TypeID:
+            m_String: game-object
+          m_Variable: {fileID: 11400000, guid: ff26b045879f1f14589722bd171e506c, type: 2}
+          m_Name:
+            m_String: Model-Primary
+            m_ID: -446666765
+    - rid: 8553766556951905224
+      type: {class: InstructionCharacterAttachProp, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766556951905225
+        m_Type: 0
+        m_Prop:
+          m_Property:
+            rid: 8553766556951905226
+        m_Handle:
+          m_Type: 1
+          m_Bone:
+            m_Type: 1
+            m_Human: 18
+            m_Path: 
+          m_LocalPosition: {x: 0, y: 0, z: 0}
+          m_LocalRotation: {x: 0, y: 0, z: 0}
+          m_Handle: {fileID: 11400000, guid: 390f6f21e52a14940bb4979fce7ae366, type: 2}
+    - rid: 8553766556951905225
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766556951905226
+      type: {class: GetGameObjectGlobalName, ns: GameCreator.Runtime.Variables, asm: GameCreator.Runtime.Core}
+      data:
+        m_Variable:
+          m_TypeID:
+            m_String: game-object
+          m_Variable: {fileID: 11400000, guid: ff26b045879f1f14589722bd171e506c, type: 2}
+          m_Name:
+            m_String: Model-Primary
+            m_ID: -446666765
+    - rid: 8553766577789993235
+      type: {class: GetGameObjectGlobalName, ns: GameCreator.Runtime.Variables, asm: GameCreator.Runtime.Core}
+      data:
+        m_Variable:
+          m_TypeID:
+            m_String: game-object
+          m_Variable: {fileID: 11400000, guid: ff26b045879f1f14589722bd171e506c, type: 2}
+          m_Name:
+            m_String: Model-Secondary
+            m_ID: -636292066
+    - rid: 8553766577789993236
+      type: {class: InstructionCharacterRemoveProp, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766577789993237
+        m_Type: 0
+        m_Prop:
+          m_Property:
+            rid: 8553766577789993238
+    - rid: 8553766577789993237
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766577789993238
+      type: {class: GetGameObjectGlobalName, ns: GameCreator.Runtime.Variables, asm: GameCreator.Runtime.Core}
+      data:
+        m_Variable:
+          m_TypeID:
+            m_String: game-object
+          m_Variable: {fileID: 11400000, guid: ff26b045879f1f14589722bd171e506c, type: 2}
+          m_Name:
+            m_String: Model-Secondary
+            m_ID: -636292066
+    - rid: 8553766577789993239
+      type: {class: InstructionCharacterRemoveProp, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766577789993240
+        m_Type: 0
+        m_Prop:
+          m_Property:
+            rid: 8553766577789993241
+    - rid: 8553766577789993240
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766577789993241
+      type: {class: GetGameObjectGlobalName, ns: GameCreator.Runtime.Variables, asm: GameCreator.Runtime.Core}
+      data:
+        m_Variable:
+          m_TypeID:
+            m_String: game-object
+          m_Variable: {fileID: 11400000, guid: ff26b045879f1f14589722bd171e506c, type: 2}
+          m_Name:
+            m_String: Model-Reserve
+            m_ID: -305830057
+    - rid: 8553766577789993242
+      type: {class: InstructionCharacterRemoveProp, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 8553766577789993243
+        m_Type: 0
+        m_Prop:
+          m_Property:
+            rid: 8553766577789993244
+    - rid: 8553766577789993243
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766577789993244
+      type: {class: GetGameObjectGlobalName, ns: GameCreator.Runtime.Variables, asm: GameCreator.Runtime.Core}
+      data:
+        m_Variable:
+          m_TypeID:
+            m_String: game-object
+          m_Variable: {fileID: 11400000, guid: ff26b045879f1f14589722bd171e506c, type: 2}
+          m_Name:
+            m_String: Model-Reserve
+            m_ID: -305830057
+    - rid: 8553766691508847213
+      type: {class: InstructionStatsChangeStat, ns: GameCreator.Runtime.Stats, asm: GameCreator.Runtime.Stats}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Target:
+          m_Property:
+            rid: 8553766691508847214
+        m_Stat:
+          m_Property:
+            rid: 8553766691508847215
+        m_Change:
+          m_Operation: 0
+          m_Value:
+            m_Property:
+              rid: 8553766691508847216
+    - rid: 8553766691508847214
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766691508847215
+      type: {class: GetStatInstance, ns: GameCreator.Runtime.Stats, asm: GameCreator.Runtime.Stats}
+      data:
+        m_Stat: {fileID: 11400000, guid: 1e71afd1515f0f84f96185ee4ac7571a, type: 2}
+    - rid: 8553766691508847216
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 150
+    - rid: 8553766691508847217
+      type: {class: InstructionStatsChangeStat, ns: GameCreator.Runtime.Stats, asm: GameCreator.Runtime.Stats}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Target:
+          m_Property:
+            rid: 8553766691508847218
+        m_Stat:
+          m_Property:
+            rid: 8553766691508847219
+        m_Change:
+          m_Operation: 0
+          m_Value:
+            m_Property:
+              rid: 8553766691508847220
+    - rid: 8553766691508847218
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766691508847219
+      type: {class: GetStatInstance, ns: GameCreator.Runtime.Stats, asm: GameCreator.Runtime.Stats}
+      data:
+        m_Stat: {fileID: 11400000, guid: 1e71afd1515f0f84f96185ee4ac7571a, type: 2}
+    - rid: 8553766691508847220
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 150
+    - rid: 8553766691508847221
+      type: {class: InstructionStatsChangeStat, ns: GameCreator.Runtime.Stats, asm: GameCreator.Runtime.Stats}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Target:
+          m_Property:
+            rid: 8553766691508847222
+        m_Stat:
+          m_Property:
+            rid: 8553766691508847223
+        m_Change:
+          m_Operation: 0
+          m_Value:
+            m_Property:
+              rid: 8553766691508847224
+    - rid: 8553766691508847222
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766691508847223
+      type: {class: GetStatInstance, ns: GameCreator.Runtime.Stats, asm: GameCreator.Runtime.Stats}
+      data:
+        m_Stat: {fileID: 11400000, guid: 1e71afd1515f0f84f96185ee4ac7571a, type: 2}
+    - rid: 8553766691508847224
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 150
+    - rid: 8553766691508847225
+      type: {class: InstructionStatsChangeStat, ns: GameCreator.Runtime.Stats, asm: GameCreator.Runtime.Stats}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Target:
+          m_Property:
+            rid: 8553766691508847226
+        m_Stat:
+          m_Property:
+            rid: 8553766691508847227
+        m_Change:
+          m_Operation: 0
+          m_Value:
+            m_Property:
+              rid: 8553766691508847228
+    - rid: 8553766691508847226
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766691508847227
+      type: {class: GetStatInstance, ns: GameCreator.Runtime.Stats, asm: GameCreator.Runtime.Stats}
+      data:
+        m_Stat: {fileID: 11400000, guid: 1e71afd1515f0f84f96185ee4ac7571a, type: 2}
+    - rid: 8553766691508847228
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 150
+    - rid: 8553766691508847229
+      type: {class: InstructionStatsChangeStat, ns: GameCreator.Runtime.Stats, asm: GameCreator.Runtime.Stats}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Target:
+          m_Property:
+            rid: 8553766691508847230
+        m_Stat:
+          m_Property:
+            rid: 8553766691508847231
+        m_Change:
+          m_Operation: 0
+          m_Value:
+            m_Property:
+              rid: 8553766691508847232
+    - rid: 8553766691508847230
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766691508847231
+      type: {class: GetStatInstance, ns: GameCreator.Runtime.Stats, asm: GameCreator.Runtime.Stats}
+      data:
+        m_Stat: {fileID: 11400000, guid: 1e71afd1515f0f84f96185ee4ac7571a, type: 2}
+    - rid: 8553766691508847232
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 150
+    - rid: 8553766691508847233
+      type: {class: InstructionStatsChangeStat, ns: GameCreator.Runtime.Stats, asm: GameCreator.Runtime.Stats}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Target:
+          m_Property:
+            rid: 8553766691508847234
+        m_Stat:
+          m_Property:
+            rid: 8553766691508847235
+        m_Change:
+          m_Operation: 0
+          m_Value:
+            m_Property:
+              rid: 8553766691508847236
+    - rid: 8553766691508847234
+      type: {class: GetGameObjectPlayer, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8553766691508847235
+      type: {class: GetStatInstance, ns: GameCreator.Runtime.Stats, asm: GameCreator.Runtime.Stats}
+      data:
+        m_Stat: {fileID: 11400000, guid: 1e71afd1515f0f84f96185ee4ac7571a, type: 2}
+    - rid: 8553766691508847236
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 150
+--- !u!1 &5220235304449976402
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 888806447207760106}
+  - component: {fileID: 8596806022394685444}
+  m_Layer: 0
+  m_Name: Equip_Rifle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &888806447207760106
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5220235304449976402}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 6952372706249794797}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8596806022394685444
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5220235304449976402}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 280989d249f9b482d890a5f97137f44b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Instructions:
+    m_Instructions:
+    - rid: 8553766351002141476
+    - rid: 8553766373797921128
+  references:
+    version: 2
+    RefIds:
+    - rid: 8553766351002141476
+      type: {class: InstructionCommonTimeWait, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Seconds:
+          m_Property:
+            rid: 8553766351002141477
+        m_Mode:
+          m_UpdateTime: 0
+    - rid: 8553766351002141477
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.001
+    - rid: 8553766373797921128
+      type: {class: InstructionLogicRunConditions, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Conditions:
+          m_Property:
+            rid: 8553766373797921129
+        m_WaitToFinish: 1
+    - rid: 8553766373797921129
+      type: {class: GetGameObjectConditions, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Conditions: {fileID: 8788298552729291516}

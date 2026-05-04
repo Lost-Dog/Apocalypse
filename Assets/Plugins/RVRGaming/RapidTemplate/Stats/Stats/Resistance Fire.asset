@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c4be981628d4fcd80364b5052329739, type: 3}
+  m_Name: Resistance Fire
+  m_EditorClassIdentifier: 
+  m_ID:
+    m_String: resistance-fire
+  m_Data:
+    m_Base: 5
+    m_Formula: {fileID: 11400000, guid: 06b5c8ee21aedca48ba6f45172875c27, type: 2}
+  m_Info:
+    m_Name:
+      m_Property:
+        rid: 7184097082284703890
+    m_Acronym:
+      m_Property:
+        rid: 7184097082284703891
+    m_Description:
+      m_Property:
+        rid: 7184097082284703892
+    m_Icon:
+      m_Property:
+        rid: 8553766262238871556
+    m_Color: {r: 1, g: 1, b: 1, a: 1}
+  references:
+    version: 2
+    RefIds:
+    - rid: 7184097082284703890
+      type: {class: GetStringString, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: Resistance Fire
+    - rid: 7184097082284703891
+      type: {class: GetStringString, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: RSTF
+    - rid: 7184097082284703892
+      type: {class: GetStringString, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: Description...
+    - rid: 8553766262238871556
+      type: {class: GetSpriteInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Sprite: {fileID: 21300000, guid: 401f09ec61f1a004c90db5fc7f6a5b84, type: 3}

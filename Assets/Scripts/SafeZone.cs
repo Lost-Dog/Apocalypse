@@ -1,28 +1,26 @@
 using UnityEngine;
 using UnityEngine.Events;
-using JUTPS;
-using JUTPS.InventorySystem;
-using JUTPS.WeaponSystem;
-using JUTPS.ItemSystem;
+using GameCreator.Runtime.Characters;
+using GameCreator.Runtime.Stats;
+using GameCreator.Runtime.Shooter;
 
+/// <summary>
+/// Trigger zone that restores all player stats and replenishes ammo on entry.
+/// Health is restored via GC2 Traits; ammo via ShooterMunition; survival stats via SurvivalManager.
+/// </summary>
 public class SafeZone : MonoBehaviour
 {
+    private const string HealthAttributeId = "health";
+
     [Header("Safe Zone Settings")]
-    [Tooltip("Name of this safe zone")]
     public string safeZoneName = "Safe Zone";
-    [Tooltip("Enable health restoration")]
-    public bool restoreHealth = true;
-    [Tooltip("Enable stamina restoration")]
-    public bool restoreStamina = true;
-    [Tooltip("Enable infection cure")]
-    public bool cureInfection = true;
-    [Tooltip("Enable temperature normalization")]
+    public bool restoreHealth       = true;
+    public bool restoreStamina      = true;
+    public bool cureInfection       = true;
     public bool normalizeTemperature = true;
-    [Tooltip("Enable hunger restoration")]
-    public bool restoreHunger = true;
-    [Tooltip("Enable thirst restoration")]
-    public bool restoreThirst = true;
-    
+    public bool restoreHunger       = true;
+    public bool restoreThirst       = true;
+
     [Header("Restoration Settings")]
     [Tooltip("Duration to fully replenish all stats (in seconds)")]
     public float replenishDuration = 5f;
@@ -34,73 +32,62 @@ public class SafeZone : MonoBehaviour
     public bool requireIdle = false;
     [Tooltip("Maximum distance player can move while idle")]
     public float idleMovementThreshold = 0.1f;
-    
-    [Header("Ammo & Grenades")]
-    [Tooltip("Replenish all weapon ammo to full when entering")]
+
+    [Header("Ammo Replenishment")]
+    [Tooltip("Fill all active weapon magazines when the player enters")]
     public bool replenishAmmo = true;
-    [Tooltip("Number of grenades to add when entering")]
-    public int grenadestoAdd = 3;
-    
+    [Tooltip("Number of total rounds to add per munition type when replenishing")]
+    public int roundsToAddPerWeapon = 90;
+
     [Header("Visual Feedback")]
-    [Tooltip("Particle effect to spawn when player enters")]
     public GameObject enterEffect;
-    [Tooltip("Particle effect to play while restoring")]
     public GameObject healingEffect;
-    [Tooltip("Material to apply to zone mesh when active")]
     public Material activeZoneMaterial;
-    [Tooltip("Color tint for healing effect")]
     public Color healingColor = new Color(0f, 1f, 0.5f, 0.3f);
-    
+
     [Header("Audio")]
-    [Tooltip("Sound to play when entering safe zone")]
     public AudioClip enterSound;
-    [Tooltip("Sound to loop while healing")]
     public AudioClip healingSound;
-    [Tooltip("Volume for sounds")]
     [Range(0f, 1f)] public float soundVolume = 0.5f;
-    
+
     [Header("UI Feedback")]
-    [Tooltip("Show safe zone message on screen")]
     public bool showUIMessage = true;
-    [Tooltip("Message to display when entering")]
     public string enterMessage = "Entered Safe Zone - Restoring Stats";
-    [Tooltip("Message duration")]
     public float messageDuration = 3f;
-    
+
     [Header("Events")]
     public UnityEvent onPlayerEnter;
     public UnityEvent onPlayerExit;
     public UnityEvent onRestoreComplete;
-    
-    private JUHealth playerHealth;
+
+    // Runtime state
+    private Traits playerTraits;
+    private Character playerCharacter;
     private SurvivalManager survivalManager;
-    private JUCharacterController playerController;
-    private JUInventory playerInventory;
-    private bool playerInZone = false;
-    private float timeInZone = 0f;
+    private bool playerInZone;
+    private float timeInZone;
     private Vector3 lastPlayerPosition;
     private GameObject activeHealingEffect;
     private AudioSource audioSource;
     private Renderer zoneRenderer;
     private Material originalMaterial;
-    private bool hasReplenishedAmmo = false;
-    
-    // Stat restoration tracking
-    private float restorationProgress = 0f;
-    private float startHealth;
+    private bool hasReplenishedAmmo;
+
+    private float restorationProgress;
+    private double startHealth;
     private float startStamina;
     private float startTemperature;
     private float startInfection;
     private float startHunger;
     private float startThirst;
-    
+
     private void Start()
     {
         SetupPhysics();
         SetupAudio();
         SetupVisuals();
     }
-    
+
     private void SetupPhysics()
     {
         Collider col = GetComponent<Collider>();
@@ -109,19 +96,18 @@ public class SafeZone : MonoBehaviour
             MeshCollider meshCol = col as MeshCollider;
             if (meshCol != null && !meshCol.convex)
             {
-                Debug.LogWarning($"SafeZone '{safeZoneName}' has a concave MeshCollider. Converting to convex or adding BoxCollider trigger.");
-                
+                Debug.LogWarning($"SafeZone '{safeZoneName}' has a concave MeshCollider — converting.");
                 if (meshCol.sharedMesh != null && meshCol.sharedMesh.vertexCount < 256)
                 {
-                    meshCol.convex = true;
+                    meshCol.convex    = true;
                     meshCol.isTrigger = true;
                 }
                 else
                 {
                     Destroy(meshCol);
-                    BoxCollider box = gameObject.AddComponent<BoxCollider>();
-                    box.isTrigger = true;
-                    box.size = new Vector3(10f, 5f, 10f);
+                    BoxCollider box   = gameObject.AddComponent<BoxCollider>();
+                    box.isTrigger     = true;
+                    box.size          = new Vector3(10f, 5f, 10f);
                 }
             }
             else
@@ -131,377 +117,238 @@ public class SafeZone : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"SafeZone '{safeZoneName}' has no collider! Adding BoxCollider as trigger.");
+            Debug.LogWarning($"SafeZone '{safeZoneName}' has no collider! Adding BoxCollider trigger.");
             BoxCollider box = gameObject.AddComponent<BoxCollider>();
-            box.isTrigger = true;
-            box.size = new Vector3(10f, 5f, 10f);
-        }
-        
-        Collider[] childColliders = GetComponentsInChildren<Collider>();
-        foreach (Collider childCol in childColliders)
-        {
-            if (childCol.gameObject != gameObject)
-            {
-                MeshCollider meshCol = childCol as MeshCollider;
-                if (meshCol != null && !meshCol.convex)
-                {
-                    Debug.LogWarning($"Skipping concave MeshCollider on '{childCol.gameObject.name}' - cannot be a trigger. Use BoxCollider or set MeshCollider to convex.");
-                    continue;
-                }
-                
-                childCol.isTrigger = true;
-                Debug.Log($"<color=yellow>Set child collider '{childCol.gameObject.name}' to trigger</color>");
-            }
+            box.isTrigger   = true;
+            box.size        = new Vector3(10f, 5f, 10f);
         }
     }
-    
+
     private void SetupAudio()
     {
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null && (enterSound != null || healingSound != null))
         {
             audioSource = gameObject.AddComponent<AudioSource>();
-            audioSource.playOnAwake = false;
+            audioSource.playOnAwake  = false;
             audioSource.spatialBlend = 1f;
-            audioSource.volume = soundVolume;
+            audioSource.volume       = soundVolume;
         }
     }
-    
+
     private void SetupVisuals()
     {
         zoneRenderer = GetComponent<Renderer>();
         if (zoneRenderer != null && activeZoneMaterial != null)
-        {
             originalMaterial = zoneRenderer.material;
-        }
     }
-    
+
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (!other.CompareTag("Player")) return;
+
+        playerCharacter = other.GetComponent<Character>();
+        playerTraits    = other.GetComponent<Traits>();
+        survivalManager = SurvivalManager.Instance ?? FindFirstObjectByType<SurvivalManager>();
+
+        if (playerTraits == null)
         {
-            playerHealth = other.GetComponent<JUHealth>();
-            survivalManager = SurvivalManager.Instance;
-            if (survivalManager == null)
-            {
-                survivalManager = FindFirstObjectByType<SurvivalManager>();
-            }
-            playerController = other.GetComponent<JUCharacterController>();
-            playerInventory = other.GetComponent<JUInventory>();
-            
-            if (playerHealth != null)
-            {
-                playerInZone = true;
-                timeInZone = 0f;
-                lastPlayerPosition = other.transform.position;
-                hasReplenishedAmmo = false;
-                
-                OnPlayerEnterZone();
-            }
+            Debug.LogWarning($"[SafeZone] Player has no Traits component — health restore disabled.");
         }
+
+        playerInZone      = true;
+        timeInZone        = 0f;
+        lastPlayerPosition = other.transform.position;
+        hasReplenishedAmmo = false;
+
+        OnPlayerEnterZone(other.gameObject);
     }
-    
+
     private void OnTriggerStay(Collider other)
     {
-        if (other.CompareTag("Player") && playerInZone)
+        if (!other.CompareTag("Player") || !playerInZone) return;
+
+        timeInZone += Time.deltaTime;
+        if (timeInZone < restoreDelay) return;
+
+        if (requireIdle)
         {
-            timeInZone += Time.deltaTime;
-            
-            if (timeInZone >= restoreDelay)
+            float moved = Vector3.Distance(other.transform.position, lastPlayerPosition);
+            lastPlayerPosition = other.transform.position;
+            if (moved > idleMovementThreshold)
             {
-                if (requireIdle)
-                {
-                    float movementDistance = Vector3.Distance(other.transform.position, lastPlayerPosition);
-                    lastPlayerPosition = other.transform.position;
-                    
-                    if (movementDistance > idleMovementThreshold)
-                    {
-                        StopHealing();
-                        return;
-                    }
-                }
-                
-                RestorePlayerStats();
+                StopHealing();
+                return;
             }
         }
+
+        RestorePlayerStats();
     }
-    
+
     private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player") && playerInZone)
-        {
             OnPlayerExitZone();
-        }
     }
-    
-    private void OnPlayerEnterZone()
+
+    private void OnPlayerEnterZone(GameObject playerGO)
     {
         Debug.Log($"<color=green>Player entered {safeZoneName}</color>");
-        
-        if (survivalManager != null)
-        {
-            survivalManager.SetInSafeZone(true);
-        }
-        
-        // Capture initial stat values for smooth restoration
+
+        survivalManager?.SetInSafeZone(true);
+
         restorationProgress = 0f;
-        if (playerHealth != null)
+
+        if (playerTraits != null)
         {
-            startHealth = playerHealth.Health;
+            try { startHealth = playerTraits.RuntimeAttributes.Get(HealthAttributeId).Value; }
+            catch (System.Exception) { }
         }
+
         if (survivalManager != null)
         {
-            startStamina = survivalManager.currentStamina;
+            startStamina    = survivalManager.currentStamina;
             startTemperature = survivalManager.currentTemperature;
-            startInfection = survivalManager.currentInfection;
-            startHunger = survivalManager.currentHunger;
-            startThirst = survivalManager.currentThirst;
+            startInfection  = survivalManager.currentInfection;
+            startHunger     = survivalManager.currentHunger;
+            startThirst     = survivalManager.currentThirst;
         }
-        
-        // Replenish ammo and add grenades
+
         if (replenishAmmo && !hasReplenishedAmmo)
         {
-            ReplenishAmmoAndGrenades();
+            ReplenishAmmo(playerGO);
             hasReplenishedAmmo = true;
         }
-        
+
         if (enterEffect != null)
         {
             GameObject effect = Instantiate(enterEffect, transform.position, Quaternion.identity);
             Destroy(effect, 3f);
         }
-        
+
         if (enterSound != null && audioSource != null)
-        {
             audioSource.PlayOneShot(enterSound, soundVolume);
-        }
-        
+
         if (zoneRenderer != null && activeZoneMaterial != null)
-        {
             zoneRenderer.material = activeZoneMaterial;
-        }
-        
-        if (showUIMessage)
-        {
-            ShowSafeZoneMessage(enterMessage);
-        }
-        
+
+        if (showUIMessage) ShowSafeZoneMessage(enterMessage);
+
         onPlayerEnter.Invoke();
     }
-    
+
     private void OnPlayerExitZone()
     {
         Debug.Log($"<color=yellow>Player left {safeZoneName}</color>");
-        
-        if (survivalManager != null)
-        {
-            survivalManager.SetInSafeZone(false);
-        }
-        
+
+        survivalManager?.SetInSafeZone(false);
+
         playerInZone = false;
-        timeInZone = 0f;
-        
+        timeInZone   = 0f;
+
         StopHealing();
-        
+
         if (zoneRenderer != null && originalMaterial != null)
-        {
             zoneRenderer.material = originalMaterial;
-        }
-        
-        if (showUIMessage)
-        {
-            ShowSafeZoneMessage("Left Safe Zone");
-        }
-        
+
+        if (showUIMessage) ShowSafeZoneMessage("Left Safe Zone");
+
         onPlayerExit.Invoke();
-        
-        playerHealth = null;
+
+        playerTraits    = null;
+        playerCharacter = null;
         survivalManager = null;
-        playerController = null;
-        playerInventory = null;
     }
-    
-    private void ReplenishAmmoAndGrenades()
+
+    private void ReplenishAmmo(GameObject playerGO)
     {
-        if (playerInventory == null)
+        // Replenish ammo for every ShooterMunition on the player's combat weapons
+        if (playerCharacter == null) return;
+
+        ShooterMunition[] munitions = playerGO.GetComponents<ShooterMunition>();
+        int count = 0;
+
+        foreach (ShooterMunition munition in munitions)
         {
-            Debug.LogWarning("[SafeZone] No JUInventory found on player - cannot replenish ammo");
-            return;
+            munition.Total += roundsToAddPerWeapon;
+            count++;
         }
-        
-        int weaponsReplenished = 0;
-        int grenadesAdded = 0;
-        
-        // Replenish all weapons in right hand
-        if (playerInventory.HoldableItensRightHand != null)
+
+        // Also check children (some setups attach munition to weapon sub-objects)
+        if (count == 0)
         {
-            foreach (var item in playerInventory.HoldableItensRightHand)
+            munitions = playerGO.GetComponentsInChildren<ShooterMunition>();
+            foreach (ShooterMunition munition in munitions)
             {
-                if (item is Weapon weapon)
-                {
-                    // Calculate max ammo based on magazine size
-                    int maxAmmo = weapon.BulletsPerMagazine * 10; // 10 magazines worth
-                    weapon.TotalBullets = maxAmmo;
-                    weapon.BulletsAmounts = weapon.BulletsPerMagazine; // Full magazine
-                    weaponsReplenished++;
-                    Debug.Log($"<color=cyan>[SafeZone] Replenished {weapon.ItemName}: {maxAmmo} total bullets</color>");
-                }
-                else if (item.ItemName.ToLower().Contains("grenade") || item.ItemName.ToLower().Contains("granade"))
-                {
-                    item.ItemQuantity += grenadestoAdd;
-                    grenadesAdded += grenadestoAdd;
-                }
+                munition.Total += roundsToAddPerWeapon;
+                count++;
             }
         }
-        
-        // Replenish all weapons in left hand
-        if (playerInventory.HoldableItensLeftHand != null)
-        {
-            foreach (var item in playerInventory.HoldableItensLeftHand)
-            {
-                if (item is Weapon weapon)
-                {
-                    int maxAmmo = weapon.BulletsPerMagazine * 10;
-                    weapon.TotalBullets = maxAmmo;
-                    weapon.BulletsAmounts = weapon.BulletsPerMagazine;
-                    weaponsReplenished++;
-                    Debug.Log($"<color=cyan>[SafeZone] Replenished {weapon.ItemName}: {maxAmmo} total bullets</color>");
-                }
-                else if (item.ItemName.ToLower().Contains("grenade") || item.ItemName.ToLower().Contains("granade"))
-                {
-                    item.ItemQuantity += grenadestoAdd;
-                    grenadesAdded += grenadestoAdd;
-                }
-            }
-        }
-        
-        // Also check all items (for grenades that might be stored differently)
-        if (playerInventory.AllItems != null)
-        {
-            foreach (var item in playerInventory.AllItems)
-            {
-                if (item.ItemName.ToLower().Contains("grenade") || item.ItemName.ToLower().Contains("granade"))
-                {
-                    if (item is ThrowableItem)
-                    {
-                        // Check if we haven't already added to this item
-                        bool alreadyProcessed = false;
-                        if (playerInventory.HoldableItensRightHand != null)
-                        {
-                            foreach (var handItem in playerInventory.HoldableItensRightHand)
-                            {
-                                if (handItem == item)
-                                {
-                                    alreadyProcessed = true;
-                                    break;
-                                }
-                            }
-                        }
-                        if (!alreadyProcessed && playerInventory.HoldableItensLeftHand != null)
-                        {
-                            foreach (var handItem in playerInventory.HoldableItensLeftHand)
-                            {
-                                if (handItem == item)
-                                {
-                                    alreadyProcessed = true;
-                                    break;
-                                }
-                            }
-                        }
-                        
-                        if (!alreadyProcessed)
-                        {
-                            item.ItemQuantity += grenadestoAdd;
-                            grenadesAdded += grenadestoAdd;
-                        }
-                    }
-                }
-            }
-        }
-        
-        if (weaponsReplenished > 0 || grenadesAdded > 0)
-        {
-            Debug.Log($"<color=green>[SafeZone] Replenished {weaponsReplenished} weapon(s) and added {grenadesAdded} grenade(s)</color>");
-        }
+
+        if (count > 0)
+            Debug.Log($"<color=cyan>[SafeZone] Replenished {count} munition type(s) (+{roundsToAddPerWeapon} each)</color>");
+        else
+            Debug.Log("[SafeZone] No ShooterMunition components found on player.");
     }
-    
+
     private void RestorePlayerStats()
     {
-        if (playerHealth == null) return;
-        
-        // Increment restoration progress
-        restorationProgress += Time.deltaTime / replenishDuration;
-        restorationProgress = Mathf.Clamp01(restorationProgress);
-        
-        bool isRestoring = false;
-        
-        // Calculate smooth lerp value
+        restorationProgress = Mathf.Clamp01(restorationProgress + Time.deltaTime / replenishDuration);
         float t = useSmoothTransition ? Mathf.SmoothStep(0f, 1f, restorationProgress) : restorationProgress;
-        
-        // Restore Health
-        if (restoreHealth && playerHealth.Health < playerHealth.MaxHealth)
+        bool isRestoring = false;
+
+        // Health via Traits
+        if (restoreHealth && playerTraits != null)
         {
-            float targetHealth = playerHealth.MaxHealth;
-            playerHealth.Health = Mathf.Lerp(startHealth, targetHealth, t);
-            isRestoring = true;
+            try
+            {
+                RuntimeAttributeData health = playerTraits.RuntimeAttributes.Get(HealthAttributeId);
+                if (health.Value < health.MaxValue)
+                {
+                    health.Value = System.Math.Min(
+                        startHealth + (health.MaxValue - startHealth) * t,
+                        health.MaxValue
+                    );
+                    isRestoring = true;
+                }
+            }
+            catch (System.Exception) { }
         }
-        
+
         if (survivalManager != null)
         {
-            // Restore Stamina
             if (restoreStamina && survivalManager.currentStamina < survivalManager.maxStamina)
             {
-                float targetStamina = survivalManager.maxStamina;
-                survivalManager.currentStamina = Mathf.Lerp(startStamina, targetStamina, t);
+                survivalManager.currentStamina = Mathf.Lerp(startStamina, survivalManager.maxStamina, t);
                 isRestoring = true;
             }
-            
-            // Cure Infection (reduce to 0)
+
             if (cureInfection && survivalManager.currentInfection > 0f)
             {
                 survivalManager.currentInfection = Mathf.Lerp(startInfection, 0f, t);
                 isRestoring = true;
             }
-            
-            // NOTE: Temperature normalization disabled - SurvivalManager.UpdateTemperature() already handles this
-            // Having both active causes oscillation between 36.9-37°C
-            /*
-            // Normalize Temperature
-            if (normalizeTemperature && Mathf.Abs(survivalManager.currentTemperature - survivalManager.normalTemperature) > 0.1f)
-            {
-                survivalManager.currentTemperature = Mathf.Lerp(startTemperature, survivalManager.normalTemperature, t);
-                isRestoring = true;
-            }
-            */
-            
-            // Restore Hunger
+
             if (restoreHunger && survivalManager.currentHunger < survivalManager.maxHunger)
             {
-                float targetHunger = survivalManager.maxHunger;
-                survivalManager.currentHunger = Mathf.Lerp(startHunger, targetHunger, t);
+                survivalManager.currentHunger = Mathf.Lerp(startHunger, survivalManager.maxHunger, t);
                 isRestoring = true;
             }
-            
-            // Restore Thirst
+
             if (restoreThirst && survivalManager.currentThirst < survivalManager.maxThirst)
             {
-                float targetThirst = survivalManager.maxThirst;
-                survivalManager.currentThirst = Mathf.Lerp(startThirst, targetThirst, t);
+                survivalManager.currentThirst = Mathf.Lerp(startThirst, survivalManager.maxThirst, t);
                 isRestoring = true;
             }
         }
-        
-        // Start or continue healing effects
+
         if (isRestoring)
         {
-            if (activeHealingEffect == null && healingEffect != null)
-            {
+            if (activeHealingEffect == null)
                 StartHealing();
-            }
         }
         else
         {
-            // All stats fully restored
             if (activeHealingEffect != null)
             {
                 StopHealing();
@@ -510,14 +357,12 @@ public class SafeZone : MonoBehaviour
             }
         }
     }
-    
+
     private void StartHealing()
     {
         if (healingEffect != null && activeHealingEffect == null)
-        {
             activeHealingEffect = Instantiate(healingEffect, transform.position, Quaternion.identity, transform);
-        }
-        
+
         if (healingSound != null && audioSource != null && !audioSource.isPlaying)
         {
             audioSource.clip = healingSound;
@@ -525,7 +370,7 @@ public class SafeZone : MonoBehaviour
             audioSource.Play();
         }
     }
-    
+
     private void StopHealing()
     {
         if (activeHealingEffect != null)
@@ -533,65 +378,49 @@ public class SafeZone : MonoBehaviour
             Destroy(activeHealingEffect);
             activeHealingEffect = null;
         }
-        
+
         if (audioSource != null && audioSource.isPlaying)
-        {
             audioSource.Stop();
-        }
     }
-    
+
     private void ShowSafeZoneMessage(string message)
     {
         GameObject messageDisplay = GameObject.Find("MessageDisplay");
-        if (messageDisplay != null)
-        {
-            MessageDisplay display = messageDisplay.GetComponent<MessageDisplay>();
-            if (display != null)
-            {
-                display.ShowMessage(message, messageDuration);
-            }
-        }
+        MessageDisplay display = messageDisplay?.GetComponent<MessageDisplay>();
+
+        if (display != null)
+            display.ShowMessage(message, messageDuration);
         else
-        {
             Debug.Log($"<color=cyan>[Safe Zone] {message}</color>");
-        }
     }
-    
+
     private void OnDrawGizmos()
     {
         Gizmos.color = healingColor;
-        
         Collider col = GetComponent<Collider>();
-        if (col != null)
+        if (col is BoxCollider box)
         {
-            if (col is BoxCollider box)
-            {
-                Gizmos.matrix = transform.localToWorldMatrix;
-                Gizmos.DrawWireCube(box.center, box.size);
-            }
-            else if (col is SphereCollider sphere)
-            {
-                Gizmos.DrawWireSphere(transform.position, sphere.radius * transform.localScale.x);
-            }
+            Gizmos.matrix = transform.localToWorldMatrix;
+            Gizmos.DrawWireCube(box.center, box.size);
+        }
+        else if (col is SphereCollider sphere)
+        {
+            Gizmos.DrawWireSphere(transform.position, sphere.radius * transform.localScale.x);
         }
     }
-    
+
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.green;
-        
         Collider col = GetComponent<Collider>();
-        if (col != null)
+        if (col is BoxCollider box)
         {
-            if (col is BoxCollider box)
-            {
-                Gizmos.matrix = transform.localToWorldMatrix;
-                Gizmos.DrawCube(box.center, box.size);
-            }
-            else if (col is SphereCollider sphere)
-            {
-                Gizmos.DrawSphere(transform.position, sphere.radius * transform.localScale.x);
-            }
+            Gizmos.matrix = transform.localToWorldMatrix;
+            Gizmos.DrawCube(box.center, box.size);
+        }
+        else if (col is SphereCollider sphere)
+        {
+            Gizmos.DrawSphere(transform.position, sphere.radius * transform.localScale.x);
         }
     }
 }

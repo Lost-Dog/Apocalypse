@@ -1,117 +1,90 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using JUTPS;
+using GameCreator.Runtime.Common;
+using GameCreator.Runtime.Stats;
 
+/// <summary>
+/// Displays the player's health attribute from the GC2 Traits component.
+/// </summary>
 public class PlayerHealthDisplay : MonoBehaviour
 {
+    private const string HealthAttributeId = "health";
+
     [Header("References")]
-    public JUHealth playerHealth;
     public TextMeshProUGUI healthText;
     public Slider healthSlider;
-    
+
     [Header("Display Settings")]
     public bool showAsPercentage = false;
     public bool showFraction = true;
     public bool showPrefix = false;
     public string prefix = "HP: ";
-    
+
     [Header("Auto-Find")]
     public bool autoFindReferences = true;
-    
+
+    private Traits playerTraits;
+
     private void Start()
     {
         if (autoFindReferences)
-        {
             FindReferences();
-        }
-        
-        InitializeSlider();
+
         UpdateDisplay();
     }
-    
+
     private void FindReferences()
     {
-        if (playerHealth == null)
+        if (playerTraits == null)
         {
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            GameObject player = ShortcutPlayer.Instance;
             if (player != null)
-            {
-                playerHealth = player.GetComponent<JUHealth>();
-            }
-            
-            if (playerHealth == null)
-            {
-                Debug.LogWarning("PlayerHealthDisplay: Could not find player health component!");
-            }
+                playerTraits = player.GetComponent<Traits>();
+
+            if (playerTraits == null)
+                Debug.LogWarning("[PlayerHealthDisplay] Could not find player Traits component!");
         }
-        
+
         if (healthText == null)
-        {
             healthText = GetComponent<TextMeshProUGUI>();
-        }
-        
+
         if (healthSlider == null)
-        {
             healthSlider = GetComponent<Slider>();
-        }
     }
-    
-    private void InitializeSlider()
-    {
-        if (healthSlider != null && playerHealth != null)
-        {
-            healthSlider.maxValue = playerHealth.MaxHealth;
-            healthSlider.value = playerHealth.Health;
-        }
-    }
-    
-    private void Update()
-    {
-        UpdateDisplay();
-    }
-    
+
+    private void Update() => UpdateDisplay();
+
     private void UpdateDisplay()
     {
-        if (playerHealth == null) return;
-        
-        if (healthText != null)
+        if (playerTraits == null) return;
+
+        try
         {
-            UpdateTextDisplay();
+            RuntimeAttributeData health = playerTraits.RuntimeAttributes.Get(HealthAttributeId);
+            double value = health.Value;
+            double maxValue = health.MaxValue;
+
+            if (healthSlider != null)
+            {
+                healthSlider.maxValue = (float)maxValue;
+                healthSlider.value = (float)value;
+            }
+
+            if (healthText != null)
+            {
+                string displayText;
+
+                if (showAsPercentage)
+                    displayText = $"{Mathf.RoundToInt((float)(value / maxValue) * 100f)}%";
+                else if (showFraction)
+                    displayText = $"{Mathf.RoundToInt((float)value)}/{Mathf.RoundToInt((float)maxValue)}";
+                else
+                    displayText = Mathf.RoundToInt((float)value).ToString();
+
+                healthText.text = showPrefix ? $"{prefix}{displayText}" : displayText;
+            }
         }
-        
-        if (healthSlider != null)
-        {
-            healthSlider.maxValue = playerHealth.MaxHealth;
-            healthSlider.value = playerHealth.Health;
-        }
-    }
-    
-    private void UpdateTextDisplay()
-    {
-        string displayText = "";
-        
-        if (showAsPercentage)
-        {
-            float percentage = (playerHealth.Health / playerHealth.MaxHealth) * 100f;
-            displayText = $"{Mathf.RoundToInt(percentage)}%";
-        }
-        else if (showFraction)
-        {
-            displayText = $"{Mathf.RoundToInt(playerHealth.Health)}/{Mathf.RoundToInt(playerHealth.MaxHealth)}";
-        }
-        else
-        {
-            displayText = Mathf.RoundToInt(playerHealth.Health).ToString();
-        }
-        
-        if (showPrefix)
-        {
-            healthText.text = $"{prefix}{displayText}";
-        }
-        else
-        {
-            healthText.text = displayText;
-        }
+        catch (System.Exception) { }
     }
 }

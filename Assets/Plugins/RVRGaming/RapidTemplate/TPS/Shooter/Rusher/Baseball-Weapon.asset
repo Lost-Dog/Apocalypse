@@ -1,0 +1,143 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c07b738becbd473c92520c1cdf024b76, type: 3}
+  m_Name: Baseball-Weapon
+  m_EditorClassIdentifier: 
+  m_Id:
+    m_SerializedID:
+      m_String: 8fa6fc29-cb86-4ada-a49e-28ea6d7cb9f9
+  m_Title:
+    m_Property:
+      rid: 2893859847396655743
+  m_Description:
+    m_Property:
+      rid: 2893859847396655744
+  m_Icon:
+    m_Property:
+      rid: 2893859847396655745
+  m_Color:
+    m_Property:
+      rid: 2893859847396655746
+  m_HitReaction: {fileID: 11400000, guid: a02d0bb15d27ee140877dc4706633999, type: 2}
+  m_ParriedReaction: {fileID: 0}
+  m_OnEquip:
+    m_Instructions:
+      m_Instructions:
+      - rid: 2893859869215425355
+  m_OnUnequip:
+    m_Instructions:
+      m_Instructions:
+      - rid: 2893859869215425358
+  m_OnDodge:
+    m_Instructions:
+      m_Instructions: []
+  m_Shield: {fileID: 11400000, guid: bd700011e95157a4692655ba47bf7efa, type: 2}
+  m_State:
+    m_StateType: 2
+    m_AnimationClip:
+      m_Property:
+        rid: 2893859847396655747
+    m_RuntimeController: {fileID: 0}
+    m_State: {fileID: 11400000, guid: eadc13bc868b75d49bc3cdd3a3df06c7, type: 2}
+    m_AvatarMask: {fileID: 0}
+  m_Layer:
+    m_Property:
+      rid: 2893859847396655748
+  m_Combos:
+    m_CombosFrom: 0
+    m_CombosAsset: {fileID: 11400000, guid: 0f8a0339d7c9a3941b866abaa00e35f8, type: 2}
+    m_CombosEmbed:
+      rid: 2893859847396655749
+  references:
+    version: 2
+    RefIds:
+    - rid: 2893859847396655743
+      type: {class: GetStringString, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 
+    - rid: 2893859847396655744
+      type: {class: GetStringTextArea, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Text:
+          m_Text: 
+    - rid: 2893859847396655745
+      type: {class: GetSpriteNone, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 2893859847396655746
+      type: {class: GetColorColorsWhite, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 2893859847396655747
+      type: {class: GetAnimationInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: {fileID: 0}
+    - rid: 2893859847396655748
+      type: {class: GetDecimalInteger, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 5
+    - rid: 2893859847396655749
+      type: {class: ComboTree, ns: GameCreator.Runtime.Melee, asm: GameCreator.Runtime.Melee}
+      data:
+        m_Dirty: 59091
+        m_Data:
+          m_Keys: 
+          m_Values: []
+        m_Nodes:
+          m_Keys: 
+          m_Values: []
+        m_Roots: 
+    - rid: 2893859869215425355
+      type: {class: InstructionCharacterAttachProp, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 2893859869215425356
+        m_Type: 0
+        m_Prop:
+          m_Property:
+            rid: 2893859869215425357
+        m_Handle:
+          m_Type: 0
+          m_Bone:
+            m_Type: 1
+            m_Human: 18
+            m_Path: 
+          m_LocalPosition: {x: -0.0019, y: 0.0394, z: 0.0168}
+          m_LocalRotation: {x: 0, y: -33.882, z: 0}
+          m_Handle: {fileID: 0}
+    - rid: 2893859869215425356
+      type: {class: GetGameObjectSelf, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 2893859869215425357
+      type: {class: GetGameObjectInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_GameObject: {fileID: 1805659447825900147, guid: b9398d167bd62df418671a689a1fb521, type: 3}
+    - rid: 2893859869215425358
+      type: {class: InstructionCharacterRemoveProp, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Character:
+          m_Property:
+            rid: 2893859869215425359
+        m_Type: 0
+        m_Prop:
+          m_Property:
+            rid: 2893859869215425360
+    - rid: 2893859869215425359
+      type: {class: GetGameObjectSelf, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 2893859869215425360
+      type: {class: GetGameObjectInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_GameObject: {fileID: 1805659447825900147, guid: d4d5927a296f58b428bff195ddfc4eb3, type: 3}

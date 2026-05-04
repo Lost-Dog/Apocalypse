@@ -1,6 +1,6 @@
-using UnityEngine;
+using GameCreator.Runtime.Characters;
 using UnityEditor;
-using JUTPS;
+using UnityEngine;
 
 namespace ApocalypseEditor
 {
@@ -25,7 +25,7 @@ namespace ApocalypseEditor
                     continue;
 
                 PoolableCharacter poolable = obj.GetComponent<PoolableCharacter>();
-                
+
                 if (poolable == null)
                 {
                     poolable = Undo.AddComponent<PoolableCharacter>(obj);
@@ -37,46 +37,39 @@ namespace ApocalypseEditor
                     configured++;
                 }
 
-                JUHealth health = obj.GetComponent<JUHealth>();
-                if (health != null)
+                Character character = obj.GetComponent<Character>();
+                if (character != null)
                 {
-                    poolable.health = health;
-                    poolable.returnToPoolOnDeath = true;
-                    poolable.deactivateDelay = 3f;
+                    poolable.returnToPoolOnDeath       = true;
+                    poolable.deactivateDelay           = 3f;
                     poolable.disableRagdollBeforeReturn = true;
                 }
                 else
                 {
-                    Debug.LogWarning($"{obj.name} doesn't have JUHealth component. Poolable behavior may not work correctly.", obj);
+                    Debug.LogWarning($"{obj.name} doesn't have a GC2 Character component. " +
+                                     "PoolableCharacter requires it for death detection.", obj);
                 }
 
                 EditorUtility.SetDirty(poolable);
-                
+
                 if (PrefabUtility.IsPartOfPrefabInstance(obj))
-                {
                     PrefabUtility.RecordPrefabInstancePropertyModifications(poolable);
-                }
             }
 
             string message = "";
-            if (added > 0)
-                message += $"Added PoolableCharacter to {added} object(s).\n";
-            if (configured > 0)
-                message += $"Configured {configured} existing PoolableCharacter component(s).\n";
-            if (skipped > 0)
-                message += $"Skipped {skipped} object(s).\n";
+            if (added > 0)       message += $"Added PoolableCharacter to {added} object(s).\n";
+            if (configured > 0)  message += $"Configured {configured} existing PoolableCharacter component(s).\n";
+            if (skipped > 0)     message += $"Skipped {skipped} object(s).\n";
 
             Debug.Log(message.TrimEnd());
             EditorUtility.DisplayDialog("Poolable Behavior Added", message, "OK");
-            
+
             AssetDatabase.SaveAssets();
         }
 
         [MenuItem("GameObject/Character/Add Poolable Behavior", true)]
-        public static bool ValidateAddPoolableBehavior()
-        {
-            return Selection.gameObjects != null && Selection.gameObjects.Length > 0;
-        }
+        public static bool ValidateAddPoolableBehavior() =>
+            Selection.gameObjects != null && Selection.gameObjects.Length > 0;
 
         [MenuItem("GameObject/Character/Configure Pool Settings", false, 51)]
         public static void ConfigurePoolSettings()

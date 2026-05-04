@@ -1,306 +1,247 @@
+using GameCreator.Runtime.Characters;
+using GameCreator.Runtime.Common;
+using GameCreator.Runtime.Shooter;
 using UnityEngine;
-using JUTPS;
-using JUTPS.WeaponSystem;
-using JUTPS.InventorySystem;
 
 /// <summary>
-/// Skill that replenishes ammo when killing enemies
+/// Skill that replenishes ShooterWeapon ammo when the player kills an enemy.
+/// Triggered externally by EnemyKillRewardHandler via OnEnemyKilled().
 /// </summary>
 public class AmmoOnKillSkill : MonoBehaviour
 {
     [Header("Skill Settings")]
-    [Tooltip("Enable/disable the skill")]
+    [Tooltip("Enable/disable the skill.")]
     public bool skillActive = true;
-    
-    [Tooltip("Activate skill on start")]
+
+    [Tooltip("Activate skill on start.")]
     public bool activateOnStart = true;
-    
+
     [Header("Ammo Replenishment")]
-    [Tooltip("Percentage of max ammo to restore (0-1)")]
+    [Tooltip("Percentage of magazine capacity to restore per kill (0–1).")]
     [Range(0f, 1f)]
     public float ammoRestorePercentage = 1.0f;
-    
-    [Tooltip("Restore ammo to current weapon only (true) or all weapons (false)")]
+
+    [Tooltip("Restore ammo to the active weapon only (true) or every equipped weapon (false).")]
     public bool currentWeaponOnly = false;
-    
-    [Tooltip("Minimum ammo bullets to restore")]
+
+    [Tooltip("Minimum rounds to restore per kill.")]
     public int minBulletsToRestore = 5;
-    
-    [Tooltip("Maximum ammo bullets to restore (0 = no limit)")]
+
+    [Tooltip("Maximum rounds to restore per kill (0 = no cap).")]
     public int maxBulletsToRestore = 0;
-    
-    [Header("Visual/Audio Feedback")]
-    [Tooltip("Show notification when ammo is restored")]
+
+    [Header("Visual / Audio Feedback")]
+    [Tooltip("Show a notification when ammo is restored.")]
     public bool showNotification = true;
-    
-    [Tooltip("Audio clip to play when ammo is restored")]
+
+    [Tooltip("Audio clip to play when ammo is restored.")]
     public AudioClip ammoRestoreSound;
-    
+
     [Header("Debug")]
     public bool debugMode = false;
-    
-    private JUCharacterController characterController;
-    private JUInventory inventory;
-    private JUHealth health;
+
+    private Character playerCharacter;
     private AudioSource audioSource;
-    private int killCount = 0;
-    
-    void Start()
+    private Args args;
+    private int killCount;
+
+    private void Start()
     {
-        if (activateOnStart)
-        {
-            ActivateSkill();
-        }
+        if (activateOnStart) ActivateSkill();
     }
-    
+
+    private void OnDestroy()
+    {
+        DeactivateSkill();
+    }
+
+    // LIFECYCLE: ---------------------------------------------------------------------------------
+
+    /// <summary>
+    /// Initialises the skill and caches the GC2 Character component.
+    /// </summary>
     public void ActivateSkill()
     {
-        // Get required components
-        characterController = GetComponent<JUCharacterController>();
-        inventory = GetComponent<JUInventory>();
-        health = GetComponent<JUHealth>();
-        
-        if (characterController == null)
+        playerCharacter = GetComponent<Character>();
+
+        if (playerCharacter == null)
         {
-            Debug.LogError("[AmmoOnKillSkill] No JUCharacterController found!");
+            Debug.LogError("[AmmoOnKillSkill] No GC2 Character component found on this GameObject.");
             return;
         }
-        
-        if (inventory == null)
-        {
-            Debug.LogWarning("[AmmoOnKillSkill] No JUInventory found - skill won't work!");
-            return;
-        }
-        
-        // Get or add audio source
+
+        args = new Args(gameObject);
+
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null && ammoRestoreSound != null)
         {
             audioSource = gameObject.AddComponent<AudioSource>();
             audioSource.playOnAwake = false;
-            audioSource.spatialBlend = 0f; // 2D sound
+            audioSource.spatialBlend = 0f;
         }
-        
-        // Subscribe to kill events
-        SubscribeToKillEvents();
-        
+
         skillActive = true;
-        
+
         if (debugMode)
-        {
-            Debug.Log($"<color=cyan>[AmmoOnKillSkill] Skill activated! Ammo restore: {ammoRestorePercentage * 100}%</color>");
-        }
+            Debug.Log($"<color=cyan>[AmmoOnKillSkill] Activated. Restore: {ammoRestorePercentage * 100}%</color>");
     }
-    
+
+    /// <summary>
+    /// Disables the skill.
+    /// </summary>
     public void DeactivateSkill()
     {
-        UnsubscribeFromKillEvents();
         skillActive = false;
-        
+
         if (debugMode)
-        {
-            Debug.Log("<color=yellow>[AmmoOnKillSkill] Skill deactivated!</color>");
-        }
+            Debug.Log("<color=yellow>[AmmoOnKillSkill] Deactivated.</color>");
     }
-    
-    private void SubscribeToKillEvents()
-    {
-        // Events are handled by EnemyKillRewardHandler calling OnEnemyKilled directly
-        // No need to subscribe to anything here
-    }
-    
-    private void UnsubscribeFromKillEvents()
-    {
-        // No events to unsubscribe from
-    }
-    
+
+    // KILL ENTRY POINT: --------------------------------------------------------------------------
+
     /// <summary>
-    /// Call this method when player kills an enemy
+    /// Called by EnemyKillRewardHandler when the player kills an enemy.
     /// </summary>
     public void OnEnemyKilled(GameObject enemy)
     {
-        if (!skillActive || inventory == null) return;
-        
+        if (!skillActive || playerCharacter == null) return;
+
         killCount++;
-        
+
         if (debugMode)
-        {
-            Debug.Log($"<color=green>[AmmoOnKillSkill] Enemy killed! Total kills: {killCount}</color>");
-        }
-        
-        RestoreAmmo();
-    }
-    
-    private void RestoreAmmo()
-    {
+            Debug.Log($"<color=green>[AmmoOnKillSkill] Kill #{killCount} registered.</color>");
+
         if (currentWeaponOnly)
-        {
-            RestoreCurrentWeaponAmmo();
-        }
+            RestoreActiveWeaponAmmo();
         else
-        {
             RestoreAllWeaponsAmmo();
-        }
     }
-    
-    private void RestoreCurrentWeaponAmmo()
+
+    // AMMO RESTORATION: --------------------------------------------------------------------------
+
+    private void RestoreActiveWeaponAmmo()
     {
-        // Get current weapon in right hand
-        Weapon currentWeapon = inventory.WeaponInUseInRightHand;
-        
-        if (currentWeapon == null)
+        ShooterWeapon weapon = playerCharacter.Combat.GetActiveWeapon<ShooterWeapon>();
+
+        if (weapon == null)
         {
-            // Try left hand
-            currentWeapon = inventory.WeaponInUseInLeftHand;
+            if (debugMode) Debug.LogWarning("[AmmoOnKillSkill] No active ShooterWeapon — skipping.");
+            return;
         }
-        
-        if (currentWeapon != null)
+
+        int restored = AddAmmo(weapon);
+
+        if (restored > 0)
         {
-            int ammoToRestore = CalculateAmmoToRestore(currentWeapon);
-            
-            if (ammoToRestore > 0)
-            {
-                currentWeapon.TotalBullets += ammoToRestore;
-                
-                if (debugMode)
-                {
-                    Debug.Log($"<color=green>[AmmoOnKillSkill] Restored {ammoToRestore} ammo to {currentWeapon.ItemName}. Total: {currentWeapon.TotalBullets}</color>");
-                }
-                
-                PlayFeedback(currentWeapon.ItemName, ammoToRestore);
-            }
-        }
-        else if (debugMode)
-        {
-            Debug.LogWarning("[AmmoOnKillSkill] No weapon equipped - cannot restore ammo");
+            if (debugMode)
+                Debug.Log($"<color=green>[AmmoOnKillSkill] +{restored} ammo to active weapon.</color>");
+
+            PlayFeedback(restored, allWeapons: false);
         }
     }
-    
+
     private void RestoreAllWeaponsAmmo()
     {
         int totalRestored = 0;
-        
-        // Restore ammo to all weapons in right hand
-        if (inventory.WeaponsRightHand != null)
+
+        foreach (Weapon slot in playerCharacter.Combat.Weapons)
         {
-            foreach (Weapon weapon in inventory.WeaponsRightHand)
-            {
-                if (weapon != null)
-                {
-                    int ammoToRestore = CalculateAmmoToRestore(weapon);
-                    if (ammoToRestore > 0)
-                    {
-                        weapon.TotalBullets += ammoToRestore;
-                        totalRestored += ammoToRestore;
-                    }
-                }
-            }
+            if (slot.Asset is ShooterWeapon shooterWeapon)
+                totalRestored += AddAmmo(shooterWeapon);
         }
-        
-        // Restore ammo to all weapons in left hand
-        if (inventory.WeaponsLeftHand != null)
-        {
-            foreach (Weapon weapon in inventory.WeaponsLeftHand)
-            {
-                if (weapon != null)
-                {
-                    int ammoToRestore = CalculateAmmoToRestore(weapon);
-                    if (ammoToRestore > 0)
-                    {
-                        weapon.TotalBullets += ammoToRestore;
-                        totalRestored += ammoToRestore;
-                    }
-                }
-            }
-        }
-        
+
         if (totalRestored > 0)
         {
             if (debugMode)
-            {
-                Debug.Log($"<color=green>[AmmoOnKillSkill] Restored {totalRestored} total ammo to all weapons</color>");
-            }
-            
-            PlayFeedback("all weapons", totalRestored);
+                Debug.Log($"<color=green>[AmmoOnKillSkill] +{totalRestored} ammo across all weapons.</color>");
+
+            PlayFeedback(totalRestored, allWeapons: true);
         }
     }
-    
-    private int CalculateAmmoToRestore(Weapon weapon)
+
+    /// <summary>
+    /// Adds calculated ammo to the weapon's ShooterMunition. Returns actual rounds added.
+    /// </summary>
+    private int AddAmmo(ShooterWeapon weapon)
     {
-        if (weapon == null || weapon.InfiniteAmmo) return 0;
-        
-        // Calculate base ammo to restore (percentage of max magazine size)
-        int baseRestore = Mathf.RoundToInt(weapon.BulletsPerMagazine * ammoRestorePercentage);
-        
-        // Apply min/max constraints
-        int ammoToRestore = Mathf.Max(baseRestore, minBulletsToRestore);
-        
+        if (weapon == null) return 0;
+
+        // Infinite-ammo weapons need no top-up
+        if (weapon.Magazine.GetTotalAmmo(args) >= int.MaxValue) return 0;
+
+        int magazineSize = weapon.Magazine.GetHasMagazine(args)
+            ? weapon.Magazine.GetMagazineSize(args)
+            : 0;
+
+        int toRestore = Mathf.RoundToInt(magazineSize * ammoRestorePercentage);
+        toRestore = Mathf.Max(toRestore, minBulletsToRestore);
         if (maxBulletsToRestore > 0)
+            toRestore = Mathf.Min(toRestore, maxBulletsToRestore);
+
+        if (toRestore <= 0) return 0;
+
+        ShooterMunition munition = playerCharacter.Combat.RequestMunition(weapon) as ShooterMunition;
+        if (munition == null) return 0;
+
+        // Add to reserve total and top up magazine if it has headroom
+        int oldTotal = munition.Total;
+        munition.Total += toRestore;
+        int actualRestored = munition.Total - oldTotal;
+
+        // Also fill magazine headroom from the newly added reserve
+        if (weapon.Magazine.GetHasMagazine(args))
         {
-            ammoToRestore = Mathf.Min(ammoToRestore, maxBulletsToRestore);
+            int headroom = Mathf.Max(0, magazineSize - munition.InMagazine);
+            int fill = Mathf.Min(headroom, munition.Total);
+            munition.InMagazine += fill;
+            munition.Total -= fill;
         }
-        
-        return ammoToRestore;
+
+        return actualRestored;
     }
-    
-    private void PlayFeedback(string weaponName, int amountRestored)
+
+    // FEEDBACK: ----------------------------------------------------------------------------------
+
+    private void PlayFeedback(int amountRestored, bool allWeapons)
     {
-        // Play sound
         if (audioSource != null && ammoRestoreSound != null)
-        {
             audioSource.PlayOneShot(ammoRestoreSound);
-        }
-        
-        // Show notification
+
         if (showNotification && NotificationManager.Instance != null)
         {
-            string message = currentWeaponOnly 
-                ? $"+{amountRestored} Ammo"
-                : $"+{amountRestored} Ammo (All Weapons)";
-            
+            string message = allWeapons
+                ? $"+{amountRestored} Ammo (All Weapons)"
+                : $"+{amountRestored} Ammo";
+
             NotificationManager.Instance.ShowNotification(message);
         }
     }
-    
+
+    // TUNING SETTERS: ----------------------------------------------------------------------------
+
     /// <summary>
-    /// Update ammo restore percentage at runtime
+    /// Updates the ammo restore percentage at runtime.
     /// </summary>
     public void SetAmmoRestorePercentage(float percentage)
     {
         ammoRestorePercentage = Mathf.Clamp01(percentage);
-        
+
         if (debugMode)
-        {
-            Debug.Log($"<color=cyan>[AmmoOnKillSkill] Ammo restore percentage set to {ammoRestorePercentage * 100}%</color>");
-        }
+            Debug.Log($"<color=cyan>[AmmoOnKillSkill] Restore %: {ammoRestorePercentage * 100}%</color>");
     }
-    
+
     /// <summary>
-    /// Set minimum bullets to restore
+    /// Sets the minimum rounds to restore per kill.
     /// </summary>
-    public void SetMinBulletsToRestore(int min)
-    {
-        minBulletsToRestore = Mathf.Max(0, min);
-    }
-    
+    public void SetMinBulletsToRestore(int min) => minBulletsToRestore = Mathf.Max(0, min);
+
     /// <summary>
-    /// Set maximum bullets to restore
+    /// Sets the maximum rounds to restore per kill (0 = no cap).
     /// </summary>
-    public void SetMaxBulletsToRestore(int max)
-    {
-        maxBulletsToRestore = Mathf.Max(0, max);
-    }
-    
+    public void SetMaxBulletsToRestore(int max) => maxBulletsToRestore = Mathf.Max(0, max);
+
     /// <summary>
-    /// Toggle between current weapon only and all weapons
+    /// Toggles between active weapon only and all equipped weapons.
     /// </summary>
-    public void SetCurrentWeaponOnly(bool currentOnly)
-    {
-        currentWeaponOnly = currentOnly;
-    }
-    
-    void OnDestroy()
-    {
-        DeactivateSkill();
-    }
+    public void SetCurrentWeaponOnly(bool currentOnly) => currentWeaponOnly = currentOnly;
 }

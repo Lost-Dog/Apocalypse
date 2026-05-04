@@ -1,0 +1,332 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8aa59a8eedbb95843887ff2a6d4dbf70, type: 3}
+  m_Name: 05_Bloodthirster
+  m_EditorClassIdentifier: Assembly-CSharp::KingEdward.SkillTree.Skill
+  m_UniqueID: 371b8bb0-2bb7-4944-880e-1e95c6060f78
+  m_AssetGUID: e205958751e62164cafb020d0bbdece0
+  m_SkillName:
+    m_Property:
+      rid: 1574977405003497651
+  m_Description:
+    m_Property:
+      rid: 1574977405003497652
+  m_Icon:
+    m_Property:
+      rid: 1574977405003497653
+  m_Cost:
+    m_Property:
+      rid: 1574977405003497654
+  m_Prerequisites:
+  - skill: {fileID: 11400000, guid: be1b3942ee921c54e954d6295ce6f084, type: 2}
+    requiredLevel: 0
+  m_OnUnlock:
+    m_Instructions:
+      m_Instructions:
+      - rid: 8846357270011052713
+  m_OnUse:
+    m_Instructions:
+      m_Instructions: []
+  m_OnLevelUp:
+    m_Instructions:
+      m_Instructions:
+      - rid: 8846357270011052757
+  m_ReapplyOnUnlockOnLoad: 1
+  m_ExecuteBeforeChange: 0
+  m_IsActiveSkill: 0
+  m_UseSequencer: 0
+  m_AnimationClip: {fileID: 0}
+  m_AvatarMask: {fileID: 0}
+  m_UseRootMotion: 0
+  m_Sequencer:
+    m_Tracks:
+    - rid: 1574977405003497655
+    - rid: 1574977405003497656
+  m_UseChargeStateWithIndicator: 0
+  m_ChargeState:
+    m_StateType: 2
+    m_AnimationClip:
+      m_Property:
+        rid: 7697259098104922713
+    m_RuntimeController: {fileID: 0}
+    m_State: {fileID: 0}
+    m_AvatarMask: {fileID: 0}
+  m_ChargeStateLayer: 0
+  m_IsChannelSkill: 0
+  m_ChannelState:
+    m_StateType: 2
+    m_AnimationClip:
+      m_Property:
+        rid: 7697259098104922714
+    m_RuntimeController: {fileID: 0}
+    m_State: {fileID: 0}
+    m_AvatarMask: {fileID: 0}
+  m_ChannelStateLayer: 0
+  m_OnChannelTick:
+    m_Instructions:
+      m_Instructions: []
+  m_ChannelConditions:
+    m_Conditions:
+      m_Conditions: []
+  m_CanInterruptOthers: 0
+  m_CanBeInterrupted: 1
+  m_IndicatorConfig:
+    type: 0
+    m_Radius:
+      m_Property:
+        rid: 7697259098104922715
+    m_MinRadius:
+      m_Property:
+        rid: 7697259098104922716
+    m_MaxRadius:
+      m_Property:
+        rid: 7697259098104922717
+    m_ExpandDuration:
+      m_Property:
+        rid: 7697259098104922718
+    m_ConeAngle:
+      m_Property:
+        rid: 7697259098104922719
+    m_Range:
+      m_Property:
+        rid: 7697259098104922720
+    m_GroundOffset:
+      m_Property:
+        rid: 7697259098104922721
+    material: {fileID: 0}
+    color: {r: 1, g: 0.3, b: 0.2, a: 0.4}
+    borderColor: {r: 1, g: 0.2, b: 0.1, a: 0.8}
+    showBorder: 1
+    fixedAtCharacter: 0
+  m_CooldownDuration:
+    m_Property:
+      rid: 1574977405003497657
+  m_HasStacks: 0
+  m_StackUsesBeforeCooldown:
+    m_Property:
+      rid: 7697259098104922722
+  m_UseStackTime: 0
+  m_StackWindowDuration:
+    m_Property:
+      rid: 7697259098104922723
+  m_MaxLevel: 5
+  m_CanLevelUp: 1
+  m_CanUnlock:
+    m_Conditions:
+      m_Conditions: []
+  m_CanUse:
+    m_Conditions:
+      m_Conditions: []
+  m_CanLevelUpConditions:
+    m_Conditions:
+      m_Conditions: []
+  m_SpecificLevelUp: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 1574977405003497651
+      type: {class: GetStringString, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: Bloodthirster
+    - rid: 1574977405003497652
+      type: {class: GetStringString, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: Heal your health based on damage dealt
+    - rid: 1574977405003497653
+      type: {class: GetSpriteInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Sprite: {fileID: 21300000, guid: e0f25fb5b46243a44a333c063b9942bc, type: 3}
+    - rid: 1574977405003497654
+      type: {class: GetDecimalInteger, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 1
+    - rid: 1574977405003497655
+      type: {class: TrackSkillTreePhases, ns: KingEdward.SkillTree, asm: KingEdward.SkillTree}
+      data:
+        m_Clips:
+        - rid: 1574977405003497658
+    - rid: 1574977405003497656
+      type: {class: TrackSkillTreeClips, ns: KingEdward.SkillTree, asm: KingEdward.SkillTree}
+      data:
+        m_Clips:
+        - rid: 1574977405003497668
+    - rid: 1574977405003497657
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 3
+    - rid: 1574977405003497658
+      type: {class: ClipSkillTreePhases, ns: KingEdward.SkillTree, asm: KingEdward.SkillTree}
+      data:
+        m_Time: 0.1724138
+        m_Duration: 0.5373564
+        m_CastEnd: 0.3
+        m_ReleaseEnd: 0.7
+        m_CastSpeed:
+          m_Property:
+            rid: 8846357225148776489
+        m_ReleaseSpeed:
+          m_Property:
+            rid: 8846357225148776490
+        m_RecoverySpeed:
+          m_Property:
+            rid: 8846357225148776491
+    - rid: 1574977405003497668
+      type: {class: ClipSkillTreeInstructions, ns: KingEdward.SkillTree, asm: KingEdward.SkillTree}
+      data:
+        m_Time: 0.19827586
+        m_Duration: 0
+        m_Instructions:
+          m_Instructions:
+            m_Instructions: []
+    - rid: 7697259098104922713
+      type: {class: GetAnimationInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: {fileID: 0}
+    - rid: 7697259098104922714
+      type: {class: GetAnimationInstance, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: {fileID: 0}
+    - rid: 7697259098104922715
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 3
+    - rid: 7697259098104922716
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 1
+    - rid: 7697259098104922717
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 6
+    - rid: 7697259098104922718
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 2
+    - rid: 7697259098104922719
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 60
+    - rid: 7697259098104922720
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 8
+    - rid: 7697259098104922721
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0.05
+    - rid: 7697259098104922722
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 1
+    - rid: 7697259098104922723
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 0
+    - rid: 8846357225148776489
+      type: {class: GetDecimalConstantOne, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8846357225148776490
+      type: {class: GetDecimalConstantOne, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8846357225148776491
+      type: {class: GetDecimalConstantOne, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 8846357270011052713
+      type: {class: InstructionCommonDebugText, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Message:
+          m_Property:
+            rid: 8846357270011052714
+    - rid: 8846357270011052714
+      type: {class: GetStringString, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: Add 5% to vampirism
+    - rid: 8846357270011052757
+      type: {class: InstructionCommonDebugText, ns: GameCreator.Runtime.VisualScripting, asm: GameCreator.Runtime.Core}
+      data:
+        m_Breakpoint: 0
+        m_IsEnabled: 1
+        m_Message:
+          m_Property:
+            rid: 8846357270011052758
+    - rid: 8846357270011052758
+      type: {class: GetStringMathJoin, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Text1:
+          m_Property:
+            rid: 8846357270011052759
+        m_Text2:
+          m_Property:
+            rid: 8846357270011052760
+    - rid: 8846357270011052759
+      type: {class: GetStringString, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 'Add '
+    - rid: 8846357270011052760
+      type: {class: GetStringMathJoin, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Text1:
+          m_Property:
+            rid: 8846357270011052761
+        m_Text2:
+          m_Property:
+            rid: 8846357270011052762
+    - rid: 8846357270011052761
+      type: {class: GetStringValueDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value:
+          m_Property:
+            rid: 8846357270011052763
+        m_Format: 
+    - rid: 8846357270011052762
+      type: {class: GetStringString, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: '% to vampirism'
+    - rid: 8846357270011052763
+      type: {class: GetDecimalMathSum, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Number1:
+          m_Property:
+            rid: 8846357270011052764
+        m_Number2:
+          m_Property:
+            rid: 8846357270011052765
+    - rid: 8846357270011052764
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 5
+    - rid: 8846357270011052765
+      type: {class: GetDecimalMathMultiply, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Number1:
+          m_Property:
+            rid: 8846357270011052766
+        m_Number2:
+          m_Property:
+            rid: 8846357270011052767
+    - rid: 8846357270011052766
+      type: {class: GetDecimalDecimal, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 1
+    - rid: 8846357270011052767
+      type: {class: GetSkillValue, ns: GameCreator.Runtime.Common, asm: KingEdward.SkillTree}
+      data:
+        m_Skill: {fileID: 11400000}
+        m_ValueType: 0
+        m_SkillTreeComponent:
+          m_Property:
+            rid: 8846357270011052768
+    - rid: 8846357270011052768
+      type: {class: GetGameObjectSelf, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
