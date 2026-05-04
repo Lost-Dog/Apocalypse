@@ -75,6 +75,9 @@ MonoBehaviour:
     useWeaponAnimatorOverrides: 0
     weaponAnimatorClipRunnerOverrides: []
     overrideWithGCCharacterState: 0
+    GCCharacterStateDisableABCEquipAnimations: 1
+    gc2EquipState: {fileID: 0}
+    gc2UnEquipState: {fileID: 0}
     useWeaponEquipAnimations: 1
     weaponEnableAnimationRunnerClip:
       refVal: {fileID: 0}
@@ -434,16 +437,16 @@ MonoBehaviour:
     potency: -1
     modifyPotencyUsingStats: 1
     potencyStatModifications:
-    - statIntegrationType: 0
+    - statIntegrationType: 3
       arithmeticOperator: 1
       percentageValue: 20
       statSource: 1
-      statName: Magic
-    - statIntegrationType: 0
+      statName: will
+    - statIntegrationType: 3
       arithmeticOperator: 0
       percentageValue: 25
       statSource: 0
-      statName: Defence
+      statName: constitution
     enhancePotencyFromCriticalHit: 0
     potencyCriticalHitBasePercentageEnhancement: 100
     potencyCriticalHitEnablePercentageEnhancementStatModification: 0
@@ -518,7 +521,8 @@ MonoBehaviour:
     removeEffectLogText: 
     showNonActivationReason: 0
     effectGraphic:
-      refVal: {fileID: 394866225015085040, guid: 6d3a2577a8d03974fa4279ca4e7c59f5, type: 3}
+      refVal: {fileID: 394866225015085040, guid: 6d3a2577a8d03974fa4279ca4e7c59f5,
+        type: 3}
       refName: LightningImpact
       refUpdateDateTime: 14/06/2021 19:19:05
     effectChildGraphic:

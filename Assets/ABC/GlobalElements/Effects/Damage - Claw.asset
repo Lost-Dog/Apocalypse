@@ -74,6 +74,9 @@ MonoBehaviour:
     useWeaponAnimatorOverrides: 0
     weaponAnimatorClipRunnerOverrides: []
     overrideWithGCCharacterState: 0
+    GCCharacterStateDisableABCEquipAnimations: 1
+    gc2EquipState: {fileID: 0}
+    gc2UnEquipState: {fileID: 0}
     useWeaponEquipAnimations: 1
     weaponEnableAnimationRunnerClip:
       refVal: {fileID: 0}
@@ -425,16 +428,16 @@ MonoBehaviour:
     potency: -1
     modifyPotencyUsingStats: 1
     potencyStatModifications:
-    - statIntegrationType: 0
+    - statIntegrationType: 3
       arithmeticOperator: 1
       percentageValue: 45
       statSource: 1
-      statName: Strength
-    - statIntegrationType: 0
+      statName: strength
+    - statIntegrationType: 3
       arithmeticOperator: 0
       percentageValue: 25
       statSource: 0
-      statName: Defence
+      statName: constitution
     enhancePotencyFromCriticalHit: 1
     potencyCriticalHitBasePercentageEnhancement: 100
     potencyCriticalHitEnablePercentageEnhancementStatModification: 0
@@ -509,7 +512,8 @@ MonoBehaviour:
     removeEffectLogText: 
     showNonActivationReason: 0
     effectGraphic:
-      refVal: {fileID: 5042003112893624425, guid: f7e5c96dc303b9c4a8ff8f989e24ea55, type: 3}
+      refVal: {fileID: 5042003112893624425, guid: f7e5c96dc303b9c4a8ff8f989e24ea55,
+        type: 3}
       refName: BloodCloudImpact
       refUpdateDateTime: 15/06/2021 20:03:13
     effectChildGraphic:

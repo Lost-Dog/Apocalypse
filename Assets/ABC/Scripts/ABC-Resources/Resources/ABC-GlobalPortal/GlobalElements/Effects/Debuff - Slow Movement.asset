@@ -74,6 +74,9 @@ MonoBehaviour:
     useWeaponAnimatorOverrides: 0
     weaponAnimatorClipRunnerOverrides: []
     overrideWithGCCharacterState: 0
+    GCCharacterStateDisableABCEquipAnimations: 1
+    gc2EquipState: {fileID: 0}
+    gc2UnEquipState: {fileID: 0}
     useWeaponEquipAnimations: 1
     weaponEnableAnimationRunnerClip:
       refVal: {fileID: 0}
@@ -428,11 +431,11 @@ MonoBehaviour:
     potency: -1
     modifyPotencyUsingStats: 1
     potencyStatModifications:
-    - statIntegrationType: 0
+    - statIntegrationType: 3
       arithmeticOperator: 1
       percentageValue: 10
       statSource: 1
-      statName: Magic
+      statName: will
     enhancePotencyFromCriticalHit: 0
     potencyCriticalHitBasePercentageEnhancement: 100
     potencyCriticalHitEnablePercentageEnhancementStatModification: 0

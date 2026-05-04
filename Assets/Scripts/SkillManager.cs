@@ -90,9 +90,10 @@ public class SkillManager : MonoBehaviour
         return allSkills.Where(s => !learnedSkills.Contains(s)).ToList();
     }
     
-    public List<SkillData> GetSkillsBySpecialization(string specialization)
+    /// <summary>Returns all skills whose SkillType maps to the given stat name.</summary>
+    public List<SkillData> GetSkillsByStatName(string statName)
     {
-        return allSkills.Where(s => s.specialization == specialization).ToList();
+        return allSkills.Where(s => s.HasStatBonus(statName)).ToList();
     }
     
     public float GetTotalStatBonus(string statName)

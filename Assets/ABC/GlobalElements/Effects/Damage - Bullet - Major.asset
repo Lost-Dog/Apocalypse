@@ -74,6 +74,9 @@ MonoBehaviour:
     useWeaponAnimatorOverrides: 0
     weaponAnimatorClipRunnerOverrides: []
     overrideWithGCCharacterState: 0
+    GCCharacterStateDisableABCEquipAnimations: 1
+    gc2EquipState: {fileID: 0}
+    gc2UnEquipState: {fileID: 0}
     useWeaponEquipAnimations: 1
     weaponEnableAnimationRunnerClip:
       refVal: {fileID: 0}
@@ -493,7 +496,8 @@ MonoBehaviour:
     removeEffectLogText: 
     showNonActivationReason: 0
     effectGraphic:
-      refVal: {fileID: 6196100002477929797, guid: 1b50b3aa650ecdd43a638ca47fa4f234, type: 3}
+      refVal: {fileID: 6196100002477929797, guid: 1b50b3aa650ecdd43a638ca47fa4f234,
+        type: 3}
       refName: BulletBloodImpact
       refUpdateDateTime: 17/06/2021 12:40:56
     effectChildGraphic:

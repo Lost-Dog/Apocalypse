@@ -262,25 +262,18 @@ public class SafeZone : MonoBehaviour
 
     private void ReplenishAmmo(GameObject playerGO)
     {
-        // Replenish ammo for every ShooterMunition on the player's combat weapons
+        // ShooterMunition is a plain C# class, not a MonoBehaviour — it lives inside
+        // Character.Combat and must be accessed through the GC2 Combat API.
         if (playerCharacter == null) return;
 
-        ShooterMunition[] munitions = playerGO.GetComponents<ShooterMunition>();
+        IMunition[] munitions = playerCharacter.Combat.Munitions;
         int count = 0;
 
-        foreach (ShooterMunition munition in munitions)
+        foreach (IMunition munitionEntry in munitions)
         {
-            munition.Total += roundsToAddPerWeapon;
-            count++;
-        }
-
-        // Also check children (some setups attach munition to weapon sub-objects)
-        if (count == 0)
-        {
-            munitions = playerGO.GetComponentsInChildren<ShooterMunition>();
-            foreach (ShooterMunition munition in munitions)
+            if (munitionEntry.Value is ShooterMunition shooterMunition)
             {
-                munition.Total += roundsToAddPerWeapon;
+                shooterMunition.Total += roundsToAddPerWeapon;
                 count++;
             }
         }
@@ -288,7 +281,7 @@ public class SafeZone : MonoBehaviour
         if (count > 0)
             Debug.Log($"<color=cyan>[SafeZone] Replenished {count} munition type(s) (+{roundsToAddPerWeapon} each)</color>");
         else
-            Debug.Log("[SafeZone] No ShooterMunition components found on player.");
+            Debug.Log("[SafeZone] No ShooterMunition entries found in player Combat.");
     }
 
     private void RestorePlayerStats()

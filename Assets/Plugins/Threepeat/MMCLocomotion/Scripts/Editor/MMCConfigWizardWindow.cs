@@ -1968,29 +1968,27 @@ namespace ThreepeatEditor
             Texture2D blackTex = MakeTex(32, 32, new Color(0.3f, 0.33f, 0.3f));
             SectionHeaderStyle = new GUIStyle(EditorStyles.foldoutHeader)
             {
-                margin = new RectOffset(0, 0, 20, 20),
-                padding = new RectOffset(50, 20, 60, 60),
-                fontSize = 15,
+                margin = new RectOffset(0, 0, 4, 4),
+                padding = new RectOffset(20, 8, 4, 4),
+                fontSize = 13,
                 fontStyle = FontStyle.Bold,
-
             };
             SectionHeaderStyle.normal.background = blackTex;
             SectionHeaderStyle.normal.textColor = Color.white;
-            SectionHeaderStyle.border.top = 30;
-            SectionHeaderStyle.border.bottom = 30;
+            SectionHeaderStyle.border.top = 4;
+            SectionHeaderStyle.border.bottom = 4;
 
             SectionHeaderStyleThin = new GUIStyle(EditorStyles.foldoutHeader)
             {
-                margin = new RectOffset(0, 0, 20, 20),
-                padding = new RectOffset(50, 20, 60, 60),
-                fontSize = 15,
+                margin = new RectOffset(0, 0, 4, 4),
+                padding = new RectOffset(20, 8, 4, 4),
+                fontSize = 13,
                 fontStyle = FontStyle.Bold,
-
             };
             SectionHeaderStyleThin.normal.background = blackTex;
             SectionHeaderStyleThin.normal.textColor = Color.white;
-            SectionHeaderStyleThin.border.top = 25;
-            SectionHeaderStyleThin.border.bottom = 25;
+            SectionHeaderStyleThin.border.top = 4;
+            SectionHeaderStyleThin.border.bottom = 4;
 
         }
 

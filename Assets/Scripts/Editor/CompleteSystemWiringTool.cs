@@ -41,7 +41,6 @@ public class CompleteSystemWiringTool : EditorWindow
         MissionManager missionManager = gameSystems.GetComponent<MissionManager>();
         ProgressionManager progressionManager = gameSystems.GetComponent<ProgressionManager>();
         LootManager lootManager = gameSystems.GetComponent<LootManager>();
-        FactionManager factionManager = gameSystems.GetComponent<FactionManager>();
         ChallengeManager challengeManager = gameSystems.GetComponent<ChallengeManager>();
         SkillManager skillManager = gameSystems.GetComponent<SkillManager>();
         HUDManager hudManager = gameSystems.GetComponent<HUDManager>();
@@ -62,12 +61,6 @@ public class CompleteSystemWiringTool : EditorWindow
         {
             gmSO.FindProperty("lootManager").objectReferenceValue = lootManager;
             Debug.Log("✓ GameManager.lootManager");
-        }
-        
-        if (factionManager != null)
-        {
-            gmSO.FindProperty("factionManager").objectReferenceValue = factionManager;
-            Debug.Log("✓ GameManager.factionManager");
         }
         
         if (challengeManager != null)
@@ -162,7 +155,6 @@ public class CompleteSystemWiringTool : EditorWindow
         ValidateComponent<MissionManager>(gameSystems, "MissionManager");
         ValidateComponent<ProgressionManager>(gameSystems, "ProgressionManager");
         ValidateComponent<LootManager>(gameSystems, "LootManager");
-        ValidateComponent<FactionManager>(gameSystems, "FactionManager");
         ValidateComponent<ChallengeManager>(gameSystems, "ChallengeManager");
         ValidateComponent<SkillManager>(gameSystems, "SkillManager");
         ValidateComponent<HUDManager>(gameSystems, "HUDManager");
@@ -174,7 +166,6 @@ public class CompleteSystemWiringTool : EditorWindow
             ValidateReference(gm.missionManager, "GameManager.missionManager");
             ValidateReference(gm.progressionManager, "GameManager.progressionManager");
             ValidateReference(gm.lootManager, "GameManager.lootManager");
-            ValidateReference(gm.factionManager, "GameManager.factionManager");
             ValidateReference(gm.challengeManager, "GameManager.challengeManager");
             ValidateReference(gm.skillManager, "GameManager.skillManager");
             ValidateReference(gm.hudManager, "GameManager.hudManager");

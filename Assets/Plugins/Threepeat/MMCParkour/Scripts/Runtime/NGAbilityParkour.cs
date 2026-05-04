@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2022, Threepeat, LLC.
+// Copyright (c) 2022, Threepeat, LLC.
 using MxM;
 using MxMGameplay;
 using System.Linq;
@@ -378,15 +378,21 @@ namespace Threepeat
             int count = 0;
             foreach (NGParkourSettings.ParkourCapability cape in config.capabilities)
             {
-                foreach (MMCAnimationClipInfo info in cape.runningEvent.animationClipInfos)
+                if (cape.runningEvent != null)
                 {
-                    eventIKMgr.AddClipEvents(info.clip, info);
-                    count++;
+                    foreach (MMCAnimationClipInfo info in cape.runningEvent.animationClipInfos)
+                    {
+                        eventIKMgr.AddClipEvents(info.clip, info);
+                        count++;
+                    }
                 }
-                foreach (MMCAnimationClipInfo info in cape.standingEvent.animationClipInfos)
+                if (cape.standingEvent != null)
                 {
-                    eventIKMgr.AddClipEvents(info.clip, info);
-                    count++;
+                    foreach (MMCAnimationClipInfo info in cape.standingEvent.animationClipInfos)
+                    {
+                        eventIKMgr.AddClipEvents(info.clip, info);
+                        count++;
+                    }
                 }
             }
             if (debugMode) Debug.LogFormat("{0} IK events added.", count);

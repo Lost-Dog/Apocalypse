@@ -73,6 +73,9 @@ MonoBehaviour:
     useWeaponAnimatorOverrides: 0
     weaponAnimatorClipRunnerOverrides: []
     overrideWithGCCharacterState: 0
+    GCCharacterStateDisableABCEquipAnimations: 1
+    gc2EquipState: {fileID: 0}
+    gc2UnEquipState: {fileID: 0}
     useWeaponEquipAnimations: 1
     weaponEnableAnimationRunnerClip:
       refVal: {fileID: 0}
@@ -493,7 +496,8 @@ MonoBehaviour:
     removeEffectLogText: '#Target# Ability Activation Debuff Removed'
     showNonActivationReason: 0
     effectGraphic:
-      refVal: {fileID: 5339124508012268709, guid: f98a296638360d043b89e43947627a98, type: 3}
+      refVal: {fileID: 5339124508012268709, guid: f98a296638360d043b89e43947627a98,
+        type: 3}
       refName: DarkImpact - Silence
       refUpdateDateTime: 08/05/2021 23:19:38
     effectChildGraphic:

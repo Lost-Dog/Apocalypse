@@ -71,15 +71,31 @@ namespace Threepeat
             playerInput.ActivateInput();
             playerInput.enabled = true;
 
-            actionMove = playerInput.actions[actionNameMovement];
-            actionJump = playerInput.actions[actionNameJump];
-            actionSprint = playerInput.actions[actionNameSprint];
-            actionCrouch = playerInput.actions[actionNameCrouch];
-            actionStrafe = playerInput.actions[actionNameStrafe];
-            ConnectCAPToInput(keyProcessorJumpParkour, actionJump);
-            ConnectCAPToInput(keyProcessorCrouchToggle, actionCrouch);
-            ConnectCAPToInput(keyProcessorSprintHold, actionSprint);
-            ConnectCAPToInput(keyProcessorStrafeToggle, actionStrafe);
+            actionMove   = FindAction(playerInput.actions, actionNameMovement,  required: true);
+            actionJump   = FindAction(playerInput.actions, actionNameJump,       required: true);
+            actionSprint = FindAction(playerInput.actions, actionNameSprint,     required: true);
+            actionCrouch = FindAction(playerInput.actions, actionNameCrouch,     required: false);
+            actionStrafe = FindAction(playerInput.actions, actionNameStrafe,     required: false);
+
+            if (actionJump   != null) ConnectCAPToInput(keyProcessorJumpParkour,   actionJump);
+            if (actionCrouch != null) ConnectCAPToInput(keyProcessorCrouchToggle,  actionCrouch);
+            if (actionSprint != null) ConnectCAPToInput(keyProcessorSprintHold,    actionSprint);
+            if (actionStrafe != null) ConnectCAPToInput(keyProcessorStrafeToggle,  actionStrafe);
+        }
+
+        /// <summary>
+        /// Looks up an action by name without throwing. Logs a warning for required missing actions.
+        /// </summary>
+        private InputAction FindAction(InputActionAsset asset, string name, bool required)
+        {
+            if (string.IsNullOrEmpty(name)) return null;
+            InputAction action = asset.FindAction(name, throwIfNotFound: false);
+            if (action == null && required)
+            {
+                Debug.LogWarning($"[MMLC] Could not find required Input Action '{name}' in '{asset.name}'. " +
+                                 $"Open the asset in the Inspector and add this action, or update the action name in NGInputScheme_InputSystem.");
+            }
+            return action;
         }
 
         public override void Deactivate()
@@ -95,6 +111,8 @@ namespace Threepeat
 
         protected override Vector3 GetInputVector()
         {
+            if (actionMove == null) return Vector3.zero;
+
             Vector2 val = actionMove.ReadValue<Vector2>();
             
             Vector3 rawInput = new Vector3(val.x, 0f, val.y);

@@ -481,6 +481,11 @@ namespace MxMGameplay
             }
             else
             {
+                if (m_characterController == null || !m_characterController.enabled)
+                {
+                    return;
+                }
+
                 if (m_enableCollision)
                 {
                     m_characterController.Move(a_move);

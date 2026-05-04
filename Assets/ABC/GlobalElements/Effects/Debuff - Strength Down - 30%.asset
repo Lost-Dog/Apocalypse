@@ -73,6 +73,9 @@ MonoBehaviour:
     useWeaponAnimatorOverrides: 0
     weaponAnimatorClipRunnerOverrides: []
     overrideWithGCCharacterState: 0
+    GCCharacterStateDisableABCEquipAnimations: 1
+    gc2EquipState: {fileID: 0}
+    gc2UnEquipState: {fileID: 0}
     useWeaponEquipAnimations: 1
     weaponEnableAnimationRunnerClip:
       refVal: {fileID: 0}
@@ -415,15 +418,15 @@ MonoBehaviour:
     globalEffect: {fileID: 0}
     effectAbilityID: 0
     effectID: 111280417
-    effectName: AdjustStatValue
+    effectName: AdjustGC2StatValue
     potency: 0
     modifyPotencyUsingStats: 1
     potencyStatModifications:
-    - statIntegrationType: 0
+    - statIntegrationType: 3
       arithmeticOperator: 1
       percentageValue: 30
       statSource: 0
-      statName: Strength
+      statName: strength
     enhancePotencyFromCriticalHit: 0
     potencyCriticalHitBasePercentageEnhancement: 100
     potencyCriticalHitEnablePercentageEnhancementStatModification: 0
@@ -438,8 +441,8 @@ MonoBehaviour:
       refName: 
       refUpdateDateTime: 
     potencyCriticalHitColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-    miscellaneousProperty: Strength
-    miscellaneousAltProperty: 
+    miscellaneousProperty: strength
+    miscellaneousAltProperty: True
     activateOn: 0
     eventType: 0
     delay: 0

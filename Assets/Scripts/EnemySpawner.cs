@@ -87,13 +87,6 @@ public class EnemySpawner : MonoBehaviour
         
         ApplyDifficultyScaling(enemy, level);
         
-        FactionMember factionMember = enemy.GetComponent<FactionMember>();
-        if (factionMember == null)
-        {
-            factionMember = enemy.AddComponent<FactionMember>();
-            factionMember.faction = FactionManager.Faction.Rogue;
-        }
-        
         return enemy;
     }
     

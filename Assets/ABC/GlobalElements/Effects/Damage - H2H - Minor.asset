@@ -74,6 +74,9 @@ MonoBehaviour:
     useWeaponAnimatorOverrides: 0
     weaponAnimatorClipRunnerOverrides: []
     overrideWithGCCharacterState: 0
+    GCCharacterStateDisableABCEquipAnimations: 1
+    gc2EquipState: {fileID: 0}
+    gc2UnEquipState: {fileID: 0}
     useWeaponEquipAnimations: 1
     weaponEnableAnimationRunnerClip:
       refVal: {fileID: 0}
@@ -425,46 +428,6 @@ MonoBehaviour:
     - {fileID: 0}
     - {fileID: 0}
     - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
     foldOut: 1
     globalEffect: {fileID: 0}
     effectAbilityID: 0
@@ -473,16 +436,16 @@ MonoBehaviour:
     potency: -1
     modifyPotencyUsingStats: 1
     potencyStatModifications:
-    - statIntegrationType: 0
+    - statIntegrationType: 3
       arithmeticOperator: 1
       percentageValue: 20
       statSource: 1
-      statName: Strength
-    - statIntegrationType: 0
+      statName: strength
+    - statIntegrationType: 3
       arithmeticOperator: 0
       percentageValue: 20
       statSource: 0
-      statName: Defence
+      statName: constitution
     enhancePotencyFromCriticalHit: 1
     potencyCriticalHitBasePercentageEnhancement: 100
     potencyCriticalHitEnablePercentageEnhancementStatModification: 0
@@ -557,7 +520,8 @@ MonoBehaviour:
     removeEffectLogText: 
     showNonActivationReason: 0
     effectGraphic:
-      refVal: {fileID: 6263520613801824659, guid: 1679b4586e7f702419fbd75ca1ba2946, type: 3}
+      refVal: {fileID: 6263520613801824659, guid: 1679b4586e7f702419fbd75ca1ba2946,
+        type: 3}
       refName: H2HImpact
       refUpdateDateTime: 28/04/2021 12:31:29
     effectChildGraphic:

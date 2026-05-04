@@ -26,7 +26,6 @@ public class GameManagerEditor : Editor
         {
             if (Application.isPlaying)
             {
-                if (gameManager.factionManager != null) gameManager.factionManager.Initialize();
                 if (gameManager.missionManager != null) gameManager.missionManager.Initialize();
                 if (gameManager.challengeManager != null) gameManager.challengeManager.Initialize();
                 if (gameManager.skillManager != null) gameManager.skillManager.Initialize();
@@ -44,7 +43,6 @@ public class GameManagerEditor : Editor
         
         int missingCount = 0;
         if (gameManager.missionManager == null) { EditorGUILayout.HelpBox("Missing: MissionManager", MessageType.Warning); missingCount++; }
-        if (gameManager.factionManager == null) { EditorGUILayout.HelpBox("Missing: FactionManager", MessageType.Warning); missingCount++; }
         if (gameManager.progressionManager == null) { EditorGUILayout.HelpBox("Missing: ProgressionManager", MessageType.Warning); missingCount++; }
         if (gameManager.lootManager == null) { EditorGUILayout.HelpBox("Missing: LootManager", MessageType.Warning); missingCount++; }
         if (gameManager.challengeManager == null) { EditorGUILayout.HelpBox("Missing: ChallengeManager", MessageType.Warning); missingCount++; }
@@ -63,10 +61,6 @@ public class GameManagerEditor : Editor
         if (gameManager.missionManager == null)
         {
             gameManager.missionManager = gameSystemsObj.GetComponent<MissionManager>();
-        }
-        if (gameManager.factionManager == null)
-        {
-            gameManager.factionManager = gameSystemsObj.GetComponent<FactionManager>();
         }
         if (gameManager.progressionManager == null)
         {

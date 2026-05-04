@@ -60,7 +60,6 @@ public class DivisionGameSetupTool : EditorWindow
             
             GameManager gameManager = gameSystemsObj.GetComponent<GameManager>();
             MissionManager missionManager = gameSystemsObj.GetComponent<MissionManager>();
-            FactionManager factionManager = gameSystemsObj.GetComponent<FactionManager>();
             ProgressionManager progressionManager = gameSystemsObj.GetComponent<ProgressionManager>();
             LootManager lootManager = gameSystemsObj.GetComponent<LootManager>();
             ChallengeManager challengeManager = gameSystemsObj.GetComponent<ChallengeManager>();
@@ -87,15 +86,6 @@ public class DivisionGameSetupTool : EditorWindow
             else
             {
                 EditorGUILayout.LabelField("✓ MissionManager", EditorStyles.helpBox);
-            }
-            
-            if (factionManager == null)
-            {
-                EditorGUILayout.HelpBox("Missing: FactionManager component", MessageType.Warning);
-            }
-            else
-            {
-                EditorGUILayout.LabelField("✓ FactionManager", EditorStyles.helpBox);
             }
             
             if (progressionManager == null)
@@ -136,13 +126,13 @@ public class DivisionGameSetupTool : EditorWindow
             
             GUILayout.Space(10);
             
-            if (gameManager != null && missionManager != null && factionManager != null && 
+            if (gameManager != null && missionManager != null &&
                 progressionManager != null && lootManager != null && challengeManager != null && 
                 skillManager != null)
             {
                 if (GUILayout.Button("Auto-Wire All Managers"))
                 {
-                    AutoWireManagers(gameManager, missionManager, factionManager, progressionManager, 
+                    AutoWireManagers(gameManager, missionManager, progressionManager, 
                                    lootManager, challengeManager, skillManager);
                 }
             }
@@ -309,7 +299,6 @@ public class DivisionGameSetupTool : EditorWindow
         GameObject gameSystemsObj = new GameObject("GameSystems");
         gameSystemsObj.AddComponent<GameManager>();
         gameSystemsObj.AddComponent<MissionManager>();
-        gameSystemsObj.AddComponent<FactionManager>();
         gameSystemsObj.AddComponent<ProgressionManager>();
         gameSystemsObj.AddComponent<LootManager>();
         gameSystemsObj.AddComponent<ChallengeManager>();
@@ -321,13 +310,12 @@ public class DivisionGameSetupTool : EditorWindow
         Debug.Log("Created GameSystems object with all managers!");
     }
     
-    private void AutoWireManagers(GameManager gameManager, MissionManager missionManager, 
-                                  FactionManager factionManager, ProgressionManager progressionManager,
+    private void AutoWireManagers(GameManager gameManager, MissionManager missionManager,
+                                  ProgressionManager progressionManager,
                                   LootManager lootManager, ChallengeManager challengeManager, 
                                   SkillManager skillManager)
     {
         gameManager.missionManager = missionManager;
-        gameManager.factionManager = factionManager;
         gameManager.progressionManager = progressionManager;
         gameManager.lootManager = lootManager;
         gameManager.challengeManager = challengeManager;
@@ -406,7 +394,6 @@ public class DivisionGameSetupTool : EditorWindow
             
             var gameManager = gameSystemsObj.GetComponent<GameManager>();
             var missionManager = gameSystemsObj.GetComponent<MissionManager>();
-            var factionManager = gameSystemsObj.GetComponent<FactionManager>();
             var progressionManager = gameSystemsObj.GetComponent<ProgressionManager>();
             var lootManager = gameSystemsObj.GetComponent<LootManager>();
             var challengeManager = gameSystemsObj.GetComponent<ChallengeManager>();
@@ -414,7 +401,6 @@ public class DivisionGameSetupTool : EditorWindow
             
             report.AppendLine(gameManager != null ? "✓ GameManager" : "❌ GameManager MISSING");
             report.AppendLine(missionManager != null ? "✓ MissionManager" : "❌ MissionManager MISSING");
-            report.AppendLine(factionManager != null ? "✓ FactionManager" : "❌ FactionManager MISSING");
             report.AppendLine(progressionManager != null ? "✓ ProgressionManager" : "❌ ProgressionManager MISSING");
             report.AppendLine(lootManager != null ? "✓ LootManager" : "❌ LootManager MISSING");
             report.AppendLine(challengeManager != null ? "✓ ChallengeManager" : "❌ ChallengeManager MISSING");
@@ -426,7 +412,6 @@ public class DivisionGameSetupTool : EditorWindow
             {
                 report.AppendLine("GameManager References:");
                 report.AppendLine(gameManager.missionManager != null ? "  ✓ missionManager wired" : "  ❌ missionManager NOT WIRED");
-                report.AppendLine(gameManager.factionManager != null ? "  ✓ factionManager wired" : "  ❌ factionManager NOT WIRED");
                 report.AppendLine(gameManager.progressionManager != null ? "  ✓ progressionManager wired" : "  ❌ progressionManager NOT WIRED");
                 report.AppendLine(gameManager.lootManager != null ? "  ✓ lootManager wired" : "  ❌ lootManager NOT WIRED");
                 report.AppendLine(gameManager.challengeManager != null ? "  ✓ challengeManager wired" : "  ❌ challengeManager NOT WIRED");

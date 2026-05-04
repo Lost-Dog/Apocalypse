@@ -79,6 +79,8 @@ namespace VHierarchy
                 {
                     if (exception.InnerException is ExitGUIException)
                         throw exception.InnerException;
+                    else if (IsEntityIdConversionException(exception))
+                        return; // Unity 6.0.3+ EntityId (UInt64) type change — drag completed, suppress reflection noise
                     else
                         throw exception;
 
@@ -157,6 +159,21 @@ namespace VHierarchy
         }
 
         static Dictionary<EditorWindow, VHierarchyNavbar> navbars_byWindow = new();
+
+        // Walks the full inner exception chain to detect the Unity 6.0.3+ EntityId drag-and-drop
+        // reflection error (UInt64 passed where Int32 was expected).
+        static bool IsEntityIdConversionException(System.Exception ex)
+        {
+            while (ex != null)
+            {
+                if (ex is System.ArgumentException && ex.Message.Contains("UInt64") && ex.Message.Contains("Int32"))
+                    return true;
+                ex = ex.InnerException;
+            }
+            return false;
+        }
+
+
 
 
 

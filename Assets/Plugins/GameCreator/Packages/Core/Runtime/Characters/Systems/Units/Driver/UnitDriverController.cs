@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using GameCreator.Runtime.Common;
 
@@ -145,7 +145,7 @@ namespace GameCreator.Runtime.Characters
                 
                 this.m_Controller.height = height;
                 this.m_Controller.radius = radius;
-                this.m_Controller.center = Vector3.zero;  
+                this.m_Controller.center = Vector3.zero;
                 
                 this.m_Controller.skinWidth = this.m_SkinWidth;
                 this.m_Controller.slopeLimit = this.m_MaxSlope;
@@ -275,7 +275,7 @@ namespace GameCreator.Runtime.Characters
 
             if (this.m_Controller.center != Vector3.zero)
             {
-                this.m_Controller.center = Vector3.zero;   
+                this.m_Controller.center = Vector3.zero;
             }
         }
 

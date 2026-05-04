@@ -8,7 +8,6 @@ public class GameManager : MonoBehaviour
     [Header("Core Managers")]
     public MissionManager missionManager;
     public ChallengeManager challengeManager;
-    public FactionManager factionManager;
     public ProgressionManager progressionManager;
     public LootManager lootManager;
     public SkillManager skillManager;
@@ -42,7 +41,6 @@ public class GameManager : MonoBehaviour
     
     private void InitializeGame()
     {
-        if (factionManager != null) factionManager.Initialize();
         if (missionManager != null) missionManager.Initialize();
         if (challengeManager != null) challengeManager.Initialize();
         if (skillManager != null) skillManager.Initialize();
