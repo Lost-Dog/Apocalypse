@@ -647,6 +647,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -1615,6 +1616,8 @@ SkinnedMeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1636,9 +1639,11 @@ SkinnedMeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   serializedVersion: 2
   m_Quality: 0
   m_UpdateWhenOffscreen: 0
@@ -1829,6 +1834,8 @@ SkinnedMeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1850,9 +1857,11 @@ SkinnedMeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   serializedVersion: 2
   m_Quality: 0
   m_UpdateWhenOffscreen: 0
@@ -2044,6 +2053,8 @@ SkinnedMeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -2065,9 +2076,11 @@ SkinnedMeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   serializedVersion: 2
   m_Quality: 0
   m_UpdateWhenOffscreen: 0
@@ -2900,6 +2913,8 @@ SkinnedMeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -2921,9 +2936,11 @@ SkinnedMeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   serializedVersion: 2
   m_Quality: 0
   m_UpdateWhenOffscreen: 0
@@ -3942,6 +3959,8 @@ SkinnedMeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -3963,9 +3982,11 @@ SkinnedMeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   serializedVersion: 2
   m_Quality: 0
   m_UpdateWhenOffscreen: 0
@@ -4213,6 +4234,9 @@ MonoBehaviour:
     useWeaponAnimatorOverrides: 0
     weaponAnimatorClipRunnerOverrides: []
     overrideWithGCCharacterState: 0
+    GCCharacterStateDisableABCEquipAnimations: 1
+    gc2EquipState: {fileID: 0}
+    gc2UnEquipState: {fileID: 0}
     useWeaponEquipAnimations: 1
     weaponEnableAnimationRunnerClip:
       refVal: {fileID: 0}
@@ -4778,6 +4802,7 @@ MonoBehaviour:
     boomerangMode: 0
     boomerangDelay: 0
     effects: []
+    gc2EffectAction: {fileID: 0}
     onEnter: 1
     onStay: 0
     onStayInterval: 0.3
@@ -4873,6 +4898,7 @@ MonoBehaviour:
     travelDurationTime: 0
     travelDurationStopSuddenly: 0
     useInitiatingAesthetics: 0
+    gc2InitiatingAction: {fileID: 0}
     initiatingAnimateOnEntity: 1
     initiatingAnimateOnScrollGraphic: 0
     initiatingAnimateOnWeapon: 0
@@ -4983,6 +5009,7 @@ MonoBehaviour:
     distanceInteruptPreparation: 0
     showPrepareTimeOnGUI: 0
     usePreparingAesthetics: 0
+    gc2PreparingAction: {fileID: 0}
     preparingAnimateOnEntity: 1
     preparingAnimateOnScrollGraphic: 0
     preparingAnimateOnWeapon: 0
@@ -5444,6 +5471,7 @@ MonoBehaviour:
     boomerangMode: 0
     boomerangDelay: 0
     effects: []
+    gc2EffectAction: {fileID: 0}
     onEnter: 1
     onStay: 0
     onStayInterval: 0.3
@@ -5539,6 +5567,7 @@ MonoBehaviour:
     travelDurationTime: 0
     travelDurationStopSuddenly: 0
     useInitiatingAesthetics: 1
+    gc2InitiatingAction: {fileID: 0}
     initiatingAnimateOnEntity: 1
     initiatingAnimateOnScrollGraphic: 0
     initiatingAnimateOnWeapon: 0
@@ -5649,6 +5678,7 @@ MonoBehaviour:
     distanceInteruptPreparation: 0
     showPrepareTimeOnGUI: 0
     usePreparingAesthetics: 0
+    gc2PreparingAction: {fileID: 0}
     preparingAnimateOnEntity: 1
     preparingAnimateOnScrollGraphic: 0
     preparingAnimateOnWeapon: 0
@@ -6108,6 +6138,7 @@ MonoBehaviour:
     boomerangMode: 0
     boomerangDelay: 0
     effects: []
+    gc2EffectAction: {fileID: 0}
     onEnter: 1
     onStay: 0
     onStayInterval: 0.3
@@ -6203,6 +6234,7 @@ MonoBehaviour:
     travelDurationTime: 0
     travelDurationStopSuddenly: 0
     useInitiatingAesthetics: 1
+    gc2InitiatingAction: {fileID: 0}
     initiatingAnimateOnEntity: 1
     initiatingAnimateOnScrollGraphic: 0
     initiatingAnimateOnWeapon: 0
@@ -6313,6 +6345,7 @@ MonoBehaviour:
     distanceInteruptPreparation: 0
     showPrepareTimeOnGUI: 0
     usePreparingAesthetics: 0
+    gc2PreparingAction: {fileID: 0}
     preparingAnimateOnEntity: 1
     preparingAnimateOnScrollGraphic: 0
     preparingAnimateOnWeapon: 0
@@ -6773,6 +6806,7 @@ MonoBehaviour:
     boomerangMode: 0
     boomerangDelay: 0
     effects: []
+    gc2EffectAction: {fileID: 0}
     onEnter: 1
     onStay: 0
     onStayInterval: 0.3
@@ -6868,6 +6902,7 @@ MonoBehaviour:
     travelDurationTime: 0
     travelDurationStopSuddenly: 0
     useInitiatingAesthetics: 1
+    gc2InitiatingAction: {fileID: 0}
     initiatingAnimateOnEntity: 1
     initiatingAnimateOnScrollGraphic: 0
     initiatingAnimateOnWeapon: 0
@@ -6978,6 +7013,7 @@ MonoBehaviour:
     distanceInteruptPreparation: 0
     showPrepareTimeOnGUI: 0
     usePreparingAesthetics: 0
+    gc2PreparingAction: {fileID: 0}
     preparingAnimateOnEntity: 1
     preparingAnimateOnScrollGraphic: 0
     preparingAnimateOnWeapon: 0
@@ -7437,6 +7473,7 @@ MonoBehaviour:
     boomerangMode: 0
     boomerangDelay: 0
     effects: []
+    gc2EffectAction: {fileID: 0}
     onEnter: 1
     onStay: 0
     onStayInterval: 0.3
@@ -7532,6 +7569,7 @@ MonoBehaviour:
     travelDurationTime: 0
     travelDurationStopSuddenly: 0
     useInitiatingAesthetics: 1
+    gc2InitiatingAction: {fileID: 0}
     initiatingAnimateOnEntity: 1
     initiatingAnimateOnScrollGraphic: 0
     initiatingAnimateOnWeapon: 0
@@ -7642,6 +7680,7 @@ MonoBehaviour:
     distanceInteruptPreparation: 0
     showPrepareTimeOnGUI: 0
     usePreparingAesthetics: 0
+    gc2PreparingAction: {fileID: 0}
     preparingAnimateOnEntity: 1
     preparingAnimateOnScrollGraphic: 0
     preparingAnimateOnWeapon: 0
@@ -8184,7 +8223,8 @@ MonoBehaviour:
       removeEffectLogText: 
       showNonActivationReason: 0
       effectGraphic:
-        refVal: {fileID: 1321021649640250, guid: 7e6c183d69bb7084c894a627bd43db61, type: 3}
+        refVal: {fileID: 1321021649640250, guid: 7e6c183d69bb7084c894a627bd43db61,
+          type: 3}
         refName: FireImpact
         refUpdateDateTime: 11/08/2020 13:54:40
       effectChildGraphic:
@@ -8200,6 +8240,7 @@ MonoBehaviour:
       effectGraphicDuration: 2
       effectFollowTarget: 0
       effectOnHitPosition: 1
+    gc2EffectAction: {fileID: 0}
     onEnter: 1
     onStay: 0
     onStayInterval: 0.3
@@ -8313,6 +8354,7 @@ MonoBehaviour:
     travelDurationTime: 5
     travelDurationStopSuddenly: 0
     useInitiatingAesthetics: 1
+    gc2InitiatingAction: {fileID: 0}
     initiatingAnimateOnEntity: 1
     initiatingAnimateOnScrollGraphic: 0
     initiatingAnimateOnWeapon: 0
@@ -8423,6 +8465,7 @@ MonoBehaviour:
     distanceInteruptPreparation: 0
     showPrepareTimeOnGUI: 0
     usePreparingAesthetics: 1
+    gc2PreparingAction: {fileID: 0}
     preparingAnimateOnEntity: 1
     preparingAnimateOnScrollGraphic: 0
     preparingAnimateOnWeapon: 0
@@ -8964,7 +9007,8 @@ MonoBehaviour:
       removeEffectLogText: 
       showNonActivationReason: 0
       effectGraphic:
-        refVal: {fileID: 1321021649640250, guid: 7e6c183d69bb7084c894a627bd43db61, type: 3}
+        refVal: {fileID: 1321021649640250, guid: 7e6c183d69bb7084c894a627bd43db61,
+          type: 3}
         refName: FireImpact
         refUpdateDateTime: 11/08/2020 13:54:40
       effectChildGraphic:
@@ -8980,6 +9024,7 @@ MonoBehaviour:
       effectGraphicDuration: 2
       effectFollowTarget: 0
       effectOnHitPosition: 1
+    gc2EffectAction: {fileID: 0}
     onEnter: 1
     onStay: 0
     onStayInterval: 0.3
@@ -9075,6 +9120,7 @@ MonoBehaviour:
     travelDurationTime: 5
     travelDurationStopSuddenly: 0
     useInitiatingAesthetics: 0
+    gc2InitiatingAction: {fileID: 0}
     initiatingAnimateOnEntity: 1
     initiatingAnimateOnScrollGraphic: 0
     initiatingAnimateOnWeapon: 0
@@ -9185,6 +9231,7 @@ MonoBehaviour:
     distanceInteruptPreparation: 0
     showPrepareTimeOnGUI: 0
     usePreparingAesthetics: 0
+    gc2PreparingAction: {fileID: 0}
     preparingAnimateOnEntity: 1
     preparingAnimateOnScrollGraphic: 0
     preparingAnimateOnWeapon: 0
@@ -9643,6 +9690,7 @@ MonoBehaviour:
     boomerangMode: 0
     boomerangDelay: 0
     effects: []
+    gc2EffectAction: {fileID: 0}
     onEnter: 1
     onStay: 0
     onStayInterval: 0.3
@@ -9738,6 +9786,7 @@ MonoBehaviour:
     travelDurationTime: 0
     travelDurationStopSuddenly: 0
     useInitiatingAesthetics: 1
+    gc2InitiatingAction: {fileID: 0}
     initiatingAnimateOnEntity: 1
     initiatingAnimateOnScrollGraphic: 0
     initiatingAnimateOnWeapon: 0
@@ -9816,7 +9865,8 @@ MonoBehaviour:
     spawnObjectOnDestroy: 1
     spawnObjectOnCollide: 0
     spawningObject:
-      refVal: {fileID: 5349493072695652359, guid: 4376c460c3a90f64faa4c8baa0328cb5, type: 3}
+      refVal: {fileID: 5349493072695652359, guid: 4376c460c3a90f64faa4c8baa0328cb5,
+        type: 3}
       refName: 
       refUpdateDateTime: 17/01/2021 22:30:53
     useRange: 0
@@ -9848,6 +9898,7 @@ MonoBehaviour:
     distanceInteruptPreparation: 0
     showPrepareTimeOnGUI: 0
     usePreparingAesthetics: 0
+    gc2PreparingAction: {fileID: 0}
     preparingAnimateOnEntity: 1
     preparingAnimateOnScrollGraphic: 0
     preparingAnimateOnWeapon: 0
@@ -10306,6 +10357,7 @@ MonoBehaviour:
     boomerangMode: 0
     boomerangDelay: 0
     effects: []
+    gc2EffectAction: {fileID: 0}
     onEnter: 1
     onStay: 0
     onStayInterval: 0.3
@@ -10437,6 +10489,7 @@ MonoBehaviour:
     travelDurationTime: 0
     travelDurationStopSuddenly: 0
     useInitiatingAesthetics: 1
+    gc2InitiatingAction: {fileID: 0}
     initiatingAnimateOnEntity: 1
     initiatingAnimateOnScrollGraphic: 0
     initiatingAnimateOnWeapon: 0
@@ -10515,7 +10568,8 @@ MonoBehaviour:
     spawnObjectOnDestroy: 1
     spawnObjectOnCollide: 0
     spawningObject:
-      refVal: {fileID: 5349493072695652359, guid: 4376c460c3a90f64faa4c8baa0328cb5, type: 3}
+      refVal: {fileID: 5349493072695652359, guid: 4376c460c3a90f64faa4c8baa0328cb5,
+        type: 3}
       refName: 
       refUpdateDateTime: 17/01/2021 22:30:53
     useRange: 0
@@ -10547,6 +10601,7 @@ MonoBehaviour:
     distanceInteruptPreparation: 0
     showPrepareTimeOnGUI: 0
     usePreparingAesthetics: 0
+    gc2PreparingAction: {fileID: 0}
     preparingAnimateOnEntity: 1
     preparingAnimateOnScrollGraphic: 0
     preparingAnimateOnWeapon: 0
@@ -11005,6 +11060,7 @@ MonoBehaviour:
     boomerangMode: 0
     boomerangDelay: 0
     effects: []
+    gc2EffectAction: {fileID: 0}
     onEnter: 1
     onStay: 0
     onStayInterval: 0.3
@@ -11100,6 +11156,7 @@ MonoBehaviour:
     travelDurationTime: 0
     travelDurationStopSuddenly: 0
     useInitiatingAesthetics: 0
+    gc2InitiatingAction: {fileID: 0}
     initiatingAnimateOnEntity: 1
     initiatingAnimateOnScrollGraphic: 0
     initiatingAnimateOnWeapon: 0
@@ -11210,6 +11267,7 @@ MonoBehaviour:
     distanceInteruptPreparation: 0
     showPrepareTimeOnGUI: 0
     usePreparingAesthetics: 0
+    gc2PreparingAction: {fileID: 0}
     preparingAnimateOnEntity: 1
     preparingAnimateOnScrollGraphic: 0
     preparingAnimateOnWeapon: 0
@@ -11752,7 +11810,8 @@ MonoBehaviour:
       removeEffectLogText: 
       showNonActivationReason: 0
       effectGraphic:
-        refVal: {fileID: 1408438189832907454, guid: f7234538a9aff1847b199b9030bf2a24, type: 3}
+        refVal: {fileID: 1408438189832907454, guid: f7234538a9aff1847b199b9030bf2a24,
+          type: 3}
         refName: HitSparkImpact
         refUpdateDateTime: 10/08/2020 16:37:54
       effectChildGraphic:
@@ -11867,6 +11926,7 @@ MonoBehaviour:
       effectGraphicDuration: 2
       effectFollowTarget: 0
       effectOnHitPosition: 1
+    gc2EffectAction: {fileID: 0}
     onEnter: 1
     onStay: 0
     onStayInterval: 0.3
@@ -11962,6 +12022,7 @@ MonoBehaviour:
     travelDurationTime: 0
     travelDurationStopSuddenly: 0
     useInitiatingAesthetics: 1
+    gc2InitiatingAction: {fileID: 0}
     initiatingAnimateOnEntity: 1
     initiatingAnimateOnScrollGraphic: 0
     initiatingAnimateOnWeapon: 0
@@ -12072,6 +12133,7 @@ MonoBehaviour:
     distanceInteruptPreparation: 0
     showPrepareTimeOnGUI: 0
     usePreparingAesthetics: 1
+    gc2PreparingAction: {fileID: 0}
     preparingAnimateOnEntity: 1
     preparingAnimateOnScrollGraphic: 0
     preparingAnimateOnWeapon: 0
@@ -12532,6 +12594,7 @@ MonoBehaviour:
     boomerangMode: 0
     boomerangDelay: 0
     effects: []
+    gc2EffectAction: {fileID: 0}
     onEnter: 1
     onStay: 0
     onStayInterval: 0.3
@@ -12627,6 +12690,7 @@ MonoBehaviour:
     travelDurationTime: 0
     travelDurationStopSuddenly: 0
     useInitiatingAesthetics: 1
+    gc2InitiatingAction: {fileID: 0}
     initiatingAnimateOnEntity: 1
     initiatingAnimateOnScrollGraphic: 0
     initiatingAnimateOnWeapon: 0
@@ -12737,6 +12801,7 @@ MonoBehaviour:
     distanceInteruptPreparation: 0
     showPrepareTimeOnGUI: 0
     usePreparingAesthetics: 0
+    gc2PreparingAction: {fileID: 0}
     preparingAnimateOnEntity: 1
     preparingAnimateOnScrollGraphic: 0
     preparingAnimateOnWeapon: 0
@@ -13196,6 +13261,7 @@ MonoBehaviour:
     boomerangMode: 0
     boomerangDelay: 0
     effects: []
+    gc2EffectAction: {fileID: 0}
     onEnter: 1
     onStay: 0
     onStayInterval: 0.3
@@ -13291,6 +13357,7 @@ MonoBehaviour:
     travelDurationTime: 0
     travelDurationStopSuddenly: 0
     useInitiatingAesthetics: 1
+    gc2InitiatingAction: {fileID: 0}
     initiatingAnimateOnEntity: 1
     initiatingAnimateOnScrollGraphic: 0
     initiatingAnimateOnWeapon: 0
@@ -13401,6 +13468,7 @@ MonoBehaviour:
     distanceInteruptPreparation: 0
     showPrepareTimeOnGUI: 0
     usePreparingAesthetics: 0
+    gc2PreparingAction: {fileID: 0}
     preparingAnimateOnEntity: 1
     preparingAnimateOnScrollGraphic: 0
     preparingAnimateOnWeapon: 0
@@ -14722,6 +14790,8 @@ SkinnedMeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -14743,9 +14813,11 @@ SkinnedMeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   serializedVersion: 2
   m_Quality: 0
   m_UpdateWhenOffscreen: 0

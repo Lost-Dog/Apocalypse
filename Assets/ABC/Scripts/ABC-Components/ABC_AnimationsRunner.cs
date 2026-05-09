@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Animations;
 using System.Collections;
@@ -1340,9 +1340,13 @@ namespace ABCToolkit {
                         this.abcEntity.MoveGC2ToDirection(animatorVelocity, Space.World, 0);
 
 
-                    //Keep child object in sync
-                    this.meAni.transform.localPosition = Vector3.zero;
-                    this.meAni.transform.localRotation = Quaternion.identity;
+                    //Keep child object in sync — only apply when the animator is on a child object,
+                    //not the root. Resetting localPosition on the root snaps the CharacterController
+                    //back to the parent pivot every frame, causing snap-back and running-in-place.
+                    if (this.meAni.transform != this.transform) {
+                        this.meAni.transform.localPosition = Vector3.zero;
+                        this.meAni.transform.localRotation = Quaternion.identity;
+                    }
 
 
                 } else if (this.applyRootMotion == true) {
