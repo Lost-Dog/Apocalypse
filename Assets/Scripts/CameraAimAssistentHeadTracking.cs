@@ -1,13 +1,10 @@
 using System.Collections.Generic;
+using Invector.vCharacterController;
 using UnityEngine;
-using GameCreator.Runtime.Characters;
-using GameCreator.Runtime.Common;
 
-namespace RVR.Camera
+[AddComponentMenu("Apocalypse/Camera/Aim Assistant (Chest Tracking)")]
+public class CameraAimAssistentHeadTracking : MonoBehaviour
 {
-    [AddComponentMenu("RVR/Camera/Aim Assistant (Head Tracking)")]
-    public class CameraAimAssistentHeadTracking : MonoBehaviour
-    {
         [System.Serializable]
         public class TargetTagOffset
         {
@@ -34,135 +31,263 @@ namespace RVR.Camera
             }
         }
 
+        [Header("Activation")]
+        [Tooltip("When false the assist is completely skipped each frame. " +
+                 "Toggle via SetAssistActive() from InvectorInputBridge.")]
+        public bool assistActive = false;
+
         [Header("Detection Settings")]
         public float DistanceToDetect = 50;
         public float AssistentForce = 3;
         public LayerMask TargetLayer;
         public TargetTagOffset[] TargetsTagsAndOffsets = new[] { new TargetTagOffset("Enemy", 1) };
 
-        [Header("Head Tracking")]
-        [Tooltip("Automatically aim at the target's head transform instead of using UpOffset")]
-        public bool trackHeadTransform = true;
+        [Tooltip("Half-angle of the detection cone in degrees. Enemies within this angle of the " +
+                 "camera forward are candidates; the one closest to the crosshair is chosen. " +
+                 "0 = pixel-perfect raycast only.")]
+        [Range(0f, 45f)]
+        public float assistAngle = 15f;
 
-        [Tooltip("Fallback UpOffset if head transform is not found")]
-        public float fallbackHeadOffset = 1.5f;
+        [Header("Chest Tracking")]
+        [Tooltip("Automatically aim at the target's chest bone instead of using UpOffset.")]
+        public bool trackChestTransform = true;
+
+        [Tooltip("Fallback UpOffset used when the chest bone cannot be found.")]
+        public float fallbackChestOffset = 1.0f;
+
+        [Tooltip("How far (metres) behind the chest the correction vector aims. " +
+                 "0 = chest surface. Positive values pull the camera to aim through the body, " +
+                 "making the assist stickier without changing where the bullet actually hits " +
+                 "(Invector's raycast still stops at the first collider surface).")]
+        [Range(0f, 1f)]
+        public float penetrationDepth = 0.3f;
 
         [Header("Debug")]
         public bool showDebugRays = false;
 
-        private UnityEngine.Camera activeCamera;
-        private float UpOffset => TargetTagOffset.GetUpOffset(TargetsTagsAndOffsets, ObjectInCameraCenter);
-        private string[] AllTags;
-        private GameObject ObjectInCameraCenter;
+        private UnityEngine.Camera _activeCamera;
+        private float UpOffset => TargetTagOffset.GetUpOffset(TargetsTagsAndOffsets, _objectInCameraCenter);
+        private string[] _allTags;
+        private GameObject _objectInCameraCenter;
+
+        // Whether a valid target was found this frame.
+        private bool _hasTarget;
+
+        // Pixel offset of the target from screen centre (positive X = target is right of centre,
+        // positive Y = target is above centre). Consumed by InvectorInputBridge.
+        private Vector2 _screenOffset;
+
+        public GameObject ObjectInCameraCenter => _objectInCameraCenter;
+
+        /// <summary>True when a target is visible on screen and <see cref="ScreenOffset"/> is valid.</summary>
+        public bool HasTarget => _hasTarget;
+
+        /// <summary>
+        /// Pixel distance of the target chest from the screen centre this frame.
+        /// X positive = target is right of crosshair, Y positive = target is above crosshair.
+        /// InvectorInputBridge converts this to angular corrections for _mouseX/_mouseY.
+        /// </summary>
+        public Vector2 ScreenOffset => _screenOffset;
 
         private void Start()
         {
-            // Resolve the active camera via GC2 shortcut, falling back to Camera.main
-            activeCamera = ShortcutMainCamera.Get<UnityEngine.Camera>();
-            if (activeCamera == null)
-                activeCamera = UnityEngine.Camera.main;
+            _activeCamera = UnityEngine.Camera.main;
+            if (_activeCamera == null)
+                Debug.LogWarning("[CameraAimAssistentChestTracking] No main camera found in the scene.");
 
             var tagList = new List<string>();
             foreach (TargetTagOffset tag in TargetsTagsAndOffsets)
                 tagList.Add(tag.Tag);
 
-            AllTags = tagList.ToArray();
+            _allTags = tagList.ToArray();
         }
 
         private void Update()
         {
-            if (activeCamera == null) return;
+            _hasTarget    = false;
+            _screenOffset = Vector2.zero;
 
-            ObjectInCameraCenter = GetObjectOnCameraCenter();
-            if (ObjectInCameraCenter == null) return;
+            if (!assistActive || _activeCamera == null) return;
 
-            for (int i = 0; i < AllTags.Length; i++)
+            _objectInCameraCenter = GetObjectOnCameraCenter();
+            if (_objectInCameraCenter == null) return;
+
+            for (int i = 0; i < _allTags.Length; i++)
             {
-                if (!ObjectInCameraCenter.CompareTag(AllTags[i])) continue;
+                if (!_objectInCameraCenter.CompareTag(_allTags[i])) continue;
 
-                Vector3 targetPosition = GetAimPosition(ObjectInCameraCenter);
+                Vector3 targetPosition = GetAimPosition(_objectInCameraCenter);
+
+                // Project the target into screen space.
+                Vector3 screenPos = _activeCamera.WorldToScreenPoint(targetPosition);
+
+                // Discard targets behind the camera.
+                if (screenPos.z <= 0f) break;
+
+                Vector2 screenCenter = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
+                _screenOffset = new Vector2(screenPos.x - screenCenter.x,
+                                            screenPos.y - screenCenter.y);
+                _hasTarget = true;
 
                 if (showDebugRays)
-                    Debug.DrawLine(activeCamera.transform.position, targetPosition, Color.red);
+                    Debug.DrawLine(_activeCamera.transform.position, targetPosition, Color.red);
 
-                // Steer the camera transform toward the aim position.
-                // GC2's camera shot system writes position/rotation in LateUpdate, so we nudge
-                // the transform here (Update) which the shot system will blend from each frame.
-                Vector3 toTarget = (targetPosition - activeCamera.transform.position).normalized;
-                Quaternion desiredRotation = Quaternion.LookRotation(toTarget);
-
-                activeCamera.transform.rotation = Quaternion.Slerp(
-                    activeCamera.transform.rotation,
-                    desiredRotation,
-                    AssistentForce * Time.deltaTime
-                );
                 break;
             }
         }
 
+        // ── Public API ────────────────────────────────────────────────────────
+
         /// <summary>
-        /// Casts a ray from the centre of the screen and returns the first hit object
-        /// within <see cref="DistanceToDetect"/> on <see cref="TargetLayer"/>.
+        /// Enables or disables the aim assist. Called by InvectorInputBridge when
+        /// the player enters or leaves aim mode.
+        /// </summary>
+        public void SetAssistActive(bool active)
+        {
+            assistActive = active;
+
+            if (!active)
+            {
+                _objectInCameraCenter = null;
+                _hasTarget = false;
+            }
+        }
+
+        /// <summary>Returns the world-space aim position for the current target.</summary>
+        public Vector3 GetCurrentAimPosition()
+        {
+            if (_objectInCameraCenter == null) return Vector3.zero;
+            return GetAimPosition(_objectInCameraCenter);
+        }
+
+        // ── Internal helpers ──────────────────────────────────────────────────
+
+        /// <summary>
+        /// Returns the best candidate in the detection cone.
+        /// When <see cref="assistAngle"/> is 0 a pixel-perfect centre-screen raycast is used.
+        /// Otherwise every collider on <see cref="TargetLayer"/> within <see cref="DistanceToDetect"/>
+        /// is tested; the one whose root GameObject matches a tracked tag AND sits closest to the
+        /// camera's forward axis (smallest angle) wins.
         /// </summary>
         private GameObject GetObjectOnCameraCenter()
         {
-            Ray ray = activeCamera.ScreenPointToRay(new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0f));
+            // ── Pixel-perfect fallback (assistAngle == 0) ─────────────────────
+            if (assistAngle <= 0f)
+            {
+                Ray ray = _activeCamera.ScreenPointToRay(
+                    new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0f));
 
-            if (Physics.Raycast(ray, out RaycastHit hit, DistanceToDetect, TargetLayer))
-                return hit.collider.gameObject;
+                return Physics.Raycast(ray, out RaycastHit hit, DistanceToDetect, TargetLayer)
+                    ? hit.collider.gameObject
+                    : null;
+            }
 
-            return null;
+            // ── Cone search ───────────────────────────────────────────────────
+            Vector3 camPos     = _activeCamera.transform.position;
+            Vector3 camForward = _activeCamera.transform.forward;
+
+            Collider[] hits = Physics.OverlapSphere(camPos, DistanceToDetect, TargetLayer);
+
+            GameObject bestTarget   = null;
+            float      bestAngle    = assistAngle; // only accept candidates inside the cone
+
+            foreach (Collider col in hits)
+            {
+                GameObject root = col.attachedRigidbody != null
+                    ? col.attachedRigidbody.gameObject
+                    : col.gameObject;
+
+                // Must match one of the tracked tags.
+                bool tagMatch = false;
+                foreach (string tag in _allTags)
+                {
+                    if (root.CompareTag(tag)) { tagMatch = true; break; }
+                }
+                if (!tagMatch) continue;
+
+                // Angle from camera forward to the collider centre.
+                Vector3 toTarget = (col.bounds.center - camPos).normalized;
+                float   angle    = Vector3.Angle(camForward, toTarget);
+
+                if (angle < bestAngle)
+                {
+                    bestAngle  = angle;
+                    bestTarget = root;
+                }
+            }
+
+            return bestTarget;
         }
 
         private Vector3 GetAimPosition(GameObject target)
         {
-            if (!trackHeadTransform)
-                return target.transform.position + Vector3.up * UpOffset;
+            Vector3 basePosition;
 
-            Transform headTransform = FindHeadTransform(target);
+            if (!trackChestTransform)
+            {
+                basePosition = target.transform.position + Vector3.up * UpOffset;
+            }
+            else
+            {
+                Transform chestTransform = FindChestTransform(target);
+                basePosition = chestTransform != null
+                    ? chestTransform.position
+                    : target.transform.position + Vector3.up * fallbackChestOffset;
+            }
 
-            return headTransform != null
-                ? headTransform.position
-                : target.transform.position + Vector3.up * fallbackHeadOffset;
+            if (penetrationDepth <= 0f || _activeCamera == null)
+                return basePosition;
+
+            // Offset the aim target behind the chest surface along the camera-to-chest vector,
+            // so the correction always pulls the crosshair into the body rather than toward its front face.
+            Vector3 camToBase = (basePosition - _activeCamera.transform.position).normalized;
+            return basePosition + camToBase * penetrationDepth;
         }
 
         /// <summary>
-        /// Resolves the head bone of a target, preferring GC2 Character's animator,
-        /// then falling back to a direct Animator search and common bone name lookups.
+        /// Resolves the chest / spine bone of a target. Prefers the Invector animator,
+        /// then a direct Animator search, then common bone name lookups.
         /// </summary>
-        private Transform FindHeadTransform(GameObject target)
+        private Transform FindChestTransform(GameObject target)
         {
-            // Method 1: GC2 Character — get head bone from the model's Animator
-            Character gc2Character = target.GetComponent<Character>();
-            if (gc2Character != null)
+            // Method 1: Invector vThirdPersonController.
+            vThirdPersonController invectorController = target.GetComponent<vThirdPersonController>();
+            if (invectorController != null)
             {
-                Animator characterAnimator = gc2Character.GetComponentInChildren<Animator>();
+                Animator characterAnimator = invectorController.GetComponentInChildren<Animator>();
                 if (characterAnimator != null && characterAnimator.isHuman)
                 {
-                    Transform head = characterAnimator.GetBoneTransform(HumanBodyBones.Head);
-                    if (head != null) return head;
+                    // Prefer UpperChest, fall back to Chest, then Spine.
+                    Transform bone = characterAnimator.GetBoneTransform(HumanBodyBones.UpperChest)
+                                  ?? characterAnimator.GetBoneTransform(HumanBodyBones.Chest)
+                                  ?? characterAnimator.GetBoneTransform(HumanBodyBones.Spine);
+                    if (bone != null) return bone;
                 }
             }
 
-            // Method 2: Direct Animator on the target (non-GC2 characters or legacy setups)
+            // Method 2: Direct Animator (non-Invector or legacy).
             Animator animator = target.GetComponent<Animator>();
+            if (animator == null)
+                animator = target.GetComponentInChildren<Animator>();
+
             if (animator != null && animator.isHuman)
             {
-                Transform head = animator.GetBoneTransform(HumanBodyBones.Head);
-                if (head != null) return head;
+                Transform bone = animator.GetBoneTransform(HumanBodyBones.UpperChest)
+                              ?? animator.GetBoneTransform(HumanBodyBones.Chest)
+                              ?? animator.GetBoneTransform(HumanBodyBones.Spine);
+                if (bone != null) return bone;
             }
 
-            // Method 3: Common head bone name variants
-            Transform headByName = FindChildByName(target.transform, "Head")
-                                ?? FindChildByName(target.transform, "head")
-                                ?? FindChildByName(target.transform, "mixamorig:Head");
-
-            return headByName;
+            // Method 3: Common bone name variants.
+            return FindChildByName(target.transform, "Chest")
+                ?? FindChildByName(target.transform, "chest")
+                ?? FindChildByName(target.transform, "UpperChest")
+                ?? FindChildByName(target.transform, "Spine1")
+                ?? FindChildByName(target.transform, "mixamorig:Spine1")
+                ?? FindChildByName(target.transform, "mixamorig:Spine2");
         }
 
-        /// <summary>
-        /// Searches all descendants for a Transform with the exact given name.
-        /// </summary>
+        /// <summary>Searches all descendants for a Transform with the exact given name.</summary>
         private Transform FindChildByName(Transform parent, string boneName)
         {
             foreach (Transform child in parent.GetComponentsInChildren<Transform>(true))
@@ -172,25 +297,11 @@ namespace RVR.Camera
             return null;
         }
 
-        /// <summary>
-        /// Returns the GameObject currently centered in the camera's aim.
-        /// </summary>
-        public GameObject GetCurrentTarget() => ObjectInCameraCenter;
-
-        /// <summary>
-        /// Returns the world-space aim position for the current target, including head tracking.
-        /// </summary>
-        public Vector3 GetCurrentAimPosition()
-        {
-            if (ObjectInCameraCenter == null) return Vector3.zero;
-            return GetAimPosition(ObjectInCameraCenter);
-        }
-
         private void OnDrawGizmosSelected()
         {
-            if (!showDebugRays || ObjectInCameraCenter == null) return;
+            if (!showDebugRays || _objectInCameraCenter == null) return;
 
-            Vector3 aimPos = GetAimPosition(ObjectInCameraCenter);
+            Vector3 aimPos = GetAimPosition(_objectInCameraCenter);
 
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(aimPos, 0.2f);
@@ -198,5 +309,4 @@ namespace RVR.Camera
             Gizmos.color = Color.yellow;
             Gizmos.DrawLine(transform.position, aimPos);
         }
-    }
 }

@@ -4,7 +4,7 @@ using UnityEditor;
 public class LootItemCreator : EditorWindow
 {
     private string itemName = "New Item";
-    private LootManager.Rarity rarity = LootManager.Rarity.Common;
+    private LootRarity rarity = LootRarity.Common;
     private LootItemData.ItemType itemType = LootItemData.ItemType.Weapon;
     private int baseGearScore = 100;
     private string description = "";
@@ -23,7 +23,7 @@ public class LootItemCreator : EditorWindow
         EditorGUILayout.Space();
         
         itemName = EditorGUILayout.TextField("Item Name", itemName);
-        rarity = (LootManager.Rarity)EditorGUILayout.EnumPopup("Rarity", rarity);
+        rarity = (LootRarity)EditorGUILayout.EnumPopup("Rarity", rarity);
         itemType = (LootItemData.ItemType)EditorGUILayout.EnumPopup("Item Type", itemType);
         baseGearScore = EditorGUILayout.IntField("Base Gear Score", baseGearScore);
         

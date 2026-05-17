@@ -1,100 +1,50 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
+/// <summary>
+/// Displays the player's current XP, XP-to-next-level threshold, and a fill bar.
+/// Polls <see cref="ProgressionManager"/> once per second to avoid per-frame string allocations.
+/// </summary>
 public class PlayerXPDisplay : MonoBehaviour
 {
-    [Header("References")]
-    public ProgressionManager progressionManager;
-    public TextMeshProUGUI xpText;
-    public Slider xpSlider;
-    
-    [Header("Display Settings")]
-    public bool showAsPercentage = false;
-    public bool showFraction = false;
-    
-    [Header("Auto-Find")]
-    public bool autoFindReferences = true;
-    
-    private void Start()
-    {
-        if (autoFindReferences)
-        {
-            FindReferences();
-        }
-        
-        InitializeSlider();
-        UpdateDisplay();
-    }
-    
-    private void FindReferences()
-    {
-        if (progressionManager == null)
-        {
-            progressionManager = FindFirstObjectByType<ProgressionManager>();
-            if (progressionManager == null)
-            {
-                Debug.LogWarning("PlayerXPDisplay: Could not find ProgressionManager in scene!");
-            }
-        }
-        
-        if (xpText == null)
-        {
-            xpText = GetComponent<TextMeshProUGUI>();
-        }
-        
-        if (xpSlider == null)
-        {
-            xpSlider = GetComponent<Slider>();
-        }
-    }
-    
-    private void InitializeSlider()
-    {
-        if (xpSlider != null)
-        {
-            xpSlider.minValue = 0f;
-            xpSlider.maxValue = 1f;
-            xpSlider.value = 0f;
-        }
-    }
-    
+    private const float RefreshInterval = 1f;
+    private const string XpFormat       = "XP  {0:N0}  /  {1:N0}";
+
+    [SerializeField] private TextMeshProUGUI xpLabel;
+    [SerializeField] private Image           xpBarFill;
+
+    private int   _lastXP    = -1;
+    private int   _lastLevel = -1;
+    private float _refreshTimer;
+
     private void Update()
     {
-        UpdateDisplay();
+        _refreshTimer += Time.deltaTime;
+        if (_refreshTimer < RefreshInterval) return;
+        _refreshTimer = 0f;
+        Refresh();
     }
-    
-    private void UpdateDisplay()
+
+    private void Refresh()
     {
-        if (progressionManager == null) return;
-        
-        if (xpText != null)
-        {
-            UpdateTextDisplay();
-        }
-        
-        if (xpSlider != null)
-        {
-            xpSlider.value = progressionManager.GetXPProgress();
-        }
-    }
-    
-    private void UpdateTextDisplay()
-    {
-        if (showAsPercentage)
-        {
-            float percentage = progressionManager.GetXPProgress() * 100f;
-            xpText.text = $"{Mathf.RoundToInt(percentage)}%";
-        }
-        else if (showFraction)
-        {
-            int currentXP = progressionManager.currentXP;
-            int requiredXP = progressionManager.GetRequiredXPForLevel(progressionManager.currentLevel);
-            xpText.text = $"{currentXP}/{requiredXP}";
-        }
-        else
-        {
-            xpText.text = progressionManager.currentXP.ToString();
-        }
+        ProgressionManager pm = ProgressionManager.Instance;
+        if (pm == null) return;
+
+        int currentXP = pm.currentXP;
+        int level     = pm.currentLevel;
+
+        if (currentXP == _lastXP && level == _lastLevel) return;
+
+        _lastXP    = currentXP;
+        _lastLevel = level;
+
+        int xpToNext = pm.GetRequiredXPForLevel(level);
+
+        if (xpLabel != null)
+            xpLabel.text = string.Format(XpFormat, currentXP, xpToNext);
+
+        if (xpBarFill != null)
+            xpBarFill.fillAmount = pm.GetXPProgress();
     }
 }

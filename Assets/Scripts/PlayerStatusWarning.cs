@@ -1,8 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using GameCreator.Runtime.Common;
-using GameCreator.Runtime.Stats;
 
 public class PlayerStatusWarning : MonoBehaviour
 {
@@ -10,15 +8,17 @@ public class PlayerStatusWarning : MonoBehaviour
     public GameObject warningPanel;
     public TextMeshProUGUI warningText;
     public Image warningIcon;
-    
+
     [Header("Auto-Find References")]
     public bool autoFindReferences = true;
     public SurvivalManager survivalManager;
     public PlayerInfectionDisplay infectionDisplay;
 
-    private const string HealthAttributeId = "health";
-    private Traits playerTraits;
-    
+    [Header("Player Provider")]
+    [Tooltip("Assign any IPlayerProvider implementation (e.g. InvectorPlayerProvider). Auto-found if left empty.")]
+    [SerializeField] private MonoBehaviour playerProviderObject;
+    private IPlayerProvider playerProvider;
+
     [Header("Threshold Settings")]
     [Range(0f, 1f)] public float healthLowThreshold = 0.3f;
     [Range(0f, 1f)] public float healthCriticalThreshold = 0.15f;
@@ -26,7 +26,7 @@ public class PlayerStatusWarning : MonoBehaviour
     [Range(0f, 1f)] public float temperatureCriticalThreshold = 0.2f;
     public float infectionLowThreshold = 50f;
     public float infectionCriticalThreshold = 75f;
-    
+
     [Header("Warning Messages")]
     public string healthLowMessage = "LOW HEALTH";
     public string healthCriticalMessage = "CRITICAL HEALTH";
@@ -34,55 +34,55 @@ public class PlayerStatusWarning : MonoBehaviour
     public string temperatureCriticalMessage = "FREEZING";
     public string infectionLowMessage = "INFECTED";
     public string infectionCriticalMessage = "SEVERE INFECTION";
-    
+
     [Header("Display Settings")]
     public float warningDisplayDuration = 3f;
     public float warningCooldown = 5f;
     public Color lowWarningColor = new Color(1f, 0.8f, 0f, 1f);
     public Color criticalWarningColor = new Color(1f, 0f, 0f, 1f);
-    
+
     [Header("Flashing Effect")]
     public bool enableFlashing = true;
     public float flashSpeed = 2f;
-    
+
     private float warningTimer = 0f;
     private float cooldownTimer = 0f;
     private bool isShowingWarning = false;
     private string currentWarning = "";
     private Color currentWarningColor = Color.white;
-    
+
     private bool wasHealthLow = false;
     private bool wasHealthCritical = false;
     private bool wasTemperatureLow = false;
     private bool wasTemperatureCritical = false;
     private bool wasInfectionLow = false;
     private bool wasInfectionCritical = false;
-    
+
     private void Start()
     {
         if (autoFindReferences)
         {
             FindReferences();
         }
-        
+
         if (warningPanel != null)
         {
             warningPanel.SetActive(false);
         }
     }
-    
+
     private void FindReferences()
     {
         if (warningPanel == null)
         {
             warningPanel = gameObject;
         }
-        
+
         if (warningText == null)
         {
             warningText = GetComponentInChildren<TextMeshProUGUI>();
         }
-        
+
         if (warningIcon == null)
         {
             Image[] images = GetComponentsInChildren<Image>(true);
@@ -91,12 +91,28 @@ public class PlayerStatusWarning : MonoBehaviour
                 warningIcon = images[0];
             }
         }
-        
-        if (playerTraits == null)
+
+        // Resolve IPlayerProvider — prefer the serialized field, then search the scene.
+        if (playerProvider == null)
         {
-            GameObject player = ShortcutPlayer.Instance;
-            if (player != null)
-                playerTraits = player.GetComponent<Traits>();
+            playerProvider = playerProviderObject as IPlayerProvider;
+        }
+
+        if (playerProvider == null)
+        {
+            foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+            {
+                if (mb is IPlayerProvider provider)
+                {
+                    playerProvider = provider;
+                    break;
+                }
+            }
+        }
+
+        if (playerProvider == null)
+        {
+            Debug.LogWarning("[PlayerStatusWarning] No IPlayerProvider found — health warnings disabled.");
         }
 
         if (survivalManager == null)
@@ -105,14 +121,14 @@ public class PlayerStatusWarning : MonoBehaviour
         if (infectionDisplay == null)
             infectionDisplay = FindFirstObjectByType<PlayerInfectionDisplay>();
     }
-    
+
     private void Update()
     {
         if (cooldownTimer > 0f)
         {
             cooldownTimer -= Time.deltaTime;
         }
-        
+
         if (isShowingWarning)
         {
             UpdateWarningDisplay();
@@ -122,28 +138,23 @@ public class PlayerStatusWarning : MonoBehaviour
             CheckForWarnings();
         }
     }
-    
+
     private void CheckForWarnings()
     {
         if (cooldownTimer > 0f) return;
-        
+
         bool healthLow = false;
         bool healthCritical = false;
         bool temperatureLow = false;
         bool temperatureCritical = false;
         bool infectionLow = false;
         bool infectionCritical = false;
-        
-        if (playerTraits != null)
+
+        if (playerProvider != null && playerProvider.MaxHealth > 0f)
         {
-            try
-            {
-                RuntimeAttributeData health = playerTraits.RuntimeAttributes.Get(HealthAttributeId);
-                float healthPercentage = (float)(health.Value / health.MaxValue);
-                healthCritical = healthPercentage <= healthCriticalThreshold;
-                healthLow      = !healthCritical && healthPercentage <= healthLowThreshold;
-            }
-            catch (System.Exception) { }
+            float healthPercentage = playerProvider.Health / playerProvider.MaxHealth;
+            healthCritical = healthPercentage <= healthCriticalThreshold;
+            healthLow      = !healthCritical && healthPercentage <= healthLowThreshold;
         }
 
         if (survivalManager != null && survivalManager.enableTemperatureSystem)
@@ -152,14 +163,14 @@ public class PlayerStatusWarning : MonoBehaviour
             temperatureCritical = tempPercentage <= temperatureCriticalThreshold;
             temperatureLow = !temperatureCritical && tempPercentage <= temperatureLowThreshold;
         }
-        
+
         if (infectionDisplay != null)
         {
             float infection = infectionDisplay.currentInfection;
             infectionCritical = infection >= infectionCriticalThreshold;
             infectionLow = !infectionCritical && infection >= infectionLowThreshold;
         }
-        
+
         if (healthCritical && !wasHealthCritical)
         {
             ShowWarning(healthCriticalMessage, criticalWarningColor);
@@ -184,7 +195,7 @@ public class PlayerStatusWarning : MonoBehaviour
         {
             ShowWarning(infectionLowMessage, lowWarningColor);
         }
-        
+
         wasHealthLow = healthLow;
         wasHealthCritical = healthCritical;
         wasTemperatureLow = temperatureLow;
@@ -192,72 +203,74 @@ public class PlayerStatusWarning : MonoBehaviour
         wasInfectionLow = infectionLow;
         wasInfectionCritical = infectionCritical;
     }
-    
+
     private void ShowWarning(string message, Color color)
     {
         currentWarning = message;
         currentWarningColor = color;
         isShowingWarning = true;
         warningTimer = warningDisplayDuration;
-        
+
         if (warningPanel != null)
         {
             warningPanel.SetActive(true);
         }
-        
+
         if (warningText != null)
         {
             warningText.text = message;
             warningText.color = color;
         }
-        
+
         if (warningIcon != null)
         {
             warningIcon.color = color;
         }
     }
-    
+
     private void UpdateWarningDisplay()
     {
         warningTimer -= Time.deltaTime;
-        
+
         if (warningTimer <= 0f)
         {
             HideWarning();
             return;
         }
-        
+
         if (enableFlashing && warningText != null)
         {
             float alpha = 0.5f + 0.5f * Mathf.Sin(Time.time * flashSpeed * Mathf.PI);
             Color flashColor = currentWarningColor;
             flashColor.a = alpha;
             warningText.color = flashColor;
-            
+
             if (warningIcon != null)
             {
                 warningIcon.color = flashColor;
             }
         }
     }
-    
+
     private void HideWarning()
     {
         isShowingWarning = false;
         cooldownTimer = warningCooldown;
-        
+
         if (warningPanel != null)
         {
             warningPanel.SetActive(false);
         }
     }
-    
+
+    /// <summary>Imperatively shows a warning panel with a custom message and colour.</summary>
     public void ForceShowWarning(string message, Color color, float duration = 3f)
     {
         warningDisplayDuration = duration;
         ShowWarning(message, color);
     }
-    
+
+    /// <summary>Immediately hides the warning panel.</summary>
     public void ClearWarning()
     {
         HideWarning();

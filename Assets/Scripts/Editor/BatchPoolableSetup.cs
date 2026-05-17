@@ -1,4 +1,4 @@
-using GameCreator.Runtime.Characters;
+using Invector;
 using UnityEditor;
 using UnityEngine;
 
@@ -37,16 +37,16 @@ namespace ApocalypseEditor
                     configured++;
                 }
 
-                Character character = obj.GetComponent<Character>();
-                if (character != null)
+                vHealthController healthController = obj.GetComponent<vHealthController>();
+                if (healthController != null)
                 {
-                    poolable.returnToPoolOnDeath       = true;
-                    poolable.deactivateDelay           = 3f;
+                    poolable.returnToPoolOnDeath        = true;
+                    poolable.deactivateDelay            = 3f;
                     poolable.disableRagdollBeforeReturn = true;
                 }
                 else
                 {
-                    Debug.LogWarning($"{obj.name} doesn't have a GC2 Character component. " +
+                    Debug.LogWarning($"{obj.name} doesn't have a vHealthController component. " +
                                      "PoolableCharacter requires it for death detection.", obj);
                 }
 

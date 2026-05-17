@@ -45,7 +45,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.SupplyDrop,
             ChallengeData.ChallengeFrequency.WorldEvent,
             ChallengeData.ChallengeDifficulty.Easy,
-            300f, 40f, 1, 1, 5, false, "", 150, 75, LootManager.Rarity.Common, 1);
+            300f, 40f, 1, 1, 5, false, "", 150, 75, LootRarity.Common, 1);
 
         CreateChallenge("Assets/Resources/Challenges/WorldEvents/WE_SupplyDrop_Medium.asset",
             "Armed Convoy",
@@ -53,7 +53,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.SupplyDrop,
             ChallengeData.ChallengeFrequency.WorldEvent,
             ChallengeData.ChallengeDifficulty.Medium,
-            600f, 50f, 3, 2, 10, false, "", 300, 150, LootManager.Rarity.Uncommon, 2);
+            600f, 50f, 3, 2, 10, false, "", 300, 150, LootRarity.Uncommon, 2);
 
         CreateChallenge("Assets/Resources/Challenges/WorldEvents/WE_SupplyDrop_Hard.asset",
             "Heavily Guarded Shipment",
@@ -61,7 +61,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.SupplyDrop,
             ChallengeData.ChallengeFrequency.WorldEvent,
             ChallengeData.ChallengeDifficulty.Hard,
-            900f, 60f, 7, 5, 15, true, "Supply Commander", 600, 300, LootManager.Rarity.Rare, 3);
+            900f, 60f, 7, 5, 15, true, "Supply Commander", 600, 300, LootRarity.Rare, 3);
 
         CreateChallenge("Assets/Resources/Challenges/WorldEvents/WE_CivilianRescue_Easy.asset",
             "Citizens in Distress",
@@ -69,7 +69,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.CivilianRescue,
             ChallengeData.ChallengeFrequency.WorldEvent,
             ChallengeData.ChallengeDifficulty.Easy,
-            240f, 35f, 1, 1, 4, false, "", 120, 60, LootManager.Rarity.Common, 1, 3);
+            240f, 35f, 1, 1, 4, false, "", 120, 60, LootRarity.Common, 1, 3);
 
         CreateChallenge("Assets/Resources/Challenges/WorldEvents/WE_CivilianRescue_Medium.asset",
             "Civilians Under Siege",
@@ -77,7 +77,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.CivilianRescue,
             ChallengeData.ChallengeFrequency.WorldEvent,
             ChallengeData.ChallengeDifficulty.Medium,
-            420f, 45f, 4, 2, 8, false, "", 250, 125, LootManager.Rarity.Uncommon, 1, 6);
+            420f, 45f, 4, 2, 8, false, "", 250, 125, LootRarity.Uncommon, 1, 6);
 
         CreateChallenge("Assets/Resources/Challenges/WorldEvents/WE_ControlPoint_Medium.asset",
             "Reclaim the Checkpoint",
@@ -85,7 +85,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.ControlPoint,
             ChallengeData.ChallengeFrequency.WorldEvent,
             ChallengeData.ChallengeDifficulty.Medium,
-            600f, 50f, 3, 2, 12, false, "", 350, 175, LootManager.Rarity.Uncommon, 2);
+            600f, 50f, 3, 2, 12, false, "", 350, 175, LootRarity.Uncommon, 2);
 
         CreateChallenge("Assets/Resources/Challenges/WorldEvents/WE_ControlPoint_Hard.asset",
             "Fortified Position Assault",
@@ -93,7 +93,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.ControlPoint,
             ChallengeData.ChallengeFrequency.WorldEvent,
             ChallengeData.ChallengeDifficulty.Hard,
-            900f, 65f, 6, 4, 20, true, "Point Commander", 650, 325, LootManager.Rarity.Rare, 2);
+            900f, 65f, 6, 4, 20, true, "Point Commander", 650, 325, LootRarity.Rare, 2);
 
         CreateChallenge("Assets/Resources/Challenges/WorldEvents/WE_BossEncounter_Medium.asset",
             "Rogue Lieutenant",
@@ -101,7 +101,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.BossEncounter,
             ChallengeData.ChallengeFrequency.WorldEvent,
             ChallengeData.ChallengeDifficulty.Medium,
-            600f, 55f, 4, 3, 8, true, "Rogue Lieutenant", 400, 200, LootManager.Rarity.Rare, 1);
+            600f, 55f, 4, 3, 8, true, "Rogue Lieutenant", 400, 200, LootRarity.Rare, 1);
 
         CreateChallenge("Assets/Resources/Challenges/WorldEvents/WE_BossEncounter_Hard.asset",
             "Elite Commander",
@@ -109,7 +109,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.BossEncounter,
             ChallengeData.ChallengeFrequency.WorldEvent,
             ChallengeData.ChallengeDifficulty.Hard,
-            900f, 60f, 7, 5, 12, true, "Elite Commander", 750, 375, LootManager.Rarity.Epic, 1);
+            900f, 60f, 7, 5, 12, true, "Elite Commander", 750, 375, LootRarity.Epic, 1);
 
         CreateChallenge("Assets/Resources/Challenges/WorldEvents/WE_BossEncounter_Extreme.asset",
             "Named Enemy - Warlord",
@@ -117,7 +117,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.BossEncounter,
             ChallengeData.ChallengeFrequency.WorldEvent,
             ChallengeData.ChallengeDifficulty.Extreme,
-            1200f, 70f, 10, 8, 15, true, "The Warlord", 1500, 750, LootManager.Rarity.Legendary, 1);
+            1200f, 70f, 10, 8, 15, true, "The Warlord", 1500, 750, LootRarity.Legendary, 1);
 
         CreateChallenge("Assets/Resources/Challenges/WorldEvents/WE_ExtractionDefense_Medium.asset",
             "Secure the LZ",
@@ -125,7 +125,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.ExtractionDefense,
             ChallengeData.ChallengeFrequency.WorldEvent,
             ChallengeData.ChallengeDifficulty.Medium,
-            480f, 45f, 5, 3, 25, false, "", 450, 225, LootManager.Rarity.Rare, 2);
+            480f, 45f, 5, 3, 25, false, "", 450, 225, LootRarity.Rare, 2);
 
         CreateChallenge("Assets/Resources/Challenges/WorldEvents/WE_ExtractionDefense_Hard.asset",
             "Hot Extraction",
@@ -133,7 +133,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.ExtractionDefense,
             ChallengeData.ChallengeFrequency.WorldEvent,
             ChallengeData.ChallengeDifficulty.Hard,
-            600f, 50f, 8, 6, 40, true, "Assault Leader", 800, 400, LootManager.Rarity.Epic, 2);
+            600f, 50f, 8, 6, 40, true, "Assault Leader", 800, 400, LootRarity.Epic, 2);
 
         CreateChallenge("Assets/Resources/Challenges/WorldEvents/WE_HostageRescue_Hard.asset",
             "High Value Target Rescue",
@@ -141,7 +141,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.HostageRescue,
             ChallengeData.ChallengeFrequency.WorldEvent,
             ChallengeData.ChallengeDifficulty.Hard,
-            600f, 50f, 6, 4, 12, false, "", 700, 350, LootManager.Rarity.Epic, 1, 4);
+            600f, 50f, 6, 4, 12, false, "", 700, 350, LootRarity.Epic, 1, 4);
 
         CreateChallenge("Assets/Resources/Challenges/WorldEvents/WE_RivalAgent_Extreme.asset",
             "Rogue Division Agent",
@@ -149,7 +149,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.RivalAgent,
             ChallengeData.ChallengeFrequency.WorldEvent,
             ChallengeData.ChallengeDifficulty.Extreme,
-            600f, 40f, 10, 8, 1, true, "Rogue Agent", 1000, 500, LootManager.Rarity.Legendary, 1);
+            600f, 40f, 10, 8, 1, true, "Rogue Agent", 1000, 500, LootRarity.Legendary, 1);
     }
 
     private static void CreateDailyChallenges()
@@ -160,7 +160,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.SupplyDrop,
             ChallengeData.ChallengeFrequency.Daily,
             ChallengeData.ChallengeDifficulty.Easy,
-            86400f, 0f, 1, 1, 50, false, "", 400, 200, LootManager.Rarity.Uncommon, 1);
+            86400f, 0f, 1, 1, 50, false, "", 400, 200, LootRarity.Uncommon, 1);
 
         CreateChallenge("Assets/Resources/Challenges/Daily/Daily_Marksman.asset",
             "Marksman",
@@ -168,7 +168,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.SupplyDrop,
             ChallengeData.ChallengeFrequency.Daily,
             ChallengeData.ChallengeDifficulty.Medium,
-            86400f, 0f, 1, 1, 25, false, "", 500, 250, LootManager.Rarity.Rare, 1);
+            86400f, 0f, 1, 1, 25, false, "", 500, 250, LootRarity.Rare, 1);
 
         CreateChallenge("Assets/Resources/Challenges/Daily/Daily_GuardianAngel.asset",
             "Guardian Angel",
@@ -176,7 +176,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.CivilianRescue,
             ChallengeData.ChallengeFrequency.Daily,
             ChallengeData.ChallengeDifficulty.Easy,
-            86400f, 0f, 1, 1, 0, false, "", 350, 175, LootManager.Rarity.Uncommon, 1, 10);
+            86400f, 0f, 1, 1, 0, false, "", 350, 175, LootRarity.Uncommon, 1, 10);
 
         CreateChallenge("Assets/Resources/Challenges/Daily/Daily_ZoneControl.asset",
             "Zone Control",
@@ -184,7 +184,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.ControlPoint,
             ChallengeData.ChallengeFrequency.Daily,
             ChallengeData.ChallengeDifficulty.Medium,
-            86400f, 0f, 1, 1, 30, false, "", 600, 300, LootManager.Rarity.Rare, 1);
+            86400f, 0f, 1, 1, 30, false, "", 600, 300, LootRarity.Rare, 1);
 
         CreateChallenge("Assets/Resources/Challenges/Daily/Daily_FlawlessOperator.asset",
             "Flawless Operator",
@@ -192,7 +192,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.SupplyDrop,
             ChallengeData.ChallengeFrequency.Daily,
             ChallengeData.ChallengeDifficulty.Hard,
-            86400f, 0f, 1, 1, 3, false, "", 750, 375, LootManager.Rarity.Epic, 1);
+            86400f, 0f, 1, 1, 3, false, "", 750, 375, LootRarity.Epic, 1);
 
         CreateChallenge("Assets/Resources/Challenges/Daily/Daily_BossHunter.asset",
             "Boss Hunter",
@@ -200,7 +200,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.BossEncounter,
             ChallengeData.ChallengeFrequency.Daily,
             ChallengeData.ChallengeDifficulty.Hard,
-            86400f, 0f, 1, 1, 2, true, "", 650, 325, LootManager.Rarity.Epic, 1);
+            86400f, 0f, 1, 1, 2, true, "", 650, 325, LootRarity.Epic, 1);
 
         CreateChallenge("Assets/Resources/Challenges/Daily/Daily_Defender.asset",
             "Defender",
@@ -208,7 +208,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.ExtractionDefense,
             ChallengeData.ChallengeFrequency.Daily,
             ChallengeData.ChallengeDifficulty.Medium,
-            86400f, 0f, 1, 1, 2, false, "", 550, 275, LootManager.Rarity.Rare, 1);
+            86400f, 0f, 1, 1, 2, false, "", 550, 275, LootRarity.Rare, 1);
 
         CreateChallenge("Assets/Resources/Challenges/Daily/Daily_ResourceCollector.asset",
             "Resource Collector",
@@ -216,7 +216,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.SupplyDrop,
             ChallengeData.ChallengeFrequency.Daily,
             ChallengeData.ChallengeDifficulty.Easy,
-            86400f, 0f, 1, 1, 5, false, "", 300, 150, LootManager.Rarity.Uncommon, 2);
+            86400f, 0f, 1, 1, 5, false, "", 300, 150, LootRarity.Uncommon, 2);
     }
 
     private static void CreateWeeklyChallenges()
@@ -227,7 +227,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.SupplyDrop,
             ChallengeData.ChallengeFrequency.Weekly,
             ChallengeData.ChallengeDifficulty.Medium,
-            604800f, 0f, 1, 1, 200, false, "", 2000, 1000, LootManager.Rarity.Epic, 2);
+            604800f, 0f, 1, 1, 200, false, "", 2000, 1000, LootRarity.Epic, 2);
 
         CreateChallenge("Assets/Resources/Challenges/Weekly/Weekly_Humanitarian.asset",
             "Humanitarian",
@@ -235,7 +235,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.CivilianRescue,
             ChallengeData.ChallengeFrequency.Weekly,
             ChallengeData.ChallengeDifficulty.Medium,
-            604800f, 0f, 1, 1, 0, false, "", 1800, 900, LootManager.Rarity.Rare, 3, 50);
+            604800f, 0f, 1, 1, 0, false, "", 1800, 900, LootRarity.Rare, 3, 50);
 
         CreateChallenge("Assets/Resources/Challenges/Weekly/Weekly_BossSlayer.asset",
             "Boss Slayer",
@@ -243,7 +243,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.BossEncounter,
             ChallengeData.ChallengeFrequency.Weekly,
             ChallengeData.ChallengeDifficulty.Hard,
-            604800f, 0f, 1, 1, 5, true, "", 2500, 1250, LootManager.Rarity.Legendary, 1);
+            604800f, 0f, 1, 1, 5, true, "", 2500, 1250, LootRarity.Legendary, 1);
 
         CreateChallenge("Assets/Resources/Challenges/Weekly/Weekly_MasterAgent.asset",
             "Master Division Agent",
@@ -251,7 +251,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.ControlPoint,
             ChallengeData.ChallengeFrequency.Weekly,
             ChallengeData.ChallengeDifficulty.Extreme,
-            604800f, 0f, 1, 1, 20, false, "", 3000, 1500, LootManager.Rarity.Legendary, 2);
+            604800f, 0f, 1, 1, 20, false, "", 3000, 1500, LootRarity.Legendary, 2);
 
         CreateChallenge("Assets/Resources/Challenges/Weekly/Weekly_TerritoryController.asset",
             "Territory Controller",
@@ -259,7 +259,7 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.ControlPoint,
             ChallengeData.ChallengeFrequency.Weekly,
             ChallengeData.ChallengeDifficulty.Medium,
-            604800f, 0f, 1, 1, 100, false, "", 2200, 1100, LootManager.Rarity.Epic, 2);
+            604800f, 0f, 1, 1, 100, false, "", 2200, 1100, LootRarity.Epic, 2);
 
         CreateChallenge("Assets/Resources/Challenges/Weekly/Weekly_Sharpshooter.asset",
             "Sharpshooter",
@@ -267,14 +267,14 @@ public class ChallengeCreator : EditorWindow
             ChallengeData.ChallengeType.SupplyDrop,
             ChallengeData.ChallengeFrequency.Weekly,
             ChallengeData.ChallengeDifficulty.Hard,
-            604800f, 0f, 1, 1, 150, false, "", 2400, 1200, LootManager.Rarity.Epic, 2);
+            604800f, 0f, 1, 1, 150, false, "", 2400, 1200, LootRarity.Epic, 2);
     }
 
     private static void CreateChallenge(string path, string challengeName, string description,
         ChallengeData.ChallengeType type, ChallengeData.ChallengeFrequency frequency,
         ChallengeData.ChallengeDifficulty difficulty, float timeLimit, float detectionRadius,
         int recommendedLevel, int requiredLevel, int enemyCount, bool spawnBoss, string bossName,
-        int xpReward, int currencyReward, LootManager.Rarity lootRarity, int lootCount, int civilianCount = 0)
+        int xpReward, int currencyReward, LootRarity lootRarity, int lootCount, int civilianCount = 0)
     {
         ChallengeData challenge = ScriptableObject.CreateInstance<ChallengeData>();
         

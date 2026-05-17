@@ -1,57 +1,37 @@
 using UnityEngine;
 using UnityEngine.Events;
-using GameCreator.Runtime.Characters;
-using GameCreator.Runtime.Stats;
 
 /// <summary>
-/// Manages player progression (level, XP, skill points) and mirrors values
-/// into the GC2 Traits system on the player character.
+/// Manages player progression (level, XP, skill points) and applies stat
+/// scaling to the Invector player via <see cref="PlayerTraitsRuntime"/>.
 /// </summary>
 public class ProgressionManager : MonoBehaviour
 {
     public static ProgressionManager Instance { get; private set; }
 
-    // -------------------------------------------------------------------------
-    // GC2 Stat ID constants — must match the IDs defined in the Stat assets.
-    // -------------------------------------------------------------------------
-    private const string StatLevel      = "level";
-    private const string StatExperience = "experience";
-    private const string StatMaxHealth  = "max-health";
-    private const string StatMaxMana    = "max-mana";
-    private const string StatMaxStamina = "max-stamina";
-    private const string StatAttack     = "attack";
-    private const string StatDefense    = "defense";
+    // ── Inspector ─────────────────────────────────────────────────────────────
 
-    // -------------------------------------------------------------------------
-    // Inspector
-    // -------------------------------------------------------------------------
-    [Header("Player Reference")]
-    [Tooltip("Assign at design time or leave null to auto-find by 'Player' tag at runtime.")]
-    public Traits playerTraits;
+    [Header("Traits Runtime")]
+    [Tooltip("Assign the PlayerTraitsRuntime component. Auto-found if left empty.")]
+    [SerializeField] private PlayerTraitsRuntime playerTraitsRuntime;
 
     [Header("Player Progression")]
-    public int currentLevel  = 1;
-    public int currentXP     = 0;
-    public int skillPoints   = 0;
+    public int currentLevel = 1;
+    public int currentXP    = 0;
+    public int skillPoints  = 0;
 
     [Header("Gear Score")]
     public int currentGearScore  = 0;
     public int equippedGearScore = 0;
 
     [Header("Level Settings")]
-    public int maxLevel = 10;
+    public int maxLevel = 1000;
 
-    [Header("Stat Bonuses Per Level")]
-    [Tooltip("Flat bonus added to max-health for each level above 1.")]
-    public float healthBonusPerLevel  = 20f;
-    [Tooltip("Flat bonus added to max-mana for each level above 1.")]
-    public float manaBonusPerLevel    = 10f;
-    [Tooltip("Flat bonus added to max-stamina for each level above 1.")]
-    public float staminaBonusPerLevel = 5f;
-    [Tooltip("Flat bonus added to attack for each level above 1.")]
-    public float attackBonusPerLevel  = 5f;
-    [Tooltip("Flat bonus added to defense for each level above 1.")]
-    public float defenseBonusPerLevel = 3f;
+    [Header("XP Formula")]
+    [Tooltip("Cumulative XP to reach level N = floor(xpBase × N ^ xpExponent). " +
+             "Raise xpExponent for a steeper curve (harder to level at higher tiers).")]
+    public float xpBase     = 100f;
+    public float xpExponent = 1.8f;
 
     [Header("Progression Events")]
     public UnityEvent<int> onLevelUp;
@@ -59,42 +39,16 @@ public class ProgressionManager : MonoBehaviour
     public UnityEvent<int> onSkillPointGained;
     public UnityEvent<int> onGearScoreChanged;
 
-    // -------------------------------------------------------------------------
-    // Private state — tracks modifiers currently applied so old ones can be
-    // removed before fresh ones are applied on level-up.
-    // -------------------------------------------------------------------------
-    private float m_AppliedHealthBonus  = 0f;
-    private float m_AppliedManaBonus    = 0f;
-    private float m_AppliedStaminaBonus = 0f;
-    private float m_AppliedAttackBonus  = 0f;
-    private float m_AppliedDefenseBonus = 0f;
+    // ── Private state ─────────────────────────────────────────────────────────
 
-    private const int SKILL_POINTS_PER_LEVEL = 1;
+    private const int SkillPointsPerLevel = 1;
 
-    private readonly int[] xpRequirements =
-    {
-        0,      // Level 1 (start)
-        100,    // Level 2
-        300,    // Level 3
-        600,    // Level 4
-        1000,   // Level 5
-        1500,   // Level 6
-        2100,   // Level 7
-        2800,   // Level 8
-        3600,   // Level 9
-        4500    // Level 10
-    };
-
-    // =========================================================================
-    // Unity lifecycle
-    // =========================================================================
+    // ── Unity lifecycle ───────────────────────────────────────────────────────
 
     private void Awake()
     {
         if (Instance == null)
-        {
             Instance = this;
-        }
         else if (Instance != this)
         {
             Destroy(gameObject);
@@ -104,13 +58,11 @@ public class ProgressionManager : MonoBehaviour
 
     private void Start()
     {
-        ResolvePlayerTraits();
-        SyncAllStatsToGC2();
+        ResolveTraitsRuntime();
+        playerTraitsRuntime?.ApplyLevel(currentLevel);
     }
 
-    // =========================================================================
-    // Public API — XP & level
-    // =========================================================================
+    // ── Public API — XP & level ───────────────────────────────────────────────
 
     /// <summary>Adds experience points and triggers a level-up check.</summary>
     public void AddExperience(int amount)
@@ -122,13 +74,10 @@ public class ProgressionManager : MonoBehaviour
 
         Debug.Log($"Gained {amount} XP. Total: {currentXP}");
 
-        SyncExperienceToGC2();
         CheckLevelUp();
     }
 
-    // =========================================================================
-    // Public API — skill points
-    // =========================================================================
+    // ── Public API — skill points ─────────────────────────────────────────────
 
     /// <summary>Spends one skill point. Returns false if none are available.</summary>
     public bool SpendSkillPoint()
@@ -144,11 +93,9 @@ public class ProgressionManager : MonoBehaviour
         skillPoints++;
     }
 
-    // =========================================================================
-    // Public API — XP progress helpers
-    // =========================================================================
+    // ── Public API — XP progress helpers ─────────────────────────────────────
 
-    /// <summary>Returns [0,1] progress toward the next level.</summary>
+    /// <summary>Returns [0, 1] progress toward the next level.</summary>
     public float GetXPProgress()
     {
         if (currentLevel >= maxLevel) return 1f;
@@ -159,13 +106,17 @@ public class ProgressionManager : MonoBehaviour
         return (float)(currentXP - currentRequired) / (nextRequired - currentRequired);
     }
 
-    /// <summary>Returns XP required to reach the given level.</summary>
+    /// <summary>
+    /// Returns the cumulative XP threshold that marks the start of <paramref name="level"/>.
+    /// Formula: <c>floor(xpBase × level ^ xpExponent)</c>.
+    /// level 0 always returns 0 (start of level 1).
+    /// </summary>
     public int GetRequiredXPForLevel(int level)
     {
-        if (level < 0 || level >= xpRequirements.Length)
-            return int.MaxValue;
+        if (level <= 0)   return 0;
+        if (level >= maxLevel) return int.MaxValue;
 
-        return xpRequirements[level];
+        return Mathf.FloorToInt(xpBase * Mathf.Pow(level, xpExponent));
     }
 
     /// <summary>Returns XP remaining until the next level.</summary>
@@ -177,9 +128,7 @@ public class ProgressionManager : MonoBehaviour
 
     public bool IsMaxLevel() => currentLevel >= maxLevel;
 
-    // =========================================================================
-    // Public API — gear score
-    // =========================================================================
+    // ── Public API — gear score ───────────────────────────────────────────────
 
     /// <summary>Updates the total inventory gear score and fires the change event.</summary>
     public void UpdateGearScore(int newGearScore)
@@ -201,8 +150,7 @@ public class ProgressionManager : MonoBehaviour
     }
 
     /// <summary>Returns player level + equipped gear score contribution.</summary>
-    public int GetPowerLevel() => currentLevel + (equippedGearScore / 100);
-
+    public int   GetPowerLevel()      => currentLevel + (equippedGearScore / 100);
     public float GetPowerLevelFloat() => currentLevel + (equippedGearScore / 100f);
 
     /// <summary>Returns recommended gear score for the current level.</summary>
@@ -227,9 +175,7 @@ public class ProgressionManager : MonoBehaviour
         return Mathf.Clamp01((float)equippedGearScore / recommended);
     }
 
-    // =========================================================================
-    // Private — level-up logic
-    // =========================================================================
+    // ── Private — level-up logic ──────────────────────────────────────────────
 
     private void CheckLevelUp()
     {
@@ -247,128 +193,33 @@ public class ProgressionManager : MonoBehaviour
     private void LevelUp()
     {
         currentLevel++;
-        skillPoints += SKILL_POINTS_PER_LEVEL;
+        skillPoints += SkillPointsPerLevel;
 
         onLevelUp?.Invoke(currentLevel);
-        onSkillPointGained?.Invoke(SKILL_POINTS_PER_LEVEL);
+        onSkillPointGained?.Invoke(SkillPointsPerLevel);
 
         if (GameManager.Instance != null)
             GameManager.Instance.UpdatePlayerLevel(currentLevel);
 
+        playerTraitsRuntime?.ApplyLevel(currentLevel);
+
         Debug.Log($"LEVEL UP! Now level {currentLevel}. Skill Points: {skillPoints}");
-
-        SyncAllStatsToGC2();
     }
 
-    // =========================================================================
-    // Private — GC2 Traits sync
-    // =========================================================================
+    // ── Private — runtime resolution ──────────────────────────────────────────
 
-    /// <summary>
-    /// Attempts to find the player Traits component if not already assigned.
-    /// </summary>
-    private void ResolvePlayerTraits()
+    private void ResolveTraitsRuntime()
     {
-        if (playerTraits != null) return;
+        if (playerTraitsRuntime != null) return;
 
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
-            playerTraits = player.GetComponent<Traits>();
+        playerTraitsRuntime = PlayerTraitsRuntime.Instance;
 
-        if (playerTraits == null)
-        {
-            Character character = FindFirstObjectByType<Character>();
-            if (character != null)
-                playerTraits = character.GetComponent<Traits>();
-        }
+        if (playerTraitsRuntime == null)
+            playerTraitsRuntime = FindFirstObjectByType<PlayerTraitsRuntime>();
 
-        if (playerTraits == null)
-            Debug.LogWarning("ProgressionManager: Could not find player Traits. GC2 stat sync disabled.");
+        if (playerTraitsRuntime == null)
+            Debug.LogWarning("[ProgressionManager] Could not find PlayerTraitsRuntime — stat scaling disabled.");
         else
-            Debug.Log($"ProgressionManager: Syncing to Traits on '{playerTraits.gameObject.name}'.");
-    }
-
-    /// <summary>
-    /// Writes level, XP, and all stat bonuses into GC2 Traits.
-    /// Safe to call multiple times — removes old modifiers before re-applying.
-    /// </summary>
-    private void SyncAllStatsToGC2()
-    {
-        if (playerTraits == null) return;
-
-        SyncLevelToGC2();
-        SyncExperienceToGC2();
-        SyncStatBonusesToGC2();
-    }
-
-    /// <summary>Sets the GC2 'lvl' stat base value to match currentLevel.</summary>
-    private void SyncLevelToGC2()
-    {
-        if (playerTraits == null) return;
-
-        try
-        {
-            playerTraits.RuntimeStats.Get(StatLevel).Base = currentLevel;
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogWarning($"ProgressionManager: Could not sync '{StatLevel}' stat — {e.Message}");
-        }
-    }
-
-    /// <summary>Sets the GC2 'experience' stat base value to match currentXP.</summary>
-    private void SyncExperienceToGC2()
-    {
-        if (playerTraits == null) return;
-
-        try
-        {
-            playerTraits.RuntimeStats.Get(StatExperience).Base = currentXP;
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogWarning($"ProgressionManager: Could not sync '{StatExperience}' stat — {e.Message}");
-        }
-    }
-
-    /// <summary>
-    /// Removes the previously-applied per-level constant modifiers and adds
-    /// fresh ones based on (currentLevel - 1) bonus steps.
-    /// </summary>
-    private void SyncStatBonusesToGC2()
-    {
-        if (playerTraits == null) return;
-
-        int bonusLevels = currentLevel - 1; // level 1 = 0 bonus steps
-
-        ApplyStatModifier(StatMaxHealth,  ref m_AppliedHealthBonus,  bonusLevels * healthBonusPerLevel);
-        ApplyStatModifier(StatMaxMana,    ref m_AppliedManaBonus,    bonusLevels * manaBonusPerLevel);
-        ApplyStatModifier(StatMaxStamina, ref m_AppliedStaminaBonus, bonusLevels * staminaBonusPerLevel);
-        ApplyStatModifier(StatAttack,     ref m_AppliedAttackBonus,  bonusLevels * attackBonusPerLevel);
-        ApplyStatModifier(StatDefense,    ref m_AppliedDefenseBonus, bonusLevels * defenseBonusPerLevel);
-    }
-
-    /// <summary>
-    /// Removes the previously tracked constant modifier value and applies the
-    /// new one, then stores the new value so it can be removed next time.
-    /// </summary>
-    private void ApplyStatModifier(string statId, ref float trackedValue, float newValue)
-    {
-        try
-        {
-            RuntimeStatData stat = playerTraits.RuntimeStats.Get(statId);
-
-            if (Mathf.Abs(trackedValue) > float.Epsilon)
-                stat.RemoveModifier(ModifierType.Constant, trackedValue);
-
-            if (Mathf.Abs(newValue) > float.Epsilon)
-                stat.AddModifier(ModifierType.Constant, newValue);
-
-            trackedValue = newValue;
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogWarning($"ProgressionManager: Could not apply modifier to '{statId}' — {e.Message}");
-        }
+            Debug.Log($"[ProgressionManager] Resolved PlayerTraitsRuntime on '{playerTraitsRuntime.gameObject.name}'.");
     }
 }

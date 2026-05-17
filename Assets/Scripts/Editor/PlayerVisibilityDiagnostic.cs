@@ -103,14 +103,14 @@ public class PlayerVisibilityDiagnostic : EditorWindow
                 }
             }
             
-            // Search for GC2 Character component as last resort
+            // Search for Invector vThirdPersonController as last resort
             if (player == null)
             {
-                var characters = Object.FindObjectsByType<GameCreator.Runtime.Characters.Character>(FindObjectsSortMode.None);
-                if (characters.Length > 0)
+                var controllers = Object.FindObjectsByType<Invector.vCharacterController.vThirdPersonController>(FindObjectsSortMode.None);
+                if (controllers.Length > 0)
                 {
-                    player = characters[0].gameObject;
-                    Debug.LogWarning($"⚠️ Found GC2 Character on '{player.name}' but it lacks 'Player' tag!");
+                    player = controllers[0].gameObject;
+                    Debug.LogWarning($"⚠️ Found vThirdPersonController on '{player.name}' but it lacks 'Player' tag!");
                 }
             }
             
@@ -255,15 +255,15 @@ public class PlayerVisibilityDiagnostic : EditorWindow
                 }
             }
             
-            // If still not found, search for GC2 Character component
+            // If still not found, search for Invector vThirdPersonController
             if (player == null)
             {
-                var characters = Object.FindObjectsByType<GameCreator.Runtime.Characters.Character>(FindObjectsSortMode.None);
-                if (characters.Length > 0)
+                var controllers = Object.FindObjectsByType<Invector.vCharacterController.vThirdPersonController>(FindObjectsSortMode.None);
+                if (controllers.Length > 0)
                 {
-                    player = characters[0].gameObject;
+                    player = controllers[0].gameObject;
                     player.tag = "Player";
-                    Debug.Log($"✓ Found GC2 Character on '{player.name}' and set tag to 'Player'");
+                    Debug.Log($"✓ Found vThirdPersonController on '{player.name}' and set tag to 'Player'");
                 }
             }
             
@@ -325,7 +325,7 @@ public class PlayerVisibilityDiagnostic : EditorWindow
         Debug.Log($"Camera: {mainCamera.name}");
         Debug.Log($"Player: {player.name}");
         Debug.Log($"Distance: {Vector3.Distance(mainCamera.transform.position, player.transform.position):F2}m");
-        Debug.Log("Camera should auto-follow player with 'Player' tag via GC2 camera shot system.");
+        Debug.Log("Camera should auto-follow the player via the assigned camera rig.");
     }
 
     private void ResetPlayerPosition()
@@ -570,18 +570,18 @@ public class PlayerVisibilityDiagnostic : EditorWindow
         
         // Check components
         Debug.Log("\nComponents:");
-        var character  = player.GetComponent<GameCreator.Runtime.Characters.Character>();
-        var rigidbody  = player.GetComponent<Rigidbody>();
-        var collider   = player.GetComponent<Collider>();
+        var invectorController = player.GetComponent<Invector.vCharacterController.vThirdPersonController>();
+        var rigidbody          = player.GetComponent<Rigidbody>();
+        var collider           = player.GetComponent<Collider>();
 
-        Debug.Log($"  GC2 Character: {(character != null ? "✓" : "❌")}");
+        Debug.Log($"  vThirdPersonController: {(invectorController != null ? "✓" : "❌")}");
         Debug.Log($"  Rigidbody: {(rigidbody != null ? "✓" : "❌")}");
         Debug.Log($"  Collider: {(collider != null ? "✓" : "❌")}");
 
-        if (character != null)
+        if (invectorController != null)
         {
-            Debug.Log($"  Character enabled: {character.enabled}");
-            Debug.Log($"  IsDead: {character.IsDead}");
+            Debug.Log($"  Controller enabled: {invectorController.enabled}");
+            Debug.Log($"  IsDead: {invectorController.isDead}");
         }
         
         Debug.Log("\n═══════════════════════════════════════");

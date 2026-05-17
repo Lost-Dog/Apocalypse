@@ -194,9 +194,9 @@ public class ChallengeDataModifierEditor : Editor
             isActive = true
         });
         
-        if ((int)data.guaranteedLootRarity < (int)LootManager.Rarity.Rare)
+        if ((int)data.guaranteedLootRarity < (int)LootRarity.Rare)
         {
-            data.guaranteedLootRarity = LootManager.Rarity.Rare;
+            data.guaranteedLootRarity = LootRarity.Rare;
         }
         
         EditorUtility.SetDirty(data);

@@ -130,7 +130,7 @@ public class DivisionGameQuickActions : EditorWindow
         challenge.timeLimit = 300f;
         challenge.baseXPReward = 300;
         challenge.baseCurrencyReward = 150;
-        challenge.guaranteedLootRarity = LootManager.Rarity.Uncommon;
+        challenge.guaranteedLootRarity = LootRarity.Uncommon;
         
         challenge.spawnItems.Add(new ChallengeData.SpawnableItem
         {

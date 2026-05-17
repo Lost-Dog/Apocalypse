@@ -1,43 +1,71 @@
-using GameCreator.Runtime.Common;
-using GameCreator.Runtime.Stats;
 using UnityEngine;
 
 /// <summary>
 /// Tracks player actions during challenges for bonus reward calculations.
+/// Health damage detection uses IPlayerProvider's OnHealthChanged event.
 /// Attach this to the player or have ChallengeManager create it dynamically.
 /// </summary>
 public class ChallengeBonusTracker : MonoBehaviour
 {
-    private const string HealthAttributeId = "health";
-
     private ChallengeManager challengeManager;
-    private Traits playerTraits;
+    private IPlayerProvider playerProvider;
+    private float lastHealth;
 
     private void Start()
     {
         challengeManager = ChallengeManager.Instance;
-        playerTraits = GetComponent<Traits>();
 
-        if (playerTraits != null)
+        // Resolve IPlayerProvider from this GameObject first, then search the scene.
+        foreach (var mb in GetComponents<MonoBehaviour>())
         {
-            playerTraits.RuntimeAttributes.EventChange += OnAttributeChanged;
+            if (mb is IPlayerProvider provider)
+            {
+                playerProvider = provider;
+                break;
+            }
+        }
+
+        if (playerProvider == null)
+        {
+            foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+            {
+                if (mb is IPlayerProvider provider)
+                {
+                    playerProvider = provider;
+                    break;
+                }
+            }
+        }
+
+        if (playerProvider != null)
+        {
+            lastHealth = playerProvider.Health;
+            playerProvider.OnHealthChanged += OnHealthChanged;
+        }
+        else
+        {
+            Debug.LogWarning("[ChallengeBonusTracker] No IPlayerProvider found — damage tracking disabled.");
         }
     }
 
     private void OnDestroy()
     {
-        if (playerTraits != null)
+        if (playerProvider != null)
         {
-            playerTraits.RuntimeAttributes.EventChange -= OnAttributeChanged;
+            playerProvider.OnHealthChanged -= OnHealthChanged;
         }
     }
 
-    private void OnAttributeChanged(IdString attributeId)
+    private void OnHealthChanged(float currentHealth, float maxHealth)
     {
-        if (attributeId.String != HealthAttributeId) return;
+        // Only act when health decreased (damage taken).
+        if (currentHealth >= lastHealth)
+        {
+            lastHealth = currentHealth;
+            return;
+        }
 
-        // A negative LastChange means the attribute decreased — i.e., damage was taken
-        if (playerTraits.RuntimeAttributes.LastChange >= 0) return;
+        lastHealth = currentHealth;
 
         if (challengeManager == null || challengeManager.activeChallenges == null) return;
 

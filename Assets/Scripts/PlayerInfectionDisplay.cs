@@ -1,152 +1,144 @@
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
-using GameCreator.Runtime.Common;
-using GameCreator.Runtime.Stats;
 
 /// <summary>
-/// Tracks and displays the player's infection level.
-/// Damage is applied to the player's health Attribute via GC2 Traits when infection is critical.
+/// Reads the player's infection level from SurvivalManager and drives the
+/// stat-dial Animator and label text. Also applies periodic health damage when
+/// infection is at maximum via IPlayerProvider.
 /// </summary>
 public class PlayerInfectionDisplay : MonoBehaviour
 {
-    private const string HealthAttributeId = "health";
-
-    [Header("Infection Settings")]
-    [Range(0f, 100f)] public float currentInfection = 0f;
-    public float maxInfection = 100f;
-    public float infectionGrowthRate = 0.5f;
-    public float infectionDecayRate = 1f;
-
-    [Header("Health Damage Settings")]
-    public bool enableHealthDamage = true;
-    public float healthDamagePerSecond = 2f;
-    public float damageTickInterval = 1f;
-
-    [Header("Display Settings")]
-    public bool showStatus = true;
-    public bool showPrefix = false;
-    public string prefix = "Infection: ";
-    public string suffix = "%";
+    private const string DialParameter = "Health";
 
     [Header("References")]
     public TextMeshProUGUI infectionText;
-    public Slider infectionSlider;
+    public Animator        dialAnimator;
 
-    [Header("Auto-Find")]
-    public bool autoFindReferences = true;
+    [Header("Health Damage at Max Infection")]
+    public bool  enableHealthDamage    = true;
+    public float healthDamagePerSecond = 2f;
+    public float damageTickInterval    = 1f;
 
-    private Traits playerTraits;
+    [Header("Display Settings")]
+    public string suffix = "%";
+
+    private SurvivalManager survivalManager;
+    private IPlayerProvider playerProvider;
     private float damageTimer;
+
+    // ─────────────────────────────────────────────────────────────────────────
 
     private void Start()
     {
-        if (autoFindReferences)
-            FindReferences();
-
-        InitializeSlider();
-        UpdateDisplay();
+        FindReferences();
         damageTimer = damageTickInterval;
     }
 
     private void FindReferences()
     {
-        if (playerTraits == null)
-        {
-            GameObject player = ShortcutPlayer.Instance;
-            if (player != null)
-                playerTraits = player.GetComponent<Traits>();
+        if (survivalManager == null)
+            survivalManager = SurvivalManager.Instance ?? FindFirstObjectByType<SurvivalManager>();
 
-            if (playerTraits == null)
-                Debug.LogWarning("[PlayerInfectionDisplay] Could not find player Traits component!");
+        if (survivalManager == null)
+            Debug.LogWarning("[PlayerInfectionDisplay] SurvivalManager not found.");
+
+        if (playerProvider == null)
+        {
+            foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+            {
+                if (mb is IPlayerProvider provider)
+                {
+                    playerProvider = provider;
+                    break;
+                }
+            }
         }
 
         if (infectionText == null)
-            infectionText = GetComponent<TextMeshProUGUI>();
+            infectionText = GetComponentInChildren<TextMeshProUGUI>();
 
-        if (infectionSlider == null)
-            infectionSlider = GetComponent<Slider>();
-    }
-
-    private void InitializeSlider()
-    {
-        if (infectionSlider == null) return;
-
-        infectionSlider.minValue = 0f;
-        infectionSlider.maxValue = maxInfection;
-        infectionSlider.value = currentInfection;
+        if (dialAnimator == null)
+            dialAnimator = GetComponentInParent<Animator>();
     }
 
     private void Update()
     {
-        UpdateInfection();
-        ApplyInfectionDamage();
-        UpdateDisplay();
+        if (survivalManager == null)
+        {
+            FindReferences();
+            return;
+        }
+
+        float normalized = GetNormalizedInfection();
+        UpdateDial(normalized);
+        UpdateLabel(normalized);
+        ApplyInfectionDamage(normalized);
     }
 
-    private void UpdateInfection()
+    // ── Read ──────────────────────────────────────────────────────────────────
+
+    private float GetNormalizedInfection()
     {
-        if (currentInfection > 0f)
-            currentInfection = Mathf.Max(0f, currentInfection - infectionDecayRate * Time.deltaTime);
+        if (survivalManager == null || survivalManager.maxInfection <= 0f) return 0f;
+        return Mathf.Clamp01(survivalManager.currentInfection / survivalManager.maxInfection);
     }
 
-    private void ApplyInfectionDamage()
+    /// <summary>Current infection value in the 0–100 range (for backwards compatibility).</summary>
+    public float currentInfection => GetNormalizedInfection() * 100f;
+
+    // ── Display ───────────────────────────────────────────────────────────────
+
+    private void UpdateDial(float normalized)
     {
-        if (!enableHealthDamage || currentInfection < maxInfection || playerTraits == null) return;
+        if (dialAnimator != null)
+            dialAnimator.SetFloat(DialParameter, normalized);
+    }
+
+    private void UpdateLabel(float normalized)
+    {
+        if (infectionText == null) return;
+        infectionText.text = $"{Mathf.RoundToInt(normalized * 100f)}{suffix}";
+    }
+
+    // ── Damage ────────────────────────────────────────────────────────────────
+
+    private void ApplyInfectionDamage(float normalized)
+    {
+        if (!enableHealthDamage || normalized < 1f || playerProvider == null) return;
 
         damageTimer -= Time.deltaTime;
         if (damageTimer > 0f) return;
 
         damageTimer = damageTickInterval;
-
-        try
-        {
-            RuntimeAttributeData health = playerTraits.RuntimeAttributes.Get(HealthAttributeId);
-            health.Value -= healthDamagePerSecond * damageTickInterval;
-        }
-        catch (System.Exception) { }
+        playerProvider.ApplyDamage(healthDamagePerSecond * damageTickInterval);
     }
 
-    private void UpdateDisplay()
+    // ── Public API ────────────────────────────────────────────────────────────
+
+    /// <summary>Adds the given amount to the infection level in SurvivalManager.</summary>
+    public void AddInfection(float amount)
     {
-        if (infectionSlider != null)
-            infectionSlider.value = currentInfection;
-
-        if (infectionText != null)
-        {
-            string displayText = $"{Mathf.RoundToInt(currentInfection)}{suffix}";
-            if (showStatus)
-                displayText += $" ({GetInfectionStatus()})";
-
-            infectionText.text = showPrefix ? $"{prefix}{displayText}" : displayText;
-        }
+        if (survivalManager == null) return;
+        survivalManager.currentInfection = Mathf.Clamp(
+            survivalManager.currentInfection + amount,
+            0f,
+            survivalManager.maxInfection
+        );
     }
 
-    private string GetInfectionStatus()
+    /// <summary>Removes the given amount from the infection level.</summary>
+    public void RemoveInfection(float amount) => AddInfection(-amount);
+
+    /// <summary>Clears infection to zero in SurvivalManager.</summary>
+    public void CureInfection()
     {
-        if (currentInfection == 0f) return "None";
-        if (currentInfection < 25f) return "Mild";
-        if (currentInfection < 50f) return "Moderate";
-        if (currentInfection < 75f) return "Severe";
-        return "Critical";
+        if (survivalManager != null)
+            survivalManager.currentInfection = 0f;
     }
 
-    // PUBLIC API ----------------------------------------------------------------------------------
-
-    /// <summary>Adds the given amount to the current infection level.</summary>
-    public void AddInfection(float amount) =>
-        currentInfection = Mathf.Clamp(currentInfection + amount, 0f, maxInfection);
-
-    /// <summary>Reduces the current infection level by the given amount.</summary>
-    public void RemoveInfection(float amount) =>
-        currentInfection = Mathf.Max(0f, currentInfection - amount);
-
-    /// <summary>Clears all infection immediately.</summary>
-    public void CureInfection() => currentInfection = 0f;
-
-    /// <summary>Returns true if the player has any infection.</summary>
-    public bool IsInfected() => currentInfection > 0f;
+    /// <summary>Returns true if infection is above zero.</summary>
+    public bool IsInfected() => GetNormalizedInfection() > 0f;
 
     /// <summary>Returns infection as a 0–1 normalised value.</summary>
-    public float GetInfectionPercentage() => currentInfection / maxInfection;
+    public float GetInfectionPercentage() => GetNormalizedInfection();
 }

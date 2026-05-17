@@ -1,15 +1,14 @@
+using Invector;
+using Invector.vCharacterController;
 using UnityEngine;
 using UnityEngine.Events;
-using GameCreator.Runtime.Stats;
 
 /// <summary>
-/// Applies continuous fire/burn damage to any GC2 Traits-bearing character that enters the trigger.
-/// Damage is subtracted directly from the configured health Attribute on the character's Traits component.
+/// Applies continuous fire/burn damage to any Invector character that enters the trigger.
+/// Damage is applied via vHealthController.TakeDamage so all Invector damage events fire correctly.
 /// </summary>
 public class ExplosionDamage : MonoBehaviour
 {
-    private const string DefaultHealthAttributeId = "health";
-
     [Header("Damage Settings")]
     [Tooltip("Fire damage per second while inside the trigger")]
     public float fireBaseDamage = 5f;
@@ -23,8 +22,21 @@ public class ExplosionDamage : MonoBehaviour
     [Tooltip("How often damage is applied (seconds between ticks)")]
     public float damageTickInterval = 0.5f;
 
-    [Tooltip("GC2 Attribute ID to subtract damage from (must match the Traits component)")]
-    public string healthAttributeId = DefaultHealthAttributeId;
+    [Header("Nuke Cover Resistance")]
+    [Tooltip("When enabled, damage is reduced if the player is crouching in cover")]
+    public bool isNukeExplosion = false;
+
+    [Tooltip("Damage multiplier at level 1 while in cover (0 = full block, 1 = no reduction)")]
+    [Range(0f, 1f)]
+    public float baseCoverDamageMultiplier = 0.6f;
+
+    [Tooltip("Minimum damage multiplier reached at max level while in cover")]
+    [Range(0f, 1f)]
+    public float minCoverDamageMultiplier = 0.1f;
+
+    [Tooltip("Controls how resistance scales from base to min over the level range. " +
+             "X = normalised level (0 = level 1, 1 = max level), Y = interpolation weight toward minCoverDamageMultiplier.")]
+    public AnimationCurve coverResistanceCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
 
     [Header("Trigger Settings")]
     [Tooltip("Tag used to identify the player")]
@@ -63,7 +75,8 @@ public class ExplosionDamage : MonoBehaviour
     public bool showDebugInfo = false;
 
     // Runtime state
-    private Traits playerTraits;
+    private vHealthController playerHealth;
+    private vThirdPersonController playerController;
     private GameObject playerObject;
     private bool playerInFire;
     private float damageTimer;
@@ -95,9 +108,9 @@ public class ExplosionDamage : MonoBehaviour
         if (audioSource == null && (fireEnterSound != null || burnLoopSound != null))
         {
             audioSource = gameObject.AddComponent<AudioSource>();
-            audioSource.playOnAwake = false;
+            audioSource.playOnAwake  = false;
             audioSource.spatialBlend = 1f;
-            audioSource.volume = soundVolume;
+            audioSource.volume       = soundVolume;
         }
     }
 
@@ -105,19 +118,20 @@ public class ExplosionDamage : MonoBehaviour
     {
         if (!other.CompareTag(playerTag)) return;
 
-        playerTraits = other.GetComponent<Traits>();
-        playerObject = other.gameObject;
+        playerHealth     = other.GetComponent<vHealthController>();
+        playerController = other.GetComponent<vThirdPersonController>();
+        playerObject     = other.gameObject;
 
-        if (playerTraits == null) return;
+        if (playerHealth == null) return;
 
         playerInFire = true;
-        damageTimer = 0f;
+        damageTimer  = 0f;
         OnPlayerEnterFire();
     }
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.CompareTag(playerTag) && playerInFire && playerTraits != null)
+        if (other.CompareTag(playerTag) && playerInFire && playerHealth != null)
             ApplyFireDamage();
     }
 
@@ -145,7 +159,7 @@ public class ExplosionDamage : MonoBehaviour
 
         damageTimer = damageTickInterval;
         float damage = fireBaseDamage * damageTickInterval;
-        SubtractHealth(damage);
+        ApplyDamage(damage);
 
         if (showDebugInfo)
             Debug.Log($"[ExplosionDamage] Applied {damage:F1} fire damage");
@@ -153,7 +167,7 @@ public class ExplosionDamage : MonoBehaviour
 
     private void ApplyBurnDamage()
     {
-        burnTimer -= Time.deltaTime;
+        burnTimer   -= Time.deltaTime;
         damageTimer -= Time.deltaTime;
 
         if (burnTimer <= 0f)
@@ -166,29 +180,52 @@ public class ExplosionDamage : MonoBehaviour
 
         damageTimer = damageTickInterval;
         float damage = burnDamagePerSecond * damageTickInterval;
-        SubtractHealth(damage);
+        ApplyDamage(damage);
 
         if (showDebugInfo)
             Debug.Log($"[ExplosionDamage] Applied {damage:F1} burn damage ({burnTimer:F1}s remaining)");
     }
 
     /// <summary>
-    /// Subtracts the given amount from the player's health Attribute via GC2 Traits.
+    /// Routes damage through Invector's TakeDamage so all health events fire correctly.
+    /// When <see cref="isNukeExplosion"/> is true, damage is reduced if the player is
+    /// crouching (in cover), with further resistance scaling per level from
+    /// <see cref="ProgressionManager"/>.
     /// </summary>
-    private void SubtractHealth(float amount)
+    private void ApplyDamage(float amount)
     {
-        if (playerTraits == null || amount <= 0f) return;
+        if (playerHealth == null || playerHealth.isDead || amount <= 0f) return;
 
-        try
-        {
-            RuntimeAttributeData healthAttr = playerTraits.RuntimeAttributes.Get(healthAttributeId);
-            if (healthAttr != null)
-                healthAttr.Value -= amount;
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogWarning($"[ExplosionDamage] Could not apply damage — {e.Message}");
-        }
+        float finalAmount = isNukeExplosion ? ApplyCoverResistance(amount) : amount;
+
+        var damage = new vDamage(Mathf.RoundToInt(finalAmount));
+        playerHealth.TakeDamage(damage);
+    }
+
+    /// <summary>
+    /// Returns the damage amount after applying cover and level-based resistance.
+    /// Level is normalised to [0, 1] relative to <see cref="ProgressionManager.maxLevel"/>,
+    /// then evaluated on <see cref="coverResistanceCurve"/> to interpolate between
+    /// <see cref="baseCoverDamageMultiplier"/> (level 1) and <see cref="minCoverDamageMultiplier"/> (max level).
+    /// Only active when the player is crouching.
+    /// </summary>
+    private float ApplyCoverResistance(float amount)
+    {
+        if (playerController == null || !playerController.isCrouching)
+            return amount;
+
+        int   level    = ProgressionManager.Instance != null ? ProgressionManager.Instance.currentLevel : 1;
+        int   maxLevel = ProgressionManager.Instance != null ? ProgressionManager.Instance.maxLevel     : 1000;
+
+        float t          = Mathf.Clamp01((float)(level - 1) / Mathf.Max(maxLevel - 1, 1));
+        float curveWeight = coverResistanceCurve.Evaluate(t);
+        float multiplier  = Mathf.Lerp(baseCoverDamageMultiplier, minCoverDamageMultiplier, curveWeight);
+        float reduced     = amount * multiplier;
+
+        if (showDebugInfo)
+            Debug.Log($"[ExplosionDamage] Nuke cover resistance — level {level}/{maxLevel}, t={t:F2}, multiplier={multiplier:F2}, {amount:F1} → {reduced:F1}");
+
+        return reduced;
     }
 
     // EVENTS -----------------------------------------------------------------------------------------
@@ -223,8 +260,8 @@ public class ExplosionDamage : MonoBehaviour
 
     private void StartBurnEffect()
     {
-        isBurning = true;
-        burnTimer = burnDuration;
+        isBurning   = true;
+        burnTimer   = burnDuration;
         damageTimer = 0f;
 
         if (showDebugInfo) Debug.Log($"[ExplosionDamage] Burn started ({burnDuration}s)");

@@ -68,6 +68,5 @@ public class ExplosionInfectionSpawner : MonoBehaviour
             zone.ambientLoopSound = ambientLoopSound;
         }
         
-        Debug.Log($"<color=cyan>Spawned explosion infection zone at {transform.position}</color>");
     }
 }

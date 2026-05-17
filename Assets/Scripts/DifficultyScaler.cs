@@ -1,17 +1,13 @@
-using GameCreator.Runtime.Stats;
+using Invector;
 using System;
 using UnityEngine;
 
 /// <summary>
 /// Scales enemy health and damage based on player/zone level.
-/// Health scaling sets the character's current HP via GC2 Stats RuntimeAttributeData.
-/// Note: the GC2 Stat that drives the attribute's MaxValue is not overridden here —
-/// max health scaling requires adjusting the underlying Stat value via the formula system.
+/// Health scaling sets the character's current HP via Invector's vHealthController.
 /// </summary>
 public class DifficultyScaler : MonoBehaviour
 {
-    private const string HealthAttributeId = "health";
-
     [Header("Base Stats")]
     [Tooltip("Base health at level 1")]
     public float baseHealth = 100f;
@@ -46,22 +42,15 @@ public class DifficultyScaler : MonoBehaviour
     [Header("Debug")]
     public bool showDebugLogs = false;
 
-    private Traits traits;
+    private vHealthController healthController;
     private bool hasAppliedScaling = false;
 
     private void Start()
     {
-        traits = GetComponent<Traits>();
+        healthController = GetComponent<vHealthController>();
 
-        if (traits != null && baseHealth <= 0f)
-        {
-            try
-            {
-                RuntimeAttributeData health = traits.RuntimeAttributes.Get(HealthAttributeId);
-                baseHealth = (float) health.MaxValue;
-            }
-            catch (Exception) { }
-        }
+        if (healthController != null && baseHealth <= 0f)
+            baseHealth = healthController.maxHealth;
 
         if (autoScaleToPlayerLevel)
             ApplyScaling(GetEffectiveLevel());
@@ -79,7 +68,7 @@ public class DifficultyScaler : MonoBehaviour
 
     /// <summary>
     /// Applies difficulty scaling for the given level.
-    /// Sets the character's current HP via GC2 Stats and notifies PoolableCharacter.
+    /// Sets max and current HP via vHealthController and notifies PoolableCharacter.
     /// </summary>
     public void ApplyScaling(int level)
     {
@@ -110,26 +99,16 @@ public class DifficultyScaler : MonoBehaviour
 
     private void ApplyStatsToCharacter()
     {
-        if (traits == null) traits = GetComponent<Traits>();
+        if (healthController == null) healthController = GetComponent<vHealthController>();
 
-        if (traits != null)
+        if (healthController != null)
         {
-            try
-            {
-                RuntimeAttributeData health = traits.RuntimeAttributes.Get(HealthAttributeId);
-                // Value setter clamps to the attribute's current MaxValue (driven by GC2 Stat formula).
-                // To truly scale max HP, adjust the underlying Stat via the GC2 Stats formula system.
-                health.Value = scaledHealth;
-            }
-            catch (Exception e)
-            {
-                if (showDebugLogs)
-                    Debug.LogWarning($"{gameObject.name}: DifficultyScaler could not set health attribute — {e.Message}");
-            }
+            healthController.maxHealth = Mathf.RoundToInt(scaledHealth);
+            healthController.ResetHealth();
         }
         else if (showDebugLogs)
         {
-            Debug.LogWarning($"{gameObject.name}: DifficultyScaler could not find Traits component!");
+            Debug.LogWarning($"{gameObject.name}: DifficultyScaler could not find vHealthController!");
         }
 
         // Notify PoolableCharacter so health resets correctly on re-spawn

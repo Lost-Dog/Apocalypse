@@ -1,27 +1,39 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class MissionOfferManager : MonoBehaviour
 {
     public static MissionOfferManager Instance { get; private set; }
-    
+
     [Header("Mission Offer Settings")]
     [Tooltip("Base location where missions must be accepted")]
     public Transform baseLocation;
-    
+
     [Tooltip("Minimum distance from base to show 'Return to Base' message")]
     public float baseDetectionRadius = 50f;
-    
+
     [Header("Current Offer")]
     [Tooltip("The currently offered mission (waiting for player to return to base)")]
     public MissionData offeredMission;
-    
+
     [Tooltip("Is there a mission waiting to be accepted at base?")]
     public bool hasPendingOffer = false;
-    
+
     [Header("Mission Tracking")]
     [Tooltip("Next mission index to offer (starts at 1 for Mission01)")]
     public int nextMissionIndex = 1;
+
+    [Header("DEBUG — Random Timed Offers")]
+    [Tooltip("When true, ignores sequential order and offers a random available mission every intervalSeconds. Revert to false for production.")]
+    public bool debugRandomOffers = true;
+
+    [Tooltip("Seconds between random mission offers while debugRandomOffers is enabled.")]
+    public float debugOfferIntervalSeconds = 120f;
+
+    private Coroutine _debugOfferCoroutine;
     
     [Header("Events")]
     public UnityEvent<MissionData> onMissionOffered;
@@ -48,8 +60,54 @@ public class MissionOfferManager : MonoBehaviour
         {
             ChallengeManager.Instance.onChallengeCompleted.AddListener(OnChallengeCompleted);
         }
-        
+
         FindPlayer();
+
+        if (debugRandomOffers)
+            _debugOfferCoroutine = StartCoroutine(DebugRandomOfferLoop());
+    }
+
+    private void OnDestroy()
+    {
+        if (_debugOfferCoroutine != null)
+            StopCoroutine(_debugOfferCoroutine);
+    }
+
+    /// <summary>DEBUG: offers a random available mission every debugOfferIntervalSeconds.</summary>
+    private IEnumerator DebugRandomOfferLoop()
+    {
+        yield return new WaitForSeconds(debugOfferIntervalSeconds);
+
+        while (true)
+        {
+            if (!hasPendingOffer && (GameManager.Instance?.missionManager) != null)
+                OfferRandomMission();
+
+            yield return new WaitForSeconds(debugOfferIntervalSeconds);
+        }
+    }
+
+    /// <summary>DEBUG: picks a random mission from the available pool and offers it.</summary>
+    private void OfferRandomMission()
+    {
+        MissionManager mm = GameManager.Instance.missionManager;
+        int playerLevel   = GameManager.Instance.currentPlayerLevel;
+
+        List<MissionData> pool = mm.allMissions
+            .Where(m => m.levelRequirement <= playerLevel
+                     && !mm.completedMissions.Contains(m)
+                     && m != mm.activeMission
+                     && m != offeredMission)
+            .ToList();
+
+        if (pool.Count == 0)
+        {
+            Debug.Log("[MissionOfferManager] DEBUG: No missions available to offer.");
+            return;
+        }
+
+        MissionData pick = pool[Random.Range(0, pool.Count)];
+        OfferMission(pick);
     }
     
     private void Update()
@@ -79,11 +137,11 @@ public class MissionOfferManager : MonoBehaviour
     
     public void OnChallengeCompleted(ActiveChallenge challenge)
     {
-        if (hasPendingOffer)
-        {
-            return;
-        }
-        
+        if (hasPendingOffer) return;
+
+        // In debug mode the timed coroutine handles offers — don't also fire sequentially.
+        if (debugRandomOffers) return;
+
         OfferNextMission();
     }
     

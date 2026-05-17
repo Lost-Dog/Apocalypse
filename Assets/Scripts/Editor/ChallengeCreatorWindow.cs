@@ -17,7 +17,7 @@ public class ChallengeCreatorWindow : EditorWindow
     
     private int xpReward = 200;
     private int currencyReward = 100;
-    private LootManager.Rarity lootRarity = LootManager.Rarity.Uncommon;
+    private LootRarity lootRarity = LootRarity.Uncommon;
     private int lootCount = 1;
     
     private List<SpawnItemTemplate> spawnTemplates = new List<SpawnItemTemplate>();
@@ -127,7 +127,7 @@ public class ChallengeCreatorWindow : EditorWindow
     {
         xpReward = EditorGUILayout.IntField("XP Reward", xpReward);
         currencyReward = EditorGUILayout.IntField("Currency Reward", currencyReward);
-        lootRarity = (LootManager.Rarity)EditorGUILayout.EnumPopup("Guaranteed Loot Rarity", lootRarity);
+        lootRarity = (LootRarity)EditorGUILayout.EnumPopup("Guaranteed Loot Rarity", lootRarity);
         lootCount = EditorGUILayout.IntField("Guaranteed Loot Count", lootCount);
     }
     

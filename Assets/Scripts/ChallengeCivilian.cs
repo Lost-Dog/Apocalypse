@@ -1,18 +1,15 @@
-using GameCreator.Runtime.Common;
-using GameCreator.Runtime.Stats;
+using Invector;
 using UnityEngine;
 
 public class ChallengeCivilian : MonoBehaviour
 {
-    private const string HealthAttributeId = "health";
-
     private ActiveChallenge linkedChallenge;
     private bool isRescued;
     private bool isDead;
-    private Traits traits;
+    private vHealthController healthController;
 
     /// <summary>
-    /// Links this civilian to an active challenge and hooks into the GC2 Stats health attribute.
+    /// Links this civilian to an active challenge and hooks into Invector's health death event.
     /// </summary>
     public void Initialize(ActiveChallenge challenge)
     {
@@ -20,10 +17,10 @@ public class ChallengeCivilian : MonoBehaviour
         isRescued = false;
         isDead = false;
 
-        traits = GetComponent<Traits>();
-        if (traits != null)
+        healthController = GetComponent<vHealthController>();
+        if (healthController != null)
         {
-            traits.RuntimeAttributes.EventChange += OnAttributeChanged;
+            healthController.onDead.AddListener(OnCivilianDiedFromDamage);
         }
     }
 
@@ -45,15 +42,9 @@ public class ChallengeCivilian : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    private void OnAttributeChanged(IdString attributeId)
+    private void OnCivilianDiedFromDamage(GameObject deadObject)
     {
-        if (attributeId.String != HealthAttributeId) return;
-
-        RuntimeAttributeData health = traits.RuntimeAttributes.Get(HealthAttributeId);
-        if (health.Value <= health.MinValue)
-        {
-            OnCivilianDied();
-        }
+        OnCivilianDied();
     }
 
     private void OnCivilianDied()
@@ -79,9 +70,9 @@ public class ChallengeCivilian : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (traits != null)
+        if (healthController != null)
         {
-            traits.RuntimeAttributes.EventChange -= OnAttributeChanged;
+            healthController.onDead.RemoveListener(OnCivilianDiedFromDamage);
         }
 
         // Fallback: notify death if not rescued and not already processed

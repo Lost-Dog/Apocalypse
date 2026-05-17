@@ -80,13 +80,13 @@ public class LootUIManager : MonoBehaviour
         }
     }
     
-    private void OnItemCollected(LootItemData itemData, int gearScore, LootManager.Rarity rarity)
+    private void OnItemCollected(LootItemData itemData, int gearScore, LootRarity rarity)
     {
         ShowLootNotification(itemData, rarity, gearScore);
         LogLootEvent(itemData, rarity, gearScore);
     }
     
-    private void ShowLootNotification(LootItemData itemData, LootManager.Rarity rarity, int gearScore)
+    private void ShowLootNotification(LootItemData itemData, LootRarity rarity, int gearScore)
     {
         if (lootNotificationPanel != null)
         {
@@ -126,7 +126,7 @@ public class LootUIManager : MonoBehaviour
         }
     }
     
-    private void LogLootEvent(LootItemData itemData, LootManager.Rarity rarity, int gearScore)
+    private void LogLootEvent(LootItemData itemData, LootRarity rarity, int gearScore)
     {
         if (eventLogPanel == null || eventLogText == null) return;
         
@@ -150,41 +150,41 @@ public class LootUIManager : MonoBehaviour
         }
     }
     
-    private Color GetRarityColor(LootManager.Rarity rarity)
+    private Color GetRarityColor(LootRarity rarity)
     {
         if (lootManager != null)
         {
             return lootManager.GetRarityColor(rarity);
         }
-        
+
         switch (rarity)
         {
-            case LootManager.Rarity.Common:
+            case LootRarity.Common:
                 return Color.white;
-            case LootManager.Rarity.Uncommon:
+            case LootRarity.Uncommon:
                 return Color.green;
-            case LootManager.Rarity.Rare:
+            case LootRarity.Rare:
                 return Color.blue;
-            case LootManager.Rarity.Epic:
+            case LootRarity.Epic:
                 return new Color(0.6f, 0f, 1f);
-            case LootManager.Rarity.Legendary:
+            case LootRarity.Legendary:
                 return new Color(1f, 0.5f, 0f);
             default:
                 return Color.white;
         }
     }
-    
-    private string GetRarityDisplayName(LootManager.Rarity rarity)
+
+    private string GetRarityDisplayName(LootRarity rarity)
     {
         if (lootManager != null)
         {
             return lootManager.GetRarityName(rarity);
         }
-        
+
         return rarity.ToString();
     }
-    
-    public void ShowLootPickupFeedback(string itemName, LootManager.Rarity rarity)
+
+    public void ShowLootPickupFeedback(string itemName, LootRarity rarity)
     {
         if (eventLogPanel == null || eventLogText == null) return;
         

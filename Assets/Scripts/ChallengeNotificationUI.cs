@@ -3,7 +3,6 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 using System.Collections.Generic;
-using GameCreator.Runtime.Characters;
 
 public class ChallengeNotificationUI : MonoBehaviour
 {
@@ -94,15 +93,7 @@ public class ChallengeNotificationUI : MonoBehaviour
         {
             playerTransform = player.transform;
         }
-        else
-        {
-            Character character = Object.FindFirstObjectByType<Character>();
-            if (character != null)
-            {
-                playerTransform = character.transform;
-            }
-        }
-        
+
         if (playerTransform == null && showDistance)
         {
             Debug.LogWarning("ChallengeNotificationUI: Could not find player transform for distance calculation.");

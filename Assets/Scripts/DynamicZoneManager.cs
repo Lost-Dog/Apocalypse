@@ -80,7 +80,7 @@ public class DynamicZoneManager : MonoBehaviour
         int randomIndex = Random.Range(0, availableZones.Count);
         DynamicChallengeZone selectedZone = availableZones[randomIndex];
         
-        Debug.Log($"<color=cyan>Selected zone '{selectedZone.zoneName}' for {challengeType} challenge (from {availableZones.Count} available)</color>");
+        // Debug.Log($"<color=cyan>Selected zone '{selectedZone.zoneName}' for {challengeType} challenge (from {availableZones.Count} available)</color>");
         
         return selectedZone;
     }

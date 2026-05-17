@@ -191,7 +191,7 @@ public class ChallengeData : ScriptableObject
     [Header("Rewards")]
     public int baseXPReward = 200;
     public int baseCurrencyReward = 100;
-    public LootManager.Rarity guaranteedLootRarity = LootManager.Rarity.Common;
+    public LootRarity guaranteedLootRarity = LootRarity.Common;
     public int guaranteedLootCount = 1;
     public List<GameObject> bonusRewards = new List<GameObject>();
     
@@ -469,7 +469,7 @@ public class ChallengeData : ScriptableObject
     /// <summary>
     /// Get scaled loot rarity based on difficulty
     /// </summary>
-    public LootManager.Rarity GetScaledLootRarity(ChallengeDifficulty actualDifficulty)
+    public LootRarity GetScaledLootRarity(ChallengeDifficulty actualDifficulty)
     {
         if (!scaleRewards)
             return guaranteedLootRarity;
@@ -494,7 +494,7 @@ public class ChallengeData : ScriptableObject
         }
         
         int finalRarity = Mathf.Clamp((int)guaranteedLootRarity + rarityBonus, 0, 4);
-        return (LootManager.Rarity)finalRarity;
+        return (LootRarity)finalRarity;
     }
     
     /// <summary>
@@ -632,16 +632,15 @@ public class ChallengeData : ScriptableObject
     /// <summary>
     /// Get adjusted loot rarity including modifiers
     /// </summary>
-    public LootManager.Rarity GetTotalLootRarity(ChallengeDifficulty actualDifficulty)
+    public LootRarity GetTotalLootRarity(ChallengeDifficulty actualDifficulty)
     {
-        LootManager.Rarity baseRarity = GetScaledLootRarity(actualDifficulty);
+        LootRarity baseRarity = GetScaledLootRarity(actualDifficulty);
         
         if (HasModifier(ChallengeModifier.ModifierType.GuaranteedRareLoot))
         {
-            // Ensure minimum Rare quality
-            if ((int)baseRarity < (int)LootManager.Rarity.Rare)
+            if ((int)baseRarity < (int)LootRarity.Rare)
             {
-                baseRarity = LootManager.Rarity.Rare;
+                baseRarity = LootRarity.Rare;
             }
         }
         

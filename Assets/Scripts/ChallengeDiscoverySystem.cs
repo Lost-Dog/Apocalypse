@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using System.Collections.Generic;
 
 /// <summary>
@@ -10,7 +11,6 @@ public class ChallengeDiscoverySystem : MonoBehaviour
     [Header("Settings")]
     [SerializeField] private float discoveryCheckInterval = 1f;
     [SerializeField] private float discoveryRange = 100f;
-    [SerializeField] private KeyCode interactKey = KeyCode.E;
     
     [Header("UI")]
     [SerializeField] private ChallengePreviewUI previewUI;
@@ -44,7 +44,7 @@ public class ChallengeDiscoverySystem : MonoBehaviour
         }
         
         // Handle interaction input
-        if (nearestChallenge != null && Input.GetKeyDown(interactKey))
+        if (nearestChallenge != null && Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
         {
             OpenChallengePreview(nearestChallenge);
         }
@@ -139,7 +139,7 @@ public class ChallengeDiscoverySystem : MonoBehaviour
             if (promptText != null)
             {
                 string action = nearestChallenge.state == ActiveChallenge.ChallengeState.Failed ? "Retry" : "View";
-                promptText.text = $"[{interactKey}] {action} Challenge: {nearestChallenge.challengeData.challengeName}";
+                promptText.text = $"[E] {action} Challenge: {nearestChallenge.challengeData.challengeName}";
             }
         }
     }

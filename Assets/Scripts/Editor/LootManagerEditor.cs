@@ -7,14 +7,12 @@ public class LootManagerEditor : Editor
 {
     private SerializedProperty lootableItems;
     private SerializedProperty lootPools;
-    private SerializedProperty playerInventory;
     
     private bool showLootableItems = true;
     private bool showLootPools = true;
     private bool showGearScoreSettings = true;
     private bool showRarityChances = true;
     private bool showLevelScaling = true;
-    private bool showVisibilitySettings = true;
     private bool showDebugTools = false;
     
     private int previewLevel = 1;
@@ -23,7 +21,6 @@ public class LootManagerEditor : Editor
     {
         lootableItems = serializedObject.FindProperty("lootableItems");
         lootPools = serializedObject.FindProperty("lootPools");
-        playerInventory = serializedObject.FindProperty("playerInventory");
     }
     
     public override void OnInspectorGUI()
@@ -36,7 +33,7 @@ public class LootManagerEditor : Editor
         EditorGUILayout.LabelField("LOOT MANAGER", EditorStyles.boldLabel);
         EditorGUILayout.HelpBox(
             "Configure lootable items, drop chances, and gear score ranges.\n" +
-            "Items will persist in PlayerInventory between game sessions.",
+            "Items are added to the player's Invector vItemManager on pickup.",
             MessageType.Info
         );
         
@@ -89,11 +86,11 @@ public class LootManagerEditor : Editor
                 
                 var itemsByRarity = GetItemCountsByRarity(lootManager);
                 EditorGUILayout.LabelField(
-                    $"C:{itemsByRarity[LootManager.Rarity.Common]} " +
-                    $"U:{itemsByRarity[LootManager.Rarity.Uncommon]} " +
-                    $"R:{itemsByRarity[LootManager.Rarity.Rare]} " +
-                    $"E:{itemsByRarity[LootManager.Rarity.Epic]} " +
-                    $"L:{itemsByRarity[LootManager.Rarity.Legendary]}",
+                    $"C:{itemsByRarity[LootRarity.Common]} " +
+                    $"U:{itemsByRarity[LootRarity.Uncommon]} " +
+                    $"R:{itemsByRarity[LootRarity.Rare]} " +
+                    $"E:{itemsByRarity[LootRarity.Epic]} " +
+                    $"L:{itemsByRarity[LootRarity.Legendary]}",
                     EditorStyles.miniLabel
                 );
                 EditorGUILayout.EndHorizontal();
@@ -232,117 +229,9 @@ public class LootManagerEditor : Editor
         EditorGUILayout.EndFoldoutHeaderGroup();
         
         EditorGUILayout.Space(5);
-        
-        EditorGUILayout.PropertyField(playerInventory);
-        
+
         EditorGUILayout.Space(5);
-        
-        showVisibilitySettings = EditorGUILayout.BeginFoldoutHeaderGroup(showVisibilitySettings, "🎨 Loot Visibility Settings");
-        if (showVisibilitySettings)
-        {
-            EditorGUI.indentLevel++;
-            
-            EditorGUILayout.HelpBox(
-                "Control how visible spawned loot is to players.\\n" +
-                "Simple Outline = Low performance impact (recommended)\\n" +
-                "Advanced = Light beams, rings, particles (higher cost)\\n" +
-                "Compass Markers = Off-screen UI markers",
-                MessageType.Info
-            );
-            
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableVisibilityHelpers"), 
-                new GUIContent("Enable Visibility Helpers", "Master toggle for all visibility aids"));
-            
-            if (lootManager.enableVisibilityHelpers)
-            {
-                EditorGUI.indentLevel++;
-                
-                EditorGUILayout.Space(5);
-                
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("useSimpleOutline"), 
-                    new GUIContent("✓ Simple Outline Glow", "Emission glow on loot materials (RECOMMENDED)"));
-                
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("useAdvancedVisibility"), 
-                    new GUIContent("⚡ Advanced Visibility", "Light beams, ground rings, particles (performance cost)"));
-                
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("useCompassMarkers"), 
-                    new GUIContent("🧭 Compass Markers", "UI markers for off-screen loot"));
-                
-                EditorGUILayout.Space(10);
-                
-                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                GUIStyle headerStyle = new GUIStyle(EditorStyles.boldLabel);
-                headerStyle.fontSize = 12;
-                EditorGUILayout.LabelField("Current Configuration:", headerStyle);
-                
-                EditorGUILayout.Space(3);
-                
-                if (lootManager.useSimpleOutline && !lootManager.useAdvancedVisibility && !lootManager.useCompassMarkers)
-                {
-                    EditorGUILayout.LabelField("⭐ Mode: BALANCED (Recommended)", EditorStyles.boldLabel);
-                    EditorGUILayout.LabelField("  • Emission glow on all loot", EditorStyles.miniLabel);
-                    EditorGUILayout.LabelField("  • Color-coded by rarity", EditorStyles.miniLabel);
-                    EditorGUILayout.LabelField("  • Low performance impact", EditorStyles.miniLabel);
-                }
-                else if (lootManager.useAdvancedVisibility && lootManager.useSimpleOutline)
-                {
-                    EditorGUILayout.LabelField("🌟 Mode: HIGH VISIBILITY", EditorStyles.boldLabel);
-                    EditorGUILayout.LabelField("  • Light beams and ground rings", EditorStyles.miniLabel);
-                    EditorGUILayout.LabelField("  • Pulsing glow effects", EditorStyles.miniLabel);
-                    EditorGUILayout.LabelField("  • ⚠️ Higher performance cost", EditorStyles.miniLabel);
-                }
-                else if (!lootManager.useSimpleOutline && !lootManager.useAdvancedVisibility)
-                {
-                    EditorGUILayout.LabelField("Mode: Minimal", EditorStyles.boldLabel);
-                    EditorGUILayout.LabelField("  • No visual aids enabled", EditorStyles.miniLabel);
-                }
-                else
-                {
-                    EditorGUILayout.LabelField("Mode: Custom", EditorStyles.boldLabel);
-                    EditorGUILayout.LabelField("  • Custom configuration", EditorStyles.miniLabel);
-                }
-                
-                if (lootManager.useCompassMarkers)
-                {
-                    EditorGUILayout.LabelField("  • Off-screen markers enabled", EditorStyles.miniLabel);
-                }
-                
-                EditorGUILayout.Space(5);
-                
-                EditorGUILayout.LabelField("Rarity Colors:", EditorStyles.boldLabel);
-                DrawRarityColorLegend();
-                
-                EditorGUILayout.EndVertical();
-                
-                EditorGUILayout.Space(5);
-                
-                if (GUILayout.Button("📖 Open Visibility System Guide", GUILayout.Height(30)))
-                {
-                    OpenVisibilityGuide();
-                }
-                
-                EditorGUI.indentLevel--;
-            }
-            else
-            {
-                EditorGUILayout.HelpBox("⚠️ Visibility helpers are disabled. Loot may be hard to see!", MessageType.Warning);
-                
-                if (GUILayout.Button("Enable Default Visibility (Recommended)", GUILayout.Height(25)))
-                {
-                    lootManager.enableVisibilityHelpers = true;
-                    lootManager.useSimpleOutline = true;
-                    lootManager.useAdvancedVisibility = false;
-                    lootManager.useCompassMarkers = false;
-                    EditorUtility.SetDirty(lootManager);
-                }
-            }
-            
-            EditorGUI.indentLevel--;
-        }
-        EditorGUILayout.EndFoldoutHeaderGroup();
-        
-        EditorGUILayout.Space(5);
-        
+
         EditorGUILayout.PropertyField(serializedObject.FindProperty("onLootDropped"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("onItemCollected"));
         
@@ -363,12 +252,12 @@ public class LootManagerEditor : Editor
                 if (GUILayout.Button("Drop Common Loot"))
                 {
                     Vector3 pos = GetPlayerPosition();
-                    lootManager.DropLootWithRarity(pos, 1, LootManager.Rarity.Common);
+                    lootManager.DropLootWithRarity(pos, 1, LootRarity.Common);
                 }
                 if (GUILayout.Button("Drop Rare Loot"))
                 {
                     Vector3 pos = GetPlayerPosition();
-                    lootManager.DropLootWithRarity(pos, 10, LootManager.Rarity.Rare);
+                    lootManager.DropLootWithRarity(pos, 10, LootRarity.Rare);
                 }
                 EditorGUILayout.EndHorizontal();
                 
@@ -376,26 +265,16 @@ public class LootManagerEditor : Editor
                 if (GUILayout.Button("Drop Epic Loot"))
                 {
                     Vector3 pos = GetPlayerPosition();
-                    lootManager.DropLootWithRarity(pos, 20, LootManager.Rarity.Epic);
+                    lootManager.DropLootWithRarity(pos, 20, LootRarity.Epic);
                 }
                 if (GUILayout.Button("Drop Legendary Loot"))
                 {
                     Vector3 pos = GetPlayerPosition();
-                    lootManager.DropLootWithRarity(pos, 30, LootManager.Rarity.Legendary);
+                    lootManager.DropLootWithRarity(pos, 30, LootRarity.Legendary);
                 }
                 EditorGUILayout.EndHorizontal();
                 
                 EditorGUILayout.Space(5);
-                
-                if (lootManager.playerInventory != null)
-                {
-                    EditorGUILayout.LabelField($"Inventory: {lootManager.playerInventory.items.Count} items", EditorStyles.boldLabel);
-                    
-                    if (GUILayout.Button("View Inventory"))
-                    {
-                        Selection.activeObject = lootManager.playerInventory;
-                    }
-                }
             }
             
             EditorGUI.indentLevel--;
@@ -405,11 +284,11 @@ public class LootManagerEditor : Editor
         serializedObject.ApplyModifiedProperties();
     }
     
-    private System.Collections.Generic.Dictionary<LootManager.Rarity, int> GetItemCountsByRarity(LootManager manager)
+    private System.Collections.Generic.Dictionary<LootRarity, int> GetItemCountsByRarity(LootManager manager)
     {
-        var counts = new System.Collections.Generic.Dictionary<LootManager.Rarity, int>();
+        var counts = new System.Collections.Generic.Dictionary<LootRarity, int>();
         
-        foreach (LootManager.Rarity rarity in System.Enum.GetValues(typeof(LootManager.Rarity)))
+        foreach (LootRarity rarity in System.Enum.GetValues(typeof(LootRarity)))
         {
             counts[rarity] = manager.lootableItems.Count(item => item != null && item.rarity == rarity);
         }
@@ -490,38 +369,5 @@ public class LootManagerEditor : Editor
             "Rarity chances for different levels have been logged to Console.\n\n" +
             "Check the Console window to see the breakdown.", 
             "OK");
-    }
-    
-    private void DrawRarityColorLegend()
-    {
-        DrawColorLegendItem("Common", new Color(0.8f, 0.8f, 0.8f));
-        DrawColorLegendItem("Uncommon", new Color(0.1f, 0.9f, 0.1f));
-        DrawColorLegendItem("Rare", new Color(0.2f, 0.5f, 1f));
-        DrawColorLegendItem("Epic", new Color(0.64f, 0.21f, 0.93f));
-        DrawColorLegendItem("Legendary", new Color(1f, 0.5f, 0f));
-    }
-    
-    private void DrawColorLegendItem(string label, Color color)
-    {
-        EditorGUILayout.BeginHorizontal();
-        Rect colorRect = GUILayoutUtility.GetRect(12, 12, GUILayout.ExpandWidth(false));
-        EditorGUI.DrawRect(colorRect, color);
-        EditorGUILayout.LabelField(label, EditorStyles.miniLabel);
-        EditorGUILayout.EndHorizontal();
-    }
-    
-    private void OpenVisibilityGuide()
-    {
-        string guidePath = "Assets/Pages/Loot Visibility System Guide.md";
-        UnityEngine.Object guideAsset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(guidePath);
-        if (guideAsset != null)
-        {
-            Selection.activeObject = guideAsset;
-            EditorGUIUtility.PingObject(guideAsset);
-        }
-        else
-        {
-            Debug.LogWarning("Could not find Loot Visibility System Guide at: " + guidePath);
-        }
     }
 }

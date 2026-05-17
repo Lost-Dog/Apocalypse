@@ -1,3 +1,4 @@
+using Invector;
 using UnityEngine;
 using UnityEngine.Events;
 using System.Collections;
@@ -9,7 +10,7 @@ public class ControlZone : MonoBehaviour
     public float captureRadius = 15f;
     public float captureTime = 10f;
     public bool requireClearEnemies = true;
-    
+
     [Header("Visualization")]
     public Color neutralColor = Color.gray;
     public Color capturingColor = Color.yellow;
@@ -17,29 +18,29 @@ public class ControlZone : MonoBehaviour
     public Color enemyColor = Color.red;
     public GameObject visualIndicator;
     public MeshRenderer zoneRenderer;
-    
+
     [Header("Spawn Settings")]
     public int enemyCount = 5;
     public Transform[] enemySpawnPoints;
     public GameObject enemyPrefab;
-    
+
     [Header("Management")]
     public bool spawnOnStart = false;
     [Tooltip("If true, zone will only spawn when activated by ChallengeManager/ChallengeSpawner")]
     public bool requiresManagerActivation = true;
-    
+
     [Header("Status")]
     public bool isCaptured = false;
     public bool isCapturable = false;
     public float captureProgress = 0f;
-    
+
     [Header("Events")]
     public UnityEvent onCaptureStarted;
     public UnityEvent onCaptureProgress;
     public UnityEvent onCaptureCancelled;
     public UnityEvent onCaptureCompleted;
     public UnityEvent onEnemiesCleared;
-    
+
     private Transform player;
     private bool playerInZone = false;
     private int enemiesRemaining;
@@ -54,26 +55,26 @@ public class ControlZone : MonoBehaviour
             zoneMaterial = zoneRenderer.material;
             SetZoneColor(neutralColor);
         }
-        
+
         enemiesRemaining = enemyCount;
-        
+
         if (spawnOnStart)
         {
             SpawnEnemies();
         }
     }
-    
+
     private void OnEnable()
     {
         if (!Application.isPlaying)
             return;
-            
+
         if (requiresManagerActivation)
         {
             Debug.Log($"<color=cyan>[ControlZone] '{zoneName}' enabled - waiting for manager activation (requiresManagerActivation=true)</color>");
             return;
         }
-        
+
         if (!hasSpawned && spawnOnStart)
         {
             Debug.Log($"<color=yellow>[ControlZone] '{zoneName}' spawning enemies on enable (spawnOnStart=true)</color>");
@@ -85,9 +86,9 @@ public class ControlZone : MonoBehaviour
     {
         if (isCaptured)
             return;
-        
+
         FindPlayer();
-        
+
         if (playerInZone && isCapturable)
         {
             CaptureZone();
@@ -118,10 +119,10 @@ public class ControlZone : MonoBehaviour
             SetZoneColor(capturingColor);
             Debug.Log($"Started capturing {zoneName}");
         }
-        
+
         captureProgress += Time.deltaTime / captureTime;
         onCaptureProgress?.Invoke();
-        
+
         if (captureProgress >= 1f)
         {
             CompleteCaptureZone();
@@ -132,7 +133,7 @@ public class ControlZone : MonoBehaviour
     {
         captureProgress -= Time.deltaTime / (captureTime * 0.5f);
         captureProgress = Mathf.Max(0f, captureProgress);
-        
+
         if (captureProgress <= 0f)
         {
             onCaptureCancelled?.Invoke();
@@ -147,17 +148,17 @@ public class ControlZone : MonoBehaviour
         captureProgress = 1f;
         SetZoneColor(capturedColor);
         onCaptureCompleted?.Invoke();
-        
+
         if (linkedChallenge != null)
         {
             linkedChallenge.currentProgress++;
-            
+
             if (ChallengeManager.Instance != null)
             {
                 ChallengeManager.Instance.UpdateChallengeProgress(linkedChallenge, 0);
             }
         }
-        
+
         Debug.Log($"{zoneName} captured!");
     }
 
@@ -167,7 +168,7 @@ public class ControlZone : MonoBehaviour
         {
             return;
         }
-        
+
         if (enemyPrefab == null || enemySpawnPoints == null || enemySpawnPoints.Length == 0)
         {
             isCapturable = true;
@@ -175,9 +176,9 @@ public class ControlZone : MonoBehaviour
             hasSpawned = true;
             return;
         }
-        
+
         int spawnCount = Mathf.Min(enemyCount, enemySpawnPoints.Length);
-        
+
         for (int i = 0; i < spawnCount; i++)
         {
             if (enemySpawnPoints[i] != null)
@@ -185,23 +186,18 @@ public class ControlZone : MonoBehaviour
                 GameObject enemy = Instantiate(enemyPrefab, enemySpawnPoints[i].position, enemySpawnPoints[i].rotation);
                 enemy.SetActive(true);
 
-                if (enemy != null)
+                vHealthController healthController = enemy.GetComponent<vHealthController>();
+                if (healthController != null)
                 {
-                    GameCreator.Runtime.Characters.Character character =
-                        enemy.GetComponent<GameCreator.Runtime.Characters.Character>();
-
-                    if (character != null)
-                    {
-                        character.EventDie += () => OnEnemyKilled();
-                    }
+                    healthController.onDead.AddListener((_) => OnEnemyKilled());
                 }
             }
         }
-        
+
         SetZoneColor(enemyColor);
         hasSpawned = true;
     }
-    
+
     public void ResetZone()
     {
         isCaptured = false;
@@ -215,7 +211,7 @@ public class ControlZone : MonoBehaviour
     public void OnEnemyKilled()
     {
         enemiesRemaining--;
-        
+
         if (enemiesRemaining <= 0)
         {
             isCapturable = true;
@@ -237,7 +233,7 @@ public class ControlZone : MonoBehaviour
     {
         linkedChallenge = challenge;
     }
-    
+
     public void ActivateAndSpawn()
     {
         if (hasSpawned)
@@ -245,7 +241,7 @@ public class ControlZone : MonoBehaviour
             Debug.LogWarning($"<color=orange>[ControlZone] '{zoneName}' already spawned, skipping...</color>");
             return;
         }
-        
+
         Debug.Log($"<color=green>[ControlZone] '{zoneName}' activated by manager - spawning enemies!</color>");
         gameObject.SetActive(true);
         SpawnEnemies();
@@ -271,7 +267,7 @@ public class ControlZone : MonoBehaviour
     {
         Gizmos.color = isCaptured ? capturedColor : (isCapturable ? capturingColor : enemyColor);
         Gizmos.DrawWireSphere(transform.position, captureRadius);
-        
+
         Gizmos.color = Color.yellow;
         if (enemySpawnPoints != null)
         {

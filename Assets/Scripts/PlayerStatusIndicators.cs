@@ -1,8 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using GameCreator.Runtime.Common;
-using GameCreator.Runtime.Stats;
 
 public class PlayerStatusIndicators : MonoBehaviour
 {
@@ -27,14 +25,15 @@ public class PlayerStatusIndicators : MonoBehaviour
     public StatusIndicator hungerIndicator;
     public StatusIndicator thirstIndicator;
     
-    private const string HealthAttributeId = "health";
-
     [Header("Auto-Find References")]
     public bool autoFindReferences = true;
     public SurvivalManager survivalManager;
     public PlayerInfectionDisplay infectionDisplay;
 
-    private Traits playerTraits;
+    [Header("Player Provider")]
+    [Tooltip("Assign any IPlayerProvider implementation (e.g. InvectorPlayerProvider). Auto-found if left empty.")]
+    [SerializeField] private MonoBehaviour playerProviderObject;
+    private IPlayerProvider playerProvider;
     
     [Header("Health Thresholds")]
     [Range(0f, 1f)] public float healthWarningThreshold = 0.5f;
@@ -110,12 +109,24 @@ public class PlayerStatusIndicators : MonoBehaviour
     
     private void FindReferences()
     {
-        if (playerTraits == null)
+        // Resolve IPlayerProvider — prefer the serialized field, then search the scene.
+        if (playerProvider == null)
+            playerProvider = playerProviderObject as IPlayerProvider;
+
+        if (playerProvider == null)
         {
-            GameObject player = ShortcutPlayer.Instance;
-            if (player != null)
-                playerTraits = player.GetComponent<Traits>();
+            foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+            {
+                if (mb is IPlayerProvider provider)
+                {
+                    playerProvider = provider;
+                    break;
+                }
+            }
         }
+
+        if (playerProvider == null)
+            Debug.LogWarning("[PlayerStatusIndicators] No IPlayerProvider found — health indicator disabled.");
 
         if (survivalManager == null)
             survivalManager = FindFirstObjectByType<SurvivalManager>();
@@ -171,15 +182,11 @@ public class PlayerStatusIndicators : MonoBehaviour
     
     private void UpdateHealthIndicator()
     {
-        if (playerTraits == null || healthIndicator.indicatorObject == null) return;
+        if (playerProvider == null || healthIndicator.indicatorObject == null) return;
 
-        float healthPercentage = 1f;
-        try
-        {
-            RuntimeAttributeData health = playerTraits.RuntimeAttributes.Get(HealthAttributeId);
-            healthPercentage = (float)(health.Value / health.MaxValue);
-        }
-        catch (System.Exception) { return; }
+        float healthPercentage = playerProvider.MaxHealth > 0f
+            ? playerProvider.Health / playerProvider.MaxHealth
+            : 1f;
 
         if (healthPercentage <= healthCriticalThreshold)
         {

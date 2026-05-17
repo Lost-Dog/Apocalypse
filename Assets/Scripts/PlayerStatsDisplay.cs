@@ -1,22 +1,22 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using GameCreator.Runtime.Common;
-using GameCreator.Runtime.Stats;
 
 /// <summary>
-/// Aggregates all player stat displays. Health reads from GC2 Traits; survival stats from SurvivalManager.
+/// Aggregates all player stat displays.
+/// Health and shield are read through IPlayerProvider; survival stats come from SurvivalManager.
 /// </summary>
 public class PlayerStatsDisplay : MonoBehaviour
 {
-    private const string HealthAttributeId = "health";
-
     [Header("Manager References")]
-    public SurvivalManager survivalManager;
+    public SurvivalManager   survivalManager;
     public ProgressionManager progressionManager;
+    [Tooltip("Assign any IPlayerProvider implementation.")]
+    public MonoBehaviour playerProviderObject;
 
     [Header("UI Text Elements")]
     public TextMeshProUGUI healthText;
+    public TextMeshProUGUI shieldText;
     public TextMeshProUGUI xpText;
     public TextMeshProUGUI levelText;
     public TextMeshProUGUI temperatureText;
@@ -27,6 +27,7 @@ public class PlayerStatsDisplay : MonoBehaviour
 
     [Header("UI Slider Elements (Optional)")]
     public Slider healthSlider;
+    public Slider shieldSlider;
     public Slider xpSlider;
     public Slider temperatureSlider;
     public Slider staminaSlider;
@@ -36,15 +37,15 @@ public class PlayerStatsDisplay : MonoBehaviour
 
     [Header("Display Settings")]
     public bool showTemperaturePrefix = false;
-    public bool showStaminaPrefix = false;
-    public bool showInfectionPrefix = false;
-    public bool showHungerPrefix = false;
-    public bool showThirstPrefix = false;
+    public bool showStaminaPrefix     = false;
+    public bool showInfectionPrefix   = false;
+    public bool showHungerPrefix      = false;
+    public bool showThirstPrefix      = false;
 
     [Header("Auto-Find References")]
     public bool autoFindReferences = true;
 
-    private Traits playerTraits;
+    private IPlayerProvider playerProvider;
 
     private void Start()
     {
@@ -59,31 +60,24 @@ public class PlayerStatsDisplay : MonoBehaviour
         if (survivalManager == null)
             survivalManager = SurvivalManager.Instance ?? FindFirstObjectByType<SurvivalManager>();
 
-        if (playerTraits == null)
-        {
-            GameObject player = ShortcutPlayer.Instance;
-            if (player != null)
-                playerTraits = player.GetComponent<Traits>();
-
-            if (playerTraits == null)
-                Debug.LogWarning("[PlayerStatsDisplay] Could not find player Traits component!");
-        }
-
         if (progressionManager == null)
             progressionManager = FindFirstObjectByType<ProgressionManager>();
+
+        playerProvider = playerProviderObject as IPlayerProvider;
+
+        if (playerProvider == null)
+            playerProvider = FindAnyPlayerProvider();
+
+        if (playerProvider == null)
+            Debug.LogWarning("[PlayerStatsDisplay] No IPlayerProvider found — health and shield will not update.");
     }
 
     private void InitializeSliders()
     {
-        if (healthSlider != null && playerTraits != null)
+        if (playerProvider != null)
         {
-            try
-            {
-                RuntimeAttributeData health = playerTraits.RuntimeAttributes.Get(HealthAttributeId);
-                healthSlider.maxValue = (float)health.MaxValue;
-                healthSlider.value    = (float)health.Value;
-            }
-            catch (System.Exception) { }
+            SetSlider(healthSlider, 0f, playerProvider.MaxHealth, playerProvider.Health);
+            SetSlider(shieldSlider, 0f, playerProvider.MaxShield, playerProvider.Shield);
         }
 
         if (xpSlider != null)
@@ -105,6 +99,7 @@ public class PlayerStatsDisplay : MonoBehaviour
     private void Update()
     {
         UpdateHealthDisplay();
+        UpdateShieldDisplay();
         UpdateXPDisplay();
         UpdateTemperatureDisplay();
         UpdateStaminaDisplay();
@@ -115,24 +110,36 @@ public class PlayerStatsDisplay : MonoBehaviour
 
     private void UpdateHealthDisplay()
     {
-        if (playerTraits == null) return;
+        if (playerProvider == null) return;
 
-        try
+        float value    = playerProvider.Health;
+        float maxValue = playerProvider.MaxHealth;
+
+        if (healthText != null)
+            healthText.text = $"{Mathf.RoundToInt(value)}/{Mathf.RoundToInt(maxValue)}";
+
+        if (healthSlider != null)
         {
-            RuntimeAttributeData health = playerTraits.RuntimeAttributes.Get(HealthAttributeId);
-            float value    = (float)health.Value;
-            float maxValue = (float)health.MaxValue;
-
-            if (healthText != null)
-                healthText.text = $"{Mathf.RoundToInt(value)}/{Mathf.RoundToInt(maxValue)}";
-
-            if (healthSlider != null)
-            {
-                healthSlider.maxValue = maxValue;
-                healthSlider.value    = value;
-            }
+            healthSlider.maxValue = maxValue;
+            healthSlider.value    = value;
         }
-        catch (System.Exception) { }
+    }
+
+    private void UpdateShieldDisplay()
+    {
+        if (playerProvider == null) return;
+
+        float value    = playerProvider.Shield;
+        float maxValue = playerProvider.MaxShield;
+
+        if (shieldText != null)
+            shieldText.text = $"{Mathf.RoundToInt(value)}/{Mathf.RoundToInt(maxValue)}";
+
+        if (shieldSlider != null)
+        {
+            shieldSlider.maxValue = maxValue;
+            shieldSlider.value    = value;
+        }
     }
 
     private void UpdateXPDisplay()
@@ -150,10 +157,9 @@ public class PlayerStatsDisplay : MonoBehaviour
 
         if (temperatureText != null)
         {
-            string status  = survivalManager.GetTemperatureStatus();
             string display = showTemperaturePrefix
-                ? $"Temp: {survivalManager.currentTemperature:F1}°C ({status})"
-                : $"{survivalManager.currentTemperature:F1}°C ({status})";
+                ? $"Temp: {survivalManager.currentTemperature:F1}°C"
+                : $"{survivalManager.currentTemperature:F1}°C";
             temperatureText.text = display;
         }
 
@@ -181,10 +187,9 @@ public class PlayerStatsDisplay : MonoBehaviour
 
         if (infectionText != null)
         {
-            string status  = survivalManager.GetInfectionStatus();
             string display = showInfectionPrefix
-                ? $"Infection: {Mathf.RoundToInt(survivalManager.currentInfection)}% ({status})"
-                : $"{Mathf.RoundToInt(survivalManager.currentInfection)}% ({status})";
+                ? $"Infection: {Mathf.RoundToInt(survivalManager.currentInfection)}%"
+                : $"{Mathf.RoundToInt(survivalManager.currentInfection)}%";
             infectionText.text = display;
         }
 
@@ -197,10 +202,9 @@ public class PlayerStatsDisplay : MonoBehaviour
 
         if (hungerText != null)
         {
-            string status  = survivalManager.GetHungerStatus();
             string display = showHungerPrefix
-                ? $"Hunger: {Mathf.RoundToInt(survivalManager.currentHunger)}% ({status})"
-                : $"{Mathf.RoundToInt(survivalManager.currentHunger)}% ({status})";
+                ? $"Hunger: {Mathf.RoundToInt(survivalManager.currentHunger)}%"
+                : $"{Mathf.RoundToInt(survivalManager.currentHunger)}%";
             hungerText.text  = display;
             hungerText.color = survivalManager.IsStarving ? Color.red
                              : survivalManager.IsHungry   ? Color.yellow
@@ -216,10 +220,9 @@ public class PlayerStatsDisplay : MonoBehaviour
 
         if (thirstText != null)
         {
-            string status  = survivalManager.GetThirstStatus();
             string display = showThirstPrefix
-                ? $"Thirst: {Mathf.RoundToInt(survivalManager.currentThirst)}% ({status})"
-                : $"{Mathf.RoundToInt(survivalManager.currentThirst)}% ({status})";
+                ? $"Thirst: {Mathf.RoundToInt(survivalManager.currentThirst)}%"
+                : $"{Mathf.RoundToInt(survivalManager.currentThirst)}%";
             thirstText.text  = display;
             thirstText.color = survivalManager.IsDehydrated ? Color.red
                              : survivalManager.IsThirsty    ? new Color(0.3f, 0.7f, 1f)
@@ -230,6 +233,16 @@ public class PlayerStatsDisplay : MonoBehaviour
     }
 
     // HELPERS -------------------------------------------------------------------------------------
+
+    private static IPlayerProvider FindAnyPlayerProvider()
+    {
+        foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+        {
+            if (mb is IPlayerProvider provider)
+                return provider;
+        }
+        return null;
+    }
 
     private static void SetSlider(Slider slider, float min, float max, float value)
     {

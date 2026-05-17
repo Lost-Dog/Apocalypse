@@ -200,7 +200,7 @@ public class LootItemDatabaseTool : EditorWindow
         
         item.itemID = EditorGUILayout.TextField("Item ID", item.itemID);
         item.itemName = EditorGUILayout.TextField("Item Name", item.itemName);
-        item.rarity = (LootManager.Rarity)EditorGUILayout.EnumPopup("Rarity", item.rarity);
+        item.rarity = (LootRarity)EditorGUILayout.EnumPopup("Rarity", item.rarity);
         item.itemType = (LootItemData.ItemType)EditorGUILayout.EnumPopup("Type", item.itemType);
         item.baseGearScore = EditorGUILayout.IntField("Base Gear Score", item.baseGearScore);
         item.icon = (Sprite)EditorGUILayout.ObjectField("Icon", item.icon, typeof(Sprite), false);
@@ -249,7 +249,7 @@ public class LootItemDatabaseTool : EditorWindow
         
         LootItemData newItem = ScriptableObject.CreateInstance<LootItemData>();
         newItem.itemName = "New Item";
-        newItem.rarity = LootManager.Rarity.Common;
+        newItem.rarity = LootRarity.Common;
         newItem.itemType = LootItemData.ItemType.Weapon;
         newItem.baseGearScore = 100;
         newItem.description = "Item description";
@@ -304,7 +304,7 @@ public class LootItemDatabaseTool : EditorWindow
             case 0:
                 item.itemName = "Standard Pistol";
                 item.itemType = LootItemData.ItemType.Weapon;
-                item.rarity = LootManager.Rarity.Common;
+                item.rarity = LootRarity.Common;
                 item.baseGearScore = 100;
                 item.description = "Basic sidearm for close combat";
                 break;
@@ -312,7 +312,7 @@ public class LootItemDatabaseTool : EditorWindow
             case 1:
                 item.itemName = "Assault Rifle";
                 item.itemType = LootItemData.ItemType.Weapon;
-                item.rarity = LootManager.Rarity.Uncommon;
+                item.rarity = LootRarity.Uncommon;
                 item.baseGearScore = 150;
                 item.description = "Military-grade rifle for medium range";
                 break;
@@ -320,7 +320,7 @@ public class LootItemDatabaseTool : EditorWindow
             case 2:
                 item.itemName = "Combat Shotgun";
                 item.itemType = LootItemData.ItemType.Weapon;
-                item.rarity = LootManager.Rarity.Rare;
+                item.rarity = LootRarity.Rare;
                 item.baseGearScore = 200;
                 item.description = "High damage close-quarters weapon";
                 break;
@@ -328,7 +328,7 @@ public class LootItemDatabaseTool : EditorWindow
             case 3:
                 item.itemName = "Marksman Rifle";
                 item.itemType = LootItemData.ItemType.Weapon;
-                item.rarity = LootManager.Rarity.Epic;
+                item.rarity = LootRarity.Epic;
                 item.baseGearScore = 250;
                 item.description = "Precision long-range weapon";
                 break;
@@ -336,7 +336,7 @@ public class LootItemDatabaseTool : EditorWindow
             case 4:
                 item.itemName = "Tactical Vest";
                 item.itemType = LootItemData.ItemType.Armor;
-                item.rarity = LootManager.Rarity.Uncommon;
+                item.rarity = LootRarity.Uncommon;
                 item.baseGearScore = 150;
                 item.description = "Protective body armor";
                 break;
@@ -344,7 +344,7 @@ public class LootItemDatabaseTool : EditorWindow
             case 5:
                 item.itemName = "Combat Helmet";
                 item.itemType = LootItemData.ItemType.Armor;
-                item.rarity = LootManager.Rarity.Rare;
+                item.rarity = LootRarity.Rare;
                 item.baseGearScore = 200;
                 item.description = "Head protection gear";
                 break;
@@ -352,7 +352,7 @@ public class LootItemDatabaseTool : EditorWindow
             case 6:
                 item.itemName = "Field Backpack";
                 item.itemType = LootItemData.ItemType.Gear;
-                item.rarity = LootManager.Rarity.Common;
+                item.rarity = LootRarity.Common;
                 item.baseGearScore = 100;
                 item.description = "Increases carrying capacity";
                 break;
@@ -360,7 +360,7 @@ public class LootItemDatabaseTool : EditorWindow
             case 7:
                 item.itemName = "Tactical Gloves";
                 item.itemType = LootItemData.ItemType.Gear;
-                item.rarity = LootManager.Rarity.Uncommon;
+                item.rarity = LootRarity.Uncommon;
                 item.baseGearScore = 150;
                 item.description = "Improves weapon handling";
                 break;
@@ -368,7 +368,7 @@ public class LootItemDatabaseTool : EditorWindow
             case 8:
                 item.itemName = "First Aid Kit";
                 item.itemType = LootItemData.ItemType.Consumable;
-                item.rarity = LootManager.Rarity.Common;
+                item.rarity = LootRarity.Common;
                 item.baseGearScore = 50;
                 item.description = "Restores health";
                 break;
@@ -376,7 +376,7 @@ public class LootItemDatabaseTool : EditorWindow
             case 9:
                 item.itemName = "Weapon Parts";
                 item.itemType = LootItemData.ItemType.Material;
-                item.rarity = LootManager.Rarity.Common;
+                item.rarity = LootRarity.Common;
                 item.baseGearScore = 50;
                 item.description = "Used for crafting and upgrades";
                 break;
@@ -384,7 +384,7 @@ public class LootItemDatabaseTool : EditorWindow
             case 10:
                 item.itemName = "Division Tech";
                 item.itemType = LootItemData.ItemType.Collectible;
-                item.rarity = LootManager.Rarity.Legendary;
+                item.rarity = LootRarity.Legendary;
                 item.baseGearScore = 500;
                 item.description = "Rare high-end crafting material";
                 break;
@@ -425,19 +425,19 @@ public class LootItemDatabaseTool : EditorWindow
         Debug.Log("Cleared all loot items");
     }
     
-    private Color GetRarityColor(LootManager.Rarity rarity)
+    private Color GetRarityColor(LootRarity rarity)
     {
         switch (rarity)
         {
-            case LootManager.Rarity.Common:
+            case LootRarity.Common:
                 return Color.white;
-            case LootManager.Rarity.Uncommon:
+            case LootRarity.Uncommon:
                 return Color.green;
-            case LootManager.Rarity.Rare:
+            case LootRarity.Rare:
                 return Color.blue;
-            case LootManager.Rarity.Epic:
+            case LootRarity.Epic:
                 return new Color(0.6f, 0f, 1f);
-            case LootManager.Rarity.Legendary:
+            case LootRarity.Legendary:
                 return new Color(1f, 0.5f, 0f);
             default:
                 return Color.white;

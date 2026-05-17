@@ -1,8 +1,8 @@
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections.Generic;
+using Invector;
 using Lovatto.MiniMap;
-using GameCreator.Runtime.Stats;
 
 public class ChallengeSpawner : MonoBehaviour
 {
@@ -1066,21 +1066,19 @@ public class ChallengeSpawner : MonoBehaviour
         if (enemy == null || challenge == null)
             return;
         
-        Traits traits = enemy.GetComponent<Traits>();
-        if (traits != null)
+        vHealthController healthController = enemy.GetComponent<vHealthController>();
+        if (healthController != null)
         {
-            try
+            float originalHealth = healthController.currentHealth;
+            float scaledHealth   = originalHealth * challenge.enemyHealthMultiplier;
+            // TakeDamage reduces health; we reduce toward the scaled value if lower.
+            float delta = originalHealth - scaledHealth;
+            if (delta > 0f)
             {
-                RuntimeAttributeData health = traits.RuntimeAttributes.Get("health");
-                float originalHealth = (float)health.Value;
-                float scaledHealth = originalHealth * challenge.enemyHealthMultiplier;
-                health.Value = scaledHealth;
-                Debug.Log($"Enemy scaled: Health {originalHealth:F0} → {scaledHealth:F0} (x{challenge.enemyHealthMultiplier:F2})");
+                var dmg = new vDamage(Mathf.RoundToInt(delta));
+                healthController.TakeDamage(dmg);
             }
-            catch (System.Exception e)
-            {
-                Debug.LogWarning($"{enemy.name}: ChallengeSpawner could not scale health — {e.Message}");
-            }
+            Debug.Log($"Enemy scaled: Health {originalHealth:F0} → {scaledHealth:F0} (x{challenge.enemyHealthMultiplier:F2})");
         }
         
         // Apply damage scaling

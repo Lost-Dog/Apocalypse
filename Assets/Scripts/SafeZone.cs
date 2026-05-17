@@ -1,25 +1,24 @@
+using Invector;
+using Invector.vCharacterController;
+using Invector.vShooter;
+using Invector.vItemManager;
 using UnityEngine;
 using UnityEngine.Events;
-using GameCreator.Runtime.Characters;
-using GameCreator.Runtime.Stats;
-using GameCreator.Runtime.Shooter;
 
 /// <summary>
 /// Trigger zone that restores all player stats and replenishes ammo on entry.
-/// Health is restored via GC2 Traits; ammo via ShooterMunition; survival stats via SurvivalManager.
+/// Health is restored via Invector's vHealthController; ammo via vAmmoManager; survival stats via SurvivalManager.
 /// </summary>
 public class SafeZone : MonoBehaviour
 {
-    private const string HealthAttributeId = "health";
-
     [Header("Safe Zone Settings")]
     public string safeZoneName = "Safe Zone";
-    public bool restoreHealth       = true;
-    public bool restoreStamina      = true;
-    public bool cureInfection       = true;
+    public bool restoreHealth        = true;
+    public bool restoreStamina       = true;
+    public bool cureInfection        = true;
     public bool normalizeTemperature = true;
-    public bool restoreHunger       = true;
-    public bool restoreThirst       = true;
+    public bool restoreHunger        = true;
+    public bool restoreThirst        = true;
 
     [Header("Restoration Settings")]
     [Tooltip("Duration to fully replenish all stats (in seconds)")]
@@ -61,8 +60,9 @@ public class SafeZone : MonoBehaviour
     public UnityEvent onRestoreComplete;
 
     // Runtime state
-    private Traits playerTraits;
-    private Character playerCharacter;
+    private vHealthController playerHealth;
+    private vThirdPersonController playerController;
+    private vAmmoManager ammoManager;
     private SurvivalManager survivalManager;
     private bool playerInZone;
     private float timeInZone;
@@ -74,7 +74,7 @@ public class SafeZone : MonoBehaviour
     private bool hasReplenishedAmmo;
 
     private float restorationProgress;
-    private double startHealth;
+    private float startHealth;
     private float startStamina;
     private float startTemperature;
     private float startInfection;
@@ -147,17 +147,18 @@ public class SafeZone : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
 
-        playerCharacter = other.GetComponent<Character>();
-        playerTraits    = other.GetComponent<Traits>();
-        survivalManager = SurvivalManager.Instance ?? FindFirstObjectByType<SurvivalManager>();
+        playerHealth     = other.GetComponent<vHealthController>();
+        playerController = other.GetComponent<vThirdPersonController>();
+        ammoManager      = other.GetComponent<vAmmoManager>();
+        survivalManager  = SurvivalManager.Instance ?? FindFirstObjectByType<SurvivalManager>();
 
-        if (playerTraits == null)
+        if (playerHealth == null)
         {
-            Debug.LogWarning($"[SafeZone] Player has no Traits component — health restore disabled.");
+            Debug.LogWarning($"[SafeZone] Player has no vHealthController — health restore disabled.");
         }
 
-        playerInZone      = true;
-        timeInZone        = 0f;
+        playerInZone       = true;
+        timeInZone         = 0f;
         lastPlayerPosition = other.transform.position;
         hasReplenishedAmmo = false;
 
@@ -199,19 +200,16 @@ public class SafeZone : MonoBehaviour
 
         restorationProgress = 0f;
 
-        if (playerTraits != null)
-        {
-            try { startHealth = playerTraits.RuntimeAttributes.Get(HealthAttributeId).Value; }
-            catch (System.Exception) { }
-        }
+        if (playerHealth != null)
+            startHealth = playerHealth.currentHealth;
 
         if (survivalManager != null)
         {
-            startStamina    = survivalManager.currentStamina;
+            startStamina     = survivalManager.currentStamina;
             startTemperature = survivalManager.currentTemperature;
-            startInfection  = survivalManager.currentInfection;
-            startHunger     = survivalManager.currentHunger;
-            startThirst     = survivalManager.currentThirst;
+            startInfection   = survivalManager.currentInfection;
+            startHunger      = survivalManager.currentHunger;
+            startThirst      = survivalManager.currentThirst;
         }
 
         if (replenishAmmo && !hasReplenishedAmmo)
@@ -255,33 +253,27 @@ public class SafeZone : MonoBehaviour
 
         onPlayerExit.Invoke();
 
-        playerTraits    = null;
-        playerCharacter = null;
-        survivalManager = null;
+        playerHealth     = null;
+        playerController = null;
+        ammoManager      = null;
+        survivalManager  = null;
     }
 
     private void ReplenishAmmo(GameObject playerGO)
     {
-        // ShooterMunition is a plain C# class, not a MonoBehaviour — it lives inside
-        // Character.Combat and must be accessed through the GC2 Combat API.
-        if (playerCharacter == null) return;
+        if (ammoManager == null) return;
 
-        IMunition[] munitions = playerCharacter.Combat.Munitions;
         int count = 0;
-
-        foreach (IMunition munitionEntry in munitions)
+        foreach (vAmmo ammo in ammoManager.ammos)
         {
-            if (munitionEntry.Value is ShooterMunition shooterMunition)
-            {
-                shooterMunition.Total += roundsToAddPerWeapon;
-                count++;
-            }
+            ammoManager.AddAmmo(ammo.ammoID, roundsToAddPerWeapon);
+            count++;
         }
 
         if (count > 0)
-            Debug.Log($"<color=cyan>[SafeZone] Replenished {count} munition type(s) (+{roundsToAddPerWeapon} each)</color>");
+            Debug.Log($"<color=cyan>[SafeZone] Replenished {count} ammo type(s) (+{roundsToAddPerWeapon} rounds each)</color>");
         else
-            Debug.Log("[SafeZone] No ShooterMunition entries found in player Combat.");
+            Debug.Log("[SafeZone] No ammo entries found in vAmmoManager.");
     }
 
     private void RestorePlayerStats()
@@ -290,22 +282,19 @@ public class SafeZone : MonoBehaviour
         float t = useSmoothTransition ? Mathf.SmoothStep(0f, 1f, restorationProgress) : restorationProgress;
         bool isRestoring = false;
 
-        // Health via Traits
-        if (restoreHealth && playerTraits != null)
+        // Health via Invector vHealthController
+        if (restoreHealth && playerHealth != null && !playerHealth.isDead)
         {
-            try
+            if (playerHealth.currentHealth < playerHealth.maxHealth)
             {
-                RuntimeAttributeData health = playerTraits.RuntimeAttributes.Get(HealthAttributeId);
-                if (health.Value < health.MaxValue)
+                float targetHealth = Mathf.Lerp(startHealth, playerHealth.maxHealth, t);
+                float delta = targetHealth - playerHealth.currentHealth;
+                if (delta > 0f)
                 {
-                    health.Value = System.Math.Min(
-                        startHealth + (health.MaxValue - startHealth) * t,
-                        health.MaxValue
-                    );
+                    playerHealth.AddHealth(Mathf.RoundToInt(delta));
                     isRestoring = true;
                 }
             }
-            catch (System.Exception) { }
         }
 
         if (survivalManager != null)

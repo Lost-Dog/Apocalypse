@@ -1,90 +1,117 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using GameCreator.Runtime.Common;
-using GameCreator.Runtime.Stats;
 
 /// <summary>
-/// Displays the player's health attribute from the GC2 Traits component.
+/// Displays the player's health using IPlayerProvider.
+/// Subscribes to IPlayerProvider.OnHealthChanged for immediate updates and
+/// avoids polling in Update. Supports any IPlayerProvider implementation —
+/// assign via Inspector or let auto-find pick it up.
 /// </summary>
 public class PlayerHealthDisplay : MonoBehaviour
 {
-    private const string HealthAttributeId = "health";
-
     [Header("References")]
     public TextMeshProUGUI healthText;
-    public Slider healthSlider;
+    public Slider          healthSlider;
+    [Tooltip("Assign any IPlayerProvider implementation.")]
+    public MonoBehaviour playerProviderObject;
 
     [Header("Display Settings")]
-    public bool showAsPercentage = false;
-    public bool showFraction = true;
-    public bool showPrefix = false;
-    public string prefix = "HP: ";
+    public bool showAsPercentage = true;
+    public bool showFraction     = false;
+    public bool showPrefix       = false;
+    public string prefix         = "HP: ";
 
     [Header("Auto-Find")]
     public bool autoFindReferences = true;
 
-    private Traits playerTraits;
+    private IPlayerProvider playerProvider;
 
     private void Start()
     {
+        ResolveProvider();
+        // Defer the first read by one frame so all Start() methods — including
+        // InvectorPlayerProvider.BindController() — have completed first.
+        StartCoroutine(LateStart());
+    }
+
+    private IEnumerator LateStart()
+    {
+        yield return null;
+        UpdateDisplay(playerProvider?.Health ?? 0f, playerProvider?.MaxHealth ?? 1f);
+    }
+
+    private void OnDestroy()
+    {
+        if (playerProvider != null)
+            playerProvider.OnHealthChanged -= UpdateDisplay;
+    }
+
+    /// <summary>Resolves the IPlayerProvider and subscribes to its health event.</summary>
+    private void ResolveProvider()
+    {
         if (autoFindReferences)
-            FindReferences();
-
-        UpdateDisplay();
-    }
-
-    private void FindReferences()
-    {
-        if (playerTraits == null)
         {
-            GameObject player = ShortcutPlayer.Instance;
-            if (player != null)
-                playerTraits = player.GetComponent<Traits>();
+            // Try the explicitly assigned object first.
+            playerProvider = playerProviderObject as IPlayerProvider;
 
-            if (playerTraits == null)
-                Debug.LogWarning("[PlayerHealthDisplay] Could not find player Traits component!");
+            // Fall back to any MonoBehaviour in the scene that implements the interface.
+            if (playerProvider == null)
+                playerProvider = FindAnyPlayerProvider();
+
+            if (healthText   == null) healthText   = GetComponent<TextMeshProUGUI>();
+            if (healthSlider == null) healthSlider = GetComponent<Slider>();
+        }
+        else
+        {
+            playerProvider = playerProviderObject as IPlayerProvider;
         }
 
-        if (healthText == null)
-            healthText = GetComponent<TextMeshProUGUI>();
+        if (playerProvider == null)
+        {
+            Debug.LogWarning("[PlayerHealthDisplay] No IPlayerProvider found.");
+            return;
+        }
 
-        if (healthSlider == null)
-            healthSlider = GetComponent<Slider>();
+        playerProvider.OnHealthChanged += UpdateDisplay;
     }
 
-    private void Update() => UpdateDisplay();
-
-    private void UpdateDisplay()
+    /// <summary>
+    /// Searches the scene for the first MonoBehaviour that implements IPlayerProvider,
+    /// without being tied to a specific concrete type.
+    /// </summary>
+    private static IPlayerProvider FindAnyPlayerProvider()
     {
-        if (playerTraits == null) return;
-
-        try
+        foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
         {
-            RuntimeAttributeData health = playerTraits.RuntimeAttributes.Get(HealthAttributeId);
-            double value = health.Value;
-            double maxValue = health.MaxValue;
-
-            if (healthSlider != null)
-            {
-                healthSlider.maxValue = (float)maxValue;
-                healthSlider.value = (float)value;
-            }
-
-            if (healthText != null)
-            {
-                string displayText;
-
-                if (showAsPercentage)
-                    displayText = $"{Mathf.RoundToInt((float)(value / maxValue) * 100f)}%";
-                else if (showFraction)
-                    displayText = $"{Mathf.RoundToInt((float)value)}/{Mathf.RoundToInt((float)maxValue)}";
-                else
-                    displayText = Mathf.RoundToInt((float)value).ToString();
-
-                healthText.text = showPrefix ? $"{prefix}{displayText}" : displayText;
-            }
+            if (mb is IPlayerProvider provider)
+                return provider;
         }
-        catch (System.Exception) { }
+        return null;
+    }
+
+    /// <summary>Called by IPlayerProvider.OnHealthChanged; also safe to call manually.</summary>
+    public void UpdateDisplay(float value, float maxValue)
+    {
+        if (healthSlider != null)
+        {
+            healthSlider.maxValue = maxValue;
+            healthSlider.value    = value;
+        }
+
+        if (healthText != null)
+        {
+            string displayText;
+
+            if (showAsPercentage)
+                displayText = $"{Mathf.RoundToInt(maxValue > 0f ? value / maxValue * 100f : 0f)}%";
+            else if (showFraction)
+                displayText = $"{Mathf.RoundToInt(value)}/{Mathf.RoundToInt(maxValue)}";
+            else
+                displayText = Mathf.RoundToInt(value).ToString();
+
+            healthText.text = showPrefix ? $"{prefix}{displayText}" : displayText;
+        }
     }
 }

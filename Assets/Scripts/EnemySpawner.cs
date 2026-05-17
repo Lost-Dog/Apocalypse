@@ -8,33 +8,71 @@ public class EnemySpawner : MonoBehaviour
     public int minEnemies = 2;
     public int maxEnemies = 5;
     public float spawnRadius = 10f;
-    
+
     [Header("Respawn Settings")]
     public bool shouldRespawn = true;
     public float respawnTime = 300f;
-    
+
     [Header("Difficulty")]
     public int zoneLevel = 1;
     public bool scaleWithPlayerLevel = false;
-    
+
     [Header("Spawn Behavior")]
     public bool spawnOnStart = true;
     public bool useNavMesh = true;
-    
+
+    [Header("Object Pooling")]
+    [Tooltip("Use object pooling for enemies (recommended for performance)")]
+    public bool useObjectPooling = true;
+    [Tooltip("Initial pool size per enemy type")]
+    public int poolSizePerType = 5;
+
     [Header("Debug")]
     public bool showSpawnRadius = true;
     public Color gizmoColor = Color.red;
-    
+
     private List<GameObject> spawnedEnemies = new List<GameObject>();
     private float respawnTimer;
     private bool hasSpawned = false;
+    private Dictionary<GameObject, ObjectPool> enemyPools = new Dictionary<GameObject, ObjectPool>();
     
     private void Start()
     {
+        if (useObjectPooling)
+        {
+            InitializeEnemyPools();
+        }
+
         if (spawnOnStart)
         {
             SpawnEnemies();
         }
+    }
+
+    /// <summary>
+    /// Initialize object pools for each enemy prefab
+    /// </summary>
+    private void InitializeEnemyPools()
+    {
+        for (int i = 0; i < enemyPrefabs.Count; i++)
+        {
+            GameObject prefab = enemyPrefabs[i];
+            if (prefab == null) continue;
+
+            // Create pool for this enemy type
+            GameObject poolObj = new GameObject($"Pool_{prefab.name}");
+            poolObj.transform.SetParent(transform);
+
+            ObjectPool pool = poolObj.AddComponent<ObjectPool>();
+            pool.prefab = prefab;
+            pool.initialPoolSize = poolSizePerType;
+            pool.maxPoolSize = poolSizePerType * 3; // Allow growth up to 3x initial size
+            pool.canGrow = true;
+
+            enemyPools[prefab] = pool;
+        }
+
+        Debug.Log($"[EnemySpawner] Initialized {enemyPools.Count} enemy pools");
     }
     
     private void Update()
@@ -83,10 +121,26 @@ public class EnemySpawner : MonoBehaviour
     private GameObject SpawnEnemy(Vector3 position, int level)
     {
         GameObject prefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Count)];
-        GameObject enemy = Instantiate(prefab, position, Quaternion.identity);
-        
+        GameObject enemy;
+
+        // OPTIMIZATION: Use object pooling if enabled
+        if (useObjectPooling && enemyPools.TryGetValue(prefab, out ObjectPool pool))
+        {
+            enemy = pool.Get(position, Quaternion.identity);
+
+            if (enemy == null)
+            {
+                Debug.LogWarning($"[EnemySpawner] Pool exhausted for {prefab.name}, falling back to Instantiate");
+                enemy = Instantiate(prefab, position, Quaternion.identity);
+            }
+        }
+        else
+        {
+            enemy = Instantiate(prefab, position, Quaternion.identity);
+        }
+
         ApplyDifficultyScaling(enemy, level);
-        
+
         return enemy;
     }
     
@@ -145,11 +199,12 @@ public class EnemySpawner : MonoBehaviour
     
     private bool AllEnemiesDefeated()
     {
-        foreach (var enemy in spawnedEnemies)
+        // OPTIMIZED: Use for loop instead of foreach to avoid allocations
+        for (int i = 0; i < spawnedEnemies.Count; i++)
         {
-            if (enemy != null) return false;
+            if (spawnedEnemies[i] != null) return false;
         }
-        
+
         return spawnedEnemies.Count > 0;
     }
     
@@ -161,15 +216,46 @@ public class EnemySpawner : MonoBehaviour
     
     public void ClearAllEnemies()
     {
-        foreach (var enemy in spawnedEnemies)
+        // OPTIMIZED: Use for loop instead of foreach to avoid allocations
+        for (int i = 0; i < spawnedEnemies.Count; i++)
         {
-            if (enemy != null)
+            if (spawnedEnemies[i] != null)
             {
-                Destroy(enemy);
+                // OPTIMIZATION: Return to pool if using pooling, otherwise destroy
+                if (useObjectPooling)
+                {
+                    ReturnEnemyToPool(spawnedEnemies[i]);
+                }
+                else
+                {
+                    Destroy(spawnedEnemies[i]);
+                }
             }
         }
-        
+
         spawnedEnemies.Clear();
+    }
+
+    /// <summary>
+    /// Return an enemy to its appropriate pool
+    /// </summary>
+    private void ReturnEnemyToPool(GameObject enemy)
+    {
+        if (enemy == null) return;
+
+        // Find the pool that owns this enemy
+        foreach (var kvp in enemyPools)
+        {
+            if (enemy.name.StartsWith(kvp.Key.name))
+            {
+                kvp.Value.Return(enemy);
+                return;
+            }
+        }
+
+        // If not found in any pool, just destroy it
+        Debug.LogWarning($"[EnemySpawner] Could not find pool for {enemy.name}, destroying instead");
+        Destroy(enemy);
     }
     
     private void OnDrawGizmos()

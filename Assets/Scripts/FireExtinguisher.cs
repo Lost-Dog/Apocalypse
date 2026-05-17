@@ -5,7 +5,7 @@ using System.Collections;
 
 /// <summary>
 /// Allows the player to extinguish fires with an optional confirmation popup.
-/// Call Interact() from a GC2 instruction or trigger to activate.
+/// Call Interact() from a trigger or external system to activate.
 /// </summary>
 public class FireExtinguisher : MonoBehaviour
 {
@@ -110,8 +110,8 @@ public class FireExtinguisher : MonoBehaviour
     }
 
     /// <summary>
-    /// Entry point called by GC2 interactions (e.g. via an Execute Method instruction)
-    /// or any other trigger. Shows a confirmation UI if assigned, otherwise extinguishes immediately.
+    /// Entry point — call this from a trigger or interaction system.
+    /// Shows a confirmation UI if assigned, otherwise extinguishes immediately.
     /// </summary>
     public void Interact()
     {

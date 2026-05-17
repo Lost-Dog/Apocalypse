@@ -1,4 +1,4 @@
-using GameCreator.Runtime.Characters;
+using Invector;
 using UnityEngine;
 
 public class ChallengeEnemy : MonoBehaviour
@@ -6,10 +6,10 @@ public class ChallengeEnemy : MonoBehaviour
     private ActiveChallenge linkedChallenge;
     private bool isBoss;
     private bool isDead;
-    private Character character;
+    private vHealthController healthController;
 
     /// <summary>
-    /// Links this enemy to an active challenge and subscribes to the GC2 death event.
+    /// Links this enemy to an active challenge and subscribes to Invector's death event.
     /// </summary>
     public void Initialize(ActiveChallenge challenge, bool boss = false)
     {
@@ -17,18 +17,18 @@ public class ChallengeEnemy : MonoBehaviour
         isBoss          = boss;
         isDead          = false;
 
-        character = GetComponent<Character>();
-        if (character != null)
+        healthController = GetComponent<vHealthController>();
+        if (healthController != null)
         {
-            character.EventDie += OnEnemyDeath;
+            healthController.onDead.AddListener(OnEnemyDeath);
         }
         else
         {
-            Debug.LogWarning($"ChallengeEnemy on {gameObject.name}: No GC2 Character component found!");
+            Debug.LogWarning($"ChallengeEnemy on {gameObject.name}: No vHealthController component found!");
         }
     }
 
-    public void OnEnemyDeath()
+    public void OnEnemyDeath(GameObject deadObject)
     {
         if (isDead || linkedChallenge == null) return;
 
@@ -43,11 +43,11 @@ public class ChallengeEnemy : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (character != null)
-            character.EventDie -= OnEnemyDeath;
+        if (healthController != null)
+            healthController.onDead.RemoveListener(OnEnemyDeath);
 
         // Fallback: if the object was destroyed before the death event fired
         if (!isDead && linkedChallenge != null && ChallengeManager.Instance != null)
-            OnEnemyDeath();
+            OnEnemyDeath(gameObject);
     }
 }

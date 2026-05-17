@@ -79,7 +79,7 @@ public class DynamicChallengeZone : MonoBehaviour
         currentChallenge = challenge;
         gameObject.SetActive(true);
         
-        Debug.Log($"<color=yellow>Zone '{zoneName}' occupied by challenge '{challenge.challengeData.challengeName}'</color>");
+        // Debug.Log($"<color=yellow>Zone '{zoneName}' occupied by challenge '{challenge.challengeData.challengeName}'</color>");
     }
     
     public void ReleaseZone()

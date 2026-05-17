@@ -46,6 +46,9 @@ public class ChallengeManager : MonoBehaviour
     private AudioSource audioSource;
     private const string CHALLENGE_RESOURCE_PATH = "Challenges";
 
+    // OPTIMIZATION: Cache the active world events count to avoid LINQ in Update
+    private int cachedActiveWorldEventsCount = 0;
+
     private void Awake()
     {
         if (Instance == null)
@@ -80,6 +83,23 @@ public class ChallengeManager : MonoBehaviour
         GenerateDailyChallenges();
         GenerateWeeklyChallenges();
         spawnTimer = worldEventSpawnInterval;
+        UpdateActiveWorldEventsCount();
+    }
+
+    /// <summary>
+    /// OPTIMIZATION: Update the cached count of active world events. 
+    /// Call this when adding/removing challenges instead of using LINQ every frame.
+    /// </summary>
+    private void UpdateActiveWorldEventsCount()
+    {
+        cachedActiveWorldEventsCount = 0;
+        for (int i = 0; i < activeChallenges.Count; i++)
+        {
+            if (activeChallenges[i].challengeData.frequency == ChallengeData.ChallengeFrequency.WorldEvent)
+            {
+                cachedActiveWorldEventsCount++;
+            }
+        }
     }
     
     private void AutoPopulateSpawnZones()
@@ -111,15 +131,15 @@ public class ChallengeManager : MonoBehaviour
         if (autoSpawnChallenges)
         {
             spawnTimer -= Time.deltaTime;
-            
-            int activeWorldEvents = activeChallenges.Count(c => c.challengeData.frequency == ChallengeData.ChallengeFrequency.WorldEvent);
-            if (spawnTimer <= 0f && activeWorldEvents < maxActiveWorldEvents)
+
+            // OPTIMIZED: Use cached count instead of LINQ query each frame
+            if (spawnTimer <= 0f && cachedActiveWorldEventsCount < maxActiveWorldEvents)
             {
                 SpawnRandomWorldEvent();
                 spawnTimer = worldEventSpawnInterval;
             }
         }
-        
+
         UpdateActiveChallenges();
     }
     
@@ -177,32 +197,36 @@ public class ChallengeManager : MonoBehaviour
             Debug.LogWarning("Cannot spawn world event: no challenges or spawn zones available");
             return;
         }
-        
-        // Check if already at max active challenges
-        int activeWorldEvents = activeChallenges.Count(c => c.challengeData.frequency == ChallengeData.ChallengeFrequency.WorldEvent);
-        if (activeWorldEvents >= maxActiveWorldEvents)
+
+        // OPTIMIZED: Use cached count instead of LINQ
+        if (cachedActiveWorldEventsCount >= maxActiveWorldEvents)
         {
             Debug.Log($"Max active challenges reached ({maxActiveWorldEvents}). Waiting for current challenge to complete.");
             return;
         }
-        
+
         Transform spawnZone = spawnZones[Random.Range(0, spawnZones.Count)];
         ChallengeData challenge = worldEventChallenges[Random.Range(0, worldEventChallenges.Count)];
-        
+
         SpawnChallenge(challenge, spawnZone.position);
     }
     
     public void SpawnChallenge(ChallengeData challenge, Vector3 position)
     {
-        // Double-check max challenges before spawning
-        int activeWorldEvents = activeChallenges.Count(c => c.challengeData.frequency == ChallengeData.ChallengeFrequency.WorldEvent);
-        if (challenge.frequency == ChallengeData.ChallengeFrequency.WorldEvent && activeWorldEvents >= maxActiveWorldEvents)
+        // OPTIMIZED: Use cached count instead of LINQ
+        if (challenge.frequency == ChallengeData.ChallengeFrequency.WorldEvent && cachedActiveWorldEventsCount >= maxActiveWorldEvents)
         {
             Debug.LogWarning($"Cannot spawn challenge '{challenge.challengeName}': Max active challenges ({maxActiveWorldEvents}) already reached.");
             return;
         }
         ActiveChallenge activeChallenge = new ActiveChallenge(challenge, position, challenge.timeLimit);
         activeChallenges.Add(activeChallenge);
+
+        // OPTIMIZATION: Update cache after adding challenge
+        if (challenge.frequency == ChallengeData.ChallengeFrequency.WorldEvent)
+        {
+            cachedActiveWorldEventsCount++;
+        }
         
         // Check if challenge requires manual start
         if (challenge.requireManualStart)
@@ -302,6 +326,13 @@ public class ChallengeManager : MonoBehaviour
                     // Permanent failure
                     onChallengeExpired?.Invoke(challenge);
                     CleanupChallenge(challenge);
+
+                    // OPTIMIZATION: Update cache before removing
+                    if (challenge.challengeData.frequency == ChallengeData.ChallengeFrequency.WorldEvent)
+                    {
+                        cachedActiveWorldEventsCount--;
+                    }
+
                     activeChallenges.RemoveAt(i);
                     Debug.Log($"Challenge expired: {challenge.challengeData.challengeName}");
                 }
@@ -310,6 +341,13 @@ public class ChallengeManager : MonoBehaviour
             {
                 CompleteChallenge(challenge);
                 CleanupChallenge(challenge);
+
+                // OPTIMIZATION: Update cache before removing
+                if (challenge.challengeData.frequency == ChallengeData.ChallengeFrequency.WorldEvent)
+                {
+                    cachedActiveWorldEventsCount--;
+                }
+
                 activeChallenges.RemoveAt(i);
             }
         }
@@ -366,7 +404,7 @@ public class ChallengeManager : MonoBehaviour
         // Spawn loot with scaled rarity and count
         if (LootManager.Instance != null)
         {
-            LootManager.Rarity lootRarity = challenge.GetTotalLootRarity();
+            LootRarity lootRarity = challenge.GetTotalLootRarity();
             int lootCount = challenge.GetTotalLootCount();
             
             for (int i = 0; i < lootCount; i++)
@@ -824,7 +862,7 @@ public class ActiveChallenge
     /// <summary>
     /// Get the scaled loot rarity for this challenge
     /// </summary>
-    public LootManager.Rarity GetLootRarity()
+    public LootRarity GetLootRarity()
     {
         return challengeData.GetScaledLootRarity(actualDifficulty);
     }
@@ -832,7 +870,7 @@ public class ActiveChallenge
     /// <summary>
     /// Get the total loot rarity including modifiers
     /// </summary>
-    public LootManager.Rarity GetTotalLootRarity()
+    public LootRarity GetTotalLootRarity()
     {
         return challengeData.GetTotalLootRarity(actualDifficulty);
     }
@@ -1095,7 +1133,7 @@ public class ChallengePreviewData
     public int maxXP;
     public int baseCurrency;
     public int maxCurrency;
-    public LootManager.Rarity lootRarity;
+    public LootRarity lootRarity;
     public int lootCount;
     
     // Scaling

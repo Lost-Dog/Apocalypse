@@ -1,134 +1,36 @@
-using UnityEngine;
 using TMPro;
+using UnityEngine;
 
+/// <summary>
+/// Displays the player's current level sourced from <see cref="PlayerTraitsRuntime"/>.
+/// Refreshes once per second to avoid per-frame string allocation overhead.
+/// </summary>
 public class PlayerLevelDisplay : MonoBehaviour
 {
-    [Header("References")]
-    public ProgressionManager progressionManager;
-    public TextMeshProUGUI levelText;
-    
-    [Header("Display Settings")]
-    public bool showPrefix = false;
-    public string prefix = "Level: ";
-    
-    [Header("Auto-Find")]
-    public bool autoFindReferences = true;
-    
-    [Header("Debug")]
-    public bool showDebugInfo = false;
-    
-    private void OnEnable()
-    {
-        if (autoFindReferences)
-        {
-            FindReferences();
-        }
-        
-        UpdateDisplay();
-    }
-    
-    private void Start()
-    {
-        if (autoFindReferences)
-        {
-            FindReferences();
-        }
-        
-        UpdateDisplay();
-        
-        if (showDebugInfo)
-        {
-            Debug.Log($"<color=cyan>PlayerLevelDisplay initialized:</color>");
-            Debug.Log($"  ProgressionManager: {(progressionManager != null ? "Found" : "Missing")}");
-            Debug.Log($"  LevelText: {(levelText != null ? "Found" : "Missing")}");
-            if (progressionManager != null)
-            {
-                Debug.Log($"  Current Level: {progressionManager.currentLevel}");
-            }
-        }
-    }
-    
-    private void FindReferences()
-    {
-        if (levelText == null)
-        {
-            levelText = GetComponent<TextMeshProUGUI>();
-            if (levelText == null)
-            {
-                Debug.LogWarning("PlayerLevelDisplay: No TextMeshProUGUI component found on this GameObject!");
-                return;
-            }
-            else if (showDebugInfo)
-            {
-                Debug.Log("<color=green>PlayerLevelDisplay: Found TextMeshProUGUI component</color>");
-            }
-        }
-        
-        if (progressionManager == null)
-        {
-            progressionManager = FindFirstObjectByType<ProgressionManager>();
-            if (progressionManager == null)
-            {
-                Debug.LogWarning("PlayerLevelDisplay: Could not find ProgressionManager in scene!");
-            }
-            else if (showDebugInfo)
-            {
-                Debug.Log($"<color=green>PlayerLevelDisplay: Found ProgressionManager (Level: {progressionManager.currentLevel})</color>");
-            }
-        }
-    }
-    
+    private const float RefreshInterval = 1f;
+    private const string LabelFormat    = "LVL {0}";
+
+    [SerializeField] private TextMeshProUGUI levelLabel;
+
+    private int   _lastLevel    = -1;
+    private float _refreshTimer;
+
     private void Update()
     {
-        UpdateDisplay();
+        _refreshTimer += Time.deltaTime;
+        if (_refreshTimer < RefreshInterval) return;
+        _refreshTimer = 0f;
+        Refresh();
     }
-    
-    private void UpdateDisplay()
+
+    private void Refresh()
     {
-        if (levelText == null)
-        {
-            if (showDebugInfo)
-            {
-                Debug.LogWarning("PlayerLevelDisplay: levelText is null!");
-            }
-            return;
-        }
-        
-        if (progressionManager == null)
-        {
-            if (autoFindReferences)
-            {
-                FindReferences();
-            }
-            
-            if (progressionManager == null)
-            {
-                if (showDebugInfo)
-                {
-                    Debug.LogWarning("PlayerLevelDisplay: progressionManager is null!");
-                }
-                return;
-            }
-        }
-        
-        string displayText;
-        if (showPrefix)
-        {
-            displayText = $"{prefix}{progressionManager.currentLevel}";
-        }
-        else
-        {
-            displayText = progressionManager.currentLevel.ToString();
-        }
-        
-        if (levelText.text != displayText)
-        {
-            levelText.text = displayText;
-            
-            if (showDebugInfo)
-            {
-                Debug.Log($"<color=yellow>PlayerLevelDisplay updated: {displayText}</color>");
-            }
-        }
+        if (PlayerTraitsRuntime.Instance == null) return;
+
+        int level = PlayerTraitsRuntime.Instance.CurrentLevel;
+        if (level == _lastLevel) return;
+
+        _lastLevel = level;
+        levelLabel.text = string.Format(LabelFormat, level);
     }
 }

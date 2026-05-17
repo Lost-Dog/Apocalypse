@@ -1,15 +1,14 @@
 using UnityEngine;
-using GameCreator.Runtime.Common;
-using GameCreator.Runtime.Characters;
-using GameCreator.Runtime.Stats;
 
 /// <summary>
-/// Bridges the GC2 player character to game systems (GameManager, HUDManager, loot, XP).
-/// Health reads from the GC2 Traits component; combat rewards are granted via public API.
+/// Bridges the player character to game systems (GameManager, HUDManager, loot, XP).
+/// All player data access goes through IPlayerProvider.
 /// </summary>
 public class PlayerSystemBridge : MonoBehaviour
 {
-    private const string HealthAttributeId = "health";
+    [Header("Player Provider")]
+    [Tooltip("Assign any IPlayerProvider implementation here.")]
+    [SerializeField] private MonoBehaviour playerProviderObject;
 
     [Header("Division Systems")]
     [SerializeField] private int playerLevel = 1;
@@ -21,38 +20,46 @@ public class PlayerSystemBridge : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool showDebugLogs = true;
 
-    private GameManager gameManager;
-    private HUDManager hudManager;
-    private Traits playerTraits;
-    private Character playerCharacter;
-    private double cachedHealth;
+    private IPlayerProvider playerProvider;
+    private GameManager     gameManager;
+    private HUDManager      hudManager;
 
     private void Start()
     {
+        ResolveProvider();
         InitializeSystems();
-        SetupDeathCallback();
     }
 
     private void OnDestroy()
     {
-        if (playerCharacter != null)
-            playerCharacter.EventDie -= OnPlayerDeath;
+        if (playerProvider != null)
+        {
+            playerProvider.OnDeath         -= OnPlayerDeath;
+            playerProvider.OnHealthChanged -= OnHealthChanged;
+        }
+    }
+
+    private void ResolveProvider()
+    {
+        playerProvider = playerProviderObject as IPlayerProvider;
+
+        if (playerProvider == null)
+        {
+            playerProvider = GetComponent<IPlayerProvider>() ?? FindAnyPlayerProvider();
+        }
+
+        if (playerProvider == null)
+        {
+            Debug.LogWarning("[PlayerSystemBridge] No IPlayerProvider found. Some features will be disabled.");
+            return;
+        }
+
+        playerProvider.OnDeath         += OnPlayerDeath;
+        playerProvider.OnHealthChanged += OnHealthChanged;
     }
 
     private void InitializeSystems()
     {
-        playerCharacter = ShortcutPlayer.Instance?.GetComponent<Character>();
-        if (playerCharacter != null)
-        {
-            playerTraits = playerCharacter.GetComponent<Traits>();
-        }
-        else
-        {
-            // Fallback: component may be on this same GameObject (player prefab)
-            playerCharacter = GetComponent<Character>();
-            playerTraits    = GetComponent<Traits>();
-        }
-
         gameManager = GameManager.Instance;
 
         if (gameManager != null)
@@ -68,27 +75,8 @@ public class PlayerSystemBridge : MonoBehaviour
         UpdateHealthUI();
     }
 
-    private void SetupDeathCallback()
-    {
-        if (playerCharacter != null)
-            playerCharacter.EventDie += OnPlayerDeath;
-    }
-
     private void Update()
     {
-        if (playerTraits == null) return;
-
-        try
-        {
-            double currentHealth = playerTraits.RuntimeAttributes.Get(HealthAttributeId).Value;
-            if (System.Math.Abs(currentHealth - cachedHealth) > 0.001)
-            {
-                cachedHealth = currentHealth;
-                UpdateHealthUI();
-            }
-        }
-        catch (System.Exception) { }
-
         if (gameManager?.progressionManager != null)
             playerLevel = gameManager.progressionManager.currentLevel;
     }
@@ -99,16 +87,15 @@ public class PlayerSystemBridge : MonoBehaviour
         UpdateHealthUI();
     }
 
+    private void OnHealthChanged(float current, float max)
+    {
+        UpdateHealthUI();
+    }
+
     private void UpdateHealthUI()
     {
-        if (hudManager == null || playerTraits == null) return;
-
-        try
-        {
-            RuntimeAttributeData health = playerTraits.RuntimeAttributes.Get(HealthAttributeId);
-            hudManager.UpdateHealthDisplay((float)health.Value, (float)health.MaxValue);
-        }
-        catch (System.Exception) { }
+        if (hudManager == null || playerProvider == null) return;
+        hudManager.UpdateHealthDisplay(playerProvider.Health, playerProvider.MaxHealth);
     }
 
     // PUBLIC API ----------------------------------------------------------------------------------
@@ -131,59 +118,30 @@ public class PlayerSystemBridge : MonoBehaviour
         }
     }
 
-    /// <summary>Restores the given amount of health by adding it to the Traits attribute value.</summary>
+    /// <summary>Restores the given amount of health.</summary>
     public void Heal(float amount)
     {
-        if (playerTraits == null) return;
-
-        try
-        {
-            RuntimeAttributeData health = playerTraits.RuntimeAttributes.Get(HealthAttributeId);
-            health.Value = System.Math.Min(health.Value + amount, health.MaxValue);
-            UpdateHealthUI();
-
-            if (showDebugLogs) Debug.Log($"[PlayerSystemBridge] Healed {amount} HP. Current: {health.Value:F0}");
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogWarning($"[PlayerSystemBridge] Heal failed — {e.Message}");
-        }
+        if (playerProvider == null) return;
+        playerProvider.ApplyDamage(-amount);
+        if (showDebugLogs) Debug.Log($"[PlayerSystemBridge] Healed {amount} HP. Current: {playerProvider.Health:F0}");
     }
 
     /// <summary>Restores the player to full health.</summary>
     public void HealToFull()
     {
-        if (playerTraits == null) return;
-
-        try
-        {
-            RuntimeAttributeData health = playerTraits.RuntimeAttributes.Get(HealthAttributeId);
-            health.Value = health.MaxValue;
-            UpdateHealthUI();
-
-            if (showDebugLogs) Debug.Log("[PlayerSystemBridge] Fully healed!");
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogWarning($"[PlayerSystemBridge] HealToFull failed — {e.Message}");
-        }
+        if (playerProvider == null) return;
+        playerProvider.SetHealth(playerProvider.MaxHealth);
+        if (showDebugLogs) Debug.Log("[PlayerSystemBridge] Fully healed!");
     }
 
     /// <summary>Returns current health as a 0–1 normalised value.</summary>
-    public float GetHealthPercentage()
-    {
-        if (playerTraits == null) return 0f;
+    public float GetHealthPercentage() =>
+        playerProvider != null && playerProvider.MaxHealth > 0f
+            ? playerProvider.Health / playerProvider.MaxHealth
+            : 0f;
 
-        try
-        {
-            RuntimeAttributeData health = playerTraits.RuntimeAttributes.Get(HealthAttributeId);
-            return (float)(health.Value / health.MaxValue);
-        }
-        catch (System.Exception) { return 0f; }
-    }
-
-    /// <summary>Returns true if the player character is not dead.</summary>
-    public bool IsAlive() => playerCharacter != null && !playerCharacter.IsDead;
+    /// <summary>Returns true if the player character is alive.</summary>
+    public bool IsAlive() => playerProvider != null && playerProvider.IsAlive;
 
     /// <summary>Returns the current player level.</summary>
     public int GetPlayerLevel() => playerLevel;
@@ -191,4 +149,14 @@ public class PlayerSystemBridge : MonoBehaviour
     /// <summary>Awards the given XP to the player.</summary>
     public void GainExperience(int amount) =>
         gameManager?.progressionManager?.AddExperience(amount);
+
+    private static IPlayerProvider FindAnyPlayerProvider()
+    {
+        foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+        {
+            if (mb is IPlayerProvider provider)
+                return provider;
+        }
+        return null;
+    }
 }

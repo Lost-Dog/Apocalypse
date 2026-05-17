@@ -1,14 +1,9 @@
-using GameCreator.Runtime.Characters;
-using GameCreator.Runtime.Common;
-using GameCreator.Runtime.Stats;
-using System;
+using Invector;
+using Invector.vCharacterController;
 using UnityEngine;
 
 public class EnemyKillRewardHandler : MonoBehaviour
 {
-    private const string HealthAttributeId  = "health";
-    private const string StaminaAttributeId = "stamina";
-
     [Header("Reward Configuration")]
     [SerializeField] private int baseXPReward = 50;
     [SerializeField] private int xpVariance = 10;
@@ -32,37 +27,33 @@ public class EnemyKillRewardHandler : MonoBehaviour
     [Tooltip("Percentage of max health to restore (0.1 = 10%)")]
     [SerializeField] private float healthRestorePercentage = 0.1f;
     [SerializeField] private bool restoreStaminaOnKill = true;
-    [Tooltip("Flat stamina amount to restore")]
-    [SerializeField] private float staminaRestoreAmount = 0f;
-    [Tooltip("Percentage of max stamina to restore (0.1 = 10%)")]
-    [SerializeField] private float staminaRestorePercentage = 0.1f;
 
-    private Character enemyCharacter;
+    private vHealthController enemyHealth;
     private bool hasRewardedPlayer = false;
 
     private void Start()
     {
-        enemyCharacter = GetComponent<Character>();
+        enemyHealth = GetComponent<vHealthController>();
 
-        if (enemyCharacter != null)
+        if (enemyHealth != null)
         {
-            enemyCharacter.EventDie += OnEnemyDeath;
+            enemyHealth.onDead.AddListener(OnEnemyDeath);
         }
         else
         {
-            Debug.LogWarning($"EnemyKillRewardHandler on {gameObject.name}: GC2 Character component not found!");
+            Debug.LogWarning($"EnemyKillRewardHandler on {gameObject.name}: vHealthController component not found!");
         }
     }
 
     private void OnDestroy()
     {
-        if (enemyCharacter != null)
+        if (enemyHealth != null)
         {
-            enemyCharacter.EventDie -= OnEnemyDeath;
+            enemyHealth.onDead.RemoveListener(OnEnemyDeath);
         }
     }
 
-    private void OnEnemyDeath()
+    private void OnEnemyDeath(GameObject deadObject)
     {
         if (hasRewardedPlayer) return;
 
@@ -72,10 +63,10 @@ public class EnemyKillRewardHandler : MonoBehaviour
 
     private void RewardPlayer()
     {
-        GameObject player = ShortcutPlayer.Instance;
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player == null)
         {
-            Debug.LogWarning($"EnemyKillRewardHandler on {gameObject.name}: Player not found via ShortcutPlayer.");
+            Debug.LogWarning($"EnemyKillRewardHandler on {gameObject.name}: Player not found.");
             return;
         }
 
@@ -88,10 +79,10 @@ public class EnemyKillRewardHandler : MonoBehaviour
 
         GiveXPReward(playerBridge);
         TryDropLoot(playerBridge);
-        RestoreAttributeOnKill(player, HealthAttributeId,  restoreHealthOnKill,  healthRestoreAmount,  healthRestorePercentage);
-        RestoreAttributeOnKill(player, StaminaAttributeId, restoreStaminaOnKill, staminaRestoreAmount, staminaRestorePercentage);
+        RestoreHealthOnKill(player);
         RestoreAmmoOnKill(player);
         RestoreTemperatureOnKill(player);
+        TriggerHealthOnKillSkill(player);
     }
 
     // XP -----------------------------------------------------------------------------------------
@@ -105,7 +96,7 @@ public class EnemyKillRewardHandler : MonoBehaviour
 
     private int CalculateXPReward()
     {
-        int xp = baseXPReward + UnityEngine.Random.Range(-xpVariance, xpVariance + 1);
+        int xp = baseXPReward + Random.Range(-xpVariance, xpVariance + 1);
 
         if (isBoss)        xp = Mathf.RoundToInt(xp * bossXPMultiplier);
         else if (isElite)  xp = Mathf.RoundToInt(xp * eliteXPMultiplier);
@@ -119,7 +110,7 @@ public class EnemyKillRewardHandler : MonoBehaviour
     {
         float dropChance = isBoss ? bossLootChance : isElite ? eliteLootChance : lootDropChance;
 
-        if (UnityEngine.Random.value <= dropChance)
+        if (Random.value <= dropChance)
         {
             DropLoot(playerBridge.GetPlayerLevel());
         }
@@ -136,46 +127,40 @@ public class EnemyKillRewardHandler : MonoBehaviour
         Vector3 dropPosition = transform.position + Vector3.up;
 
         if (isBoss)
-            GameManager.Instance.lootManager.DropLootWithRarity(dropPosition, playerLevel, LootManager.Rarity.Epic);
+            GameManager.Instance.lootManager.DropLootWithRarity(dropPosition, playerLevel, LootRarity.Epic);
         else if (isElite)
-            GameManager.Instance.lootManager.DropLootWithRarity(dropPosition, playerLevel, LootManager.Rarity.Rare);
+            GameManager.Instance.lootManager.DropLootWithRarity(dropPosition, playerLevel, LootRarity.Rare);
         else
             GameManager.Instance.lootManager.DropLoot(dropPosition, playerLevel);
 
         Debug.Log($"Loot dropped at {dropPosition}");
     }
 
-    // ATTRIBUTE RESTORE --------------------------------------------------------------------------
+    // HEALTH RESTORE -----------------------------------------------------------------------------
 
     /// <summary>
-    /// Restores a flat amount plus a percentage of the attribute's max value on the player's Traits.
+    /// Restores health to the player via IPlayerProvider on kill.
     /// </summary>
-    private void RestoreAttributeOnKill(GameObject player, string attributeId, bool enabled,
-                                        float flatAmount, float percentage)
+    private void RestoreHealthOnKill(GameObject player)
     {
-        if (!enabled) return;
+        if (!restoreHealthOnKill) return;
 
-        Traits traits = player.GetComponent<Traits>();
-        if (traits == null) return;
+        IPlayerProvider provider = FindPlayerProvider(player);
+        if (provider == null || !provider.IsAlive) return;
 
-        RuntimeAttributeData attribute;
-        try { attribute = traits.RuntimeAttributes.Get(attributeId); }
-        catch (Exception) { return; }
-
-        double toRestore = flatAmount + attribute.MaxValue * percentage;
-        double oldValue  = attribute.Value;
-        attribute.Value  = Math.Min(attribute.MaxValue, attribute.Value + toRestore);
-        double restored  = attribute.Value - oldValue;
-
-        if (restored > 0)
-            Debug.Log($"Restored {restored:F1} {attributeId} on kill. ({attribute.Value:F1}/{attribute.MaxValue:F1})");
+        float restoreAmount = healthRestoreAmount + provider.MaxHealth * healthRestorePercentage;
+        if (restoreAmount > 0f)
+        {
+            provider.ApplyDamage(-restoreAmount);
+            Debug.Log($"Restored {restoreAmount:F1} health on kill. ({provider.Health:F0}/{provider.MaxHealth:F0})");
+        }
     }
 
     // SKILL DELEGATES ----------------------------------------------------------------------------
 
     private void RestoreAmmoOnKill(GameObject player)
     {
-        AmmoOnKillSkill ammoSkill = player.GetComponent<AmmoOnKillSkill>();
+        InvectorAmmoOnKillSkill ammoSkill = player.GetComponent<InvectorAmmoOnKillSkill>();
         if (ammoSkill != null && ammoSkill.skillActive)
             ammoSkill.OnEnemyKilled(gameObject);
     }
@@ -185,6 +170,13 @@ public class EnemyKillRewardHandler : MonoBehaviour
         TemperatureRestoreOnKill tempSkill = player.GetComponent<TemperatureRestoreOnKill>();
         if (tempSkill != null && tempSkill.skillActive)
             tempSkill.OnEnemyKilled(gameObject);
+    }
+
+    private void TriggerHealthOnKillSkill(GameObject player)
+    {
+        HealthOnKillSkill healthSkill = player.GetComponent<HealthOnKillSkill>();
+        if (healthSkill != null && healthSkill.skillActive)
+            healthSkill.OnEnemyKilled(gameObject);
     }
 
     // SETTERS ------------------------------------------------------------------------------------
@@ -197,4 +189,18 @@ public class EnemyKillRewardHandler : MonoBehaviour
 
     /// <summary>Marks this enemy as a boss. Mutually exclusive with elite.</summary>
     public void SetAsBoss(bool boss)   { isBoss = boss;   if (boss)  isElite = false; }
+
+    // HELPERS ------------------------------------------------------------------------------------
+
+    private static IPlayerProvider FindPlayerProvider(GameObject player)
+    {
+        IPlayerProvider provider = player.GetComponent<IPlayerProvider>();
+        if (provider != null) return provider;
+
+        foreach (var mb in player.GetComponents<MonoBehaviour>())
+        {
+            if (mb is IPlayerProvider p) return p;
+        }
+        return null;
+    }
 }

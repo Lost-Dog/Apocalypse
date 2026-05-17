@@ -16,7 +16,7 @@ public class LootSpawner : MonoBehaviour
     
     [Tooltip("Force a specific rarity (leave unchecked for random)")]
     public bool forceRarity = false;
-    public LootManager.Rarity forcedRarity = LootManager.Rarity.Common;
+    public LootRarity forcedRarity = LootRarity.Common;
     
     [Header("Multiple Drops")]
     [Tooltip("Number of loot items to drop")]
