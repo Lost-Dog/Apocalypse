@@ -38,7 +38,7 @@ public class InvectorInputBridge : MonoBehaviour
 
     [Tooltip("Camera rotation speed at full gamepad right-stick deflection, in degrees per second. " +
              "Increase until gamepad feel matches mouse at your preferred mouse sensitivity.")]
-    public float gamepadDegreesPerSecond = 180f;
+    public float gamepadDegreesPerSecond = 90f;
 
     [Header("Gamepad Feel")]
     [Tooltip("Smoothing factor for gamepad camera rotation. Higher = more responsive but more overshoot. " +

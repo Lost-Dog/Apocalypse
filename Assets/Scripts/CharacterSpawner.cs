@@ -270,15 +270,20 @@ public class CharacterSpawner : MonoBehaviour
         }
         else
         {
-            obj = Instantiate(prefab, transform);
+            // Instantiate directly at the target position so the object never
+            // briefly exists at the spawner's world origin (0,0,0) while active,
+            // which caused physics collisions with the player and bullets.
+            obj = Instantiate(prefab, position, Quaternion.identity, transform);
             obj.name = $"{prefab.name}_Extra_{pool.inUse.Count}";
-            
+
             if (logSpawnEvents)
             {
                 Debug.Log($"CharacterSpawner: Pool exhausted, created new instance of {prefab.name}");
             }
         }
 
+        // Set position and rotation BEFORE activating so the collider never
+        // wakes up at the wrong world position for even a single physics step.
         obj.transform.position = position;
         obj.transform.rotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
         obj.SetActive(true);
