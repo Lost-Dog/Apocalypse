@@ -36,8 +36,34 @@ public class InvectorInputBridge : MonoBehaviour
     [Tooltip("Multiplier applied to raw mouse delta for camera rotation.")]
     public float mouseSensitivity = 1.5f;
 
-    [Tooltip("Multiplier applied to right-stick axis for camera rotation.")]
-    public float gamepadSensitivity = 120f;
+    [Tooltip("Camera rotation speed at full gamepad right-stick deflection, in degrees per second. " +
+             "Increase until gamepad feel matches mouse at your preferred mouse sensitivity.")]
+    public float gamepadDegreesPerSecond = 180f;
+
+    [Header("Gamepad Feel")]
+    [Tooltip("Smoothing factor for gamepad camera rotation. Higher = more responsive but more overshoot. " +
+             "Lower = smoother but slightly laggy. 0 = instant (no smoothing).")]
+    [Range(0f, 30f)]
+    public float gamepadLookSmoothing = 12f;
+
+    [Tooltip("Radial dead zone applied to the left stick before writing movement input. " +
+             "Values below this magnitude are treated as zero, eliminating stick drift and jitter.")]
+    [Range(0f, 0.3f)]
+    public float gamepadMoveDeadZone = 0.12f;
+
+    [Tooltip("Radial dead zone applied to the right stick before writing camera rotation. " +
+             "Values below this magnitude are treated as zero.")]
+    [Range(0f, 0.3f)]
+    public float gamepadLookDeadZone = 0.1f;
+
+    [Header("Aim Assist Smoothing")]
+    [Tooltip("Screen-space dead zone in pixels. Correction is skipped when the target is already " +
+             "within this distance from the crosshair, preventing micro-oscillation at close range.")]
+    public float aimAssistDeadZonePx = 12f;
+
+    [Tooltip("Maximum angular correction applied per second (degrees). Caps the assist speed so " +
+             "it cannot overshoot the target and cause wiggling.")]
+    public float aimAssistMaxDegPerSec = 8f;
 
     [Header("Debug")]
     public bool debugMode = false;
@@ -105,6 +131,7 @@ public class InvectorInputBridge : MonoBehaviour
     // Per-frame state fed by performed/cancelled callbacks (thread-safe for main thread use)
     private Vector2 _moveValue;
     private Vector2 _lookValue;
+    private Vector2 _smoothedLookValue;
     private float   _zoomValue;
 
     private bool _sprintHeld;
@@ -657,9 +684,18 @@ public class InvectorInputBridge : MonoBehaviour
         // and lockSetMoveSpeed — so writing cc.input here is safe.
         if (!_tpInput.lockMoveInput || (_coverController != null && _coverController.inCover))
         {
+            // Apply radial dead zone for gamepad left stick to remove drift and jitter.
+            Vector2 move = _moveValue;
+            bool usingGamepadMove = Gamepad.current != null &&
+                                    Gamepad.current.leftStick.ReadValue().sqrMagnitude > 0.0001f;
+            if (usingGamepadMove && move.magnitude < gamepadMoveDeadZone)
+                move = Vector2.zero;
+            else if (usingGamepadMove && move.magnitude > 0f)
+                move = move.normalized * Mathf.InverseLerp(gamepadMoveDeadZone, 1f, move.magnitude);
+
             var input = cc.input;
-            input.x = _moveValue.x;
-            input.z = _moveValue.y;
+            input.x = move.x;
+            input.z = move.y;
             cc.input = input;
         }
 
@@ -854,11 +890,32 @@ public class InvectorInputBridge : MonoBehaviour
             float x, y;
             if (usingGamepad)
             {
-                x = _lookValue.x * gamepadSensitivity * Time.deltaTime;
-                y = _lookValue.y * gamepadSensitivity * Time.deltaTime;
+                // Apply radial dead zone to right stick.
+                Vector2 rawLook = _lookValue;
+                if (rawLook.magnitude < gamepadLookDeadZone)
+                    rawLook = Vector2.zero;
+                else
+                    rawLook = rawLook.normalized * Mathf.InverseLerp(gamepadLookDeadZone, 1f, rawLook.magnitude);
+
+                // Smooth acceleration only — snap to zero immediately on stick release.
+                // Lerping on release causes the camera to drift past the intended stop point,
+                // which reads as overshoot. Only ramp-up benefits from smoothing.
+                if (rawLook.sqrMagnitude > 0f)
+                {
+                    float smoothRate = gamepadLookSmoothing > 0f ? gamepadLookSmoothing : float.MaxValue;
+                    _smoothedLookValue = Vector2.Lerp(_smoothedLookValue, rawLook, smoothRate * Time.deltaTime);
+                }
+                else
+                {
+                    _smoothedLookValue = Vector2.zero;
+                }
+
+                x = _smoothedLookValue.x * gamepadDegreesPerSecond * Time.deltaTime;
+                y = _smoothedLookValue.y * gamepadDegreesPerSecond * Time.deltaTime;
             }
             else
             {
+                _smoothedLookValue = Vector2.zero;
                 x = _lookValue.x * mouseSensitivity;
                 y = _lookValue.y * mouseSensitivity;
             }
@@ -880,23 +937,35 @@ public class InvectorInputBridge : MonoBehaviour
             {
                 Vector2 offset = _aimAssist.ScreenOffset; // pixels from screen centre
 
-                // Degrees per pixel for each axis using the live camera FOV.
-                float vFov     = Camera.main.fieldOfView;
-                float hFov     = Camera.VerticalToHorizontalFieldOfView(vFov, Camera.main.aspect);
-                float dppH     = hFov / Screen.width;
-                float dppV     = vFov / Screen.height;
+                // Dead zone: skip correction when crosshair is already close enough.
+                // Prevents micro-oscillation once the camera is nearly aligned.
+                if (offset.magnitude > aimAssistDeadZonePx)
+                {
+                    // Degrees per pixel for each axis using the live camera FOV.
+                    float vFov  = Camera.main.fieldOfView;
+                    float hFov  = Camera.VerticalToHorizontalFieldOfView(vFov, Camera.main.aspect);
+                    float dppH  = hFov / Screen.width;
+                    float dppV  = vFov / Screen.height;
 
-                float force    = _aimAssist.AssistentForce;
-                // corrX: positive pixel offset (target right of crosshair) → increase mouseX (rotate right)
-                // corrY: positive pixel offset (target above crosshair)    → decrease mouseY (rotate up)
-                float corrX    =  offset.x * dppH * force * Time.deltaTime;
-                float corrY    = -offset.y * dppV * force * Time.deltaTime;
+                    float force = _aimAssist.AssistentForce;
 
-                var   cam      = _tpInput.tpCamera;
-                float mouseX   = (float)_cameraMouseXField.GetValue(cam);
-                float mouseY   = (float)_cameraMouseYField.GetValue(cam);
-                _cameraMouseXField.SetValue(cam, mouseX + corrX);
-                _cameraMouseYField.SetValue(cam, mouseY + corrY);
+                    // Raw desired correction in degrees this frame.
+                    // corrX: positive pixel offset (target right of crosshair) → increase mouseX (rotate right)
+                    // corrY: positive pixel offset (target above crosshair)    → decrease mouseY (rotate up)
+                    float corrX =  offset.x * dppH * force * Time.deltaTime;
+                    float corrY = -offset.y * dppV * force * Time.deltaTime;
+
+                    // Clamp to max degrees-per-second to prevent overshooting and oscillation.
+                    float maxStep = aimAssistMaxDegPerSec * Time.deltaTime;
+                    corrX = Mathf.Clamp(corrX, -maxStep, maxStep);
+                    corrY = Mathf.Clamp(corrY, -maxStep, maxStep);
+
+                    var   cam    = _tpInput.tpCamera;
+                    float mouseX = (float)_cameraMouseXField.GetValue(cam);
+                    float mouseY = (float)_cameraMouseYField.GetValue(cam);
+                    _cameraMouseXField.SetValue(cam, mouseX + corrX);
+                    _cameraMouseYField.SetValue(cam, mouseY + corrY);
+                }
             }
 
             _tpInput.tpCamera.Zoom(_zoomValue);
