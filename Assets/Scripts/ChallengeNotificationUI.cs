@@ -289,7 +289,12 @@ public class ChallengeNotificationUI : MonoBehaviour
 
         if (progressText != null)
         {
-            int totalCount = currentDisplayedChallenge.challengeData.GetEnemyCount();
+            // Prefer the actual spawned count; fall back to the data-defined max if spawning
+            // hasn't happened yet or the field hasn't been written (e.g. legacy paths).
+            int totalCount = currentDisplayedChallenge.totalEnemiesSpawned > 0
+                ? currentDisplayedChallenge.totalEnemiesSpawned
+                : currentDisplayedChallenge.challengeData.GetEnemyCount();
+
             if (totalCount == 0)
                 totalCount = currentDisplayedChallenge.challengeData.GetCivilianCount();
             

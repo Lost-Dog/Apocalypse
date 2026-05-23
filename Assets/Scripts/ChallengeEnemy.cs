@@ -37,7 +37,10 @@ public class ChallengeEnemy : MonoBehaviour
         if (ChallengeManager.Instance != null)
         {
             ChallengeManager.Instance.OnEnemyKilled(linkedChallenge);
-            Debug.Log($"Challenge enemy killed! {linkedChallenge.enemiesKilled}/{linkedChallenge.challengeData.GetEnemyCount()}");
+            int total = linkedChallenge.totalEnemiesSpawned > 0
+                ? linkedChallenge.totalEnemiesSpawned
+                : linkedChallenge.challengeData.GetEnemyCount();
+            Debug.Log($"Challenge enemy killed! {linkedChallenge.enemiesKilled}/{total}");
         }
     }
 

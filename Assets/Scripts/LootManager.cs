@@ -165,6 +165,27 @@ public class LootManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Returns a loot drop GameObject to its pool. Returns false if the object
+    /// does not belong to any managed pool and should be destroyed by the caller.
+    /// </summary>
+    public bool TryReturnToPool(GameObject lootDrop)
+    {
+        if (!useObjectPooling) return false;
+
+        foreach (var kvp in lootObjectPools)
+        {
+            ObjectPool pool = kvp.Value;
+            if (pool == null) continue;
+
+            // ObjectPool tracks all objects it owns; delegate the check to it.
+            pool.Return(lootDrop);
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// Rolls rarity and spawns a loot drop at the given position.
     /// </summary>
     public void DropLoot(Vector3 position, int playerLevel)

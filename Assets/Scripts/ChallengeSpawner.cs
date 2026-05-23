@@ -3,6 +3,7 @@ using UnityEngine.AI;
 using System.Collections.Generic;
 using Invector;
 using Lovatto.MiniMap;
+using CompassNavigatorPro;
 
 public class ChallengeSpawner : MonoBehaviour
 {
@@ -25,6 +26,12 @@ public class ChallengeSpawner : MonoBehaviour
     [Header("Enemy Setup")]
     [Tooltip("Icon data for enemies on minimap")]
     public bl_MiniMapIconData enemyMinimapIcon;
+
+    [Header("Enemy Compass")]
+    [Tooltip("Sprite shown on the Kronnect compass bar for enemies. If null, Compass Navigator Pro will use its default icon.")]
+    public Sprite enemyCompassIcon;
+    [Tooltip("Tint color of the enemy compass marker. Red by default.")]
+    public Color enemyCompassColor = Color.red;
     [Tooltip("Healthbar prefab to instantiate for enemies")]
     public GameObject healthBarPrefab;
     [Tooltip("Maximum number of enemies that can be spawned per challenge")]
@@ -663,22 +670,44 @@ public class ChallengeSpawner : MonoBehaviour
     
     private void SetupChallengeEnemyUI(GameObject enemyObject)
     {
-        // Setup minimap entity
+        // --- UGUI MiniMap entity ---
         bl_MiniMapEntity minimapEntity = enemyObject.GetComponent<bl_MiniMapEntity>();
         if (minimapEntity == null)
         {
             minimapEntity = enemyObject.AddComponent<bl_MiniMapEntity>();
-            
+
             if (enemyMinimapIcon != null)
-            {
                 minimapEntity.iconData = enemyMinimapIcon;
-            }
-            
-            minimapEntity.Target = enemyObject.transform;
+
+            minimapEntity.Target          = enemyObject.transform;
             minimapEntity.DestroyWithObject = true;
-            minimapEntity.OffScreen = true;
-            
+            minimapEntity.OffScreen       = true;
+
             Debug.Log($"  📍 Added minimap entity to {enemyObject.name}");
+        }
+
+        // --- Kronnect Compass Navigator Pro POI ---
+        CompassProPOI compassPOI = enemyObject.GetComponent<CompassProPOI>();
+        if (compassPOI == null)
+        {
+            compassPOI = enemyObject.AddComponent<CompassProPOI>();
+            compassPOI.title            = enemyObject.name;
+            compassPOI.tintColor        = enemyCompassColor;
+            compassPOI.canBeVisited     = false;   // never mark as "visited" — it's an enemy, not a location
+            compassPOI.clampPosition    = true;    // pin to bar edge when enemy is behind the player
+            compassPOI.showOnScreenIndicator  = true;
+            compassPOI.showOffScreenIndicator = true;
+            compassPOI.iconShowDistance = true;
+            compassPOI.visibility       = POIVisibility.AlwaysVisible;
+
+            if (enemyCompassIcon != null)
+            {
+                compassPOI.iconNonVisited = enemyCompassIcon;
+                compassPOI.iconVisited    = enemyCompassIcon;
+            }
+
+            // GenerateNewId ensures no ID collision with pre-placed scene POIs.
+            compassPOI.GenerateNewId();
         }
     }
     
@@ -696,6 +725,8 @@ public class ChallengeSpawner : MonoBehaviour
                 }
                 
                 instance.spawnedEnemies.Add(obj);
+                challenge.totalEnemiesSpawned++;
+
                 ChallengeEnemy challengeEnemy = obj.GetComponent<ChallengeEnemy>();
                 if (challengeEnemy == null)
                 {

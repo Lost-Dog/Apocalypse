@@ -436,7 +436,12 @@ public class ChallengeManager : MonoBehaviour
         challenge.currentProgress = challenge.enemiesKilled;
         onChallengeProgress?.Invoke(challenge);
 
-        int totalEnemies = challenge.challengeData.GetEnemyCount();
+        // Use the actual spawned count so a partial spawn (e.g. 9/10 due to NavMesh
+        // failures) still allows the challenge to complete.
+        int totalEnemies = challenge.totalEnemiesSpawned > 0
+            ? challenge.totalEnemiesSpawned
+            : challenge.challengeData.GetEnemyCount();
+
         Debug.Log($"Enemy killed! Progress: {challenge.enemiesKilled}/{totalEnemies}");
 
         if (challenge.enemiesKilled >= totalEnemies)
@@ -472,7 +477,11 @@ public class ChallengeManager : MonoBehaviour
         challenge.currentProgress += amount;
         onChallengeProgress?.Invoke(challenge);
 
-        if (challenge.currentProgress >= challenge.challengeData.GetEnemyCount() && !challenge.isCompleted)
+        int totalEnemies = challenge.totalEnemiesSpawned > 0
+            ? challenge.totalEnemiesSpawned
+            : challenge.challengeData.GetEnemyCount();
+
+        if (challenge.currentProgress >= totalEnemies && !challenge.isCompleted)
         {
             challenge.MarkCompleted();
         }
@@ -679,6 +688,14 @@ public class ActiveChallenge
     public int enemiesKilled;
     public int civiliansRescued;
     public bool playerDied;
+
+    /// <summary>
+    /// Actual number of enemies spawned for this challenge instance.
+    /// Set by ChallengeSpawner after spawning completes. Used instead of
+    /// ChallengeData.GetEnemyCount() to handle NavMesh failures where fewer
+    /// enemies than requested could be placed in the world.
+    /// </summary>
+    public int totalEnemiesSpawned;
     
     // Player agency
     public ChallengeState state;
@@ -772,7 +789,9 @@ public class ActiveChallenge
     
     public float GetProgress()
     {
-        int enemyCount = challengeData.GetEnemyCount();
+        int enemyCount = totalEnemiesSpawned > 0
+            ? totalEnemiesSpawned
+            : challengeData.GetEnemyCount();
         if (enemyCount > 0)
         {
             return Mathf.Clamp01((float)enemiesKilled / enemyCount);

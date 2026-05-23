@@ -63,7 +63,7 @@ public class InvectorInputBridge : MonoBehaviour
 
     [Tooltip("Maximum angular correction applied per second (degrees). Caps the assist speed so " +
              "it cannot overshoot the target and cause wiggling.")]
-    public float aimAssistMaxDegPerSec = 8f;
+    public float aimAssistMaxDegPerSec = 30f;
 
     [Header("Debug")]
     public bool debugMode = false;

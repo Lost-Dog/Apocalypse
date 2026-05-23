@@ -46,7 +46,7 @@ public class CameraAimAssistentHeadTracking : MonoBehaviour
                  "camera forward are candidates; the one closest to the crosshair is chosen. " +
                  "0 = pixel-perfect raycast only.")]
         [Range(0f, 45f)]
-        public float assistAngle = 15f;
+        public float assistAngle = 25f;
 
         [Header("Chest Tracking")]
         [Tooltip("Automatically aim at the target's chest bone instead of using UpOffset.")]
