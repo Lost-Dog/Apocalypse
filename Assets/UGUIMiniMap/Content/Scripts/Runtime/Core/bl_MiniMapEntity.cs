@@ -95,6 +95,10 @@ public class bl_MiniMapEntity : bl_MiniMapEntityBase
     private bl_MiniMapIconData iconDataInstance;
     private float targetOpacity;
     private float sizeRatio = 1;
+    private Camera cachedCamera;
+    private Transform cachedRig;
+    private Vector2 lastPos;
+    private Vector3 lastTargetPos;
     #endregion
 
     /// <summary>
@@ -112,6 +116,7 @@ public class bl_MiniMapEntity : bl_MiniMapEntityBase
 
     private void OnEnable()
     {
+        targetOpacity = 1;
         if (cacheItem != null && enableDisableWithTarget) SetActiveIcon(true);
     }
 
@@ -132,6 +137,8 @@ public class bl_MiniMapEntity : bl_MiniMapEntityBase
         cacheItem = Instantiate(g) as GameObject;
         cacheItem.name = $"Icon ({gameObject.name})";
         if (MiniMapOwner.iconsSizeRelativeToZoom) sizeRatio = MiniMapOwner.GetViewportRatio();
+        cachedCamera = MiniMapOwner.miniMapCamera;
+        cachedRig = MiniMapOwner.minimapRig;
         RectRoot = OffScreen ? MiniMapOwner.MiniMapUI.root : MiniMapOwner.MiniMapUI.iconsPanel;
         //SetUp Icon UI
         IconInstance = cacheItem.GetComponent<bl_MiniMapIconBase>();
@@ -162,6 +169,8 @@ public class bl_MiniMapEntity : bl_MiniMapEntityBase
     public override void ChangeMiniMapOwner(bl_MiniMap newOwner)
     {
         _minimap = newOwner;
+        cachedCamera = newOwner.miniMapCamera;
+        cachedRig = newOwner.minimapRig;
         RectRoot = OffScreen ? MiniMapOwner.MiniMapUI.root : MiniMapOwner.MiniMapUI.iconsPanel;
         cacheItem.transform.SetParent(RectRoot.transform, false);
     }
@@ -174,10 +183,8 @@ public class bl_MiniMapEntity : bl_MiniMapEntityBase
         //If a component missing, return for avoid bugs.
         if (Target == null || MiniMapOwner == null)
             return;
-        if (Graphic == null)
-            return;
 
-        if (Time.frameCount % 30 == 0 || MiniMapOwner.HighPrecisionMode) OnFrameUpdate();
+        if ((Time.frameCount + GetInstanceID()) % 30 == 0 || MiniMapOwner.HighPrecisionMode) OnFrameUpdate();
         IconControl();
         OpacityControl();
     }
@@ -187,10 +194,28 @@ public class bl_MiniMapEntity : bl_MiniMapEntityBase
     /// </summary>
     void IconControl()
     {
+        if (cachedCamera == null) cachedCamera = MiniMapOwner.miniMapCamera;
+
+        // Optimization: Skip calculation if neither camera nor target has moved
+        Vector3 currentTargetPos = TargetPosition;
+        bool targetMoved = (currentTargetPos - lastTargetPos).sqrMagnitude > 0.001f;
+        if (!MiniMapOwner.CameraChanged && !targetMoved && !MiniMapOwner.HighPrecisionMode && !MiniMapOwner.ViewportChanged) return;
+        lastTargetPos = currentTargetPos;
+
+        if (viewPortFullSize != MiniMapOwner.CachedViewportSize)
+        {
+            viewPortFullSize = MiniMapOwner.CachedViewportSize;
+            // Fallback if cached size is invalid (e.g. first frame)
+            if (viewPortFullSize.sqrMagnitude < 1 && MiniMapOwner.MiniMapUI.mapTextureRender != null)
+                viewPortFullSize = MiniMapOwner.MiniMapUI.mapTextureRender.GetRectSize();
+
+            viewPortSize = viewPortFullSize * 0.5f;
+        }
+
         //Setting the modify position
-        Vector3 CorrectPosition = TargetPosition + OffSet;
+        Vector3 CorrectPosition = currentTargetPos + OffSet;
         //Convert the position of target in ViewPortPoint
-        Vector2 wvp = MiniMapOwner.miniMapCamera.WorldToViewportPoint(CorrectPosition);
+        Vector2 wvp = cachedCamera.WorldToViewportPoint(CorrectPosition);
         //Calculate the position of target and convert into position of screen
         position.Set((wvp.x * viewPortFullSize.x) - viewPortSize.x, (wvp.y * viewPortFullSize.y) - viewPortSize.y);
         Vector2 UnClampPosition = position;
@@ -206,7 +231,7 @@ public class bl_MiniMapEntity : bl_MiniMapEntityBase
                 if (position.sqrMagnitude > (MiniMapOwner.CompassSize * MiniMapOwner.CompassSize))
                 {
                     position = position.normalized * MiniMapOwner.CompassSize;
-                    Iconsize = IconOffScreenSize;
+                    Iconsize = IconOffScreenSize * sizeRatio;
                 }
                 else
                 {
@@ -219,32 +244,66 @@ public class bl_MiniMapEntity : bl_MiniMapEntityBase
                 position.x = bl_MiniMapUtils.ClampBorders(position.x, -border.x, border.x, out clampedX);
                 position.y = bl_MiniMapUtils.ClampBorders(position.y, -border.y, border.y, out clampedY);
                 //check if the icon is out of the minimap bounds
-                Iconsize = clampedX || clampedY ? IconOffScreenSize : Size * sizeRatio;
+                Iconsize = clampedX || clampedY ? IconOffScreenSize * sizeRatio : Size * sizeRatio;
             }
         }
         else
         {
             Iconsize *= sizeRatio;
+            // Optimization: Hide if far off screen
+            if (Mathf.Abs(position.x) > viewPortSize.x * 1.5f || Mathf.Abs(position.y) > viewPortSize.y * 1.5f)
+            {
+                if (Graphic.enabled) Graphic.enabled = false;
+
+            }
+            else
+            {
+                if (!Graphic.enabled) Graphic.enabled = true;
+            }
         }
 
         //Apply position to the UI (for follow)
-        GraphicRect.anchoredPosition = position;
+        if ((position - lastPos).sqrMagnitude > 0.001f)
+        {
+            GraphicRect.anchoredPosition = position;
+            lastPos = position;
+        }
         if (CircleAreaRect != null) { CircleAreaRect.anchoredPosition = UnClampPosition; }
 
-        Iconsize = Mathf.Max(Iconsize, 5);
         //Change size with smooth transition
-        targetSize = Vector2.one * (Iconsize * MiniMapOwner.IconMultiplier);
-        GraphicRect.sizeDelta = Vector2.Lerp(GraphicRect.sizeDelta, targetSize, Time.deltaTime * 8);
+        if (iconData.sizeType == MiniMapIconSizeType.SizeDelta)
+        {
+            Iconsize = Mathf.Max(Iconsize, 5);
+            targetSize = Vector2.one * (Iconsize * MiniMapOwner.IconMultiplier);
+
+            if (Mathf.Abs(GraphicRect.sizeDelta.x - targetSize.x) > 0.1f)
+            {
+                GraphicRect.sizeDelta = Vector2.Lerp(GraphicRect.sizeDelta, targetSize, Time.deltaTime * 8);
+            }
+        }
+        else
+        {
+            float finalScale = Iconsize * MiniMapOwner.IconMultiplier;
+            Vector3 targetScaleVec = new Vector3(finalScale, finalScale, 1);
+            if (Mathf.Abs(GraphicRect.localScale.x - finalScale) > 0.01f)
+            {
+                GraphicRect.localScale = Vector3.Lerp(GraphicRect.localScale, targetScaleVec, Time.deltaTime * 8);
+            }
+        }
 
         if (GetFaceDirection() == IconFaceDirection.AlwaysUp)
         {
             //with this the icon rotation always will facing up
-            if (MiniMapOwner.canvasRenderMode == MiniMapRenderMode.Mode2D) { GraphicRect.up = Vector3.up; }
+            if (MiniMapOwner.canvasRenderMode == MiniMapRenderMode.Mode2D)
+            {
+                if (GraphicRect.up != Vector3.up) GraphicRect.up = Vector3.up;
+            }
             else
             {
                 Quaternion r = Quaternion.identity;
                 r.x = Target.rotation.x;
-                GraphicRect.localRotation = r;
+                if (Quaternion.Angle(GraphicRect.localRotation, r) > 0.1f)
+                    GraphicRect.localRotation = r;
             }
         }
         else
@@ -252,8 +311,14 @@ public class bl_MiniMapEntity : bl_MiniMapEntityBase
             //with this the rotation icon will depend of target
             Vector3 re = MiniMapOwner.canvasRenderMode == MiniMapRenderMode.Mode2D ? Vector3.zero : GraphicRect.eulerAngles;
             //Fix player rotation for apply to el icon.
-            re.z = ((-Target.rotation.eulerAngles.y) + MiniMapOwner.minimapRig.eulerAngles.y);
-            GraphicRect.rotation = Quaternion.Euler(re);
+            if (cachedRig == null) cachedRig = MiniMapOwner.minimapRig;
+            re.z = ((-Target.rotation.eulerAngles.y) + cachedRig.eulerAngles.y);
+            Quaternion targetRot = Quaternion.Euler(re);
+
+            if (Quaternion.Angle(GraphicRect.rotation, targetRot) > 0.1f)
+            {
+                GraphicRect.rotation = targetRot;
+            }
 
             if (keepTextAlwaysFacingUp) IconInstance.ForceFaceUp();
         }
@@ -264,11 +329,9 @@ public class bl_MiniMapEntity : bl_MiniMapEntityBase
     /// </summary>
     void OnFrameUpdate()
     {
-        viewPortFullSize = MiniMapOwner.MiniMapUI.mapTextureRender.GetRectSize();
-        viewPortSize = viewPortFullSize * 0.5f;
         borderRect = RectRoot.rect.size * 0.5f;
 
-        if (opacityBasedDistance && MiniMapOwner != null && MiniMapOwner.HasTarget())
+        if (opacityBasedDistance && MiniMapOwner != null && MiniMapOwner.Target != null)
         {
             if (MiniMapOwner.IsFullScreen)
             {
@@ -277,7 +340,7 @@ public class bl_MiniMapEntity : bl_MiniMapEntityBase
             else
             {
                 float targetDistance = Vector3.Distance(TargetPosition, MiniMapOwner.Target.position);
-                float percentage = targetDistance / maxDistance;
+                float percentage = targetDistance / Math.Max(1, maxDistance);
                 percentage = Math.Min(1, percentage);
                 if (percentage < 0.2f) percentage = 0;
                 targetOpacity = 1 - percentage;
@@ -513,7 +576,9 @@ public class bl_MiniMapEntity : bl_MiniMapEntityBase
     {
         get
         {
-            return Target == null ? Vector3.zero : new Vector3(Target.position.x, 0, Target.position.z);
+            if (Target == null) return Vector3.zero;
+            Vector3 p = Target.position;
+            return new Vector3(p.x, 0, p.z);
         }
     }
 

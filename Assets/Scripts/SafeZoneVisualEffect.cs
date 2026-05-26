@@ -2,6 +2,12 @@ using UnityEngine;
 
 public class SafeZoneVisualEffect : MonoBehaviour
 {
+    [Header("Visual Target")]
+    [Tooltip("The child GameObject that carries the visual mesh/renderer. " +
+             "Pulse and rotation are applied here so the collider on this root is never disturbed. " +
+             "Leave empty to create a dedicated child automatically.")]
+    public Transform visualTarget;
+
     [Header("Pulse Effect")]
     public bool enablePulse = true;
     public float pulseSpeed = 1f;
@@ -27,18 +33,23 @@ public class SafeZoneVisualEffect : MonoBehaviour
     public float particleHeight = 0.5f;
     public float rotateRingSpeed = 5f;
     
-    private Vector3 originalScale;
-    private Renderer zoneRenderer;
+    private Vector3 originalVisualScale;
+    private Renderer visualRenderer;
     private Material glowMaterial;
     private GameObject particleRing;
     private float particleAngle = 0f;
+
+    // The root transform that carries the collider — must never be scaled or rotated by this script.
+    private Transform ColliderRoot => transform;
     
     private void Start()
     {
-        originalScale = transform.localScale;
-        zoneRenderer = GetComponent<Renderer>();
+        EnsureVisualTarget();
+
+        originalVisualScale = visualTarget.localScale;
+        visualRenderer = visualTarget.GetComponent<Renderer>();
         
-        if (enableGlow && zoneRenderer != null)
+        if (enableGlow && visualRenderer != null)
         {
             SetupGlowMaterial();
         }
@@ -46,6 +57,37 @@ public class SafeZoneVisualEffect : MonoBehaviour
         if (enableParticleRing && particlePrefab != null)
         {
             CreateParticleRing();
+        }
+    }
+
+    /// <summary>
+    /// Guarantees <see cref="visualTarget"/> is a child of this GameObject so collider transforms are
+    /// never touched by animation effects.
+    /// </summary>
+    private void EnsureVisualTarget()
+    {
+        if (visualTarget != null && visualTarget != transform) return;
+
+        // Look for an existing child named "Visual"
+        Transform found = transform.Find("Visual");
+        if (found != null)
+        {
+            visualTarget = found;
+            return;
+        }
+
+        // Create a dedicated visual child and reparent any Renderer/MeshFilter found on the root.
+        GameObject visualGO = new GameObject("Visual");
+        visualGO.transform.SetParent(transform, false);
+        visualTarget = visualGO.transform;
+
+        // Move renderer components to the child so the pulse doesn't affect the collider root.
+        Renderer rootRenderer = GetComponent<Renderer>();
+        if (rootRenderer != null)
+        {
+            // Can't move components — just disable the root renderer; visual child will own the material.
+            Debug.LogWarning($"[SafeZoneVisualEffect] '{name}': Renderer found on the collider root. " +
+                             "Move it to a child named 'Visual' so the pulse effect doesn't disturb the trigger.", this);
         }
     }
     
@@ -71,17 +113,19 @@ public class SafeZoneVisualEffect : MonoBehaviour
             RotateParticleRing();
         }
     }
-    
+
+    /// <summary>Scales only the visual child — the collider root stays at its original scale.</summary>
     private void ApplyPulseEffect()
     {
         float scale = Mathf.Lerp(pulseMinScale, pulseMaxScale, 
             (Mathf.Sin(Time.time * pulseSpeed) + 1f) * 0.5f);
-        transform.localScale = originalScale * scale;
+        visualTarget.localScale = originalVisualScale * scale;
     }
-    
+
+    /// <summary>Rotates only the visual child — the collider root keeps its original rotation.</summary>
     private void ApplyRotationEffect()
     {
-        transform.Rotate(rotationAxis, rotationSpeed * Time.deltaTime, Space.World);
+        visualTarget.Rotate(rotationAxis, rotationSpeed * Time.deltaTime, Space.World);
     }
     
     private void ApplyGlowEffect()
@@ -103,8 +147,8 @@ public class SafeZoneVisualEffect : MonoBehaviour
     
     private void SetupGlowMaterial()
     {
-        glowMaterial = new Material(zoneRenderer.material);
-        zoneRenderer.material = glowMaterial;
+        glowMaterial = new Material(visualRenderer.material);
+        visualRenderer.material = glowMaterial;
         
         glowMaterial.EnableKeyword("_EMISSION");
         glowMaterial.SetColor("_EmissionColor", glowColor * glowIntensity);
@@ -112,8 +156,9 @@ public class SafeZoneVisualEffect : MonoBehaviour
     
     private void CreateParticleRing()
     {
+        // Parent the ring to the collider root so it doesn't inherit visual-child rotation.
         particleRing = new GameObject("ParticleRing");
-        particleRing.transform.SetParent(transform);
+        particleRing.transform.SetParent(ColliderRoot, false);
         particleRing.transform.localPosition = Vector3.zero;
         
         float angleStep = 360f / particleCount;

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Lovatto.MiniMap
 {
@@ -8,12 +9,20 @@ namespace Lovatto.MiniMap
     /// </summary>
     public class bl_MiniMapPlayer : MonoBehaviour
     {
+        private bool isAssigned = false;
+
         /// <summary>
         /// 
         /// </summary>
         private void OnEnable()
         {
             AssignAsTarget();
+            SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+
+        private void OnDisable()
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
         }
 
         /// <summary>
@@ -22,9 +31,23 @@ namespace Lovatto.MiniMap
         public void AssignAsTarget()
         {
             var miniMap = bl_MiniMap.ActiveMiniMap;
-            if (miniMap == null) return;
+            if (miniMap == null)
+            {
+                Debug.LogWarning("No active minimap found to assign the player as target.");
+                return;
+            }
 
             miniMap.SetTarget(gameObject);
+            isAssigned = true;
         }
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            // In case the minimap is loaded after the player
+            if (isAssigned) return;
+
+            AssignAsTarget();
+        }
+
     }
 }

@@ -79,4 +79,19 @@ namespace Lovatto.MiniMap
         Rectangle,
         Circle
     }
+
+    [Serializable]
+    public enum MiniMapRotationMode
+    {
+        RotateMap,
+        RotatePlayer,
+        RotateMapAndPlayer
+    }
+
+    [Serializable]
+    public enum MiniMapIconSizeType
+    {
+        SizeDelta,
+        Scale
+    }
 }

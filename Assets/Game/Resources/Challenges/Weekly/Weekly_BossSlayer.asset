@@ -30,6 +30,7 @@ MonoBehaviour:
   requireNoDeaths: 0
   requireStealth: 0
   objectiveDescription: Complete the challenge
+  sharedSpawnPoints: []
   spawnItems:
   - itemName: Elite Bodyguards
     prefab: {fileID: 3089473516772616032, guid: 4a0c54d15d1cda84dac5f960c2af8a63,
@@ -48,15 +49,14 @@ MonoBehaviour:
     priority: 5
     required: 1
   - itemName: Boss Enemies
-    prefab: {fileID: 3089473516772616032, guid: 4a0c54d15d1cda84dac5f960c2af8a63,
-      type: 3}
+    prefab: {fileID: 1645189946640246, guid: b796c65458d0efc44b9b996819aa248f, type: 3}
     category: 1
     minCount: 5
     maxCount: 5
     usePoolMode: 0
     customSpawnPoints: []
-    spawnLocation: 3
-    spawnRadius: 5
+    spawnLocation: 0
+    spawnRadius: 15
     offset: {x: 0, y: 0, z: 0}
     requireNavMesh: 1
     randomRotation: 1

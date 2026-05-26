@@ -19,9 +19,13 @@ namespace UGUIMiniMap
         {
             Vector3 randomDirection = Random.insideUnitSphere * Radius;
             randomDirection += transform.position;
-            UnityEngine.AI.NavMeshHit hit;
-            UnityEngine.AI.NavMesh.SamplePosition(randomDirection, out hit, 75, 1);
+            UnityEngine.AI.NavMesh.SamplePosition(randomDirection, out UnityEngine.AI.NavMeshHit hit, 75, 1);
             Vector3 finalPosition = hit.position;
+            if (float.IsInfinity(finalPosition.sqrMagnitude) || float.IsNaN(finalPosition.x))
+            {
+                return;
+            }
+
             Agent.SetDestination(finalPosition);
         }
 

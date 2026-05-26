@@ -1,46 +1,42 @@
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// Reads the player's shield value from IPlayerProvider each frame and drives
-/// the stat-dial Animator and label text.
+/// Displays the player's armour using IPlayerProvider.OnArmourChanged events.
+/// Subscribes to armour changes rather than polling — zero per-frame overhead.
+/// Drives a fill Image (fillAmount 0–1) and an optional TextMeshPro label.
 /// </summary>
 public class PlayerArmourDisplay : MonoBehaviour
 {
-    private const string DialParameter = "Health";
-
     [Header("References")]
+    [Tooltip("Fill Image whose fillAmount is driven by armour (0 = empty, 1 = full).")]
+    public Image           armourFill;
     public TextMeshProUGUI armourText;
-    public Animator        dialAnimator;
-    [Tooltip("Assign any IPlayerProvider implementation.")]
-    public MonoBehaviour playerProviderObject;
+    [Tooltip("Assign any IPlayerProvider implementation. Auto-found if left empty.")]
+    public MonoBehaviour   playerProviderObject;
 
     [Header("Display Settings")]
-    public string suffix = "%";
+    [Tooltip("Show the raw current/max value instead of a percentage.")]
+    public bool   showRawValue = false;
+    public string suffix       = "%";
 
     // Exposed for downstream warning/status scripts.
     [HideInInspector] public SurvivalManager survivalManager;
 
-    private IPlayerProvider playerProvider;
+    private IPlayerProvider _playerProvider;
 
-    // ─────────────────────────────────────────────────────────────────────────
+    // ── Unity lifecycle ───────────────────────────────────────────────────────
 
     private void Start()
     {
         FindReferences();
     }
 
-    private void Update()
+    private void OnDestroy()
     {
-        if (playerProvider == null)
-        {
-            FindReferences();
-            return;
-        }
-
-        float normalized = GetNormalizedShield();
-        UpdateDial(normalized);
-        UpdateLabel(normalized);
+        if (_playerProvider != null)
+            _playerProvider.OnArmourChanged -= UpdateDisplay;
     }
 
     // ── Wiring ────────────────────────────────────────────────────────────────
@@ -50,61 +46,71 @@ public class PlayerArmourDisplay : MonoBehaviour
         if (survivalManager == null)
             survivalManager = SurvivalManager.Instance;
 
-        if (survivalManager == null)
-            Debug.LogWarning("[PlayerArmourDisplay] SurvivalManager not found.");
+        _playerProvider = playerProviderObject as IPlayerProvider;
 
-        playerProvider = playerProviderObject as IPlayerProvider;
+        if (_playerProvider == null)
+            _playerProvider = FindAnyPlayerProvider();
 
-        if (playerProvider == null)
-            playerProvider = FindAnyPlayerProvider();
-
-        if (playerProvider == null)
+        if (_playerProvider == null)
+        {
             Debug.LogWarning("[PlayerArmourDisplay] No IPlayerProvider found.");
+            return;
+        }
 
-        if (armourText   == null) armourText   = GetComponentInChildren<TextMeshProUGUI>();
-        if (dialAnimator == null) dialAnimator = GetComponentInParent<Animator>();
-    }
+        _playerProvider.OnArmourChanged += UpdateDisplay;
 
-    // ── Read ──────────────────────────────────────────────────────────────────
+        if (armourText == null)
+            armourText = GetComponentInChildren<TextMeshProUGUI>();
 
-    private float GetNormalizedShield()
-    {
-        if (playerProvider == null) return 0f;
-        float max = playerProvider.MaxShield;
-        return max > 0f ? Mathf.Clamp01(playerProvider.Shield / max) : 0f;
+        if (armourFill == null)
+            armourFill = GetComponentInChildren<Image>();
+
+        // Prime the display immediately.
+        UpdateDisplay(_playerProvider.Armour, _playerProvider.MaxArmour);
     }
 
     // ── Display ───────────────────────────────────────────────────────────────
 
-    private void UpdateDial(float normalized)
+    /// <summary>Called by IPlayerProvider.OnArmourChanged; also safe to call manually.</summary>
+    public void UpdateDisplay(float current, float max)
     {
-        if (dialAnimator != null)
-            dialAnimator.SetFloat(DialParameter, normalized);
-    }
+        float normalized = max > 0f ? Mathf.Clamp01(current / max) : 0f;
 
-    private void UpdateLabel(float normalized)
-    {
-        if (armourText == null) return;
-        armourText.text = $"{Mathf.RoundToInt(normalized * 100f)}{suffix}";
+        if (armourFill != null)
+            armourFill.fillAmount = normalized;
+
+        if (armourText != null)
+        {
+            armourText.text = showRawValue
+                ? $"{Mathf.RoundToInt(current)}{suffix}"
+                : $"{Mathf.RoundToInt(normalized * 100f)}{suffix}";
+        }
     }
 
     // ── Public API ────────────────────────────────────────────────────────────
 
-    /// <summary>Adds the given amount to the player's shield.</summary>
+    /// <summary>Adds the given amount to the player's armour via SurvivalManager.</summary>
     public void AddArmour(float amount)
     {
-        if (playerProvider == null) return;
-        playerProvider.SetShield(playerProvider.Shield + amount);
+        if (survivalManager != null)
+            survivalManager.ModifyArmour(amount);
     }
 
-    /// <summary>Removes the given amount from the player's shield.</summary>
+    /// <summary>Removes the given amount from the player's armour via SurvivalManager.</summary>
     public void RemoveArmour(float amount) => AddArmour(-amount);
 
-    /// <summary>Clears shield to zero.</summary>
-    public void ClearArmour() => playerProvider?.SetShield(0f);
+    /// <summary>Clears armour to zero via SurvivalManager.</summary>
+    public void ClearArmour() => survivalManager?.SetArmour(0f);
 
-    /// <summary>Returns current shield as a 0–1 normalised value.</summary>
-    public float GetArmourPercentage() => GetNormalizedShield();
+    /// <summary>Returns current armour as a 0–1 normalised value.</summary>
+    public float GetArmourPercentage()
+    {
+        if (_playerProvider == null) return 0f;
+        float max = _playerProvider.MaxArmour;
+        return max > 0f ? Mathf.Clamp01(_playerProvider.Armour / max) : 0f;
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
 
     private static IPlayerProvider FindAnyPlayerProvider()
     {

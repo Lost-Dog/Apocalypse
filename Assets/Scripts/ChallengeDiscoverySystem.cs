@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
@@ -19,15 +20,20 @@ public class ChallengeDiscoverySystem : MonoBehaviour
     private ChallengeManager challengeManager;
     private float checkTimer;
     private ActiveChallenge nearestChallenge;
+    private ActiveChallenge _lastPromptChallenge;
     private HashSet<ActiveChallenge> discoveredChallenges = new HashSet<ActiveChallenge>();
+    private TextMeshProUGUI _promptText;
     
     private void Start()
     {
         challengeManager = ChallengeManager.Instance;
         checkTimer = discoveryCheckInterval;
-        
+
         if (interactPrompt != null)
+        {
             interactPrompt.SetActive(false);
+            _promptText = interactPrompt.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+        }
     }
     
     private void Update()
@@ -124,22 +130,20 @@ public class ChallengeDiscoverySystem : MonoBehaviour
     {
         if (interactPrompt == null)
             return;
-        
+
         bool shouldShow = nearestChallenge != null;
-        
+
         if (interactPrompt.activeSelf != shouldShow)
-        {
             interactPrompt.SetActive(shouldShow);
-        }
-        
-        // Optional: Update prompt text with challenge name
-        if (shouldShow)
+
+        // Only rebuild the string when the nearest challenge actually changes.
+        if (shouldShow && nearestChallenge != _lastPromptChallenge)
         {
-            var promptText = interactPrompt.GetComponentInChildren<TMPro.TextMeshProUGUI>();
-            if (promptText != null)
+            _lastPromptChallenge = nearestChallenge;
+            if (_promptText != null)
             {
                 string action = nearestChallenge.state == ActiveChallenge.ChallengeState.Failed ? "Retry" : "View";
-                promptText.text = $"[E] {action} Challenge: {nearestChallenge.challengeData.challengeName}";
+                _promptText.text = $"[E] {action} Challenge: {nearestChallenge.challengeData.challengeName}";
             }
         }
     }

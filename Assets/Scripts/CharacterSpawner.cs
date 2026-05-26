@@ -10,9 +10,19 @@ public class CharacterSpawner : MonoBehaviour
     [SerializeField] private List<GameObject> civilianPrefabs = new List<GameObject>();
     
     [Header("Spawn Settings")]
-    [SerializeField] private int maxActiveCharacters = 20;
+    [Tooltip("Base number of characters to keep active at level 0.")]
+    [SerializeField] private int baseCharacterCount = 5;
+    [Tooltip("Every this many player levels, one more character slot is added.")]
+    [SerializeField] private int levelsPerExtraCharacter = 5;
+    [SerializeField] private int maxActiveCharacters = 5;
     [SerializeField] private int initialPoolSize = 30;
     [SerializeField] private float spawnInterval = 2f;
+
+    [Header("Character Health Scaling")]
+    [Tooltip("Base health at player level 0 (health = baseCharacterHealth + healthPerLevel * playerLevel).")]
+    [SerializeField] private float baseCharacterHealth = 100f;
+    [Tooltip("Flat health added per player level.")]
+    [SerializeField] private float healthPerLevel = 100f;
     
     [Header("Distance Settings")]
     [SerializeField] private float minSpawnDistance = 30f;
@@ -73,12 +83,20 @@ public class CharacterSpawner : MonoBehaviour
         
         InitializePlayer();
         InitializePools();
-        
+        RefreshMaxActiveCharacters();
+        SubscribeToProgression();
+
         if (enableAutoSpawn)
         {
-            Debug.LogWarning($"<color=red>[CharacterSpawner] AUTO-SPAWNING {maxActiveCharacters / 2} INITIAL CHARACTERS!</color>");
+            Debug.LogWarning($"<color=red>[CharacterSpawner] AUTO-SPAWNING {maxActiveCharacters} INITIAL CHARACTERS!</color>");
             SpawnInitialCharacters();
         }
+    }
+
+    private void OnDestroy()
+    {
+        if (ProgressionManager.Instance != null)
+            ProgressionManager.Instance.onLevelUp.RemoveListener(OnPlayerLevelUp);
     }
 
     private void Update()
@@ -118,12 +136,13 @@ public class CharacterSpawner : MonoBehaviour
             return;
         }
 
+        // Remove nulls and duplicates so the pool dictionary and draw list stay consistent.
+        civilianPrefabs = DeduplicatePrefabs(civilianPrefabs);
+
         Debug.Log($"<color=orange>[CharacterSpawner] InitializePools() - Creating pools for {civilianPrefabs.Count} prefabs with initialPoolSize: {initialPoolSize}</color>");
 
         foreach (GameObject prefab in civilianPrefabs)
         {
-            if (prefab == null) continue;
-
             Pool pool = new Pool { prefab = prefab };
             
             int poolSizePerPrefab = Mathf.CeilToInt((float)initialPoolSize / civilianPrefabs.Count);
@@ -132,7 +151,9 @@ public class CharacterSpawner : MonoBehaviour
             
             for (int i = 0; i < poolSizePerPrefab; i++)
             {
-                GameObject obj = Instantiate(prefab, transform);
+                // Instantiate far below the world so the AI's Awake() physics registration
+                // never overlaps with gameplay geometry at the world origin.
+                GameObject obj = Instantiate(prefab, Vector3.down * 1000f, Quaternion.identity, transform);
                 obj.name = $"{prefab.name}_{i}";
                 obj.SetActive(false);
                 pool.available.Enqueue(obj);
@@ -150,9 +171,34 @@ public class CharacterSpawner : MonoBehaviour
         RefillAvailablePrefabs();
     }
 
+    /// <summary>
+    /// Returns a new list with null entries and duplicate prefab references removed.
+    /// Logs a warning for each duplicate found so the Inspector can be cleaned up.
+    /// </summary>
+    private List<GameObject> DeduplicatePrefabs(List<GameObject> source)
+    {
+        var seen = new HashSet<GameObject>();
+        var result = new List<GameObject>(source.Count);
+
+        foreach (GameObject prefab in source)
+        {
+            if (prefab == null) continue;
+
+            if (!seen.Add(prefab))
+            {
+                Debug.LogWarning($"CharacterSpawner: Duplicate prefab entry '{prefab.name}' removed. Check the civilianPrefabs list in the Inspector.");
+                continue;
+            }
+
+            result.Add(prefab);
+        }
+
+        return result;
+    }
+
     private void SpawnInitialCharacters()
     {
-        int toSpawn = Mathf.Min(maxActiveCharacters / 2, initialPoolSize);
+        int toSpawn = Mathf.Min(maxActiveCharacters, initialPoolSize);
         
         for (int i = 0; i < toSpawn; i++)
         {
@@ -225,27 +271,31 @@ public class CharacterSpawner : MonoBehaviour
             return null;
 
         if (availablePrefabsForSpawn.Count == 0)
-        {
             RefillAvailablePrefabs();
-        }
+
+        // Find a valid spawn position first so we don't consume a prefab slot on a failed attempt.
+        Vector3 spawnPosition;
+        if (!FindValidSpawnPosition(out spawnPosition))
+            return null;
 
         int randomIndex = Random.Range(0, availablePrefabsForSpawn.Count);
         GameObject selectedPrefab = availablePrefabsForSpawn[randomIndex];
         availablePrefabsForSpawn.RemoveAt(randomIndex);
-        
-        Vector3 spawnPosition;
-        if (FindValidSpawnPosition(out spawnPosition))
-        {
-            return SpawnCharacter(selectedPrefab, spawnPosition);
-        }
-        
-        return null;
+
+        return SpawnCharacter(selectedPrefab, spawnPosition);
     }
 
     private void RefillAvailablePrefabs()
     {
         availablePrefabsForSpawn.Clear();
-        availablePrefabsForSpawn.AddRange(civilianPrefabs);
+
+        // Only add prefabs that have an initialised pool — guards against any
+        // list inconsistency between civilianPrefabs and characterPools.
+        foreach (GameObject prefab in civilianPrefabs)
+        {
+            if (prefab != null && characterPools.ContainsKey(prefab))
+                availablePrefabsForSpawn.Add(prefab);
+        }
         
         if (logSpawnEvents)
         {
@@ -287,6 +337,8 @@ public class CharacterSpawner : MonoBehaviour
         obj.transform.position = position;
         obj.transform.rotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
         obj.SetActive(true);
+
+        ApplyHealthScaling(obj);
 
         pool.inUse.Add(obj);
 
@@ -361,6 +413,67 @@ public class CharacterSpawner : MonoBehaviour
         }
         
         return false;
+    }
+
+    // ── Progression integration ───────────────────────────────────────────────
+
+    /// <summary>Subscribes to ProgressionManager level-up events.</summary>
+    private void SubscribeToProgression()
+    {
+        if (ProgressionManager.Instance != null)
+            ProgressionManager.Instance.onLevelUp.AddListener(OnPlayerLevelUp);
+        else
+            Debug.LogWarning("[CharacterSpawner] ProgressionManager not found — character count won't scale with level.");
+    }
+
+    private void OnPlayerLevelUp(int newLevel)
+    {
+        RefreshMaxActiveCharacters();
+        Debug.Log($"[CharacterSpawner] Player reached level {newLevel}. Max active characters: {maxActiveCharacters}");
+    }
+
+    /// <summary>
+    /// Recalculates <see cref="maxActiveCharacters"/> based on the current player level.
+    /// Formula: <c>baseCharacterCount + floor(playerLevel / levelsPerExtraCharacter)</c>.
+    /// </summary>
+    private void RefreshMaxActiveCharacters()
+    {
+        int playerLevel = ProgressionManager.Instance != null
+            ? ProgressionManager.Instance.currentLevel
+            : 0;
+
+        // Level in ProgressionManager starts at 1; treat it as 0-based for the formula.
+        int zeroBasedLevel = Mathf.Max(0, playerLevel - 1);
+        maxActiveCharacters = baseCharacterCount + (zeroBasedLevel / levelsPerExtraCharacter);
+    }
+
+    /// <summary>
+    /// Ensures <paramref name="character"/> has a <see cref="DifficultyScaler"/> and applies
+    /// flat health scaling: <c>baseCharacterHealth + healthPerLevel × playerLevel</c>.
+    /// </summary>
+    private void ApplyHealthScaling(GameObject character)
+    {
+        int playerLevel = ProgressionManager.Instance != null
+            ? ProgressionManager.Instance.currentLevel
+            : 0;
+
+        // Convert to 0-based so level 1 → base health only, level 2 → base + 1× per-level, etc.
+        int zeroBasedLevel = Mathf.Max(0, playerLevel - 1);
+
+        DifficultyScaler scaler = character.GetComponent<DifficultyScaler>();
+        if (scaler == null)
+            scaler = character.AddComponent<DifficultyScaler>();
+
+        // Flat formula: health = baseCharacterHealth + healthPerLevel * zeroBasedLevel
+        // DifficultyScaler uses: scaledHealth = baseHealth * (1 + (level - 1) * multiplierPerLevel)
+        // Passing level = zeroBasedLevel + 1 and baseHealth = baseCharacterHealth:
+        //   scaledHealth = baseCharacterHealth * (1 + zeroBasedLevel * multiplierPerLevel)
+        // For a flat +healthPerLevel increase we need:
+        //   multiplierPerLevel = healthPerLevel / baseCharacterHealth  (when baseCharacterHealth > 0)
+        float multiplier = baseCharacterHealth > 0f ? healthPerLevel / baseCharacterHealth : 1f;
+        scaler.SetBaseStats(baseCharacterHealth, scaler.baseDamage);
+        scaler.healthMultiplierPerLevel = multiplier;
+        scaler.ApplyScaling(zeroBasedLevel + 1);
     }
 
     public void SetMaxActiveCharacters(int count)

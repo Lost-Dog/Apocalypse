@@ -282,18 +282,20 @@ public class SafeZone : MonoBehaviour
         float t = useSmoothTransition ? Mathf.SmoothStep(0f, 1f, restorationProgress) : restorationProgress;
         bool isRestoring = false;
 
-        // Health via Invector vHealthController
+        // Health via Invector vHealthController.
+        // Use AddHealth only for the amount still missing each frame to avoid accumulation overshoot.
         if (restoreHealth && playerHealth != null && !playerHealth.isDead)
         {
-            if (playerHealth.currentHealth < playerHealth.maxHealth)
+            int missing = Mathf.RoundToInt(playerHealth.maxHealth - playerHealth.currentHealth);
+            if (missing > 0)
             {
-                float targetHealth = Mathf.Lerp(startHealth, playerHealth.maxHealth, t);
-                float delta = targetHealth - playerHealth.currentHealth;
-                if (delta > 0f)
+                int targetHealth = Mathf.RoundToInt(Mathf.Lerp(startHealth, playerHealth.maxHealth, t));
+                int delta = targetHealth - Mathf.RoundToInt(playerHealth.currentHealth);
+                if (delta > 0)
                 {
-                    playerHealth.AddHealth(Mathf.RoundToInt(delta));
-                    isRestoring = true;
+                    playerHealth.AddHealth(delta);
                 }
+                isRestoring = true;
             }
         }
 

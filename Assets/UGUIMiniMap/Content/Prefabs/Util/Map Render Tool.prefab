@@ -25,12 +25,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 145106}
+  serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.70710677}
   m_LocalPosition: {x: -5.5599995, y: 566, z: -6.97}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 90.00001, y: 0, z: 0}
 --- !u!20 &2075858
 Camera:
@@ -46,9 +47,17 @@ Camera:
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
+  m_Iso: 200
+  m_ShutterSpeed: 0.005
+  m_Aperture: 16
+  m_FocusDistance: 10
+  m_FocalLength: 50
+  m_BladeCount: 5
+  m_Curvature: {x: 2, y: 11}
+  m_BarrelClipping: 0.25
+  m_Anamorphism: 0
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
-  m_FocalLength: 50
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
@@ -100,3 +109,14 @@ MonoBehaviour:
   previewBorders: 1
   blackBorders: 1
   miniMap: {fileID: 0}
+  showGrid: 0
+  previewGrid: 0
+  overrideExisting: 0
+  gridCellSize: 20
+  gridLineColor: {r: 1, g: 1, b: 1, a: 0.5}
+  gridLineThickness: 0.5
+  gridTextColor: {r: 1, g: 1, b: 1, a: 1}
+  gridTextSize: 7
+  gridFont: {fileID: 12800000, guid: 6b66c39ad76a8b241ab569554eb046be, type: 3}
+  showGridLabels: 1
+  gridLabelPadding: 0

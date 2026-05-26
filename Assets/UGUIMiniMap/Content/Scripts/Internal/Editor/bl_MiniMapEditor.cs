@@ -18,6 +18,7 @@ public class bl_MiniMapEditor : Editor
     AnimBool RenderAnim;
     AnimBool ReferencesAnim;
     AnimBool MarksAnim;
+    AnimBool FogAnim;
     SerializedProperty generalProp;
     SerializedProperty zoomProp;
     SerializedProperty positionProp;
@@ -28,6 +29,7 @@ public class bl_MiniMapEditor : Editor
     SerializedProperty renderProp;
     SerializedProperty refProp;
     SerializedProperty marksProp;
+    SerializedProperty fogProp;
 
     private void OnEnable()
     {
@@ -60,6 +62,9 @@ public class bl_MiniMapEditor : Editor
 
         marksProp = serializedObject.FindProperty("AllowMapMarks");
         InitAnim(ref MarksAnim, marksProp);
+
+        fogProp = serializedObject.FindProperty("hasFogOfWar");
+        InitAnim(ref FogAnim, fogProp);
     }
 
     private void InitAnim(ref AnimBool anim, SerializedProperty prop)
@@ -119,7 +124,7 @@ public class bl_MiniMapEditor : Editor
                     script.mapRender.DrawOnGUI(rrect);
                 }
                 GUILayout.FlexibleSpace();
-                script.mapRender = EditorGUILayout.ObjectField(script.mapRender, typeof(bl_MapRender), allowSceneObjects) as bl_MapRender;
+                script.mapRender = EditorGUILayout.ObjectField(new GUIContent("", "The component responsible for rendering the map texture."), script.mapRender, typeof(bl_MapRender), allowSceneObjects) as bl_MapRender;
 
                 GUILayout.EndHorizontal();
                 GUILayout.Space(10);
@@ -132,7 +137,7 @@ public class bl_MiniMapEditor : Editor
                         SetupScreenShot();
                     }
                     GUILayout.Space(5);
-                    if (GUILayout.Button("Set Bounds", GUILayout.Width(75)))
+                    if (GUILayout.Button(new GUIContent("Set Bounds", "Select and highlight the map bounds transform in the scene."), GUILayout.Width(75)))
                     {
                         Selection.activeTransform = script.mapBounds.BoundTransform;
                         EditorGUIUtility.PingObject(script.mapBounds.BoundTransform);
@@ -153,17 +158,17 @@ public class bl_MiniMapEditor : Editor
         {
             EditorGUILayout.LabelField(new GUIContent("Zoom Range", "Minimum and Maximum zoom in/out allowed."), EditorStyles.label);
             EditorGUILayout.BeginHorizontal();
-            script.MinZoom = EditorGUILayout.FloatField(script.MinZoom, GUILayout.Width(50));
+            script.MinZoom = EditorGUILayout.FloatField(new GUIContent("", "The minimum zoom level allowed."), script.MinZoom, GUILayout.Width(50));
             EditorGUILayout.MinMaxSlider(ref script.MinZoom, ref script.MaxZoom, 1, 200);
-            script.MaxZoom = EditorGUILayout.FloatField(script.MaxZoom, GUILayout.Width(50));
+            script.MaxZoom = EditorGUILayout.FloatField(new GUIContent("", "The maximum zoom level allowed."), script.MaxZoom, GUILayout.Width(50));
             EditorGUILayout.EndHorizontal();
-            script.DefaultHeight = EditorGUILayout.Slider("Default Zoom", script.DefaultHeight, script.MinZoom, script.MaxZoom);
+            script.DefaultHeight = EditorGUILayout.Slider(new GUIContent("Default Zoom", "The initial zoom level when the minimap starts."), script.DefaultHeight, script.MinZoom, script.MaxZoom);
             script.saveZoomInRuntime = EditorGUILayout.ToggleLeft(new GUIContent("Save runtime zoom modifications?", "Save the zoom changes made in runtime so next time the game is loaded that will be the default zoom?"), script.saveZoomInRuntime, EditorStyles.toolbarButton);
             GUILayout.Space(2);
             script.iconsSizeRelativeToZoom = EditorGUILayout.ToggleLeft(new GUIContent("Icons Size Relative to Zoom", "Make the icons size relative to the zoom, this will make the icons bigger when the zoom is increased and smaller when the zoom is decreased."), script.iconsSizeRelativeToZoom, EditorStyles.toolbarButton);
             script.scrollSensitivity = EditorGUILayout.IntSlider(new GUIContent("Zoom Steps", "The amount of zoom increase or deacrese when change it with the scroll."), script.scrollSensitivity, 1, 10);
-            script.IconMultiplier = EditorGUILayout.Slider("Icon Size Multiplier", script.IconMultiplier, 0.05f, 2);
-            script.LerpHeight = EditorGUILayout.Slider("Zoom Speed", script.LerpHeight, 1, 20);
+            script.IconMultiplier = EditorGUILayout.Slider(new GUIContent("Icon Size Multiplier", "Multiplier for the size of all minimap icons."), script.IconMultiplier, 0.05f, 2);
+            script.LerpHeight = EditorGUILayout.Slider(new GUIContent("Zoom Speed", "The speed at which the zoom transitions occur."), script.LerpHeight, 1, 20);
 
             GUILayout.Space(2);
             if (PlayerPrefs.HasKey(bl_MiniMap.MMHeightKey))
@@ -183,23 +188,23 @@ public class bl_MiniMapEditor : Editor
         {
             script.lerpTrackingPosition = EditorGUILayout.ToggleLeft(new GUIContent("Smooth Player Position Tracking?", "Apply a smoothness to the target position follow? Not recommended if the target moves fast."), script.lerpTrackingPosition, EditorStyles.toolbarButton);
             GUILayout.Space(2);
-            script.fullScreenMode = (MiniMapFullScreenMode)EditorGUILayout.EnumPopup("Fullscreen Mode", script.fullScreenMode);
+            script.fullScreenMode = (MiniMapFullScreenMode)EditorGUILayout.EnumPopup(new GUIContent("Fullscreen Mode", "How the minimap expands to fullscreen."), script.fullScreenMode);
             if (script.fullScreenMode != MiniMapFullScreenMode.NoFullScreen)
             {
                 if (script.fullScreenMode == MiniMapFullScreenMode.ScreenArea)
                 {
-                    script.FullMapPosition = EditorGUILayout.Vector3Field("FullScreen Map Position", script.FullMapPosition);
-                    script.FullMapSize = EditorGUILayout.Vector2Field("FullScreen Map Size", script.FullMapSize);
+                    script.FullMapPosition = EditorGUILayout.Vector3Field(new GUIContent("FullScreen Map Position", "The position of the minimap when in fullscreen mode."), script.FullMapPosition);
+                    script.FullMapSize = EditorGUILayout.Vector2Field(new GUIContent("FullScreen Map Size", "The size of the minimap when in fullscreen mode."), script.FullMapSize);
                 }
 
                 if (script.canvasRenderMode == MiniMapRenderMode.Mode3D)
                 {
-                    script.FullMapRotation = EditorGUILayout.Vector3Field("FullScreen Map Rotation", script.FullMapRotation);
+                    script.FullMapRotation = EditorGUILayout.Vector3Field(new GUIContent("FullScreen Map Rotation", "The rotation of the minimap when in fullscreen mode."), script.FullMapRotation);
                 }
 
                 if (script.fullScreenMode != MiniMapFullScreenMode.ScreenArea)
                 {
-                    script.fullScreenMargin = EditorGUILayout.Slider("Fullscreen Margin", script.fullScreenMargin, 0, 100);
+                    script.fullScreenMargin = EditorGUILayout.Slider(new GUIContent("Fullscreen Margin", "The margin from the screen edges when in fullscreen mode."), script.fullScreenMargin, 0, 100);
                 }
             }
         }
@@ -207,14 +212,14 @@ public class bl_MiniMapEditor : Editor
         {
             if (script.fullScreenMode == MiniMapFullScreenMode.ScreenArea && positionProp.isExpanded)
             {
-                if (GUILayout.Button("Catch Position"))
+                if (GUILayout.Button(new GUIContent("Catch Position", "Capture the current minimap position and size for fullscreen settings.")))
                 {
                     script.GetFullMapSize();
                 }
 
                 if (script._isPreviewFullscreen)
                 {
-                    if (GUILayout.Button("Stop Fullscreen Preview"))
+                    if (GUILayout.Button(new GUIContent("Stop Fullscreen Preview", "Exit the fullscreen preview mode.")))
                     {
                         var ui = script.MiniMapUI;
                         if (ui != null)
@@ -230,7 +235,7 @@ public class bl_MiniMapEditor : Editor
                 }
                 else
                 {
-                    if (GUILayout.Button("Preview Fullscreen"))
+                    if (GUILayout.Button(new GUIContent("Preview Fullscreen", "Preview how the minimap looks in fullscreen mode.")))
                     {
                         script.GetMiniMapSize();
                         var ui = script.MiniMapUI;
@@ -254,19 +259,19 @@ public class bl_MiniMapEditor : Editor
         if (GUILayout.Button("Rotation Settings", EditorStyles.toolbarPopup)) { rotationProp.isExpanded = !rotationProp.isExpanded; RotationAnim.target = rotationProp.isExpanded; }
         if (EditorGUILayout.BeginFadeGroup(RotationAnim.faded))
         {
-            script.mapShape = (MiniMapMapShape)EditorGUILayout.EnumPopup("Shape", script.mapShape);
+            script.mapShape = (MiniMapMapShape)EditorGUILayout.EnumPopup(new GUIContent("Shape", "The shape of the minimap (Rectangle or Circle)."), script.mapShape);
             if (script.mapShape == MiniMapMapShape.Circle)
             {
                 script.CompassSize = EditorGUILayout.Slider(new GUIContent("Circle Size", "The radius of the minimap circle, this is to delimitate the position of the minimap icons."), script.CompassSize, 25, 500);
             }
-            script.DynamicRotation = EditorGUILayout.ToggleLeft(new GUIContent("Rotate Map with player", "Rotate the minimap map render with the target rotation, if false only the target icon will rotate."), script.DynamicRotation, EditorStyles.toolbarButton);
-            if (!script.DynamicRotation)
+            script.RotationMode = (MiniMapRotationMode)EditorGUILayout.EnumPopup(new GUIContent("Rotation Mode", "How the minimap rotates relative to the target."), script.RotationMode);
+            if (script.RotationMode != MiniMapRotationMode.RotateMap)
             {
                 script.mapRotationOffset = EditorGUILayout.Slider(new GUIContent("Map Rotation Offset", "In some type of games, the cardinals points would work differently, this allow adjust the map direction to fit as needed."), script.mapRotationOffset, 0, 360);
             }
             script.iconsAlwaysFacingUp = EditorGUILayout.ToggleLeft(new GUIContent("Icons Always Facing Up?", "Force the minimap icons facing up or make them rotate towards their target forward direction?"), script.iconsAlwaysFacingUp, EditorStyles.toolbarButton);
-            script.SmoothRotation = EditorGUILayout.ToggleLeft("Smooth Rotation", script.SmoothRotation, EditorStyles.toolbarButton);
-            if (script.SmoothRotation) { script.LerpRotation = EditorGUILayout.Slider("Rotation Lerp", script.LerpRotation, 1, 20); }
+            script.SmoothRotation = EditorGUILayout.ToggleLeft(new GUIContent("Smooth Rotation", "Enable smooth transitions for map rotation."), script.SmoothRotation, EditorStyles.toolbarButton);
+            if (script.SmoothRotation) { script.LerpRotation = EditorGUILayout.Slider(new GUIContent("Rotation Lerp", "The speed of smooth rotation transitions."), script.LerpRotation, 1, 20); }
         }
         EditorGUILayout.EndFadeGroup();
         EditorGUILayout.EndVertical();
@@ -275,11 +280,29 @@ public class bl_MiniMapEditor : Editor
         if (GUILayout.Button("Grid Settings", EditorStyles.toolbarPopup)) { gripProp.isExpanded = !gripProp.isExpanded; GripAnim.target = gripProp.isExpanded; }
         if (EditorGUILayout.BeginFadeGroup(GripAnim.faded))
         {
-            script.ShowAreaGrid = EditorGUILayout.ToggleLeft("Show Grid", script.ShowAreaGrid, EditorStyles.toolbarButton);
+            script.ShowAreaGrid = EditorGUILayout.ToggleLeft(new GUIContent("Show Dynamic Grid", "Display a grid overlay on the minimap."), script.ShowAreaGrid, EditorStyles.toolbarButton);
             if (script.ShowAreaGrid)
             {
-                script.AreasSize = EditorGUILayout.Slider("Row Grid Size", script.AreasSize, 1, 25);
-                script.gridOpacity = EditorGUILayout.Slider("Grid Opacity", script.gridOpacity, 0, 1);
+                script.AreasSize = EditorGUILayout.Slider(new GUIContent("Row Grid Size", "The size of each grid cell."), script.AreasSize, 1, 25);
+                script.gridOpacity = EditorGUILayout.Slider(new GUIContent("Grid Opacity", "The transparency level of the grid."), script.gridOpacity, 0, 1);
+            }
+        }
+        EditorGUILayout.EndFadeGroup();
+        EditorGUILayout.EndVertical();
+
+        // fog of war settings
+
+        EditorGUILayout.BeginVertical("box");
+        if (GUILayout.Button("Fog of War Settings", EditorStyles.toolbarPopup)) { fogProp.isExpanded = !fogProp.isExpanded; FogAnim.target = fogProp.isExpanded; }
+        if (EditorGUILayout.BeginFadeGroup(FogAnim.faded))
+        {
+            script.hasFogOfWar = EditorGUILayout.ToggleLeft(new GUIContent("Enable Fog of War", "Hide unexplored areas of the map."), script.hasFogOfWar, EditorStyles.toolbarButton);
+            if (script.hasFogOfWar)
+            {
+                script.fogOfWarUpdateRate = EditorGUILayout.IntSlider(new GUIContent("Fog Update Rate", "How often the fog of war updates the revealed area based on the target position."), script.fogOfWarUpdateRate, 1, 60);
+                script.fogOfWarRadius = EditorGUILayout.Slider(new GUIContent("Revealed Radius", "The radius around the target that will be revealed in the minimap."), script.fogOfWarRadius, 0.01f, 0.5f);
+                script.fogOfWarSoftness = EditorGUILayout.Slider(new GUIContent("Fog Softness", "The softness of the edge of the revealed area."), script.fogOfWarSoftness, 0.01f, 0.5f);
+                script.fogOfWarColor = EditorGUILayout.ColorField(new GUIContent("Fog Color", "The color of the fog covering unexplored areas."), script.fogOfWarColor);
             }
         }
         EditorGUILayout.EndFadeGroup();
@@ -292,9 +315,9 @@ public class bl_MiniMapEditor : Editor
             script.AllowMapMarks = EditorGUILayout.ToggleLeft(new GUIContent("Allow Map Pointers", "Allow create pointers when click over the minimap?"), script.AllowMapMarks, EditorStyles.toolbarButton);
             if (script.AllowMapMarks)
             {
-                script.AllowMultipleMarks = EditorGUILayout.ToggleLeft("Allow multiple marks", script.AllowMultipleMarks, EditorStyles.toolbarButton);
+                script.AllowMultipleMarks = EditorGUILayout.ToggleLeft(new GUIContent("Allow multiple marks", "Permit placing multiple map pointers simultaneously."), script.AllowMultipleMarks, EditorStyles.toolbarButton);
                 script.showPathNav = EditorGUILayout.ToggleLeft(new GUIContent("Show Path Navigation", "Show Path Navigation from the player position to the mark position?"), script.showPathNav, EditorStyles.toolbarButton);
-                script.MapPointerPrefab = EditorGUILayout.ObjectField("Pointer Prefab", script.MapPointerPrefab, typeof(GameObject), allowSceneObjects) as GameObject;
+                script.MapPointerPrefab = EditorGUILayout.ObjectField(new GUIContent("Pointer Prefab", "The prefab used for map pointers."), script.MapPointerPrefab, typeof(GameObject), allowSceneObjects) as GameObject;
             }
         }
         EditorGUILayout.EndFadeGroup();
@@ -304,30 +327,30 @@ public class bl_MiniMapEditor : Editor
         if (GUILayout.Button("Drag Settings", EditorStyles.toolbarPopup)) { dragProp.isExpanded = !dragProp.isExpanded; DragAnim.target = dragProp.isExpanded; }
         if (EditorGUILayout.BeginFadeGroup(DragAnim.faded))
         {
-            script.CanDragMiniMap = EditorGUILayout.ToggleLeft("Active Drag MiniMap", script.CanDragMiniMap, EditorStyles.toolbarButton);
+            script.CanDragMiniMap = EditorGUILayout.ToggleLeft(new GUIContent("Active Drag MiniMap", "Allow dragging the minimap to pan the view."), script.CanDragMiniMap, EditorStyles.toolbarButton);
             if (script.CanDragMiniMap)
             {
-                script.DragOnlyOnFullScreen = EditorGUILayout.ToggleLeft("Only on full screen", script.DragOnlyOnFullScreen, EditorStyles.toolbarButton);
-                script.ResetOffSetOnChange = EditorGUILayout.ToggleLeft("Auto reset position", script.ResetOffSetOnChange, EditorStyles.toolbarButton);
+                script.DragOnlyOnFullScreen = EditorGUILayout.ToggleLeft(new GUIContent("Only on full screen", "Restrict dragging to fullscreen mode only."), script.DragOnlyOnFullScreen, EditorStyles.toolbarButton);
+                script.ResetOffSetOnChange = EditorGUILayout.ToggleLeft(new GUIContent("Auto reset position", "Automatically reset the drag offset when switching modes."), script.ResetOffSetOnChange, EditorStyles.toolbarButton);
                 var lw = EditorGUIUtility.labelWidth;
                 EditorGUIUtility.labelWidth = 100;
                 EditorGUILayout.BeginHorizontal();
                 Vector2 v = script.DragMovementSpeed;
-                v.x = EditorGUILayout.Slider("Horizontal Speed", v.x, 0.01f, 30);
-                v.y = EditorGUILayout.Slider("Vertical Speed", v.y, 0.01f, 30);
+                v.x = EditorGUILayout.Slider(new GUIContent("Horizontal Speed", "Speed of horizontal dragging."), v.x, 0.01f, 30);
+                v.y = EditorGUILayout.Slider(new GUIContent("Vertical Speed", "Speed of vertical dragging."), v.y, 0.01f, 30);
                 script.DragMovementSpeed = v;
                 EditorGUILayout.EndHorizontal();
                 EditorGUILayout.BeginHorizontal();
                 Vector2 v2 = script.MaxOffSetPosition;
-                v2.x = EditorGUILayout.Slider("MinMax Horizontal", v2.x, 1, 2000);
-                v2.y = EditorGUILayout.Slider("MinMax Vertical", v2.y, 1, 2000);
+                v2.x = EditorGUILayout.Slider(new GUIContent("MinMax Horizontal", "Maximum horizontal drag offset."), v2.x, 1, 2000);
+                v2.y = EditorGUILayout.Slider(new GUIContent("MinMax Vertical", "Maximum vertical drag offset."), v2.y, 1, 2000);
                 script.MaxOffSetPosition = v2;
                 EditorGUILayout.EndHorizontal();
-                script.DragCursorIcon = EditorGUILayout.ObjectField("Drag cursor image", script.DragCursorIcon, typeof(Texture2D), allowSceneObjects) as Texture2D;
+                script.DragCursorIcon = EditorGUILayout.ObjectField(new GUIContent("Drag cursor image", "The cursor texture shown during dragging."), script.DragCursorIcon, typeof(Texture2D), allowSceneObjects) as Texture2D;
                 EditorGUILayout.BeginHorizontal();
                 Vector2 v3 = script.HotSpot;
-                v3.x = EditorGUILayout.Slider("Cursor X offset", v3.x, 0.01f, 10);
-                v3.y = EditorGUILayout.Slider("Cursor Y offset", v3.y, 0.01f, 10);
+                v3.x = EditorGUILayout.Slider(new GUIContent("Cursor X offset", "Horizontal offset for the drag cursor."), v3.x, 0.01f, 10);
+                v3.y = EditorGUILayout.Slider(new GUIContent("Cursor Y offset", "Vertical offset for the drag cursor."), v3.y, 0.01f, 10);
                 script.HotSpot = v3;
                 EditorGUILayout.EndHorizontal();
                 EditorGUIUtility.labelWidth = lw;
@@ -340,9 +363,9 @@ public class bl_MiniMapEditor : Editor
         if (GUILayout.Button("Animations Settings", EditorStyles.toolbarPopup)) { rotationProp.isExpanded = !rotationProp.isExpanded; AnimationsAnim.target = rotationProp.isExpanded; }
         if (EditorGUILayout.BeginFadeGroup(AnimationsAnim.faded))
         {
-            script.FadeOnFullScreen = EditorGUILayout.ToggleLeft("Fade on full screen", script.FadeOnFullScreen, EditorStyles.toolbarButton);
-            script.sizeTransitionDuration = EditorGUILayout.Slider("Resize Transition Duration", script.sizeTransitionDuration, 0.1f, 2);
-            script.sizeTransitionCurve = EditorGUILayout.CurveField("Resize Transition Curve", script.sizeTransitionCurve);
+            script.FadeOnFullScreen = EditorGUILayout.ToggleLeft(new GUIContent("Fade on full screen", "Fade the minimap when entering fullscreen."), script.FadeOnFullScreen, EditorStyles.toolbarButton);
+            script.sizeTransitionDuration = EditorGUILayout.Slider(new GUIContent("Resize Transition Duration", "Duration of the size transition animation."), script.sizeTransitionDuration, 0.1f, 2);
+            script.sizeTransitionCurve = EditorGUILayout.CurveField(new GUIContent("Resize Transition Curve", "Animation curve for size transitions."), script.sizeTransitionCurve);
         }
         EditorGUILayout.EndFadeGroup();
         EditorGUILayout.EndVertical();
@@ -351,8 +374,8 @@ public class bl_MiniMapEditor : Editor
         if (GUILayout.Button("Render Settings", EditorStyles.toolbarPopup)) { renderProp.isExpanded = !renderProp.isExpanded; RenderAnim.target = renderProp.isExpanded; }
         if (EditorGUILayout.BeginFadeGroup(RenderAnim.faded))
         {
-            script.PlayerIconSprite = EditorGUILayout.ObjectField("Player Icon", script.PlayerIconSprite, typeof(Sprite), false) as Sprite;
-            script.playerColor = EditorGUILayout.ColorField("Player Color", script.playerColor);
+            script.PlayerIconSprite = EditorGUILayout.ObjectField(new GUIContent("Player Icon", "The sprite used for the player icon on the minimap."), script.PlayerIconSprite, typeof(Sprite), false) as Sprite;
+            script.playerColor = EditorGUILayout.ColorField(new GUIContent("Player Color", "The color tint applied to the player icon."), script.playerColor);
             script.emptySpaceColor = EditorGUILayout.ColorField(new GUIContent("Empty Space Color", "Color of the empty space in the minimap."), script.emptySpaceColor);
             if (script.showPathNav)
             {
@@ -360,7 +383,7 @@ public class bl_MiniMapEditor : Editor
                 script.navPathWidth = EditorGUILayout.Slider(new GUIContent("Nav Path Thickness", "The Thickness of the navigation path line."), script.navPathWidth, 0.1f, 10);
             }
             float size = script.playerIconSize;
-            script.playerIconSize = EditorGUILayout.Slider("Player Icon Size", script.playerIconSize, 1f, 40);
+            script.playerIconSize = EditorGUILayout.Slider(new GUIContent("Player Icon Size", "The size of the player icon."), script.playerIconSize, 1f, 40);
             if (size != script.playerIconSize && script.MiniMapUI != null && script.MiniMapUI.playerIcon != null)
             {
                 script.MiniMapUI.playerIcon.SetSize(script.playerIconSize);
@@ -369,13 +392,13 @@ public class bl_MiniMapEditor : Editor
             script.overallOpacity = EditorGUILayout.Slider(new GUIContent("MiniMap Opacity", "The opacity of the whole minimap UI."), script.overallOpacity, 0, 1);
             script.backgroundOpacity = EditorGUILayout.Slider(new GUIContent("Background Opacity", "The opacity of the background UI in the minimap."), script.backgroundOpacity, 0, 1);
             if (script.renderType == MiniMapRenderType.Picture)
-                script.planeSaturation = EditorGUILayout.Slider("Map Saturation", script.planeSaturation, 0.2f, 2);
+                script.planeSaturation = EditorGUILayout.Slider(new GUIContent("Map Saturation", "Adjust the color saturation of the map texture."), script.planeSaturation, 0.2f, 2);
             script.cameraUpdateMode = (MiniMapCameraUpdateMode)EditorGUILayout.EnumPopup(new GUIContent("Camera Update Mode", "Every Frame = Default engine camera update mode.\nRate Limited = Update the camera by script based in the minimap update rate limit (better performance)."), script.cameraUpdateMode);
 
             EditorGUILayout.BeginHorizontal();
             {
-                script._rtSize = (MiniMapRTSize)EditorGUILayout.EnumPopup("Render Texture Size", script._rtSize);
-                if (GUILayout.Button("Set", EditorStyles.miniButton, GUILayout.Width(40)))
+                script._rtSize = (MiniMapRTSize)EditorGUILayout.EnumPopup(new GUIContent("Render Texture Size", "Resolution of the render texture for the minimap."), script._rtSize);
+                if (GUILayout.Button(new GUIContent("Set", "Apply the selected render texture size."), EditorStyles.miniButton, GUILayout.Width(40)))
                 {
                     string sizeString = script._rtSize.ToString().Replace("_", "");
                     string rtAssetName = "minimap_rt_" + sizeString;
@@ -413,12 +436,12 @@ public class bl_MiniMapEditor : Editor
         if (GUILayout.Button("References", EditorStyles.toolbarPopup)) { refProp.isExpanded = !refProp.isExpanded; ReferencesAnim.target = refProp.isExpanded; }
         if (EditorGUILayout.BeginFadeGroup(ReferencesAnim.faded))
         {
-            script.minimapRig = EditorGUILayout.ObjectField("Mini Map Rig", script.minimapRig, typeof(Transform), allowSceneObjects) as Transform;
-            script.miniMapCamera = EditorGUILayout.ObjectField("Mini Map Camera", script.miniMapCamera, typeof(Camera), allowSceneObjects) as Camera;
-            script.ItemPrefabSimple = EditorGUILayout.ObjectField("Icon Simple Prefab", script.ItemPrefabSimple, typeof(GameObject), allowSceneObjects) as GameObject;
+            script.minimapRig = EditorGUILayout.ObjectField(new GUIContent("Mini Map Rig", "The transform that holds the minimap camera and plane."), script.minimapRig, typeof(Transform), allowSceneObjects) as Transform;
+            script.miniMapCamera = EditorGUILayout.ObjectField(new GUIContent("Mini Map Camera", "The camera used to render the minimap."), script.miniMapCamera, typeof(Camera), allowSceneObjects) as Camera;
+            script.ItemPrefabSimple = EditorGUILayout.ObjectField(new GUIContent("Icon Simple Prefab", "The prefab for simple minimap icons."), script.ItemPrefabSimple, typeof(GameObject), allowSceneObjects) as GameObject;
 
-            script.mapBounds = EditorGUILayout.ObjectField("Map Bounds", script.mapBounds, typeof(bl_MiniMapBounds), allowSceneObjects) as bl_MiniMapBounds;
-            script.m_Canvas = EditorGUILayout.ObjectField("Canvas", script.m_Canvas, typeof(Canvas), allowSceneObjects) as Canvas;
+            script.mapBounds = EditorGUILayout.ObjectField(new GUIContent("Map Bounds", "The component defining the boundaries of the map."), script.mapBounds, typeof(bl_MiniMapBounds), allowSceneObjects) as bl_MiniMapBounds;
+            script.m_Canvas = EditorGUILayout.ObjectField(new GUIContent("Canvas", "The UI canvas containing the minimap."), script.m_Canvas, typeof(Canvas), allowSceneObjects) as Canvas;
         }
         EditorGUILayout.EndFadeGroup();
         EditorGUILayout.EndVertical();

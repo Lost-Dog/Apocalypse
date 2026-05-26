@@ -30,35 +30,17 @@ MonoBehaviour:
   requireNoDeaths: 0
   requireStealth: 0
   objectiveDescription: Complete the challenge
-  sharedSpawnPoints:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  sharedSpawnPoints: []
   spawnItems:
   - itemName: Boss
-    prefab: {fileID: 4087107557208246455, guid: 3eed6798f0ab4b14289150fc4a4c5158,
-      type: 3}
+    prefab: {fileID: 1645189946640246, guid: b796c65458d0efc44b9b996819aa248f, type: 3}
     category: 7
     minCount: 2
     maxCount: 2
     usePoolMode: 0
     customSpawnPoints: []
     spawnLocation: 0
-    spawnRadius: 0
+    spawnRadius: 15
     offset: {x: 0, y: 0, z: 0}
     requireNavMesh: 1
     randomRotation: 1
@@ -119,7 +101,7 @@ MonoBehaviour:
   rewardScalingMultiplier: 1
   challengeIcon: {fileID: 0}
   difficultyColor: {r: 1, g: 0.5, b: 0, a: 1}
-  startSound: {fileID: 0}
+  startSound: {fileID: 8300000, guid: ec9306b5d9dffa0278bf32847e00fa9f, type: 3}
   completeSound: {fileID: 0}
   failSound: {fileID: 0}
   spawnVFX: {fileID: 1796635450895110, guid: 1103bc5779fcc26419c248d4fd2f8586, type: 3}

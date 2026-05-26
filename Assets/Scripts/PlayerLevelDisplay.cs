@@ -2,35 +2,44 @@ using TMPro;
 using UnityEngine;
 
 /// <summary>
-/// Displays the player's current level sourced from <see cref="PlayerTraitsRuntime"/>.
-/// Refreshes once per second to avoid per-frame string allocation overhead.
+/// Displays the player's current level, driven entirely by <see cref="ProgressionManager.onLevelUp"/>.
+/// No polling — the label updates only when a level-up event is fired.
 /// </summary>
 public class PlayerLevelDisplay : MonoBehaviour
 {
-    private const float RefreshInterval = 1f;
-    private const string LabelFormat    = "LVL {0}";
+    private const string LabelFormat = "{0}";
 
     [SerializeField] private TextMeshProUGUI levelLabel;
 
-    private int   _lastLevel    = -1;
-    private float _refreshTimer;
-
-    private void Update()
+    private void Start()
     {
-        _refreshTimer += Time.deltaTime;
-        if (_refreshTimer < RefreshInterval) return;
-        _refreshTimer = 0f;
-        Refresh();
+        // Start() runs after all Awake() calls, so ProgressionManager.Instance is guaranteed to exist.
+        if (ProgressionManager.Instance != null)
+        {
+            ProgressionManager.Instance.onLevelUp.AddListener(OnLevelUp);
+            SetLevel(ProgressionManager.Instance.currentLevel);
+        }
+        else
+        {
+            Debug.LogWarning("[PlayerLevelDisplay] ProgressionManager not found — level label will not update.");
+        }
     }
 
-    private void Refresh()
+    private void OnDestroy()
     {
-        if (PlayerTraitsRuntime.Instance == null) return;
+        if (ProgressionManager.Instance != null)
+            ProgressionManager.Instance.onLevelUp.RemoveListener(OnLevelUp);
+    }
 
-        int level = PlayerTraitsRuntime.Instance.CurrentLevel;
-        if (level == _lastLevel) return;
+    /// <summary>Called by ProgressionManager.onLevelUp whenever the player levels up.</summary>
+    private void OnLevelUp(int newLevel)
+    {
+        SetLevel(newLevel);
+    }
 
-        _lastLevel = level;
-        levelLabel.text = string.Format(LabelFormat, level);
+    private void SetLevel(int level)
+    {
+        if (levelLabel != null)
+            levelLabel.text = string.Format(LabelFormat, level);
     }
 }

@@ -30,6 +30,7 @@ MonoBehaviour:
   requireNoDeaths: 0
   requireStealth: 0
   objectiveDescription: Complete the challenge
+  sharedSpawnPoints: []
   spawnItems:
   - itemName: Enemy Threats
     prefab: {fileID: 2166067723440681891, guid: 6efc6ed876616f144a7ee0cc8f0cec62,
@@ -38,6 +39,7 @@ MonoBehaviour:
     minCount: 6
     maxCount: 10
     usePoolMode: 0
+    customSpawnPoints: []
     spawnLocation: 1
     spawnRadius: 20
     offset: {x: 0, y: 0, z: 0}
@@ -47,14 +49,14 @@ MonoBehaviour:
     priority: 5
     required: 1
   - itemName: Civilians to Rescue
-    prefab: {fileID: 4420673318631931856, guid: c040e5b3bf715b746a29433408162a9a,
-      type: 3}
+    prefab: {fileID: 1106020874876768, guid: e15e8df86e8fb974cb9abbffa32c8a29, type: 3}
     category: 2
     minCount: 10
     maxCount: 10
     usePoolMode: 0
-    spawnLocation: 3
-    spawnRadius: 15
+    customSpawnPoints: []
+    spawnLocation: 0
+    spawnRadius: 30
     offset: {x: 0, y: 0, z: 0}
     requireNavMesh: 0
     randomRotation: 1
@@ -83,7 +85,7 @@ MonoBehaviour:
   rewardScalingMultiplier: 1
   challengeIcon: {fileID: 0}
   difficultyColor: {r: 0, g: 1, b: 0, a: 1}
-  startSound: {fileID: 0}
+  startSound: {fileID: 8300000, guid: 83a71393fdff51b1e8dfd7884f9011a7, type: 3}
   completeSound: {fileID: 0}
   failSound: {fileID: 0}
   spawnVFX: {fileID: 1796635450895110, guid: 1103bc5779fcc26419c248d4fd2f8586, type: 3}

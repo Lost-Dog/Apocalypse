@@ -17,7 +17,7 @@ MonoBehaviour:
   challengeType: 0
   frequency: 1
   difficulty: 1
-  iconData: {fileID: 0}
+  iconData: {fileID: 11400000, guid: 44a9a005006fac54c8333e0f70f69f37, type: 2}
   recommendedLevel: 1
   requiredPlayerLevel: 1
   timeLimit: 86400
@@ -30,13 +30,30 @@ MonoBehaviour:
   requireNoDeaths: 0
   requireStealth: 0
   objectiveDescription: Complete the challenge
-  spawnItems: []
+  sharedSpawnPoints: []
+  spawnItems:
+  - itemName: Enemies
+    prefab: {fileID: 1831302938180596, guid: 919c5e4c238e26c408ef79c7e7e63a08, type: 3}
+    category: 0
+    minCount: 5
+    maxCount: 5
+    usePoolMode: 0
+    customSpawnPoints: []
+    spawnLocation: 0
+    spawnRadius: 0
+    offset: {x: 0, y: 0, z: 0}
+    requireNavMesh: 0
+    randomRotation: 0
+    fixedRotation: {x: 0, y: 0, z: 0}
+    priority: 0
+    required: 0
   modifiers: []
   baseXPReward: 200
   baseCurrencyReward: 100
   guaranteedLootRarity: 2
   guaranteedLootCount: 1
-  bonusRewards: []
+  bonusRewards:
+  - {fileID: 150024, guid: b13b1a669dda56f4cbd8fb0d831eec76, type: 3}
   perfectCompletionBonus: 1
   perfectCompletionXPMultiplier: 1.5
   speedCompletionBonus: 1

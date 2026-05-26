@@ -6,7 +6,8 @@ namespace Lovatto.MiniMap
     {
         public GameObject mapPlane;
         public GameObject gridPlane;
-        public Material planeMaterial, planeMobileMaterial;
+        [SerializeField] private bl_MiniMapFogOfWar fogOfWar = null;
+        public Material planeMaterial, planeMobileMaterial;  
 
         private Transform m_Transform;
         private bl_MiniMap m_Minimap;
@@ -47,7 +48,12 @@ namespace Lovatto.MiniMap
             //Apply MiniMap Layer
             mapPlane.layer = minimap.MiniMapLayer;
             gridPlane.layer = minimap.MiniMapLayer;
-            gameObject.hideFlags = HideFlags.HideInHierarchy;
+            if (fogOfWar != null)
+            {
+                fogOfWar.gameObject.layer = minimap.MiniMapLayer;
+                fogOfWar.Setup(this);
+            }
+           if(!bl_MiniMapData.Instance.showPlanesInHierarchy) gameObject.hideFlags = HideFlags.HideInHierarchy;
             gameObject.name = $"Minimap Plane ({minimap.gameObject.name})";
             mapPlane.SetActive(minimap.renderType == MiniMapRenderType.Picture);
             gridPlane.SetActive(minimap.ShowAreaGrid);
@@ -65,6 +71,11 @@ namespace Lovatto.MiniMap
                 {
                     SetupMultiRender();
                 }
+            }
+            
+            if(fogOfWar != null)
+            {
+                fogOfWar.gameObject.SetActive(minimap.hasFogOfWar);
             }
 
             Invoke(nameof(DelayPositionInvoke), 1);
@@ -170,6 +181,12 @@ namespace Lovatto.MiniMap
             if (gridPlane == null) return;
             gridPlane.SetActive(active);
         }
+        
+        public override void SetActiveFog(bool active)
+        {
+            if (fogOfWar == null) return;
+            fogOfWar.gameObject.SetActive(active);
+        }
 
         /// <summary>
         /// Create Material for Minimap image in plane.
@@ -189,5 +206,7 @@ namespace Lovatto.MiniMap
         {
             get { return mapPlane.GetComponent<Renderer>(); }
         }
+        
+        public override bl_MiniMap MiniMap { get { return m_Minimap; } }
     }
 }

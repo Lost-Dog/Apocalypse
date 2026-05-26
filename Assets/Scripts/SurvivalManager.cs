@@ -145,6 +145,20 @@ public class SurvivalManager : MonoBehaviour
     public bool enableThirstSystem = true;
     public bool showDebugInfo = false;
 
+    [Header("Armour Settings")]
+    [Tooltip("Enable the armour system. When enabled, damage depletes armour before health.")]
+    public bool enableArmourSystem = true;
+    [Tooltip("Current armour value. Initialised from PlayerTraitsRuntime on Start.")]
+    [Range(0f, 100000f)] public float currentArmour = 100f;
+    [Tooltip("Maximum armour. Driven by PlayerTraitsRuntime based on level — do not set manually.")]
+    public float maxArmour = 100f;
+    [Tooltip("Armour regenerates passively at this rate (points per second) when out of combat.")]
+    public float armourRegenRate = 5f;
+    [Tooltip("Seconds after taking damage before armour regen resumes.")]
+    public float armourRegenDelay = 4f;
+    [Tooltip("Fired whenever armour changes. Passes (currentArmour, maxArmour).")]
+    public UnityEvent<float, float> onArmourChanged;
+
     [Header("Performance Optimization")]
     [Tooltip("Use update intervals instead of every-frame updates (90% CPU reduction)")]
     public bool useUpdateIntervals = true;
@@ -169,6 +183,9 @@ public class SurvivalManager : MonoBehaviour
     private bool isIndoors = false;
     private bool isNearFire = false;
     private bool isInColdZone = false;
+
+    // Armour regen cooldown — reset to armourRegenDelay each time damage is taken.
+    private float _armourRegenTimer = 0f;
 
     // OPTIMIZATION: Update interval tracking
     private float updateIntervalTimer = 0f;
@@ -230,19 +247,33 @@ public class SurvivalManager : MonoBehaviour
         if (playerProvider == null)
             Debug.LogWarning("SurvivalManager: No IPlayerProvider found — health damage will not be applied.");
         else
+        {
             playerProvider.OnHealthChanged += HandleHealthChanged;
+            playerProvider.OnArmourChanged += HandleArmourChanged;
+        }
 
         if (progressionManager == null)
             progressionManager = FindFirstObjectByType<ProgressionManager>();
 
         if (progressionManager == null)
             Debug.LogWarning("SurvivalManager: Could not find ProgressionManager!");
+        else
+            progressionManager.onLevelUp.AddListener(OnLevelUp);
+
+        // Initialise armour cap from current level.
+        SyncArmourCapFromTraits();
     }
 
     private void OnDestroy()
     {
         if (playerProvider != null)
+        {
             playerProvider.OnHealthChanged -= HandleHealthChanged;
+            playerProvider.OnArmourChanged -= HandleArmourChanged;
+        }
+
+        if (progressionManager != null)
+            progressionManager.onLevelUp.RemoveListener(OnLevelUp);
     }
 
     private static IPlayerProvider FindAnyPlayerProvider()
@@ -259,7 +290,66 @@ public class SurvivalManager : MonoBehaviour
     private void HandleHealthChanged(float current, float max)
     {
         onHealthChanged?.Invoke(current, max);
+
+        // Reset armour regen cooldown whenever health decreases (enemy damage hit through armour).
+        if (enableArmourSystem)
+            _armourRegenTimer = armourRegenDelay;
     }
+
+    private void HandleArmourChanged(float current, float max)
+    {
+        currentArmour = current;
+        maxArmour     = max;
+        onArmourChanged?.Invoke(current, max);
+
+        // Reset regen cooldown whenever armour drops (enemy damage is absorbed by armour).
+        if (enableArmourSystem && current < max)
+            _armourRegenTimer = armourRegenDelay;
+    }
+
+    // ── Armour helpers ────────────────────────────────────────────────────────
+
+    private void OnLevelUp(int newLevel)
+    {
+        SyncArmourCapFromTraits();
+    }
+
+    private void SyncArmourCapFromTraits()
+    {
+        if (PlayerTraitsRuntime.Instance == null) return;
+
+        int cap = PlayerTraitsRuntime.Instance.CurrentMaxArmour;
+        if (cap <= 0) return;
+
+        maxArmour = cap;
+
+        // Propagate to InvectorPlayerProvider so the interception layer knows
+        // the updated cap. Do not refill — player keeps current armour.
+        if (playerProvider is InvectorPlayerProvider ipp)
+            ipp.SetMaxArmour(cap, refillToMax: false);
+
+        if (currentArmour > maxArmour)
+            currentArmour = maxArmour;
+
+        onArmourChanged?.Invoke(currentArmour, maxArmour);
+    }
+
+    /// <summary>Sets armour to a specific value, clamped to [0, maxArmour].</summary>
+    public void SetArmour(float value)
+    {
+        currentArmour = Mathf.Clamp(value, 0f, maxArmour);
+        playerProvider?.SetArmour(currentArmour);
+        onArmourChanged?.Invoke(currentArmour, maxArmour);
+    }
+
+    /// <summary>Modifies armour by a delta (positive = add, negative = drain).</summary>
+    public void ModifyArmour(float delta) => SetArmour(currentArmour + delta);
+
+    /// <summary>Fully restores armour to its maximum value.</summary>
+    public void ResetArmour() => SetArmour(maxArmour);
+
+    /// <summary>Returns armour as a 0–1 normalised fraction.</summary>
+    public float ArmourPercentage => maxArmour > 0f ? currentArmour / maxArmour : 0f;
 
     private void Update()
     {
@@ -327,6 +417,11 @@ public class SurvivalManager : MonoBehaviour
         {
             UpdateThirst();
             ApplyThirstEffects();
+        }
+
+        if (enableArmourSystem)
+        {
+            UpdateArmourRegen(deltaTime);
         }
     }
 
@@ -474,6 +569,21 @@ public class SurvivalManager : MonoBehaviour
         }
     }
 
+    private void UpdateArmourRegen(float deltaTime)
+    {
+        if (!enableArmourSystem || playerProvider == null) return;
+        if (currentArmour >= maxArmour) return;
+
+        if (_armourRegenTimer > 0f)
+        {
+            _armourRegenTimer -= deltaTime;
+            return;
+        }
+
+        float regen = armourRegenRate * deltaTime;
+        SetArmour(currentArmour + regen);
+    }
+
     private void ApplyInfectionEffects()
     {
         if (!isInCriticalInfection || playerProvider == null)
@@ -493,6 +603,11 @@ public class SurvivalManager : MonoBehaviour
         if (playerProvider == null || damagePerSecond <= 0f) return;
 
         float damage = damagePerSecond * damageTickInterval;
+
+        // Reset armour regen cooldown whenever the player takes survival damage.
+        if (enableArmourSystem)
+            _armourRegenTimer = armourRegenDelay;
+
         playerProvider.ApplyDamage(damage);
 
         if (showDebugInfo)
@@ -676,6 +791,7 @@ public class SurvivalManager : MonoBehaviour
         ResetInfection();
         ResetHunger();
         ResetThirst();
+        ResetArmour();
         playerProvider?.SetHealth(playerProvider.MaxHealth);
     }
 

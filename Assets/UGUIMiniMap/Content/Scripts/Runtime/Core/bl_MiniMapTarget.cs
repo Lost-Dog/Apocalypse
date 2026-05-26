@@ -35,5 +35,10 @@ namespace Lovatto.MiniMap
         {
             return rotationTarget != null ? rotationTarget : target;
         }
+        
+        public static bl_MiniMapTarget Get()
+        {
+          return FindFirstObjectByType<bl_MiniMapTarget>();
+        }
     }
 }

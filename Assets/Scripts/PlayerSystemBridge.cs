@@ -23,6 +23,7 @@ public class PlayerSystemBridge : MonoBehaviour
     private IPlayerProvider playerProvider;
     private GameManager     gameManager;
     private HUDManager      hudManager;
+    private float           lastKnownHealth = -1f;
 
     private void Start()
     {
@@ -72,6 +73,11 @@ public class PlayerSystemBridge : MonoBehaviour
             Debug.LogWarning("[PlayerSystemBridge] GameManager not found. Some features will be disabled.");
         }
 
+        if (playerProvider != null)
+        {
+            lastKnownHealth = playerProvider.Health;
+        }
+
         UpdateHealthUI();
     }
 
@@ -84,11 +90,24 @@ public class PlayerSystemBridge : MonoBehaviour
     private void OnPlayerDeath()
     {
         if (showDebugLogs) Debug.Log("[PlayerSystemBridge] Player died!");
+
+        if (ChallengeManager.Instance != null)
+        {
+            ChallengeManager.Instance.OnPlayerDied(GetPlayerPosition());
+        }
+
         UpdateHealthUI();
     }
 
     private void OnHealthChanged(float current, float max)
     {
+        if (lastKnownHealth >= 0f && current < lastKnownHealth && ChallengeManager.Instance != null)
+        {
+            float damageAmount = lastKnownHealth - current;
+            ChallengeManager.Instance.OnPlayerDamaged(GetPlayerPosition(), damageAmount);
+        }
+
+        lastKnownHealth = current;
         UpdateHealthUI();
     }
 
@@ -158,5 +177,15 @@ public class PlayerSystemBridge : MonoBehaviour
                 return provider;
         }
         return null;
+    }
+
+    private Vector3 GetPlayerPosition()
+    {
+        if (playerProvider?.PlayerObject != null)
+        {
+            return playerProvider.PlayerObject.transform.position;
+        }
+
+        return transform.position;
     }
 }

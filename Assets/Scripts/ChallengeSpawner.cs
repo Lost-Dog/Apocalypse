@@ -336,6 +336,9 @@ public class ChallengeSpawner : MonoBehaviour
         int totalSpawned = 0;
         int totalFailed = 0;
         
+        // Minimum NavMesh search radius used when an item's own radius is too small to sample against.
+        const float minNavMeshSearchRadius = 15f;
+
         foreach (ChallengeData.SpawnableItem item in sortedItems)
         {
             // Enemies are handled by SpawnEnemiesInRadius
@@ -349,10 +352,18 @@ public class ChallengeSpawner : MonoBehaviour
                 totalFailed++;
                 continue;
             }
-            
-            int countToSpawn = item.usePoolMode ? 
-                Mathf.Min(item.maxCount, item.minCount) : 
-                Random.Range(item.minCount, item.maxCount + 1);
+
+            int effectiveMin = Mathf.Min(item.minCount, item.maxCount);
+            int effectiveMax = Mathf.Max(item.minCount, item.maxCount);
+            int countToSpawn = item.usePoolMode ?
+                effectiveMin :
+                Random.Range(effectiveMin, effectiveMax + 1);
+
+            if (countToSpawn <= 0)
+            {
+                Debug.LogWarning($"⚠️ Spawn item '{item.itemName}' resolved to 0 count (min={item.minCount} max={item.maxCount}), skipping.");
+                continue;
+            }
             
             int spawnedCount = 0;
             int failedCount = 0;
@@ -402,6 +413,10 @@ public class ChallengeSpawner : MonoBehaviour
             else
             {
                 Debug.Log($"✓ Using random/procedural spawning for {item.itemName} (spawnLocation: {item.spawnLocation}, radius: {item.spawnRadius}m)");
+
+                // When radius is 0 and NavMesh sampling is required, use a broad fallback radius so
+                // the SamplePosition call has a realistic chance of finding a valid point.
+                float effectiveNavMeshRadius = Mathf.Max(item.spawnRadius, minNavMeshSearchRadius);
                 
                 for (int i = 0; i < countToSpawn; i++)
                 {
@@ -416,49 +431,67 @@ public class ChallengeSpawner : MonoBehaviour
                     Quaternion spawnRotation = item.randomRotation ? 
                         Quaternion.Euler(0, Random.Range(0f, 360f), 0) : 
                         Quaternion.Euler(item.fixedRotation.x, item.fixedRotation.y, item.fixedRotation.z);
-                    
+
+                    float useRadius = Mathf.Max(item.spawnRadius, 0f);
                     switch (item.spawnLocation)
                     {
                         case ChallengeData.SpawnLocationType.AtCenter:
                             spawnPosition = challenge.position + item.offset;
                             break;
                         case ChallengeData.SpawnLocationType.RandomInRadius:
-                            Vector2 randomCircle = Random.insideUnitCircle * item.spawnRadius;
+                            Vector2 randomCircle = useRadius > 0f
+                                ? Random.insideUnitCircle * useRadius
+                                : Vector2.zero;
                             spawnPosition = challenge.position + new Vector3(randomCircle.x, 0, randomCircle.y) + item.offset;
                             break;
                         case ChallengeData.SpawnLocationType.RandomOnEdge:
-                            Vector2 randomEdge = Random.insideUnitCircle.normalized * item.spawnRadius;
+                            Vector2 randomEdge = useRadius > 0f
+                                ? Random.insideUnitCircle.normalized * useRadius
+                                : Vector2.zero;
                             spawnPosition = challenge.position + new Vector3(randomEdge.x, 0, randomEdge.y) + item.offset;
                             break;
                         case ChallengeData.SpawnLocationType.AroundPerimeter:
                             float angle = (360f / countToSpawn) * i;
                             float radians = angle * Mathf.Deg2Rad;
-                            Vector3 perimeterOffset = new Vector3(Mathf.Cos(radians), 0, Mathf.Sin(radians)) * item.spawnRadius;
+                            Vector3 perimeterOffset = new Vector3(Mathf.Cos(radians), 0, Mathf.Sin(radians)) * useRadius;
                             spawnPosition = challenge.position + perimeterOffset + item.offset;
                             break;
                         case ChallengeData.SpawnLocationType.Grid:
                             int gridSize = Mathf.CeilToInt(Mathf.Sqrt(countToSpawn));
                             int row = i / gridSize;
                             int col = i % gridSize;
-                            float spacing = item.spawnRadius * 2f / gridSize;
+                            float spacing = useRadius > 0f ? useRadius * 2f / gridSize : 3f;
                             Vector3 gridOffset = new Vector3((col - gridSize / 2f) * spacing, 0, (row - gridSize / 2f) * spacing);
                             spawnPosition = challenge.position + gridOffset + item.offset;
                             break;
                     }
                     
-                    // NavMesh validation (optional)
+                    // Ground-snap: raycast downward from well above the candidate position so the Y
+                    // matches the actual terrain/mesh surface before the NavMesh sphere search.
+                    // Without this, a vertical gap between spawnPosition and the NavMesh exceeds
+                    // effectiveNavMeshRadius and SamplePosition silently fails.
+                    const float groundRayOriginOffset = 100f;
+                    const float groundRayLength       = 200f;
+                    if (Physics.Raycast(spawnPosition + Vector3.up * groundRayOriginOffset,
+                                        Vector3.down, out RaycastHit groundHit, groundRayLength))
+                    {
+                        spawnPosition.y = groundHit.point.y;
+                    }
+
+                    // NavMesh validation — use a generous search radius so items with radius=0 can still land on NavMesh.
                     bool shouldCheckNavMesh = forceNavMesh || (item.requireNavMesh && !ignoreNavMeshRequirement);
                     if (shouldCheckNavMesh)
                     {
                         UnityEngine.AI.NavMeshHit hit;
-                        if (UnityEngine.AI.NavMesh.SamplePosition(spawnPosition, out hit, 5f, UnityEngine.AI.NavMesh.AllAreas))
+                        if (UnityEngine.AI.NavMesh.SamplePosition(spawnPosition, out hit, effectiveNavMeshRadius, UnityEngine.AI.NavMesh.AllAreas))
                         {
                             spawnPosition = hit.position;
                         }
                         else
                         {
-                            Debug.LogWarning($"Failed to find NavMesh near position {spawnPosition} for {item.itemName}");
+                            Debug.LogWarning($"[{data.challengeName}] NavMesh not found within {effectiveNavMeshRadius}m of {spawnPosition} for '{item.itemName}'. Challenge center: {challenge.position}");
                             failedCount++;
+                            totalFailed++;
                             continue;
                         }
                     }
@@ -468,6 +501,7 @@ public class ChallengeSpawner : MonoBehaviour
                     {
                         Debug.LogWarning($"Spawn position {spawnPosition} is obstructed for {item.itemName}");
                         failedCount++;
+                        totalFailed++;
                         continue;
                     }
                     
@@ -491,18 +525,21 @@ public class ChallengeSpawner : MonoBehaviour
             
             if (failedCount > 0)
             {
-                Debug.LogWarning($"⚠️ Failed {failedCount}x {item.itemName} spawns (NavMesh/obstruction issues)");
+                Debug.LogWarning($"⚠️ Failed {failedCount}x '{item.itemName}' spawns for '{data.challengeName}' (NavMesh/obstruction). Challenge pos: {challenge.position}");
             }
         }
         
-        Debug.Log($"📊 Challenge Spawn Summary: {totalSpawned} spawned, {totalFailed} failed");
+        Debug.Log($"📊 [{data.challengeName}] Challenge Spawn Summary: {totalSpawned} spawned, {totalFailed} failed");
         
         if (totalSpawned == 0 && totalFailed > 0)
         {
-            Debug.LogError($"❌ CRITICAL: NO objects spawned for challenge '{data.challengeName}'!");
-            Debug.LogError($"Common fixes:");
-            Debug.LogError($"  1. Add spawn points to 'Shared Spawn Points' in Challenge Data");
-            Debug.LogError($"  2. Or assign 'Custom Spawn Points' to each spawn item");
+            Debug.LogError($"❌ CRITICAL: NO objects spawned for challenge '{data.challengeName}'! Challenge position: {challenge.position}");
+            Debug.LogError($"  forceNavMesh={forceNavMesh}, ignoreNavMeshRequirement={ignoreNavMeshRequirement}, ignoreObstructionChecks={ignoreObstructionChecks}");
+            Debug.LogError($"  All {data.spawnItems.Count} non-Enemy spawn items failed NavMesh/obstruction checks. Ensure the challenge spawns near NavMesh-covered terrain.");
+        }
+        else if (totalSpawned == 0)
+        {
+            Debug.LogWarning($"⚠️ [{data.challengeName}] No non-Enemy flex items to spawn (all items may be Enemy category, handled by SpawnEnemiesInRadius).");
         }
     }
     
@@ -770,8 +807,8 @@ public class ChallengeSpawner : MonoBehaviour
     private void SpawnEnemiesInRadius(ActiveChallenge challenge, ChallengeData data, ChallengeInstance instance)
     {
         const float spawnRadius = 15f;
-        const float groundRayOriginOffset = 5f;
-        const float groundRayLength = 20f;
+        const float groundRayOriginOffset = 100f;
+        const float groundRayLength = 200f;
 
         int totalToSpawn = 0;
         GameObject enemyPrefab = null;

@@ -124,6 +124,9 @@ public class ExplosionDamage : MonoBehaviour
 
         if (playerHealth == null) return;
 
+        // Cancel any lingering burn from a previous visit before starting fire damage fresh
+        if (isBurning) StopBurnEffect();
+
         playerInFire = true;
         damageTimer  = 0f;
         OnPlayerEnterFire();
@@ -260,6 +263,9 @@ public class ExplosionDamage : MonoBehaviour
 
     private void StartBurnEffect()
     {
+        // Do not restart burn if one is already active from a previous exit
+        if (isBurning) return;
+
         isBurning   = true;
         burnTimer   = burnDuration;
         damageTimer = 0f;

@@ -1,4 +1,4 @@
-// Made with Amplify Shader Editor v1.9.9.1
+// Made with Amplify Shader Editor v1.9.8.1
 // Available at the Unity Asset Store - http://u3d.as/y3X 
 Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 {
@@ -22,7 +22,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
         [HideInInspector][NoScaleOffset] unity_LightmapsInd("unity_LightmapsInd", 2DArray) = "" {}
         [HideInInspector][NoScaleOffset] unity_ShadowMasks("unity_ShadowMasks", 2DArray) = "" {}
 
-		[HideInInspector][ToggleOff] _ReceiveShadows("Receive Shadows", Float) = 1
+		[HideInInspector][ToggleOff] _ReceiveShadows("Receive Shadows", Float) = 1.0
 	}
 
 	SubShader
@@ -175,12 +175,13 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 
 			
 
-			#pragma multi_compile_local _ALPHATEST_ON
+			#pragma multi_compile_fragment _ALPHATEST_ON
+			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
 			#pragma multi_compile_instancing
 			#pragma instancing_options renderinglayer
 			#define _SURFACE_TYPE_TRANSPARENT 1
-			#define ASE_VERSION 19901
-			#define ASE_SRP_VERSION 140012
+			#define ASE_VERSION 19801
+			#define ASE_SRP_VERSION 140010
 
 
 			
@@ -238,11 +239,8 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
             #endif
 
-			#define ASE_NEEDS_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_WORLD_POSITION
 			#define ASE_NEEDS_FRAG_WORLD_POSITION
-			#define ASE_NEEDS_FRAG_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_FRAG_SCREEN_POSITION_NORMALIZED
+			#define ASE_NEEDS_FRAG_SCREEN_POSITION
 
 
 			#if defined(ASE_EARLY_Z_DEPTH_OPTIMIZE) && (SHADER_TARGET >= 45)
@@ -267,20 +265,21 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 			struct PackedVaryings
 			{
 				ASE_SV_POSITION_QUALIFIERS float4 positionCS : SV_POSITION;
-				float3 positionWS : TEXCOORD0;
+				float4 clipPosV : TEXCOORD0;
+				float3 positionWS : TEXCOORD1;
 				#if defined(ASE_FOG) || defined(_ADDITIONAL_LIGHTS_VERTEX)
-					half4 fogFactorAndVertexLight : TEXCOORD1;
+					half4 fogFactorAndVertexLight : TEXCOORD2;
 				#endif
 				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
-					float4 shadowCoord : TEXCOORD2;
+					float4 shadowCoord : TEXCOORD3;
 				#endif
 				#if defined(LIGHTMAP_ON)
-					float4 lightmapUVOrVertexSH : TEXCOORD3;
+					float4 lightmapUVOrVertexSH : TEXCOORD4;
 				#endif
 				#if defined(DYNAMICLIGHTMAP_ON)
-					float2 dynamicLightmapUV : TEXCOORD4;
+					float2 dynamicLightmapUV : TEXCOORD5;
 				#endif
-				float4 ase_texcoord5 : TEXCOORD5;
+				float4 ase_texcoord6 : TEXCOORD6;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
@@ -395,25 +394,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 				return 130.0 * dot( m, g );
 			}
 			
-					float2 voronoihash81_g379( float2 p )
+					float2 voronoihash81_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi81_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi81_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash81_g379( n + g );
+						 		float2 o = voronoihash81_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -428,25 +427,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return F1;
 					}
 			
-					float2 voronoihash88_g379( float2 p )
+					float2 voronoihash88_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi88_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi88_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash88_g379( n + g );
+						 		float2 o = voronoihash88_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -461,25 +460,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return F1;
 					}
 			
-					float2 voronoihash200_g379( float2 p )
+					float2 voronoihash200_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi200_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi200_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash200_g379( n + g );
+						 		float2 o = voronoihash200_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -494,25 +493,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return (F2 + F1) * 0.5;
 					}
 			
-					float2 voronoihash232_g379( float2 p )
+					float2 voronoihash232_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi232_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi232_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash232_g379( n + g );
+						 		float2 o = voronoihash232_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -527,25 +526,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return F1;
 					}
 			
-					float2 voronoihash84_g379( float2 p )
+					float2 voronoihash84_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi84_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi84_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash84_g379( n + g );
+						 		float2 o = voronoihash84_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -560,7 +559,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return F1;
 					}
 			
-			float HLSL20_g384( bool enabled, bool submerged, float textureSample )
+			float HLSL20_g367( bool enabled, bool submerged, float textureSample )
 			{
 				if(enabled)
 				{
@@ -581,10 +580,10 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 				UNITY_TRANSFER_INSTANCE_ID(input, output);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
-				output.ase_texcoord5.xy = input.texcoord.xy;
+				output.ase_texcoord6.xy = input.texcoord.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				output.ase_texcoord5.zw = 0;
+				output.ase_texcoord6.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					float3 defaultVertexValue = input.positionOS.xyz;
@@ -627,6 +626,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 				#endif
 
 				output.positionCS = vertexInput.positionCS;
+				output.clipPosV = vertexInput.positionCS;
 				output.positionWS = vertexInput.positionWS;
 				return output;
 			}
@@ -636,13 +636,6 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 			{
 				float4 positionOS : INTERNALTESSPOS;
 				float3 normalOS : NORMAL;
-                float4 texcoord : TEXCOORD0;
-				#if defined(LIGHTMAP_ON) || defined(ASE_NEEDS_TEXTURE_COORDINATES1)
-					float4 texcoord1 : TEXCOORD1;
-				#endif
-				#if defined(DYNAMICLIGHTMAP_ON) || defined(ASE_NEEDS_TEXTURE_COORDINATES2)
-					float4 texcoord2 : TEXCOORD2;
-				#endif
 				
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
@@ -660,13 +653,6 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 				UNITY_TRANSFER_INSTANCE_ID(input, output);
 				output.positionOS = input.positionOS;
 				output.normalOS = input.normalOS;
-                output.texcoord = input.texcoord;
-				#if defined(LIGHTMAP_ON) || defined(ASE_NEEDS_TEXTURE_COORDINATES1)
-					output.texcoord1 = input.texcoord1;
-				#endif
-				#if defined(DYNAMICLIGHTMAP_ON) || defined(ASE_NEEDS_TEXTURE_COORDINATES2)
-					output.texcoord2 = input.texcoord2;
-				#endif
 				
 				return output;
 			}
@@ -706,13 +692,6 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 				Attributes output = (Attributes) 0;
 				output.positionOS = patch[0].positionOS * bary.x + patch[1].positionOS * bary.y + patch[2].positionOS * bary.z;
 				output.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
-                output.texcoord = patch[0].texcoord * bary.x + patch[1].texcoord * bary.y + patch[2].texcoord * bary.z;
-				#if defined(LIGHTMAP_ON) || defined(ASE_NEEDS_TEXTURE_COORDINATES1)
-					output.texcoord1 = patch[0].texcoord1 * bary.x + patch[1].texcoord1 * bary.y + patch[2].texcoord1 * bary.z;
-				#endif
-				#if defined(DYNAMICLIGHTMAP_ON) || defined(ASE_NEEDS_TEXTURE_COORDINATES2)
-					output.texcoord2 = patch[0].texcoord2 * bary.x + patch[1].texcoord2 * bary.y + patch[2].texcoord2 * bary.z;
-				#endif
 				
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
@@ -750,9 +729,10 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 				float3 WorldPosition = input.positionWS;
 				float3 WorldViewDirection = GetWorldSpaceNormalizeViewDir( WorldPosition );
 				float4 ShadowCoords = float4( 0, 0, 0, 0 );
-				float4 ScreenPosNorm = float4( GetNormalizedScreenSpaceUV( input.positionCS ), input.positionCS.zw );
-				float4 ClipPos = ComputeClipSpacePosition( ScreenPosNorm.xy, input.positionCS.z ) * input.positionCS.w;
-				float4 ScreenPos = ComputeScreenPos( ClipPos );
+				float4 ClipPos = input.clipPosV;
+				float4 ScreenPos = ComputeScreenPos( input.clipPosV );
+
+				float2 NormalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(input.positionCS);
 
 				#if defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
 					#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
@@ -762,183 +742,182 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 					#endif
 				#endif
 
-				WorldViewDirection = SafeNormalize( WorldViewDirection );
-
-				float3 hsvTorgb2_g380 = RGBToHSV( CZY_CloudColor.rgb );
-				float3 hsvTorgb3_g380 = HSVToRGB( float3(hsvTorgb2_g380.x,saturate( ( hsvTorgb2_g380.y + CZY_FilterSaturation ) ),( hsvTorgb2_g380.z + CZY_FilterValue )) );
-				float4 temp_output_10_0_g380 = ( float4( hsvTorgb3_g380 , 0.0 ) * CZY_FilterColor );
-				float4 CloudColor41_g379 = ( temp_output_10_0_g380 * CZY_CloudFilterColor );
-				float3 hsvTorgb2_g383 = RGBToHSV( CZY_CloudHighlightColor.rgb );
-				float3 hsvTorgb3_g383 = HSVToRGB( float3(hsvTorgb2_g383.x,saturate( ( hsvTorgb2_g383.y + CZY_FilterSaturation ) ),( hsvTorgb2_g383.z + CZY_FilterValue )) );
-				float4 temp_output_10_0_g383 = ( float4( hsvTorgb3_g383 , 0.0 ) * CZY_FilterColor );
-				float4 CloudHighlightColor55_g379 = ( temp_output_10_0_g383 * CZY_SunFilterColor );
-				float2 texCoord31_g379 = input.ase_texcoord5.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 Pos33_g379 = texCoord31_g379;
-				float mulTime29_g379 = _TimeParameters.x * ( 0.001 * CZY_WindSpeed );
-				float TIme30_g379 = mulTime29_g379;
-				float simplePerlin2D409_g379 = snoise( ( Pos33_g379 + ( TIme30_g379 * float2( 0.2,-0.4 ) ) )*( 100.0 / CZY_MainCloudScale ) );
-				simplePerlin2D409_g379 = simplePerlin2D409_g379*0.5 + 0.5;
-				float SimpleCloudDensity153_g379 = simplePerlin2D409_g379;
-				float time81_g379 = 0.0;
-				float2 voronoiSmoothId81_g379 = 0;
-				float2 temp_output_94_0_g379 = ( Pos33_g379 + ( TIme30_g379 * float2( 0.3,0.2 ) ) );
-				float2 coords81_g379 = temp_output_94_0_g379 * ( 140.0 / CZY_MainCloudScale );
-				float2 id81_g379 = 0;
-				float2 uv81_g379 = 0;
-				float voroi81_g379 = voronoi81_g379( coords81_g379, time81_g379, id81_g379, uv81_g379, 0, voronoiSmoothId81_g379 );
-				float time88_g379 = 0.0;
-				float2 voronoiSmoothId88_g379 = 0;
-				float2 coords88_g379 = temp_output_94_0_g379 * ( 500.0 / CZY_MainCloudScale );
-				float2 id88_g379 = 0;
-				float2 uv88_g379 = 0;
-				float voroi88_g379 = voronoi88_g379( coords88_g379, time88_g379, id88_g379, uv88_g379, 0, voronoiSmoothId88_g379 );
-				float2 appendResult95_g379 = (float2(voroi81_g379 , voroi88_g379));
-				float2 VoroDetails109_g379 = appendResult95_g379;
-				float CumulusCoverage34_g379 = CZY_CumulusCoverageMultiplier;
-				float ComplexCloudDensity141_g379 =  (0.0 + ( min( SimpleCloudDensity153_g379 , ( 1.0 - VoroDetails109_g379.x ) ) - ( 1.0 - CumulusCoverage34_g379 ) ) * ( 1.0 - 0.0 ) / ( 1.0 - ( 1.0 - CumulusCoverage34_g379 ) ) );
-				float4 lerpResult315_g379 = lerp( CloudHighlightColor55_g379 , CloudColor41_g379 , saturate(  (2.0 + ( ComplexCloudDensity141_g379 - 0.0 ) * ( 0.7 - 2.0 ) / ( 1.0 - 0.0 ) ) ));
-				float3 normalizeResult40_g379 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
-				float dotResult42_g379 = dot( normalizeResult40_g379 , CZY_SunDirection );
-				float temp_output_49_0_g379 = abs( (dotResult42_g379*0.5 + 0.5) );
-				half LightMask56_g379 = saturate( pow( temp_output_49_0_g379 , CZY_SunFlareFalloff ) );
-				float time200_g379 = 0.0;
-				float2 voronoiSmoothId200_g379 = 0;
-				float mulTime163_g379 = _TimeParameters.x * 0.003;
-				float2 coords200_g379 = (Pos33_g379*1.0 + ( float2( 1,-2 ) * mulTime163_g379 )) * 10.0;
-				float2 id200_g379 = 0;
-				float2 uv200_g379 = 0;
-				float voroi200_g379 = voronoi200_g379( coords200_g379, time200_g379, id200_g379, uv200_g379, 0, voronoiSmoothId200_g379 );
-				float time232_g379 = ( 10.0 * mulTime163_g379 );
-				float2 voronoiSmoothId232_g379 = 0;
-				float2 coords232_g379 = input.ase_texcoord5.xy * 10.0;
-				float2 id232_g379 = 0;
-				float2 uv232_g379 = 0;
-				float voroi232_g379 = voronoi232_g379( coords232_g379, time232_g379, id232_g379, uv232_g379, 0, voronoiSmoothId232_g379 );
-				float temp_output_242_0_g379 = ( ( ( 1.0 - 0.0 ) -  (1.0 + ( voroi200_g379 - 0.0 ) * ( -0.5 - 1.0 ) / ( 1.0 - 0.0 ) ) ) - voroi232_g379 );
-				float AltoCumulusPlacement376_g379 = temp_output_242_0_g379;
-				float CloudThicknessDetails286_g379 = ( VoroDetails109_g379.y * saturate( ( AltoCumulusPlacement376_g379 - 0.26 ) ) );
-				float3 normalizeResult43_g379 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
-				float dotResult46_g379 = dot( normalizeResult43_g379 , CZY_MoonDirection );
-				half MoonlightMask57_g379 = saturate( pow( abs( (dotResult46_g379*0.5 + 0.5) ) , CZY_CloudMoonFalloff ) );
-				float3 hsvTorgb2_g381 = RGBToHSV( CZY_CloudMoonColor.rgb );
-				float3 hsvTorgb3_g381 = HSVToRGB( float3(hsvTorgb2_g381.x,saturate( ( hsvTorgb2_g381.y + CZY_FilterSaturation ) ),( hsvTorgb2_g381.z + CZY_FilterValue )) );
-				float4 temp_output_10_0_g381 = ( float4( hsvTorgb3_g381 , 0.0 ) * CZY_FilterColor );
-				float4 MoonlightColor60_g379 = ( temp_output_10_0_g381 * CZY_CloudFilterColor );
-				float4 lerpResult338_g379 = lerp( ( lerpResult315_g379 + ( LightMask56_g379 * CloudHighlightColor55_g379 * ( 1.0 - CloudThicknessDetails286_g379 ) ) + ( MoonlightMask57_g379 * MoonlightColor60_g379 * ( 1.0 - CloudThicknessDetails286_g379 ) ) ) , ( CloudColor41_g379 * float4( 0.5660378,0.5660378,0.5660378,0 ) ) , CloudThicknessDetails286_g379);
-				float time84_g379 = 0.0;
-				float2 voronoiSmoothId84_g379 = 0;
-				float2 coords84_g379 = ( Pos33_g379 + ( TIme30_g379 * float2( 0.3,0.2 ) ) ) * ( 100.0 / CZY_DetailScale );
-				float2 id84_g379 = 0;
-				float2 uv84_g379 = 0;
-				float fade84_g379 = 0.5;
-				float voroi84_g379 = 0;
-				float rest84_g379 = 0;
-				for( int it84_g379 = 0; it84_g379 <3; it84_g379++ ){
-				voroi84_g379 += fade84_g379 * voronoi84_g379( coords84_g379, time84_g379, id84_g379, uv84_g379, 0,voronoiSmoothId84_g379 );
-				rest84_g379 += fade84_g379;
-				coords84_g379 *= 2;
-				fade84_g379 *= 0.5;
-				}//Voronoi84_g379
-				voroi84_g379 /= rest84_g379;
-				float temp_output_173_0_g379 = (  (0.0 + ( ( 1.0 - voroi84_g379 ) - 0.3 ) * ( 0.5 - 0.0 ) / ( 1.0 - 0.3 ) ) * 0.1 * CZY_DetailAmount );
-				float DetailedClouds252_g379 = saturate( ( ComplexCloudDensity141_g379 + temp_output_173_0_g379 ) );
-				float CloudDetail179_g379 = temp_output_173_0_g379;
-				float2 texCoord79_g379 = input.ase_texcoord5.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_161_0_g379 = ( texCoord79_g379 - float2( 0.5,0.5 ) );
-				float dotResult212_g379 = dot( temp_output_161_0_g379 , temp_output_161_0_g379 );
-				float BorderHeight154_g379 = ( 1.0 - CZY_BorderHeight );
-				float temp_output_151_0_g379 = ( -2.0 * ( 1.0 - CZY_BorderVariation ) );
-				float clampResult247_g379 = clamp( ( ( ( CloudDetail179_g379 + SimpleCloudDensity153_g379 ) * saturate(  (( BorderHeight154_g379 * temp_output_151_0_g379 ) + ( dotResult212_g379 - 0.0 ) * ( ( temp_output_151_0_g379 * -4.0 ) - ( BorderHeight154_g379 * temp_output_151_0_g379 ) ) / ( 0.5 - 0.0 ) ) ) ) * 10.0 * CZY_BorderEffect ) , -1.0 , 1.0 );
-				float BorderLightTransport278_g379 = clampResult247_g379;
-				float3 normalizeResult116_g379 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
-				float3 normalizeResult146_g379 = normalize( CZY_StormDirection );
-				float dotResult150_g379 = dot( normalizeResult116_g379 , normalizeResult146_g379 );
-				float2 texCoord98_g379 = input.ase_texcoord5.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_124_0_g379 = ( texCoord98_g379 - float2( 0.5,0.5 ) );
-				float dotResult125_g379 = dot( temp_output_124_0_g379 , temp_output_124_0_g379 );
-				float temp_output_140_0_g379 = ( -2.0 * ( 1.0 - ( CZY_NimbusVariation * 0.9 ) ) );
-				float NimbusLightTransport269_g379 = saturate( ( ( ( CloudDetail179_g379 + SimpleCloudDensity153_g379 ) * saturate(  (( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_140_0_g379 ) + ( ( dotResult150_g379 + ( CZY_NimbusHeight * 4.0 * dotResult125_g379 ) ) - 0.5 ) * ( ( temp_output_140_0_g379 * -4.0 ) - ( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_140_0_g379 ) ) / ( 7.0 - 0.5 ) ) ) ) * 10.0 ) );
-				float mulTime104_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D143_g379 = snoise( (Pos33_g379*1.0 + mulTime104_g379)*2.0 );
-				float mulTime93_g379 = _TimeParameters.x * CZY_ChemtrailsMoveSpeed;
-				float cos97_g379 = cos( ( mulTime93_g379 * 0.01 ) );
-				float sin97_g379 = sin( ( mulTime93_g379 * 0.01 ) );
-				float2 rotator97_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos97_g379 , -sin97_g379 , sin97_g379 , cos97_g379 )) + float2( 0.5,0.5 );
-				float cos131_g379 = cos( ( mulTime93_g379 * -0.02 ) );
-				float sin131_g379 = sin( ( mulTime93_g379 * -0.02 ) );
-				float2 rotator131_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos131_g379 , -sin131_g379 , sin131_g379 , cos131_g379 )) + float2( 0.5,0.5 );
-				float mulTime107_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D147_g379 = snoise( (Pos33_g379*1.0 + mulTime107_g379)*4.0 );
-				float4 ChemtrailsPattern210_g379 = ( ( saturate( simplePerlin2D143_g379 ) * tex2D( CZY_ChemtrailsTexture, (rotator97_g379*0.5 + 0.0) ) ) + ( tex2D( CZY_ChemtrailsTexture, rotator131_g379 ) * saturate( simplePerlin2D147_g379 ) ) );
-				float2 texCoord139_g379 = input.ase_texcoord5.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_162_0_g379 = ( texCoord139_g379 - float2( 0.5,0.5 ) );
-				float dotResult207_g379 = dot( temp_output_162_0_g379 , temp_output_162_0_g379 );
-				float ChemtrailsFinal248_g379 = ( ( ChemtrailsPattern210_g379 * saturate(  (0.4 + ( dotResult207_g379 - 0.0 ) * ( 2.0 - 0.4 ) / ( 0.1 - 0.0 ) ) ) ).r > ( 1.0 - ( CZY_ChemtrailsMultiplier * 0.5 ) ) ? 1.0 : 0.0 );
-				float mulTime80_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D126_g379 = snoise( (Pos33_g379*1.0 + mulTime80_g379)*2.0 );
-				float mulTime75_g379 = _TimeParameters.x * CZY_CirrusMoveSpeed;
-				float cos101_g379 = cos( ( mulTime75_g379 * 0.01 ) );
-				float sin101_g379 = sin( ( mulTime75_g379 * 0.01 ) );
-				float2 rotator101_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos101_g379 , -sin101_g379 , sin101_g379 , cos101_g379 )) + float2( 0.5,0.5 );
-				float cos112_g379 = cos( ( mulTime75_g379 * -0.02 ) );
-				float sin112_g379 = sin( ( mulTime75_g379 * -0.02 ) );
-				float2 rotator112_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos112_g379 , -sin112_g379 , sin112_g379 , cos112_g379 )) + float2( 0.5,0.5 );
-				float mulTime135_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D122_g379 = snoise( (Pos33_g379*1.0 + mulTime135_g379) );
-				simplePerlin2D122_g379 = simplePerlin2D122_g379*0.5 + 0.5;
-				float4 CirrusPattern137_g379 = ( ( saturate( simplePerlin2D126_g379 ) * tex2D( CZY_CirrusTexture, (rotator101_g379*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrusTexture, (rotator112_g379*1.0 + 0.0) ) * saturate( simplePerlin2D122_g379 ) ) );
-				float2 texCoord134_g379 = input.ase_texcoord5.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_164_0_g379 = ( texCoord134_g379 - float2( 0.5,0.5 ) );
-				float dotResult157_g379 = dot( temp_output_164_0_g379 , temp_output_164_0_g379 );
-				float4 temp_output_217_0_g379 = ( CirrusPattern137_g379 * saturate(  (0.0 + ( dotResult157_g379 - 0.0 ) * ( 2.0 - 0.0 ) / ( 0.2 - 0.0 ) ) ) );
-				float Clipping208_g379 = CZY_ClippingThreshold;
-				float CirrusAlpha250_g379 = ( ( temp_output_217_0_g379 * ( CZY_CirrusMultiplier * 10.0 ) ).r > Clipping208_g379 ? 1.0 : 0.0 );
-				float SimpleRadiance268_g379 = saturate( ( DetailedClouds252_g379 + BorderLightTransport278_g379 + NimbusLightTransport269_g379 + ChemtrailsFinal248_g379 + CirrusAlpha250_g379 ) );
-				float4 lerpResult342_g379 = lerp( CloudColor41_g379 , lerpResult338_g379 , ( 1.0 - SimpleRadiance268_g379 ));
-				float CloudbreakLightDir426_g379 = saturate( pow( temp_output_49_0_g379 , ( CZY_SunFlareFalloff * 0.5 ) ) );
-				float lerpResult316_g379 = lerp( -0.4 , 1.0 , ( saturate( ( ComplexCloudDensity141_g379 - 0.0 ) ) * CloudDetail179_g379 * CloudbreakLightDir426_g379 ));
-				float SunThroughClouds399_g379 = saturate( lerpResult316_g379 );
-				float3 hsvTorgb2_g382 = RGBToHSV( CZY_AltoCloudColor.rgb );
-				float3 hsvTorgb3_g382 = HSVToRGB( float3(hsvTorgb2_g382.x,saturate( ( hsvTorgb2_g382.y + CZY_FilterSaturation ) ),( hsvTorgb2_g382.z + CZY_FilterValue )) );
-				float4 temp_output_10_0_g382 = ( float4( hsvTorgb3_g382 , 0.0 ) * CZY_FilterColor );
-				float4 CirrusCustomLightColor350_g379 = ( CloudColor41_g379 * ( temp_output_10_0_g382 * CZY_CloudFilterColor ) );
-				float temp_output_391_0_g379 = ( AltoCumulusPlacement376_g379 *  (0.0 + ( tex2D( CZY_AltocumulusTexture, ((Pos33_g379*1.0 + ( CZY_AltocumulusWindSpeed * TIme30_g379 ))*( 1.0 / CZY_AltocumulusScale ) + 0.0) ).r - 0.0 ) * ( 1.0 - 0.0 ) / ( 0.2 - 0.0 ) ) * CZY_AltocumulusMultiplier );
-				float AltoCumulusLightTransport393_g379 = temp_output_391_0_g379;
-				float ACCustomLightsClipping387_g379 = ( AltoCumulusLightTransport393_g379 * ( SimpleRadiance268_g379 > Clipping208_g379 ? 0.0 : 1.0 ) );
-				float mulTime193_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D224_g379 = snoise( (Pos33_g379*1.0 + mulTime193_g379)*2.0 );
-				float mulTime178_g379 = _TimeParameters.x * CZY_CirrostratusMoveSpeed;
-				float cos138_g379 = cos( ( mulTime178_g379 * 0.01 ) );
-				float sin138_g379 = sin( ( mulTime178_g379 * 0.01 ) );
-				float2 rotator138_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos138_g379 , -sin138_g379 , sin138_g379 , cos138_g379 )) + float2( 0.5,0.5 );
-				float cos198_g379 = cos( ( mulTime178_g379 * -0.02 ) );
-				float sin198_g379 = sin( ( mulTime178_g379 * -0.02 ) );
-				float2 rotator198_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos198_g379 , -sin198_g379 , sin198_g379 , cos198_g379 )) + float2( 0.5,0.5 );
-				float mulTime184_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D216_g379 = snoise( (Pos33_g379*10.0 + mulTime184_g379)*4.0 );
-				float4 CirrostratPattern261_g379 = ( ( saturate( simplePerlin2D224_g379 ) * tex2D( CZY_CirrostratusTexture, (rotator138_g379*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrostratusTexture, (rotator198_g379*1.5 + 0.75) ) * saturate( simplePerlin2D216_g379 ) ) );
-				float2 texCoord234_g379 = input.ase_texcoord5.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_243_0_g379 = ( texCoord234_g379 - float2( 0.5,0.5 ) );
-				float dotResult238_g379 = dot( temp_output_243_0_g379 , temp_output_243_0_g379 );
-				float clampResult264_g379 = clamp( ( CZY_CirrostratusMultiplier * 0.5 ) , 0.0 , 0.98 );
-				float CirrostratLightTransport281_g379 = ( ( CirrostratPattern261_g379 * saturate(  (0.4 + ( dotResult238_g379 - 0.0 ) * ( 2.0 - 0.4 ) / ( 0.1 - 0.0 ) ) ) ).r > ( 1.0 - clampResult264_g379 ) ? 1.0 : 0.0 );
-				float CSCustomLightsClipping309_g379 = ( CirrostratLightTransport281_g379 * ( SimpleRadiance268_g379 > Clipping208_g379 ? 0.0 : 1.0 ) );
-				float CustomRadiance340_g379 = saturate( ( ACCustomLightsClipping387_g379 + CSCustomLightsClipping309_g379 ) );
-				float4 lerpResult331_g379 = lerp( ( lerpResult342_g379 + ( SunThroughClouds399_g379 * CloudHighlightColor55_g379 ) ) , CirrusCustomLightColor350_g379 , CustomRadiance340_g379);
-				float FinalAlpha375_g379 = saturate( ( DetailedClouds252_g379 + BorderLightTransport278_g379 + AltoCumulusLightTransport393_g379 + ChemtrailsFinal248_g379 + CirrostratLightTransport281_g379 + CirrusAlpha250_g379 + NimbusLightTransport269_g379 ) );
-				float4 appendResult420_g379 = (float4((lerpResult331_g379).rgb , FinalAlpha375_g379));
-				float4 FinalCloudColor325_g379 = appendResult420_g379;
+				float3 hsvTorgb2_g364 = RGBToHSV( CZY_CloudColor.rgb );
+				float3 hsvTorgb3_g364 = HSVToRGB( float3(hsvTorgb2_g364.x,saturate( ( hsvTorgb2_g364.y + CZY_FilterSaturation ) ),( hsvTorgb2_g364.z + CZY_FilterValue )) );
+				float4 temp_output_10_0_g364 = ( float4( hsvTorgb3_g364 , 0.0 ) * CZY_FilterColor );
+				float4 CloudColor41_g363 = ( temp_output_10_0_g364 * CZY_CloudFilterColor );
+				float3 hsvTorgb2_g368 = RGBToHSV( CZY_CloudHighlightColor.rgb );
+				float3 hsvTorgb3_g368 = HSVToRGB( float3(hsvTorgb2_g368.x,saturate( ( hsvTorgb2_g368.y + CZY_FilterSaturation ) ),( hsvTorgb2_g368.z + CZY_FilterValue )) );
+				float4 temp_output_10_0_g368 = ( float4( hsvTorgb3_g368 , 0.0 ) * CZY_FilterColor );
+				float4 CloudHighlightColor55_g363 = ( temp_output_10_0_g368 * CZY_SunFilterColor );
+				float2 texCoord31_g363 = input.ase_texcoord6.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 Pos33_g363 = texCoord31_g363;
+				float mulTime29_g363 = _TimeParameters.x * ( 0.001 * CZY_WindSpeed );
+				float TIme30_g363 = mulTime29_g363;
+				float simplePerlin2D409_g363 = snoise( ( Pos33_g363 + ( TIme30_g363 * float2( 0.2,-0.4 ) ) )*( 100.0 / CZY_MainCloudScale ) );
+				simplePerlin2D409_g363 = simplePerlin2D409_g363*0.5 + 0.5;
+				float SimpleCloudDensity153_g363 = simplePerlin2D409_g363;
+				float time81_g363 = 0.0;
+				float2 voronoiSmoothId81_g363 = 0;
+				float2 temp_output_94_0_g363 = ( Pos33_g363 + ( TIme30_g363 * float2( 0.3,0.2 ) ) );
+				float2 coords81_g363 = temp_output_94_0_g363 * ( 140.0 / CZY_MainCloudScale );
+				float2 id81_g363 = 0;
+				float2 uv81_g363 = 0;
+				float voroi81_g363 = voronoi81_g363( coords81_g363, time81_g363, id81_g363, uv81_g363, 0, voronoiSmoothId81_g363 );
+				float time88_g363 = 0.0;
+				float2 voronoiSmoothId88_g363 = 0;
+				float2 coords88_g363 = temp_output_94_0_g363 * ( 500.0 / CZY_MainCloudScale );
+				float2 id88_g363 = 0;
+				float2 uv88_g363 = 0;
+				float voroi88_g363 = voronoi88_g363( coords88_g363, time88_g363, id88_g363, uv88_g363, 0, voronoiSmoothId88_g363 );
+				float2 appendResult95_g363 = (float2(voroi81_g363 , voroi88_g363));
+				float2 VoroDetails109_g363 = appendResult95_g363;
+				float CumulusCoverage34_g363 = CZY_CumulusCoverageMultiplier;
+				float ComplexCloudDensity141_g363 = (0.0 + (min( SimpleCloudDensity153_g363 , ( 1.0 - VoroDetails109_g363.x ) ) - ( 1.0 - CumulusCoverage34_g363 )) * (1.0 - 0.0) / (1.0 - ( 1.0 - CumulusCoverage34_g363 )));
+				float4 lerpResult315_g363 = lerp( CloudHighlightColor55_g363 , CloudColor41_g363 , saturate( (2.0 + (ComplexCloudDensity141_g363 - 0.0) * (0.7 - 2.0) / (1.0 - 0.0)) ));
+				float3 normalizeResult40_g363 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
+				float dotResult42_g363 = dot( normalizeResult40_g363 , CZY_SunDirection );
+				float temp_output_49_0_g363 = abs( (dotResult42_g363*0.5 + 0.5) );
+				half LightMask56_g363 = saturate( pow( temp_output_49_0_g363 , CZY_SunFlareFalloff ) );
+				float time200_g363 = 0.0;
+				float2 voronoiSmoothId200_g363 = 0;
+				float mulTime163_g363 = _TimeParameters.x * 0.003;
+				float2 coords200_g363 = (Pos33_g363*1.0 + ( float2( 1,-2 ) * mulTime163_g363 )) * 10.0;
+				float2 id200_g363 = 0;
+				float2 uv200_g363 = 0;
+				float voroi200_g363 = voronoi200_g363( coords200_g363, time200_g363, id200_g363, uv200_g363, 0, voronoiSmoothId200_g363 );
+				float time232_g363 = ( 10.0 * mulTime163_g363 );
+				float2 voronoiSmoothId232_g363 = 0;
+				float2 coords232_g363 = input.ase_texcoord6.xy * 10.0;
+				float2 id232_g363 = 0;
+				float2 uv232_g363 = 0;
+				float voroi232_g363 = voronoi232_g363( coords232_g363, time232_g363, id232_g363, uv232_g363, 0, voronoiSmoothId232_g363 );
+				float temp_output_242_0_g363 = ( ( ( 1.0 - 0.0 ) - (1.0 + (voroi200_g363 - 0.0) * (-0.5 - 1.0) / (1.0 - 0.0)) ) - voroi232_g363 );
+				float AltoCumulusPlacement376_g363 = temp_output_242_0_g363;
+				float CloudThicknessDetails286_g363 = ( VoroDetails109_g363.y * saturate( ( AltoCumulusPlacement376_g363 - 0.26 ) ) );
+				float3 normalizeResult43_g363 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
+				float dotResult46_g363 = dot( normalizeResult43_g363 , CZY_MoonDirection );
+				half MoonlightMask57_g363 = saturate( pow( abs( (dotResult46_g363*0.5 + 0.5) ) , CZY_CloudMoonFalloff ) );
+				float3 hsvTorgb2_g365 = RGBToHSV( CZY_CloudMoonColor.rgb );
+				float3 hsvTorgb3_g365 = HSVToRGB( float3(hsvTorgb2_g365.x,saturate( ( hsvTorgb2_g365.y + CZY_FilterSaturation ) ),( hsvTorgb2_g365.z + CZY_FilterValue )) );
+				float4 temp_output_10_0_g365 = ( float4( hsvTorgb3_g365 , 0.0 ) * CZY_FilterColor );
+				float4 MoonlightColor60_g363 = ( temp_output_10_0_g365 * CZY_CloudFilterColor );
+				float4 lerpResult338_g363 = lerp( ( lerpResult315_g363 + ( LightMask56_g363 * CloudHighlightColor55_g363 * ( 1.0 - CloudThicknessDetails286_g363 ) ) + ( MoonlightMask57_g363 * MoonlightColor60_g363 * ( 1.0 - CloudThicknessDetails286_g363 ) ) ) , ( CloudColor41_g363 * float4( 0.5660378,0.5660378,0.5660378,0 ) ) , CloudThicknessDetails286_g363);
+				float time84_g363 = 0.0;
+				float2 voronoiSmoothId84_g363 = 0;
+				float2 coords84_g363 = ( Pos33_g363 + ( TIme30_g363 * float2( 0.3,0.2 ) ) ) * ( 100.0 / CZY_DetailScale );
+				float2 id84_g363 = 0;
+				float2 uv84_g363 = 0;
+				float fade84_g363 = 0.5;
+				float voroi84_g363 = 0;
+				float rest84_g363 = 0;
+				for( int it84_g363 = 0; it84_g363 <3; it84_g363++ ){
+				voroi84_g363 += fade84_g363 * voronoi84_g363( coords84_g363, time84_g363, id84_g363, uv84_g363, 0,voronoiSmoothId84_g363 );
+				rest84_g363 += fade84_g363;
+				coords84_g363 *= 2;
+				fade84_g363 *= 0.5;
+				}//Voronoi84_g363
+				voroi84_g363 /= rest84_g363;
+				float temp_output_173_0_g363 = ( (0.0 + (( 1.0 - voroi84_g363 ) - 0.3) * (0.5 - 0.0) / (1.0 - 0.3)) * 0.1 * CZY_DetailAmount );
+				float DetailedClouds252_g363 = saturate( ( ComplexCloudDensity141_g363 + temp_output_173_0_g363 ) );
+				float CloudDetail179_g363 = temp_output_173_0_g363;
+				float2 texCoord79_g363 = input.ase_texcoord6.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_161_0_g363 = ( texCoord79_g363 - float2( 0.5,0.5 ) );
+				float dotResult212_g363 = dot( temp_output_161_0_g363 , temp_output_161_0_g363 );
+				float BorderHeight154_g363 = ( 1.0 - CZY_BorderHeight );
+				float temp_output_151_0_g363 = ( -2.0 * ( 1.0 - CZY_BorderVariation ) );
+				float clampResult247_g363 = clamp( ( ( ( CloudDetail179_g363 + SimpleCloudDensity153_g363 ) * saturate( (( BorderHeight154_g363 * temp_output_151_0_g363 ) + (dotResult212_g363 - 0.0) * (( temp_output_151_0_g363 * -4.0 ) - ( BorderHeight154_g363 * temp_output_151_0_g363 )) / (0.5 - 0.0)) ) ) * 10.0 * CZY_BorderEffect ) , -1.0 , 1.0 );
+				float BorderLightTransport278_g363 = clampResult247_g363;
+				float3 normalizeResult116_g363 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
+				float3 normalizeResult146_g363 = normalize( CZY_StormDirection );
+				float dotResult150_g363 = dot( normalizeResult116_g363 , normalizeResult146_g363 );
+				float2 texCoord98_g363 = input.ase_texcoord6.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_124_0_g363 = ( texCoord98_g363 - float2( 0.5,0.5 ) );
+				float dotResult125_g363 = dot( temp_output_124_0_g363 , temp_output_124_0_g363 );
+				float temp_output_140_0_g363 = ( -2.0 * ( 1.0 - ( CZY_NimbusVariation * 0.9 ) ) );
+				float NimbusLightTransport269_g363 = saturate( ( ( ( CloudDetail179_g363 + SimpleCloudDensity153_g363 ) * saturate( (( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_140_0_g363 ) + (( dotResult150_g363 + ( CZY_NimbusHeight * 4.0 * dotResult125_g363 ) ) - 0.5) * (( temp_output_140_0_g363 * -4.0 ) - ( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_140_0_g363 )) / (7.0 - 0.5)) ) ) * 10.0 ) );
+				float mulTime104_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D143_g363 = snoise( (Pos33_g363*1.0 + mulTime104_g363)*2.0 );
+				float mulTime93_g363 = _TimeParameters.x * CZY_ChemtrailsMoveSpeed;
+				float cos97_g363 = cos( ( mulTime93_g363 * 0.01 ) );
+				float sin97_g363 = sin( ( mulTime93_g363 * 0.01 ) );
+				float2 rotator97_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos97_g363 , -sin97_g363 , sin97_g363 , cos97_g363 )) + float2( 0.5,0.5 );
+				float cos131_g363 = cos( ( mulTime93_g363 * -0.02 ) );
+				float sin131_g363 = sin( ( mulTime93_g363 * -0.02 ) );
+				float2 rotator131_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos131_g363 , -sin131_g363 , sin131_g363 , cos131_g363 )) + float2( 0.5,0.5 );
+				float mulTime107_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D147_g363 = snoise( (Pos33_g363*1.0 + mulTime107_g363)*4.0 );
+				float4 ChemtrailsPattern210_g363 = ( ( saturate( simplePerlin2D143_g363 ) * tex2D( CZY_ChemtrailsTexture, (rotator97_g363*0.5 + 0.0) ) ) + ( tex2D( CZY_ChemtrailsTexture, rotator131_g363 ) * saturate( simplePerlin2D147_g363 ) ) );
+				float2 texCoord139_g363 = input.ase_texcoord6.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_162_0_g363 = ( texCoord139_g363 - float2( 0.5,0.5 ) );
+				float dotResult207_g363 = dot( temp_output_162_0_g363 , temp_output_162_0_g363 );
+				float ChemtrailsFinal248_g363 = ( ( ChemtrailsPattern210_g363 * saturate( (0.4 + (dotResult207_g363 - 0.0) * (2.0 - 0.4) / (0.1 - 0.0)) ) ).r > ( 1.0 - ( CZY_ChemtrailsMultiplier * 0.5 ) ) ? 1.0 : 0.0 );
+				float mulTime80_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D126_g363 = snoise( (Pos33_g363*1.0 + mulTime80_g363)*2.0 );
+				float mulTime75_g363 = _TimeParameters.x * CZY_CirrusMoveSpeed;
+				float cos101_g363 = cos( ( mulTime75_g363 * 0.01 ) );
+				float sin101_g363 = sin( ( mulTime75_g363 * 0.01 ) );
+				float2 rotator101_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos101_g363 , -sin101_g363 , sin101_g363 , cos101_g363 )) + float2( 0.5,0.5 );
+				float cos112_g363 = cos( ( mulTime75_g363 * -0.02 ) );
+				float sin112_g363 = sin( ( mulTime75_g363 * -0.02 ) );
+				float2 rotator112_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos112_g363 , -sin112_g363 , sin112_g363 , cos112_g363 )) + float2( 0.5,0.5 );
+				float mulTime135_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D122_g363 = snoise( (Pos33_g363*1.0 + mulTime135_g363) );
+				simplePerlin2D122_g363 = simplePerlin2D122_g363*0.5 + 0.5;
+				float4 CirrusPattern137_g363 = ( ( saturate( simplePerlin2D126_g363 ) * tex2D( CZY_CirrusTexture, (rotator101_g363*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrusTexture, (rotator112_g363*1.0 + 0.0) ) * saturate( simplePerlin2D122_g363 ) ) );
+				float2 texCoord134_g363 = input.ase_texcoord6.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_164_0_g363 = ( texCoord134_g363 - float2( 0.5,0.5 ) );
+				float dotResult157_g363 = dot( temp_output_164_0_g363 , temp_output_164_0_g363 );
+				float4 temp_output_217_0_g363 = ( CirrusPattern137_g363 * saturate( (0.0 + (dotResult157_g363 - 0.0) * (2.0 - 0.0) / (0.2 - 0.0)) ) );
+				float Clipping208_g363 = CZY_ClippingThreshold;
+				float CirrusAlpha250_g363 = ( ( temp_output_217_0_g363 * ( CZY_CirrusMultiplier * 10.0 ) ).r > Clipping208_g363 ? 1.0 : 0.0 );
+				float SimpleRadiance268_g363 = saturate( ( DetailedClouds252_g363 + BorderLightTransport278_g363 + NimbusLightTransport269_g363 + ChemtrailsFinal248_g363 + CirrusAlpha250_g363 ) );
+				float4 lerpResult342_g363 = lerp( CloudColor41_g363 , lerpResult338_g363 , ( 1.0 - SimpleRadiance268_g363 ));
+				float CloudbreakLightDir426_g363 = saturate( pow( temp_output_49_0_g363 , ( CZY_SunFlareFalloff * 0.5 ) ) );
+				float lerpResult316_g363 = lerp( -0.4 , 1.0 , ( saturate( ( ComplexCloudDensity141_g363 - 0.0 ) ) * CloudDetail179_g363 * CloudbreakLightDir426_g363 ));
+				float SunThroughClouds399_g363 = saturate( lerpResult316_g363 );
+				float3 hsvTorgb2_g366 = RGBToHSV( CZY_AltoCloudColor.rgb );
+				float3 hsvTorgb3_g366 = HSVToRGB( float3(hsvTorgb2_g366.x,saturate( ( hsvTorgb2_g366.y + CZY_FilterSaturation ) ),( hsvTorgb2_g366.z + CZY_FilterValue )) );
+				float4 temp_output_10_0_g366 = ( float4( hsvTorgb3_g366 , 0.0 ) * CZY_FilterColor );
+				float4 CirrusCustomLightColor350_g363 = ( CloudColor41_g363 * ( temp_output_10_0_g366 * CZY_CloudFilterColor ) );
+				float temp_output_391_0_g363 = ( AltoCumulusPlacement376_g363 * (0.0 + (tex2D( CZY_AltocumulusTexture, ((Pos33_g363*1.0 + ( CZY_AltocumulusWindSpeed * TIme30_g363 ))*( 1.0 / CZY_AltocumulusScale ) + 0.0) ).r - 0.0) * (1.0 - 0.0) / (0.2 - 0.0)) * CZY_AltocumulusMultiplier );
+				float AltoCumulusLightTransport393_g363 = temp_output_391_0_g363;
+				float ACCustomLightsClipping387_g363 = ( AltoCumulusLightTransport393_g363 * ( SimpleRadiance268_g363 > Clipping208_g363 ? 0.0 : 1.0 ) );
+				float mulTime193_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D224_g363 = snoise( (Pos33_g363*1.0 + mulTime193_g363)*2.0 );
+				float mulTime178_g363 = _TimeParameters.x * CZY_CirrostratusMoveSpeed;
+				float cos138_g363 = cos( ( mulTime178_g363 * 0.01 ) );
+				float sin138_g363 = sin( ( mulTime178_g363 * 0.01 ) );
+				float2 rotator138_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos138_g363 , -sin138_g363 , sin138_g363 , cos138_g363 )) + float2( 0.5,0.5 );
+				float cos198_g363 = cos( ( mulTime178_g363 * -0.02 ) );
+				float sin198_g363 = sin( ( mulTime178_g363 * -0.02 ) );
+				float2 rotator198_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos198_g363 , -sin198_g363 , sin198_g363 , cos198_g363 )) + float2( 0.5,0.5 );
+				float mulTime184_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D216_g363 = snoise( (Pos33_g363*10.0 + mulTime184_g363)*4.0 );
+				float4 CirrostratPattern261_g363 = ( ( saturate( simplePerlin2D224_g363 ) * tex2D( CZY_CirrostratusTexture, (rotator138_g363*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrostratusTexture, (rotator198_g363*1.5 + 0.75) ) * saturate( simplePerlin2D216_g363 ) ) );
+				float2 texCoord234_g363 = input.ase_texcoord6.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_243_0_g363 = ( texCoord234_g363 - float2( 0.5,0.5 ) );
+				float dotResult238_g363 = dot( temp_output_243_0_g363 , temp_output_243_0_g363 );
+				float clampResult264_g363 = clamp( ( CZY_CirrostratusMultiplier * 0.5 ) , 0.0 , 0.98 );
+				float CirrostratLightTransport281_g363 = ( ( CirrostratPattern261_g363 * saturate( (0.4 + (dotResult238_g363 - 0.0) * (2.0 - 0.4) / (0.1 - 0.0)) ) ).r > ( 1.0 - clampResult264_g363 ) ? 1.0 : 0.0 );
+				float CSCustomLightsClipping309_g363 = ( CirrostratLightTransport281_g363 * ( SimpleRadiance268_g363 > Clipping208_g363 ? 0.0 : 1.0 ) );
+				float CustomRadiance340_g363 = saturate( ( ACCustomLightsClipping387_g363 + CSCustomLightsClipping309_g363 ) );
+				float4 lerpResult331_g363 = lerp( ( lerpResult342_g363 + SunThroughClouds399_g363 ) , CirrusCustomLightColor350_g363 , CustomRadiance340_g363);
+				float FinalAlpha375_g363 = saturate( ( DetailedClouds252_g363 + BorderLightTransport278_g363 + AltoCumulusLightTransport393_g363 + ChemtrailsFinal248_g363 + CirrostratLightTransport281_g363 + CirrusAlpha250_g363 + NimbusLightTransport269_g363 ) );
+				float4 appendResult420_g363 = (float4((lerpResult331_g363).rgb , FinalAlpha375_g363));
+				float4 FinalCloudColor325_g363 = appendResult420_g363;
 				float3 hsvTorgb69_g369 = RGBToHSV( CZY_FogColor5.rgb );
+				float3 normalizeResult54_g369 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
+				float3 temp_output_56_0_g369 = ( normalizeResult54_g369 * _ProjectionParams.z );
 				float3 appendResult25_g369 = (float3(1.0 , CZY_LightFlareSquish , 1.0));
-				float3 normalizeResult13_g369 = normalize( ( ( WorldPosition * appendResult25_g369 ) - _WorldSpaceCameraPos ) );
+				float3 normalizeResult13_g369 = normalize( ( ( temp_output_56_0_g369 * appendResult25_g369 ) - _WorldSpaceCameraPos ) );
 				float dotResult16_g369 = dot( normalizeResult13_g369 , CZY_SunDirection );
 				half LightMask35_g369 = saturate( pow( abs( ( (dotResult16_g369*0.5 + 0.5) * CZY_LightIntensity ) ) , CZY_LightFalloff ) );
 				float temp_output_91_0_g369 = CZY_CloudsFogLightAmount;
 				float3 hsvTorgb2_g371 = RGBToHSV( ( CZY_LightColor * hsvTorgb69_g369.z * saturate( ( LightMask35_g369 * ( 1.5 * CZY_FogColor5.a ) * temp_output_91_0_g369 ) ) ).rgb );
 				float3 hsvTorgb3_g371 = HSVToRGB( float3(hsvTorgb2_g371.x,saturate( ( hsvTorgb2_g371.y + CZY_FilterSaturation ) ),( hsvTorgb2_g371.z + CZY_FilterValue )) );
 				float4 temp_output_10_0_g371 = ( float4( hsvTorgb3_g371 , 0.0 ) * CZY_FilterColor );
-				float3 normalizeResult93_g369 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
-				float3 direction88_g369 = normalizeResult93_g369;
+				float3 direction88_g369 = ( temp_output_56_0_g369 - _WorldSpaceCameraPos );
 				float3 normalizeResult32_g369 = normalize( direction88_g369 );
 				float3 normalizeResult30_g369 = normalize( CZY_MoonDirection );
 				float dotResult28_g369 = dot( normalizeResult32_g369 , normalizeResult30_g369 );
@@ -948,18 +927,20 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 				float4 temp_output_10_0_g370 = ( float4( hsvTorgb3_g370 , 0.0 ) * CZY_FilterColor );
 				float3 ase_objectScale = float3( length( GetObjectToWorldMatrix()[ 0 ].xyz ), length( GetObjectToWorldMatrix()[ 1 ].xyz ), length( GetObjectToWorldMatrix()[ 2 ].xyz ) );
 				float temp_output_34_0_g369 = ( CZY_CloudsFogAmount * saturate( ( ( 1.0 - saturate( ( ( ( direction88_g369.y * 0.1 ) * ( 1.0 / ( ( CZY_FogSmoothness * length( ase_objectScale ) ) * 10.0 ) ) ) + ( 1.0 - CZY_FogOffset ) ) ) ) * CZY_FogIntensity ) ) );
-				float4 lerpResult90_g369 = lerp( FinalCloudColor325_g379 , ( ( temp_output_10_0_g371 * CZY_SunFilterColor ) + temp_output_10_0_g370 ) , temp_output_34_0_g369);
+				float4 lerpResult90_g369 = lerp( FinalCloudColor325_g363 , ( ( temp_output_10_0_g371 * CZY_SunFilterColor ) + temp_output_10_0_g370 ) , temp_output_34_0_g369);
 				
-				bool enabled20_g384 =(bool)_UnderwaterRenderingEnabled;
-				bool submerged20_g384 =(bool)_FullySubmerged;
-				float textureSample20_g384 = tex2Dlod( _UnderwaterMask, float4( ScreenPosNorm.xy, 0, 0.0) ).r;
-				float localHLSL20_g384 = HLSL20_g384( enabled20_g384 , submerged20_g384 , textureSample20_g384 );
+				bool enabled20_g367 =(bool)_UnderwaterRenderingEnabled;
+				bool submerged20_g367 =(bool)_FullySubmerged;
+				float4 ase_positionSSNorm = ScreenPos / ScreenPos.w;
+				ase_positionSSNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_positionSSNorm.z : ase_positionSSNorm.z * 0.5 + 0.5;
+				float textureSample20_g367 = tex2Dlod( _UnderwaterMask, float4( ase_positionSSNorm.xy, 0, 0.0) ).r;
+				float localHLSL20_g367 = HLSL20_g367( enabled20_g367 , submerged20_g367 , textureSample20_g367 );
 				
 				float3 BakedAlbedo = 0;
 				float3 BakedEmission = 0;
 				float3 Color = lerpResult90_g369.rgb;
-				float Alpha = ( ( (FinalCloudColor325_g379).w * ( 1.0 - localHLSL20_g384 ) ) > Clipping208_g379 ? 1.0 : 0.0 );
-				float AlphaClipThreshold = Clipping208_g379;
+				float Alpha = ( ( (FinalCloudColor325_g363).w * ( 1.0 - localHLSL20_g367 ) ) > Clipping208_g363 ? 1.0 : 0.0 );
+				float AlphaClipThreshold = Clipping208_g363;
 				float AlphaClipThresholdShadow = 0.5;
 
 				#ifdef ASE_DEPTH_WRITE_ON
@@ -972,8 +953,6 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 
 				InputData inputData = (InputData)0;
 				inputData.positionWS = WorldPosition;
-				inputData.positionCS = float4( input.positionCS.xy, ClipPos.zw / ClipPos.w );
-				inputData.normalizedScreenSpaceUV = ScreenPosNorm.xy;
 				inputData.viewDirectionWS = WorldViewDirection;
 
 				#ifdef ASE_FOG
@@ -982,6 +961,8 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 				#ifdef _ADDITIONAL_LIGHTS_VERTEX
 					inputData.vertexLighting = input.fogFactorAndVertexLight.yzw;
 				#endif
+
+				inputData.normalizedScreenSpaceUV = NormalizedScreenSpaceUV;
 
 				#if defined(_DBUFFER)
 					ApplyDecalToBaseColor(input.positionCS, Color);
@@ -1025,11 +1006,11 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 
 			
 
-			#pragma multi_compile_local _ALPHATEST_ON
+			#pragma multi_compile _ALPHATEST_ON
 			#pragma multi_compile_instancing
 			#define _SURFACE_TYPE_TRANSPARENT 1
-			#define ASE_VERSION 19901
-			#define ASE_SRP_VERSION 140012
+			#define ASE_VERSION 19801
+			#define ASE_SRP_VERSION 140010
 
 
 			
@@ -1056,11 +1037,8 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
             #endif
 
-			#define ASE_NEEDS_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_WORLD_POSITION
 			#define ASE_NEEDS_FRAG_WORLD_POSITION
-			#define ASE_NEEDS_FRAG_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_FRAG_SCREEN_POSITION_NORMALIZED
+			#define ASE_NEEDS_FRAG_SCREEN_POSITION
 
 
 			#if defined(ASE_EARLY_Z_DEPTH_OPTIMIZE) && (SHADER_TARGET >= 45)
@@ -1082,13 +1060,14 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 			struct PackedVaryings
 			{
 				ASE_SV_POSITION_QUALIFIERS float4 positionCS : SV_POSITION;
+				float4 clipPosV : TEXCOORD0;
 				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-					float3 positionWS : TEXCOORD0;
+					float3 positionWS : TEXCOORD1;
 				#endif
 				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
-					float4 shadowCoord : TEXCOORD1;
+					float4 shadowCoord : TEXCOORD2;
 				#endif
-				float4 ase_texcoord2 : TEXCOORD2;
+				float4 ase_texcoord3 : TEXCOORD3;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
@@ -1192,25 +1171,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 				return 130.0 * dot( m, g );
 			}
 			
-					float2 voronoihash81_g379( float2 p )
+					float2 voronoihash81_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi81_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi81_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash81_g379( n + g );
+						 		float2 o = voronoihash81_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -1225,25 +1204,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return F1;
 					}
 			
-					float2 voronoihash88_g379( float2 p )
+					float2 voronoihash88_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi88_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi88_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash88_g379( n + g );
+						 		float2 o = voronoihash88_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -1258,25 +1237,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return F1;
 					}
 			
-					float2 voronoihash200_g379( float2 p )
+					float2 voronoihash200_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi200_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi200_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash200_g379( n + g );
+						 		float2 o = voronoihash200_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -1291,25 +1270,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return (F2 + F1) * 0.5;
 					}
 			
-					float2 voronoihash232_g379( float2 p )
+					float2 voronoihash232_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi232_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi232_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash232_g379( n + g );
+						 		float2 o = voronoihash232_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -1324,25 +1303,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return F1;
 					}
 			
-					float2 voronoihash84_g379( float2 p )
+					float2 voronoihash84_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi84_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi84_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash84_g379( n + g );
+						 		float2 o = voronoihash84_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -1357,7 +1336,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return F1;
 					}
 			
-			float HLSL20_g384( bool enabled, bool submerged, float textureSample )
+			float HLSL20_g367( bool enabled, bool submerged, float textureSample )
 			{
 				if(enabled)
 				{
@@ -1381,10 +1360,10 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 				UNITY_TRANSFER_INSTANCE_ID(input, output);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO( output );
 
-				output.ase_texcoord2.xy = input.ase_texcoord.xy;
+				output.ase_texcoord3.xy = input.ase_texcoord.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				output.ase_texcoord2.zw = 0;
+				output.ase_texcoord3.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					float3 defaultVertexValue = input.positionOS.xyz;
@@ -1431,6 +1410,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 				#endif
 
 				output.positionCS = positionCS;
+				output.clipPosV = positionCS;
 				return output;
 			}
 
@@ -1528,9 +1508,8 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 				#endif
 
 				float4 ShadowCoords = float4( 0, 0, 0, 0 );
-				float4 ScreenPosNorm = float4( GetNormalizedScreenSpaceUV( input.positionCS ), input.positionCS.zw );
-				float4 ClipPos = ComputeClipSpacePosition( ScreenPosNorm.xy, input.positionCS.z ) * input.positionCS.w;
-				float4 ScreenPos = ComputeScreenPos( ClipPos );
+				float4 ClipPos = input.clipPosV;
+				float4 ScreenPos = ComputeScreenPos( input.clipPosV );
 
 				#if defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
 					#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
@@ -1540,178 +1519,180 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 					#endif
 				#endif
 
-				float3 hsvTorgb2_g380 = RGBToHSV( CZY_CloudColor.rgb );
-				float3 hsvTorgb3_g380 = HSVToRGB( float3(hsvTorgb2_g380.x,saturate( ( hsvTorgb2_g380.y + CZY_FilterSaturation ) ),( hsvTorgb2_g380.z + CZY_FilterValue )) );
-				float4 temp_output_10_0_g380 = ( float4( hsvTorgb3_g380 , 0.0 ) * CZY_FilterColor );
-				float4 CloudColor41_g379 = ( temp_output_10_0_g380 * CZY_CloudFilterColor );
-				float3 hsvTorgb2_g383 = RGBToHSV( CZY_CloudHighlightColor.rgb );
-				float3 hsvTorgb3_g383 = HSVToRGB( float3(hsvTorgb2_g383.x,saturate( ( hsvTorgb2_g383.y + CZY_FilterSaturation ) ),( hsvTorgb2_g383.z + CZY_FilterValue )) );
-				float4 temp_output_10_0_g383 = ( float4( hsvTorgb3_g383 , 0.0 ) * CZY_FilterColor );
-				float4 CloudHighlightColor55_g379 = ( temp_output_10_0_g383 * CZY_SunFilterColor );
-				float2 texCoord31_g379 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 Pos33_g379 = texCoord31_g379;
-				float mulTime29_g379 = _TimeParameters.x * ( 0.001 * CZY_WindSpeed );
-				float TIme30_g379 = mulTime29_g379;
-				float simplePerlin2D409_g379 = snoise( ( Pos33_g379 + ( TIme30_g379 * float2( 0.2,-0.4 ) ) )*( 100.0 / CZY_MainCloudScale ) );
-				simplePerlin2D409_g379 = simplePerlin2D409_g379*0.5 + 0.5;
-				float SimpleCloudDensity153_g379 = simplePerlin2D409_g379;
-				float time81_g379 = 0.0;
-				float2 voronoiSmoothId81_g379 = 0;
-				float2 temp_output_94_0_g379 = ( Pos33_g379 + ( TIme30_g379 * float2( 0.3,0.2 ) ) );
-				float2 coords81_g379 = temp_output_94_0_g379 * ( 140.0 / CZY_MainCloudScale );
-				float2 id81_g379 = 0;
-				float2 uv81_g379 = 0;
-				float voroi81_g379 = voronoi81_g379( coords81_g379, time81_g379, id81_g379, uv81_g379, 0, voronoiSmoothId81_g379 );
-				float time88_g379 = 0.0;
-				float2 voronoiSmoothId88_g379 = 0;
-				float2 coords88_g379 = temp_output_94_0_g379 * ( 500.0 / CZY_MainCloudScale );
-				float2 id88_g379 = 0;
-				float2 uv88_g379 = 0;
-				float voroi88_g379 = voronoi88_g379( coords88_g379, time88_g379, id88_g379, uv88_g379, 0, voronoiSmoothId88_g379 );
-				float2 appendResult95_g379 = (float2(voroi81_g379 , voroi88_g379));
-				float2 VoroDetails109_g379 = appendResult95_g379;
-				float CumulusCoverage34_g379 = CZY_CumulusCoverageMultiplier;
-				float ComplexCloudDensity141_g379 =  (0.0 + ( min( SimpleCloudDensity153_g379 , ( 1.0 - VoroDetails109_g379.x ) ) - ( 1.0 - CumulusCoverage34_g379 ) ) * ( 1.0 - 0.0 ) / ( 1.0 - ( 1.0 - CumulusCoverage34_g379 ) ) );
-				float4 lerpResult315_g379 = lerp( CloudHighlightColor55_g379 , CloudColor41_g379 , saturate(  (2.0 + ( ComplexCloudDensity141_g379 - 0.0 ) * ( 0.7 - 2.0 ) / ( 1.0 - 0.0 ) ) ));
-				float3 normalizeResult40_g379 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
-				float dotResult42_g379 = dot( normalizeResult40_g379 , CZY_SunDirection );
-				float temp_output_49_0_g379 = abs( (dotResult42_g379*0.5 + 0.5) );
-				half LightMask56_g379 = saturate( pow( temp_output_49_0_g379 , CZY_SunFlareFalloff ) );
-				float time200_g379 = 0.0;
-				float2 voronoiSmoothId200_g379 = 0;
-				float mulTime163_g379 = _TimeParameters.x * 0.003;
-				float2 coords200_g379 = (Pos33_g379*1.0 + ( float2( 1,-2 ) * mulTime163_g379 )) * 10.0;
-				float2 id200_g379 = 0;
-				float2 uv200_g379 = 0;
-				float voroi200_g379 = voronoi200_g379( coords200_g379, time200_g379, id200_g379, uv200_g379, 0, voronoiSmoothId200_g379 );
-				float time232_g379 = ( 10.0 * mulTime163_g379 );
-				float2 voronoiSmoothId232_g379 = 0;
-				float2 coords232_g379 = input.ase_texcoord2.xy * 10.0;
-				float2 id232_g379 = 0;
-				float2 uv232_g379 = 0;
-				float voroi232_g379 = voronoi232_g379( coords232_g379, time232_g379, id232_g379, uv232_g379, 0, voronoiSmoothId232_g379 );
-				float temp_output_242_0_g379 = ( ( ( 1.0 - 0.0 ) -  (1.0 + ( voroi200_g379 - 0.0 ) * ( -0.5 - 1.0 ) / ( 1.0 - 0.0 ) ) ) - voroi232_g379 );
-				float AltoCumulusPlacement376_g379 = temp_output_242_0_g379;
-				float CloudThicknessDetails286_g379 = ( VoroDetails109_g379.y * saturate( ( AltoCumulusPlacement376_g379 - 0.26 ) ) );
-				float3 normalizeResult43_g379 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
-				float dotResult46_g379 = dot( normalizeResult43_g379 , CZY_MoonDirection );
-				half MoonlightMask57_g379 = saturate( pow( abs( (dotResult46_g379*0.5 + 0.5) ) , CZY_CloudMoonFalloff ) );
-				float3 hsvTorgb2_g381 = RGBToHSV( CZY_CloudMoonColor.rgb );
-				float3 hsvTorgb3_g381 = HSVToRGB( float3(hsvTorgb2_g381.x,saturate( ( hsvTorgb2_g381.y + CZY_FilterSaturation ) ),( hsvTorgb2_g381.z + CZY_FilterValue )) );
-				float4 temp_output_10_0_g381 = ( float4( hsvTorgb3_g381 , 0.0 ) * CZY_FilterColor );
-				float4 MoonlightColor60_g379 = ( temp_output_10_0_g381 * CZY_CloudFilterColor );
-				float4 lerpResult338_g379 = lerp( ( lerpResult315_g379 + ( LightMask56_g379 * CloudHighlightColor55_g379 * ( 1.0 - CloudThicknessDetails286_g379 ) ) + ( MoonlightMask57_g379 * MoonlightColor60_g379 * ( 1.0 - CloudThicknessDetails286_g379 ) ) ) , ( CloudColor41_g379 * float4( 0.5660378,0.5660378,0.5660378,0 ) ) , CloudThicknessDetails286_g379);
-				float time84_g379 = 0.0;
-				float2 voronoiSmoothId84_g379 = 0;
-				float2 coords84_g379 = ( Pos33_g379 + ( TIme30_g379 * float2( 0.3,0.2 ) ) ) * ( 100.0 / CZY_DetailScale );
-				float2 id84_g379 = 0;
-				float2 uv84_g379 = 0;
-				float fade84_g379 = 0.5;
-				float voroi84_g379 = 0;
-				float rest84_g379 = 0;
-				for( int it84_g379 = 0; it84_g379 <3; it84_g379++ ){
-				voroi84_g379 += fade84_g379 * voronoi84_g379( coords84_g379, time84_g379, id84_g379, uv84_g379, 0,voronoiSmoothId84_g379 );
-				rest84_g379 += fade84_g379;
-				coords84_g379 *= 2;
-				fade84_g379 *= 0.5;
-				}//Voronoi84_g379
-				voroi84_g379 /= rest84_g379;
-				float temp_output_173_0_g379 = (  (0.0 + ( ( 1.0 - voroi84_g379 ) - 0.3 ) * ( 0.5 - 0.0 ) / ( 1.0 - 0.3 ) ) * 0.1 * CZY_DetailAmount );
-				float DetailedClouds252_g379 = saturate( ( ComplexCloudDensity141_g379 + temp_output_173_0_g379 ) );
-				float CloudDetail179_g379 = temp_output_173_0_g379;
-				float2 texCoord79_g379 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_161_0_g379 = ( texCoord79_g379 - float2( 0.5,0.5 ) );
-				float dotResult212_g379 = dot( temp_output_161_0_g379 , temp_output_161_0_g379 );
-				float BorderHeight154_g379 = ( 1.0 - CZY_BorderHeight );
-				float temp_output_151_0_g379 = ( -2.0 * ( 1.0 - CZY_BorderVariation ) );
-				float clampResult247_g379 = clamp( ( ( ( CloudDetail179_g379 + SimpleCloudDensity153_g379 ) * saturate(  (( BorderHeight154_g379 * temp_output_151_0_g379 ) + ( dotResult212_g379 - 0.0 ) * ( ( temp_output_151_0_g379 * -4.0 ) - ( BorderHeight154_g379 * temp_output_151_0_g379 ) ) / ( 0.5 - 0.0 ) ) ) ) * 10.0 * CZY_BorderEffect ) , -1.0 , 1.0 );
-				float BorderLightTransport278_g379 = clampResult247_g379;
-				float3 normalizeResult116_g379 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
-				float3 normalizeResult146_g379 = normalize( CZY_StormDirection );
-				float dotResult150_g379 = dot( normalizeResult116_g379 , normalizeResult146_g379 );
-				float2 texCoord98_g379 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_124_0_g379 = ( texCoord98_g379 - float2( 0.5,0.5 ) );
-				float dotResult125_g379 = dot( temp_output_124_0_g379 , temp_output_124_0_g379 );
-				float temp_output_140_0_g379 = ( -2.0 * ( 1.0 - ( CZY_NimbusVariation * 0.9 ) ) );
-				float NimbusLightTransport269_g379 = saturate( ( ( ( CloudDetail179_g379 + SimpleCloudDensity153_g379 ) * saturate(  (( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_140_0_g379 ) + ( ( dotResult150_g379 + ( CZY_NimbusHeight * 4.0 * dotResult125_g379 ) ) - 0.5 ) * ( ( temp_output_140_0_g379 * -4.0 ) - ( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_140_0_g379 ) ) / ( 7.0 - 0.5 ) ) ) ) * 10.0 ) );
-				float mulTime104_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D143_g379 = snoise( (Pos33_g379*1.0 + mulTime104_g379)*2.0 );
-				float mulTime93_g379 = _TimeParameters.x * CZY_ChemtrailsMoveSpeed;
-				float cos97_g379 = cos( ( mulTime93_g379 * 0.01 ) );
-				float sin97_g379 = sin( ( mulTime93_g379 * 0.01 ) );
-				float2 rotator97_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos97_g379 , -sin97_g379 , sin97_g379 , cos97_g379 )) + float2( 0.5,0.5 );
-				float cos131_g379 = cos( ( mulTime93_g379 * -0.02 ) );
-				float sin131_g379 = sin( ( mulTime93_g379 * -0.02 ) );
-				float2 rotator131_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos131_g379 , -sin131_g379 , sin131_g379 , cos131_g379 )) + float2( 0.5,0.5 );
-				float mulTime107_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D147_g379 = snoise( (Pos33_g379*1.0 + mulTime107_g379)*4.0 );
-				float4 ChemtrailsPattern210_g379 = ( ( saturate( simplePerlin2D143_g379 ) * tex2D( CZY_ChemtrailsTexture, (rotator97_g379*0.5 + 0.0) ) ) + ( tex2D( CZY_ChemtrailsTexture, rotator131_g379 ) * saturate( simplePerlin2D147_g379 ) ) );
-				float2 texCoord139_g379 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_162_0_g379 = ( texCoord139_g379 - float2( 0.5,0.5 ) );
-				float dotResult207_g379 = dot( temp_output_162_0_g379 , temp_output_162_0_g379 );
-				float ChemtrailsFinal248_g379 = ( ( ChemtrailsPattern210_g379 * saturate(  (0.4 + ( dotResult207_g379 - 0.0 ) * ( 2.0 - 0.4 ) / ( 0.1 - 0.0 ) ) ) ).r > ( 1.0 - ( CZY_ChemtrailsMultiplier * 0.5 ) ) ? 1.0 : 0.0 );
-				float mulTime80_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D126_g379 = snoise( (Pos33_g379*1.0 + mulTime80_g379)*2.0 );
-				float mulTime75_g379 = _TimeParameters.x * CZY_CirrusMoveSpeed;
-				float cos101_g379 = cos( ( mulTime75_g379 * 0.01 ) );
-				float sin101_g379 = sin( ( mulTime75_g379 * 0.01 ) );
-				float2 rotator101_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos101_g379 , -sin101_g379 , sin101_g379 , cos101_g379 )) + float2( 0.5,0.5 );
-				float cos112_g379 = cos( ( mulTime75_g379 * -0.02 ) );
-				float sin112_g379 = sin( ( mulTime75_g379 * -0.02 ) );
-				float2 rotator112_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos112_g379 , -sin112_g379 , sin112_g379 , cos112_g379 )) + float2( 0.5,0.5 );
-				float mulTime135_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D122_g379 = snoise( (Pos33_g379*1.0 + mulTime135_g379) );
-				simplePerlin2D122_g379 = simplePerlin2D122_g379*0.5 + 0.5;
-				float4 CirrusPattern137_g379 = ( ( saturate( simplePerlin2D126_g379 ) * tex2D( CZY_CirrusTexture, (rotator101_g379*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrusTexture, (rotator112_g379*1.0 + 0.0) ) * saturate( simplePerlin2D122_g379 ) ) );
-				float2 texCoord134_g379 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_164_0_g379 = ( texCoord134_g379 - float2( 0.5,0.5 ) );
-				float dotResult157_g379 = dot( temp_output_164_0_g379 , temp_output_164_0_g379 );
-				float4 temp_output_217_0_g379 = ( CirrusPattern137_g379 * saturate(  (0.0 + ( dotResult157_g379 - 0.0 ) * ( 2.0 - 0.0 ) / ( 0.2 - 0.0 ) ) ) );
-				float Clipping208_g379 = CZY_ClippingThreshold;
-				float CirrusAlpha250_g379 = ( ( temp_output_217_0_g379 * ( CZY_CirrusMultiplier * 10.0 ) ).r > Clipping208_g379 ? 1.0 : 0.0 );
-				float SimpleRadiance268_g379 = saturate( ( DetailedClouds252_g379 + BorderLightTransport278_g379 + NimbusLightTransport269_g379 + ChemtrailsFinal248_g379 + CirrusAlpha250_g379 ) );
-				float4 lerpResult342_g379 = lerp( CloudColor41_g379 , lerpResult338_g379 , ( 1.0 - SimpleRadiance268_g379 ));
-				float CloudbreakLightDir426_g379 = saturate( pow( temp_output_49_0_g379 , ( CZY_SunFlareFalloff * 0.5 ) ) );
-				float lerpResult316_g379 = lerp( -0.4 , 1.0 , ( saturate( ( ComplexCloudDensity141_g379 - 0.0 ) ) * CloudDetail179_g379 * CloudbreakLightDir426_g379 ));
-				float SunThroughClouds399_g379 = saturate( lerpResult316_g379 );
-				float3 hsvTorgb2_g382 = RGBToHSV( CZY_AltoCloudColor.rgb );
-				float3 hsvTorgb3_g382 = HSVToRGB( float3(hsvTorgb2_g382.x,saturate( ( hsvTorgb2_g382.y + CZY_FilterSaturation ) ),( hsvTorgb2_g382.z + CZY_FilterValue )) );
-				float4 temp_output_10_0_g382 = ( float4( hsvTorgb3_g382 , 0.0 ) * CZY_FilterColor );
-				float4 CirrusCustomLightColor350_g379 = ( CloudColor41_g379 * ( temp_output_10_0_g382 * CZY_CloudFilterColor ) );
-				float temp_output_391_0_g379 = ( AltoCumulusPlacement376_g379 *  (0.0 + ( tex2D( CZY_AltocumulusTexture, ((Pos33_g379*1.0 + ( CZY_AltocumulusWindSpeed * TIme30_g379 ))*( 1.0 / CZY_AltocumulusScale ) + 0.0) ).r - 0.0 ) * ( 1.0 - 0.0 ) / ( 0.2 - 0.0 ) ) * CZY_AltocumulusMultiplier );
-				float AltoCumulusLightTransport393_g379 = temp_output_391_0_g379;
-				float ACCustomLightsClipping387_g379 = ( AltoCumulusLightTransport393_g379 * ( SimpleRadiance268_g379 > Clipping208_g379 ? 0.0 : 1.0 ) );
-				float mulTime193_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D224_g379 = snoise( (Pos33_g379*1.0 + mulTime193_g379)*2.0 );
-				float mulTime178_g379 = _TimeParameters.x * CZY_CirrostratusMoveSpeed;
-				float cos138_g379 = cos( ( mulTime178_g379 * 0.01 ) );
-				float sin138_g379 = sin( ( mulTime178_g379 * 0.01 ) );
-				float2 rotator138_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos138_g379 , -sin138_g379 , sin138_g379 , cos138_g379 )) + float2( 0.5,0.5 );
-				float cos198_g379 = cos( ( mulTime178_g379 * -0.02 ) );
-				float sin198_g379 = sin( ( mulTime178_g379 * -0.02 ) );
-				float2 rotator198_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos198_g379 , -sin198_g379 , sin198_g379 , cos198_g379 )) + float2( 0.5,0.5 );
-				float mulTime184_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D216_g379 = snoise( (Pos33_g379*10.0 + mulTime184_g379)*4.0 );
-				float4 CirrostratPattern261_g379 = ( ( saturate( simplePerlin2D224_g379 ) * tex2D( CZY_CirrostratusTexture, (rotator138_g379*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrostratusTexture, (rotator198_g379*1.5 + 0.75) ) * saturate( simplePerlin2D216_g379 ) ) );
-				float2 texCoord234_g379 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_243_0_g379 = ( texCoord234_g379 - float2( 0.5,0.5 ) );
-				float dotResult238_g379 = dot( temp_output_243_0_g379 , temp_output_243_0_g379 );
-				float clampResult264_g379 = clamp( ( CZY_CirrostratusMultiplier * 0.5 ) , 0.0 , 0.98 );
-				float CirrostratLightTransport281_g379 = ( ( CirrostratPattern261_g379 * saturate(  (0.4 + ( dotResult238_g379 - 0.0 ) * ( 2.0 - 0.4 ) / ( 0.1 - 0.0 ) ) ) ).r > ( 1.0 - clampResult264_g379 ) ? 1.0 : 0.0 );
-				float CSCustomLightsClipping309_g379 = ( CirrostratLightTransport281_g379 * ( SimpleRadiance268_g379 > Clipping208_g379 ? 0.0 : 1.0 ) );
-				float CustomRadiance340_g379 = saturate( ( ACCustomLightsClipping387_g379 + CSCustomLightsClipping309_g379 ) );
-				float4 lerpResult331_g379 = lerp( ( lerpResult342_g379 + ( SunThroughClouds399_g379 * CloudHighlightColor55_g379 ) ) , CirrusCustomLightColor350_g379 , CustomRadiance340_g379);
-				float FinalAlpha375_g379 = saturate( ( DetailedClouds252_g379 + BorderLightTransport278_g379 + AltoCumulusLightTransport393_g379 + ChemtrailsFinal248_g379 + CirrostratLightTransport281_g379 + CirrusAlpha250_g379 + NimbusLightTransport269_g379 ) );
-				float4 appendResult420_g379 = (float4((lerpResult331_g379).rgb , FinalAlpha375_g379));
-				float4 FinalCloudColor325_g379 = appendResult420_g379;
-				bool enabled20_g384 =(bool)_UnderwaterRenderingEnabled;
-				bool submerged20_g384 =(bool)_FullySubmerged;
-				float textureSample20_g384 = tex2Dlod( _UnderwaterMask, float4( ScreenPosNorm.xy, 0, 0.0) ).r;
-				float localHLSL20_g384 = HLSL20_g384( enabled20_g384 , submerged20_g384 , textureSample20_g384 );
+				float3 hsvTorgb2_g364 = RGBToHSV( CZY_CloudColor.rgb );
+				float3 hsvTorgb3_g364 = HSVToRGB( float3(hsvTorgb2_g364.x,saturate( ( hsvTorgb2_g364.y + CZY_FilterSaturation ) ),( hsvTorgb2_g364.z + CZY_FilterValue )) );
+				float4 temp_output_10_0_g364 = ( float4( hsvTorgb3_g364 , 0.0 ) * CZY_FilterColor );
+				float4 CloudColor41_g363 = ( temp_output_10_0_g364 * CZY_CloudFilterColor );
+				float3 hsvTorgb2_g368 = RGBToHSV( CZY_CloudHighlightColor.rgb );
+				float3 hsvTorgb3_g368 = HSVToRGB( float3(hsvTorgb2_g368.x,saturate( ( hsvTorgb2_g368.y + CZY_FilterSaturation ) ),( hsvTorgb2_g368.z + CZY_FilterValue )) );
+				float4 temp_output_10_0_g368 = ( float4( hsvTorgb3_g368 , 0.0 ) * CZY_FilterColor );
+				float4 CloudHighlightColor55_g363 = ( temp_output_10_0_g368 * CZY_SunFilterColor );
+				float2 texCoord31_g363 = input.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 Pos33_g363 = texCoord31_g363;
+				float mulTime29_g363 = _TimeParameters.x * ( 0.001 * CZY_WindSpeed );
+				float TIme30_g363 = mulTime29_g363;
+				float simplePerlin2D409_g363 = snoise( ( Pos33_g363 + ( TIme30_g363 * float2( 0.2,-0.4 ) ) )*( 100.0 / CZY_MainCloudScale ) );
+				simplePerlin2D409_g363 = simplePerlin2D409_g363*0.5 + 0.5;
+				float SimpleCloudDensity153_g363 = simplePerlin2D409_g363;
+				float time81_g363 = 0.0;
+				float2 voronoiSmoothId81_g363 = 0;
+				float2 temp_output_94_0_g363 = ( Pos33_g363 + ( TIme30_g363 * float2( 0.3,0.2 ) ) );
+				float2 coords81_g363 = temp_output_94_0_g363 * ( 140.0 / CZY_MainCloudScale );
+				float2 id81_g363 = 0;
+				float2 uv81_g363 = 0;
+				float voroi81_g363 = voronoi81_g363( coords81_g363, time81_g363, id81_g363, uv81_g363, 0, voronoiSmoothId81_g363 );
+				float time88_g363 = 0.0;
+				float2 voronoiSmoothId88_g363 = 0;
+				float2 coords88_g363 = temp_output_94_0_g363 * ( 500.0 / CZY_MainCloudScale );
+				float2 id88_g363 = 0;
+				float2 uv88_g363 = 0;
+				float voroi88_g363 = voronoi88_g363( coords88_g363, time88_g363, id88_g363, uv88_g363, 0, voronoiSmoothId88_g363 );
+				float2 appendResult95_g363 = (float2(voroi81_g363 , voroi88_g363));
+				float2 VoroDetails109_g363 = appendResult95_g363;
+				float CumulusCoverage34_g363 = CZY_CumulusCoverageMultiplier;
+				float ComplexCloudDensity141_g363 = (0.0 + (min( SimpleCloudDensity153_g363 , ( 1.0 - VoroDetails109_g363.x ) ) - ( 1.0 - CumulusCoverage34_g363 )) * (1.0 - 0.0) / (1.0 - ( 1.0 - CumulusCoverage34_g363 )));
+				float4 lerpResult315_g363 = lerp( CloudHighlightColor55_g363 , CloudColor41_g363 , saturate( (2.0 + (ComplexCloudDensity141_g363 - 0.0) * (0.7 - 2.0) / (1.0 - 0.0)) ));
+				float3 normalizeResult40_g363 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
+				float dotResult42_g363 = dot( normalizeResult40_g363 , CZY_SunDirection );
+				float temp_output_49_0_g363 = abs( (dotResult42_g363*0.5 + 0.5) );
+				half LightMask56_g363 = saturate( pow( temp_output_49_0_g363 , CZY_SunFlareFalloff ) );
+				float time200_g363 = 0.0;
+				float2 voronoiSmoothId200_g363 = 0;
+				float mulTime163_g363 = _TimeParameters.x * 0.003;
+				float2 coords200_g363 = (Pos33_g363*1.0 + ( float2( 1,-2 ) * mulTime163_g363 )) * 10.0;
+				float2 id200_g363 = 0;
+				float2 uv200_g363 = 0;
+				float voroi200_g363 = voronoi200_g363( coords200_g363, time200_g363, id200_g363, uv200_g363, 0, voronoiSmoothId200_g363 );
+				float time232_g363 = ( 10.0 * mulTime163_g363 );
+				float2 voronoiSmoothId232_g363 = 0;
+				float2 coords232_g363 = input.ase_texcoord3.xy * 10.0;
+				float2 id232_g363 = 0;
+				float2 uv232_g363 = 0;
+				float voroi232_g363 = voronoi232_g363( coords232_g363, time232_g363, id232_g363, uv232_g363, 0, voronoiSmoothId232_g363 );
+				float temp_output_242_0_g363 = ( ( ( 1.0 - 0.0 ) - (1.0 + (voroi200_g363 - 0.0) * (-0.5 - 1.0) / (1.0 - 0.0)) ) - voroi232_g363 );
+				float AltoCumulusPlacement376_g363 = temp_output_242_0_g363;
+				float CloudThicknessDetails286_g363 = ( VoroDetails109_g363.y * saturate( ( AltoCumulusPlacement376_g363 - 0.26 ) ) );
+				float3 normalizeResult43_g363 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
+				float dotResult46_g363 = dot( normalizeResult43_g363 , CZY_MoonDirection );
+				half MoonlightMask57_g363 = saturate( pow( abs( (dotResult46_g363*0.5 + 0.5) ) , CZY_CloudMoonFalloff ) );
+				float3 hsvTorgb2_g365 = RGBToHSV( CZY_CloudMoonColor.rgb );
+				float3 hsvTorgb3_g365 = HSVToRGB( float3(hsvTorgb2_g365.x,saturate( ( hsvTorgb2_g365.y + CZY_FilterSaturation ) ),( hsvTorgb2_g365.z + CZY_FilterValue )) );
+				float4 temp_output_10_0_g365 = ( float4( hsvTorgb3_g365 , 0.0 ) * CZY_FilterColor );
+				float4 MoonlightColor60_g363 = ( temp_output_10_0_g365 * CZY_CloudFilterColor );
+				float4 lerpResult338_g363 = lerp( ( lerpResult315_g363 + ( LightMask56_g363 * CloudHighlightColor55_g363 * ( 1.0 - CloudThicknessDetails286_g363 ) ) + ( MoonlightMask57_g363 * MoonlightColor60_g363 * ( 1.0 - CloudThicknessDetails286_g363 ) ) ) , ( CloudColor41_g363 * float4( 0.5660378,0.5660378,0.5660378,0 ) ) , CloudThicknessDetails286_g363);
+				float time84_g363 = 0.0;
+				float2 voronoiSmoothId84_g363 = 0;
+				float2 coords84_g363 = ( Pos33_g363 + ( TIme30_g363 * float2( 0.3,0.2 ) ) ) * ( 100.0 / CZY_DetailScale );
+				float2 id84_g363 = 0;
+				float2 uv84_g363 = 0;
+				float fade84_g363 = 0.5;
+				float voroi84_g363 = 0;
+				float rest84_g363 = 0;
+				for( int it84_g363 = 0; it84_g363 <3; it84_g363++ ){
+				voroi84_g363 += fade84_g363 * voronoi84_g363( coords84_g363, time84_g363, id84_g363, uv84_g363, 0,voronoiSmoothId84_g363 );
+				rest84_g363 += fade84_g363;
+				coords84_g363 *= 2;
+				fade84_g363 *= 0.5;
+				}//Voronoi84_g363
+				voroi84_g363 /= rest84_g363;
+				float temp_output_173_0_g363 = ( (0.0 + (( 1.0 - voroi84_g363 ) - 0.3) * (0.5 - 0.0) / (1.0 - 0.3)) * 0.1 * CZY_DetailAmount );
+				float DetailedClouds252_g363 = saturate( ( ComplexCloudDensity141_g363 + temp_output_173_0_g363 ) );
+				float CloudDetail179_g363 = temp_output_173_0_g363;
+				float2 texCoord79_g363 = input.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_161_0_g363 = ( texCoord79_g363 - float2( 0.5,0.5 ) );
+				float dotResult212_g363 = dot( temp_output_161_0_g363 , temp_output_161_0_g363 );
+				float BorderHeight154_g363 = ( 1.0 - CZY_BorderHeight );
+				float temp_output_151_0_g363 = ( -2.0 * ( 1.0 - CZY_BorderVariation ) );
+				float clampResult247_g363 = clamp( ( ( ( CloudDetail179_g363 + SimpleCloudDensity153_g363 ) * saturate( (( BorderHeight154_g363 * temp_output_151_0_g363 ) + (dotResult212_g363 - 0.0) * (( temp_output_151_0_g363 * -4.0 ) - ( BorderHeight154_g363 * temp_output_151_0_g363 )) / (0.5 - 0.0)) ) ) * 10.0 * CZY_BorderEffect ) , -1.0 , 1.0 );
+				float BorderLightTransport278_g363 = clampResult247_g363;
+				float3 normalizeResult116_g363 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
+				float3 normalizeResult146_g363 = normalize( CZY_StormDirection );
+				float dotResult150_g363 = dot( normalizeResult116_g363 , normalizeResult146_g363 );
+				float2 texCoord98_g363 = input.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_124_0_g363 = ( texCoord98_g363 - float2( 0.5,0.5 ) );
+				float dotResult125_g363 = dot( temp_output_124_0_g363 , temp_output_124_0_g363 );
+				float temp_output_140_0_g363 = ( -2.0 * ( 1.0 - ( CZY_NimbusVariation * 0.9 ) ) );
+				float NimbusLightTransport269_g363 = saturate( ( ( ( CloudDetail179_g363 + SimpleCloudDensity153_g363 ) * saturate( (( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_140_0_g363 ) + (( dotResult150_g363 + ( CZY_NimbusHeight * 4.0 * dotResult125_g363 ) ) - 0.5) * (( temp_output_140_0_g363 * -4.0 ) - ( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_140_0_g363 )) / (7.0 - 0.5)) ) ) * 10.0 ) );
+				float mulTime104_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D143_g363 = snoise( (Pos33_g363*1.0 + mulTime104_g363)*2.0 );
+				float mulTime93_g363 = _TimeParameters.x * CZY_ChemtrailsMoveSpeed;
+				float cos97_g363 = cos( ( mulTime93_g363 * 0.01 ) );
+				float sin97_g363 = sin( ( mulTime93_g363 * 0.01 ) );
+				float2 rotator97_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos97_g363 , -sin97_g363 , sin97_g363 , cos97_g363 )) + float2( 0.5,0.5 );
+				float cos131_g363 = cos( ( mulTime93_g363 * -0.02 ) );
+				float sin131_g363 = sin( ( mulTime93_g363 * -0.02 ) );
+				float2 rotator131_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos131_g363 , -sin131_g363 , sin131_g363 , cos131_g363 )) + float2( 0.5,0.5 );
+				float mulTime107_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D147_g363 = snoise( (Pos33_g363*1.0 + mulTime107_g363)*4.0 );
+				float4 ChemtrailsPattern210_g363 = ( ( saturate( simplePerlin2D143_g363 ) * tex2D( CZY_ChemtrailsTexture, (rotator97_g363*0.5 + 0.0) ) ) + ( tex2D( CZY_ChemtrailsTexture, rotator131_g363 ) * saturate( simplePerlin2D147_g363 ) ) );
+				float2 texCoord139_g363 = input.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_162_0_g363 = ( texCoord139_g363 - float2( 0.5,0.5 ) );
+				float dotResult207_g363 = dot( temp_output_162_0_g363 , temp_output_162_0_g363 );
+				float ChemtrailsFinal248_g363 = ( ( ChemtrailsPattern210_g363 * saturate( (0.4 + (dotResult207_g363 - 0.0) * (2.0 - 0.4) / (0.1 - 0.0)) ) ).r > ( 1.0 - ( CZY_ChemtrailsMultiplier * 0.5 ) ) ? 1.0 : 0.0 );
+				float mulTime80_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D126_g363 = snoise( (Pos33_g363*1.0 + mulTime80_g363)*2.0 );
+				float mulTime75_g363 = _TimeParameters.x * CZY_CirrusMoveSpeed;
+				float cos101_g363 = cos( ( mulTime75_g363 * 0.01 ) );
+				float sin101_g363 = sin( ( mulTime75_g363 * 0.01 ) );
+				float2 rotator101_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos101_g363 , -sin101_g363 , sin101_g363 , cos101_g363 )) + float2( 0.5,0.5 );
+				float cos112_g363 = cos( ( mulTime75_g363 * -0.02 ) );
+				float sin112_g363 = sin( ( mulTime75_g363 * -0.02 ) );
+				float2 rotator112_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos112_g363 , -sin112_g363 , sin112_g363 , cos112_g363 )) + float2( 0.5,0.5 );
+				float mulTime135_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D122_g363 = snoise( (Pos33_g363*1.0 + mulTime135_g363) );
+				simplePerlin2D122_g363 = simplePerlin2D122_g363*0.5 + 0.5;
+				float4 CirrusPattern137_g363 = ( ( saturate( simplePerlin2D126_g363 ) * tex2D( CZY_CirrusTexture, (rotator101_g363*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrusTexture, (rotator112_g363*1.0 + 0.0) ) * saturate( simplePerlin2D122_g363 ) ) );
+				float2 texCoord134_g363 = input.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_164_0_g363 = ( texCoord134_g363 - float2( 0.5,0.5 ) );
+				float dotResult157_g363 = dot( temp_output_164_0_g363 , temp_output_164_0_g363 );
+				float4 temp_output_217_0_g363 = ( CirrusPattern137_g363 * saturate( (0.0 + (dotResult157_g363 - 0.0) * (2.0 - 0.0) / (0.2 - 0.0)) ) );
+				float Clipping208_g363 = CZY_ClippingThreshold;
+				float CirrusAlpha250_g363 = ( ( temp_output_217_0_g363 * ( CZY_CirrusMultiplier * 10.0 ) ).r > Clipping208_g363 ? 1.0 : 0.0 );
+				float SimpleRadiance268_g363 = saturate( ( DetailedClouds252_g363 + BorderLightTransport278_g363 + NimbusLightTransport269_g363 + ChemtrailsFinal248_g363 + CirrusAlpha250_g363 ) );
+				float4 lerpResult342_g363 = lerp( CloudColor41_g363 , lerpResult338_g363 , ( 1.0 - SimpleRadiance268_g363 ));
+				float CloudbreakLightDir426_g363 = saturate( pow( temp_output_49_0_g363 , ( CZY_SunFlareFalloff * 0.5 ) ) );
+				float lerpResult316_g363 = lerp( -0.4 , 1.0 , ( saturate( ( ComplexCloudDensity141_g363 - 0.0 ) ) * CloudDetail179_g363 * CloudbreakLightDir426_g363 ));
+				float SunThroughClouds399_g363 = saturate( lerpResult316_g363 );
+				float3 hsvTorgb2_g366 = RGBToHSV( CZY_AltoCloudColor.rgb );
+				float3 hsvTorgb3_g366 = HSVToRGB( float3(hsvTorgb2_g366.x,saturate( ( hsvTorgb2_g366.y + CZY_FilterSaturation ) ),( hsvTorgb2_g366.z + CZY_FilterValue )) );
+				float4 temp_output_10_0_g366 = ( float4( hsvTorgb3_g366 , 0.0 ) * CZY_FilterColor );
+				float4 CirrusCustomLightColor350_g363 = ( CloudColor41_g363 * ( temp_output_10_0_g366 * CZY_CloudFilterColor ) );
+				float temp_output_391_0_g363 = ( AltoCumulusPlacement376_g363 * (0.0 + (tex2D( CZY_AltocumulusTexture, ((Pos33_g363*1.0 + ( CZY_AltocumulusWindSpeed * TIme30_g363 ))*( 1.0 / CZY_AltocumulusScale ) + 0.0) ).r - 0.0) * (1.0 - 0.0) / (0.2 - 0.0)) * CZY_AltocumulusMultiplier );
+				float AltoCumulusLightTransport393_g363 = temp_output_391_0_g363;
+				float ACCustomLightsClipping387_g363 = ( AltoCumulusLightTransport393_g363 * ( SimpleRadiance268_g363 > Clipping208_g363 ? 0.0 : 1.0 ) );
+				float mulTime193_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D224_g363 = snoise( (Pos33_g363*1.0 + mulTime193_g363)*2.0 );
+				float mulTime178_g363 = _TimeParameters.x * CZY_CirrostratusMoveSpeed;
+				float cos138_g363 = cos( ( mulTime178_g363 * 0.01 ) );
+				float sin138_g363 = sin( ( mulTime178_g363 * 0.01 ) );
+				float2 rotator138_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos138_g363 , -sin138_g363 , sin138_g363 , cos138_g363 )) + float2( 0.5,0.5 );
+				float cos198_g363 = cos( ( mulTime178_g363 * -0.02 ) );
+				float sin198_g363 = sin( ( mulTime178_g363 * -0.02 ) );
+				float2 rotator198_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos198_g363 , -sin198_g363 , sin198_g363 , cos198_g363 )) + float2( 0.5,0.5 );
+				float mulTime184_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D216_g363 = snoise( (Pos33_g363*10.0 + mulTime184_g363)*4.0 );
+				float4 CirrostratPattern261_g363 = ( ( saturate( simplePerlin2D224_g363 ) * tex2D( CZY_CirrostratusTexture, (rotator138_g363*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrostratusTexture, (rotator198_g363*1.5 + 0.75) ) * saturate( simplePerlin2D216_g363 ) ) );
+				float2 texCoord234_g363 = input.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_243_0_g363 = ( texCoord234_g363 - float2( 0.5,0.5 ) );
+				float dotResult238_g363 = dot( temp_output_243_0_g363 , temp_output_243_0_g363 );
+				float clampResult264_g363 = clamp( ( CZY_CirrostratusMultiplier * 0.5 ) , 0.0 , 0.98 );
+				float CirrostratLightTransport281_g363 = ( ( CirrostratPattern261_g363 * saturate( (0.4 + (dotResult238_g363 - 0.0) * (2.0 - 0.4) / (0.1 - 0.0)) ) ).r > ( 1.0 - clampResult264_g363 ) ? 1.0 : 0.0 );
+				float CSCustomLightsClipping309_g363 = ( CirrostratLightTransport281_g363 * ( SimpleRadiance268_g363 > Clipping208_g363 ? 0.0 : 1.0 ) );
+				float CustomRadiance340_g363 = saturate( ( ACCustomLightsClipping387_g363 + CSCustomLightsClipping309_g363 ) );
+				float4 lerpResult331_g363 = lerp( ( lerpResult342_g363 + SunThroughClouds399_g363 ) , CirrusCustomLightColor350_g363 , CustomRadiance340_g363);
+				float FinalAlpha375_g363 = saturate( ( DetailedClouds252_g363 + BorderLightTransport278_g363 + AltoCumulusLightTransport393_g363 + ChemtrailsFinal248_g363 + CirrostratLightTransport281_g363 + CirrusAlpha250_g363 + NimbusLightTransport269_g363 ) );
+				float4 appendResult420_g363 = (float4((lerpResult331_g363).rgb , FinalAlpha375_g363));
+				float4 FinalCloudColor325_g363 = appendResult420_g363;
+				bool enabled20_g367 =(bool)_UnderwaterRenderingEnabled;
+				bool submerged20_g367 =(bool)_FullySubmerged;
+				float4 ase_positionSSNorm = ScreenPos / ScreenPos.w;
+				ase_positionSSNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_positionSSNorm.z : ase_positionSSNorm.z * 0.5 + 0.5;
+				float textureSample20_g367 = tex2Dlod( _UnderwaterMask, float4( ase_positionSSNorm.xy, 0, 0.0) ).r;
+				float localHLSL20_g367 = HLSL20_g367( enabled20_g367 , submerged20_g367 , textureSample20_g367 );
 				
 
-				float Alpha = ( ( (FinalCloudColor325_g379).w * ( 1.0 - localHLSL20_g384 ) ) > Clipping208_g379 ? 1.0 : 0.0 );
-				float AlphaClipThreshold = Clipping208_g379;
+				float Alpha = ( ( (FinalCloudColor325_g363).w * ( 1.0 - localHLSL20_g367 ) ) > Clipping208_g363 ? 1.0 : 0.0 );
+				float AlphaClipThreshold = Clipping208_g363;
 				float AlphaClipThresholdShadow = 0.5;
 
 				#ifdef ASE_DEPTH_WRITE_ON
@@ -1754,11 +1735,11 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 
 			
 
-			#pragma multi_compile_local _ALPHATEST_ON
+			#pragma multi_compile _ALPHATEST_ON
 			#pragma multi_compile_instancing
 			#define _SURFACE_TYPE_TRANSPARENT 1
-			#define ASE_VERSION 19901
-			#define ASE_SRP_VERSION 140012
+			#define ASE_VERSION 19801
+			#define ASE_SRP_VERSION 140010
 
 
 			
@@ -1781,11 +1762,8 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
             #endif
 
-			#define ASE_NEEDS_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_WORLD_POSITION
 			#define ASE_NEEDS_FRAG_WORLD_POSITION
-			#define ASE_NEEDS_FRAG_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_FRAG_SCREEN_POSITION_NORMALIZED
+			#define ASE_NEEDS_FRAG_SCREEN_POSITION
 
 
 			#if defined(ASE_EARLY_Z_DEPTH_OPTIMIZE) && (SHADER_TARGET >= 45)
@@ -1807,13 +1785,14 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 			struct PackedVaryings
 			{
 				ASE_SV_POSITION_QUALIFIERS float4 positionCS : SV_POSITION;
+				float4 clipPosV : TEXCOORD0;
 				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-					float3 positionWS : TEXCOORD0;
+					float3 positionWS : TEXCOORD1;
 				#endif
 				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
-					float4 shadowCoord : TEXCOORD1;
+					float4 shadowCoord : TEXCOORD2;
 				#endif
-				float4 ase_texcoord2 : TEXCOORD2;
+				float4 ase_texcoord3 : TEXCOORD3;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
@@ -1917,25 +1896,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 				return 130.0 * dot( m, g );
 			}
 			
-					float2 voronoihash81_g379( float2 p )
+					float2 voronoihash81_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi81_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi81_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash81_g379( n + g );
+						 		float2 o = voronoihash81_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -1950,25 +1929,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return F1;
 					}
 			
-					float2 voronoihash88_g379( float2 p )
+					float2 voronoihash88_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi88_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi88_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash88_g379( n + g );
+						 		float2 o = voronoihash88_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -1983,25 +1962,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return F1;
 					}
 			
-					float2 voronoihash200_g379( float2 p )
+					float2 voronoihash200_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi200_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi200_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash200_g379( n + g );
+						 		float2 o = voronoihash200_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -2016,25 +1995,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return (F2 + F1) * 0.5;
 					}
 			
-					float2 voronoihash232_g379( float2 p )
+					float2 voronoihash232_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi232_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi232_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash232_g379( n + g );
+						 		float2 o = voronoihash232_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -2049,25 +2028,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return F1;
 					}
 			
-					float2 voronoihash84_g379( float2 p )
+					float2 voronoihash84_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi84_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi84_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash84_g379( n + g );
+						 		float2 o = voronoihash84_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -2082,7 +2061,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return F1;
 					}
 			
-			float HLSL20_g384( bool enabled, bool submerged, float textureSample )
+			float HLSL20_g367( bool enabled, bool submerged, float textureSample )
 			{
 				if(enabled)
 				{
@@ -2103,10 +2082,10 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 				UNITY_TRANSFER_INSTANCE_ID(input, output);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
-				output.ase_texcoord2.xy = input.ase_texcoord.xy;
+				output.ase_texcoord3.xy = input.ase_texcoord.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				output.ase_texcoord2.zw = 0;
+				output.ase_texcoord3.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					float3 defaultVertexValue = input.positionOS.xyz;
@@ -2135,6 +2114,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 				#endif
 
 				output.positionCS = vertexInput.positionCS;
+				output.clipPosV = vertexInput.positionCS;
 				return output;
 			}
 
@@ -2232,9 +2212,8 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 				#endif
 
 				float4 ShadowCoords = float4( 0, 0, 0, 0 );
-				float4 ScreenPosNorm = float4( GetNormalizedScreenSpaceUV( input.positionCS ), input.positionCS.zw );
-				float4 ClipPos = ComputeClipSpacePosition( ScreenPosNorm.xy, input.positionCS.z ) * input.positionCS.w;
-				float4 ScreenPos = ComputeScreenPos( ClipPos );
+				float4 ClipPos = input.clipPosV;
+				float4 ScreenPos = ComputeScreenPos( input.clipPosV );
 
 				#if defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
 					#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
@@ -2244,178 +2223,180 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 					#endif
 				#endif
 
-				float3 hsvTorgb2_g380 = RGBToHSV( CZY_CloudColor.rgb );
-				float3 hsvTorgb3_g380 = HSVToRGB( float3(hsvTorgb2_g380.x,saturate( ( hsvTorgb2_g380.y + CZY_FilterSaturation ) ),( hsvTorgb2_g380.z + CZY_FilterValue )) );
-				float4 temp_output_10_0_g380 = ( float4( hsvTorgb3_g380 , 0.0 ) * CZY_FilterColor );
-				float4 CloudColor41_g379 = ( temp_output_10_0_g380 * CZY_CloudFilterColor );
-				float3 hsvTorgb2_g383 = RGBToHSV( CZY_CloudHighlightColor.rgb );
-				float3 hsvTorgb3_g383 = HSVToRGB( float3(hsvTorgb2_g383.x,saturate( ( hsvTorgb2_g383.y + CZY_FilterSaturation ) ),( hsvTorgb2_g383.z + CZY_FilterValue )) );
-				float4 temp_output_10_0_g383 = ( float4( hsvTorgb3_g383 , 0.0 ) * CZY_FilterColor );
-				float4 CloudHighlightColor55_g379 = ( temp_output_10_0_g383 * CZY_SunFilterColor );
-				float2 texCoord31_g379 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 Pos33_g379 = texCoord31_g379;
-				float mulTime29_g379 = _TimeParameters.x * ( 0.001 * CZY_WindSpeed );
-				float TIme30_g379 = mulTime29_g379;
-				float simplePerlin2D409_g379 = snoise( ( Pos33_g379 + ( TIme30_g379 * float2( 0.2,-0.4 ) ) )*( 100.0 / CZY_MainCloudScale ) );
-				simplePerlin2D409_g379 = simplePerlin2D409_g379*0.5 + 0.5;
-				float SimpleCloudDensity153_g379 = simplePerlin2D409_g379;
-				float time81_g379 = 0.0;
-				float2 voronoiSmoothId81_g379 = 0;
-				float2 temp_output_94_0_g379 = ( Pos33_g379 + ( TIme30_g379 * float2( 0.3,0.2 ) ) );
-				float2 coords81_g379 = temp_output_94_0_g379 * ( 140.0 / CZY_MainCloudScale );
-				float2 id81_g379 = 0;
-				float2 uv81_g379 = 0;
-				float voroi81_g379 = voronoi81_g379( coords81_g379, time81_g379, id81_g379, uv81_g379, 0, voronoiSmoothId81_g379 );
-				float time88_g379 = 0.0;
-				float2 voronoiSmoothId88_g379 = 0;
-				float2 coords88_g379 = temp_output_94_0_g379 * ( 500.0 / CZY_MainCloudScale );
-				float2 id88_g379 = 0;
-				float2 uv88_g379 = 0;
-				float voroi88_g379 = voronoi88_g379( coords88_g379, time88_g379, id88_g379, uv88_g379, 0, voronoiSmoothId88_g379 );
-				float2 appendResult95_g379 = (float2(voroi81_g379 , voroi88_g379));
-				float2 VoroDetails109_g379 = appendResult95_g379;
-				float CumulusCoverage34_g379 = CZY_CumulusCoverageMultiplier;
-				float ComplexCloudDensity141_g379 =  (0.0 + ( min( SimpleCloudDensity153_g379 , ( 1.0 - VoroDetails109_g379.x ) ) - ( 1.0 - CumulusCoverage34_g379 ) ) * ( 1.0 - 0.0 ) / ( 1.0 - ( 1.0 - CumulusCoverage34_g379 ) ) );
-				float4 lerpResult315_g379 = lerp( CloudHighlightColor55_g379 , CloudColor41_g379 , saturate(  (2.0 + ( ComplexCloudDensity141_g379 - 0.0 ) * ( 0.7 - 2.0 ) / ( 1.0 - 0.0 ) ) ));
-				float3 normalizeResult40_g379 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
-				float dotResult42_g379 = dot( normalizeResult40_g379 , CZY_SunDirection );
-				float temp_output_49_0_g379 = abs( (dotResult42_g379*0.5 + 0.5) );
-				half LightMask56_g379 = saturate( pow( temp_output_49_0_g379 , CZY_SunFlareFalloff ) );
-				float time200_g379 = 0.0;
-				float2 voronoiSmoothId200_g379 = 0;
-				float mulTime163_g379 = _TimeParameters.x * 0.003;
-				float2 coords200_g379 = (Pos33_g379*1.0 + ( float2( 1,-2 ) * mulTime163_g379 )) * 10.0;
-				float2 id200_g379 = 0;
-				float2 uv200_g379 = 0;
-				float voroi200_g379 = voronoi200_g379( coords200_g379, time200_g379, id200_g379, uv200_g379, 0, voronoiSmoothId200_g379 );
-				float time232_g379 = ( 10.0 * mulTime163_g379 );
-				float2 voronoiSmoothId232_g379 = 0;
-				float2 coords232_g379 = input.ase_texcoord2.xy * 10.0;
-				float2 id232_g379 = 0;
-				float2 uv232_g379 = 0;
-				float voroi232_g379 = voronoi232_g379( coords232_g379, time232_g379, id232_g379, uv232_g379, 0, voronoiSmoothId232_g379 );
-				float temp_output_242_0_g379 = ( ( ( 1.0 - 0.0 ) -  (1.0 + ( voroi200_g379 - 0.0 ) * ( -0.5 - 1.0 ) / ( 1.0 - 0.0 ) ) ) - voroi232_g379 );
-				float AltoCumulusPlacement376_g379 = temp_output_242_0_g379;
-				float CloudThicknessDetails286_g379 = ( VoroDetails109_g379.y * saturate( ( AltoCumulusPlacement376_g379 - 0.26 ) ) );
-				float3 normalizeResult43_g379 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
-				float dotResult46_g379 = dot( normalizeResult43_g379 , CZY_MoonDirection );
-				half MoonlightMask57_g379 = saturate( pow( abs( (dotResult46_g379*0.5 + 0.5) ) , CZY_CloudMoonFalloff ) );
-				float3 hsvTorgb2_g381 = RGBToHSV( CZY_CloudMoonColor.rgb );
-				float3 hsvTorgb3_g381 = HSVToRGB( float3(hsvTorgb2_g381.x,saturate( ( hsvTorgb2_g381.y + CZY_FilterSaturation ) ),( hsvTorgb2_g381.z + CZY_FilterValue )) );
-				float4 temp_output_10_0_g381 = ( float4( hsvTorgb3_g381 , 0.0 ) * CZY_FilterColor );
-				float4 MoonlightColor60_g379 = ( temp_output_10_0_g381 * CZY_CloudFilterColor );
-				float4 lerpResult338_g379 = lerp( ( lerpResult315_g379 + ( LightMask56_g379 * CloudHighlightColor55_g379 * ( 1.0 - CloudThicknessDetails286_g379 ) ) + ( MoonlightMask57_g379 * MoonlightColor60_g379 * ( 1.0 - CloudThicknessDetails286_g379 ) ) ) , ( CloudColor41_g379 * float4( 0.5660378,0.5660378,0.5660378,0 ) ) , CloudThicknessDetails286_g379);
-				float time84_g379 = 0.0;
-				float2 voronoiSmoothId84_g379 = 0;
-				float2 coords84_g379 = ( Pos33_g379 + ( TIme30_g379 * float2( 0.3,0.2 ) ) ) * ( 100.0 / CZY_DetailScale );
-				float2 id84_g379 = 0;
-				float2 uv84_g379 = 0;
-				float fade84_g379 = 0.5;
-				float voroi84_g379 = 0;
-				float rest84_g379 = 0;
-				for( int it84_g379 = 0; it84_g379 <3; it84_g379++ ){
-				voroi84_g379 += fade84_g379 * voronoi84_g379( coords84_g379, time84_g379, id84_g379, uv84_g379, 0,voronoiSmoothId84_g379 );
-				rest84_g379 += fade84_g379;
-				coords84_g379 *= 2;
-				fade84_g379 *= 0.5;
-				}//Voronoi84_g379
-				voroi84_g379 /= rest84_g379;
-				float temp_output_173_0_g379 = (  (0.0 + ( ( 1.0 - voroi84_g379 ) - 0.3 ) * ( 0.5 - 0.0 ) / ( 1.0 - 0.3 ) ) * 0.1 * CZY_DetailAmount );
-				float DetailedClouds252_g379 = saturate( ( ComplexCloudDensity141_g379 + temp_output_173_0_g379 ) );
-				float CloudDetail179_g379 = temp_output_173_0_g379;
-				float2 texCoord79_g379 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_161_0_g379 = ( texCoord79_g379 - float2( 0.5,0.5 ) );
-				float dotResult212_g379 = dot( temp_output_161_0_g379 , temp_output_161_0_g379 );
-				float BorderHeight154_g379 = ( 1.0 - CZY_BorderHeight );
-				float temp_output_151_0_g379 = ( -2.0 * ( 1.0 - CZY_BorderVariation ) );
-				float clampResult247_g379 = clamp( ( ( ( CloudDetail179_g379 + SimpleCloudDensity153_g379 ) * saturate(  (( BorderHeight154_g379 * temp_output_151_0_g379 ) + ( dotResult212_g379 - 0.0 ) * ( ( temp_output_151_0_g379 * -4.0 ) - ( BorderHeight154_g379 * temp_output_151_0_g379 ) ) / ( 0.5 - 0.0 ) ) ) ) * 10.0 * CZY_BorderEffect ) , -1.0 , 1.0 );
-				float BorderLightTransport278_g379 = clampResult247_g379;
-				float3 normalizeResult116_g379 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
-				float3 normalizeResult146_g379 = normalize( CZY_StormDirection );
-				float dotResult150_g379 = dot( normalizeResult116_g379 , normalizeResult146_g379 );
-				float2 texCoord98_g379 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_124_0_g379 = ( texCoord98_g379 - float2( 0.5,0.5 ) );
-				float dotResult125_g379 = dot( temp_output_124_0_g379 , temp_output_124_0_g379 );
-				float temp_output_140_0_g379 = ( -2.0 * ( 1.0 - ( CZY_NimbusVariation * 0.9 ) ) );
-				float NimbusLightTransport269_g379 = saturate( ( ( ( CloudDetail179_g379 + SimpleCloudDensity153_g379 ) * saturate(  (( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_140_0_g379 ) + ( ( dotResult150_g379 + ( CZY_NimbusHeight * 4.0 * dotResult125_g379 ) ) - 0.5 ) * ( ( temp_output_140_0_g379 * -4.0 ) - ( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_140_0_g379 ) ) / ( 7.0 - 0.5 ) ) ) ) * 10.0 ) );
-				float mulTime104_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D143_g379 = snoise( (Pos33_g379*1.0 + mulTime104_g379)*2.0 );
-				float mulTime93_g379 = _TimeParameters.x * CZY_ChemtrailsMoveSpeed;
-				float cos97_g379 = cos( ( mulTime93_g379 * 0.01 ) );
-				float sin97_g379 = sin( ( mulTime93_g379 * 0.01 ) );
-				float2 rotator97_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos97_g379 , -sin97_g379 , sin97_g379 , cos97_g379 )) + float2( 0.5,0.5 );
-				float cos131_g379 = cos( ( mulTime93_g379 * -0.02 ) );
-				float sin131_g379 = sin( ( mulTime93_g379 * -0.02 ) );
-				float2 rotator131_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos131_g379 , -sin131_g379 , sin131_g379 , cos131_g379 )) + float2( 0.5,0.5 );
-				float mulTime107_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D147_g379 = snoise( (Pos33_g379*1.0 + mulTime107_g379)*4.0 );
-				float4 ChemtrailsPattern210_g379 = ( ( saturate( simplePerlin2D143_g379 ) * tex2D( CZY_ChemtrailsTexture, (rotator97_g379*0.5 + 0.0) ) ) + ( tex2D( CZY_ChemtrailsTexture, rotator131_g379 ) * saturate( simplePerlin2D147_g379 ) ) );
-				float2 texCoord139_g379 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_162_0_g379 = ( texCoord139_g379 - float2( 0.5,0.5 ) );
-				float dotResult207_g379 = dot( temp_output_162_0_g379 , temp_output_162_0_g379 );
-				float ChemtrailsFinal248_g379 = ( ( ChemtrailsPattern210_g379 * saturate(  (0.4 + ( dotResult207_g379 - 0.0 ) * ( 2.0 - 0.4 ) / ( 0.1 - 0.0 ) ) ) ).r > ( 1.0 - ( CZY_ChemtrailsMultiplier * 0.5 ) ) ? 1.0 : 0.0 );
-				float mulTime80_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D126_g379 = snoise( (Pos33_g379*1.0 + mulTime80_g379)*2.0 );
-				float mulTime75_g379 = _TimeParameters.x * CZY_CirrusMoveSpeed;
-				float cos101_g379 = cos( ( mulTime75_g379 * 0.01 ) );
-				float sin101_g379 = sin( ( mulTime75_g379 * 0.01 ) );
-				float2 rotator101_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos101_g379 , -sin101_g379 , sin101_g379 , cos101_g379 )) + float2( 0.5,0.5 );
-				float cos112_g379 = cos( ( mulTime75_g379 * -0.02 ) );
-				float sin112_g379 = sin( ( mulTime75_g379 * -0.02 ) );
-				float2 rotator112_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos112_g379 , -sin112_g379 , sin112_g379 , cos112_g379 )) + float2( 0.5,0.5 );
-				float mulTime135_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D122_g379 = snoise( (Pos33_g379*1.0 + mulTime135_g379) );
-				simplePerlin2D122_g379 = simplePerlin2D122_g379*0.5 + 0.5;
-				float4 CirrusPattern137_g379 = ( ( saturate( simplePerlin2D126_g379 ) * tex2D( CZY_CirrusTexture, (rotator101_g379*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrusTexture, (rotator112_g379*1.0 + 0.0) ) * saturate( simplePerlin2D122_g379 ) ) );
-				float2 texCoord134_g379 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_164_0_g379 = ( texCoord134_g379 - float2( 0.5,0.5 ) );
-				float dotResult157_g379 = dot( temp_output_164_0_g379 , temp_output_164_0_g379 );
-				float4 temp_output_217_0_g379 = ( CirrusPattern137_g379 * saturate(  (0.0 + ( dotResult157_g379 - 0.0 ) * ( 2.0 - 0.0 ) / ( 0.2 - 0.0 ) ) ) );
-				float Clipping208_g379 = CZY_ClippingThreshold;
-				float CirrusAlpha250_g379 = ( ( temp_output_217_0_g379 * ( CZY_CirrusMultiplier * 10.0 ) ).r > Clipping208_g379 ? 1.0 : 0.0 );
-				float SimpleRadiance268_g379 = saturate( ( DetailedClouds252_g379 + BorderLightTransport278_g379 + NimbusLightTransport269_g379 + ChemtrailsFinal248_g379 + CirrusAlpha250_g379 ) );
-				float4 lerpResult342_g379 = lerp( CloudColor41_g379 , lerpResult338_g379 , ( 1.0 - SimpleRadiance268_g379 ));
-				float CloudbreakLightDir426_g379 = saturate( pow( temp_output_49_0_g379 , ( CZY_SunFlareFalloff * 0.5 ) ) );
-				float lerpResult316_g379 = lerp( -0.4 , 1.0 , ( saturate( ( ComplexCloudDensity141_g379 - 0.0 ) ) * CloudDetail179_g379 * CloudbreakLightDir426_g379 ));
-				float SunThroughClouds399_g379 = saturate( lerpResult316_g379 );
-				float3 hsvTorgb2_g382 = RGBToHSV( CZY_AltoCloudColor.rgb );
-				float3 hsvTorgb3_g382 = HSVToRGB( float3(hsvTorgb2_g382.x,saturate( ( hsvTorgb2_g382.y + CZY_FilterSaturation ) ),( hsvTorgb2_g382.z + CZY_FilterValue )) );
-				float4 temp_output_10_0_g382 = ( float4( hsvTorgb3_g382 , 0.0 ) * CZY_FilterColor );
-				float4 CirrusCustomLightColor350_g379 = ( CloudColor41_g379 * ( temp_output_10_0_g382 * CZY_CloudFilterColor ) );
-				float temp_output_391_0_g379 = ( AltoCumulusPlacement376_g379 *  (0.0 + ( tex2D( CZY_AltocumulusTexture, ((Pos33_g379*1.0 + ( CZY_AltocumulusWindSpeed * TIme30_g379 ))*( 1.0 / CZY_AltocumulusScale ) + 0.0) ).r - 0.0 ) * ( 1.0 - 0.0 ) / ( 0.2 - 0.0 ) ) * CZY_AltocumulusMultiplier );
-				float AltoCumulusLightTransport393_g379 = temp_output_391_0_g379;
-				float ACCustomLightsClipping387_g379 = ( AltoCumulusLightTransport393_g379 * ( SimpleRadiance268_g379 > Clipping208_g379 ? 0.0 : 1.0 ) );
-				float mulTime193_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D224_g379 = snoise( (Pos33_g379*1.0 + mulTime193_g379)*2.0 );
-				float mulTime178_g379 = _TimeParameters.x * CZY_CirrostratusMoveSpeed;
-				float cos138_g379 = cos( ( mulTime178_g379 * 0.01 ) );
-				float sin138_g379 = sin( ( mulTime178_g379 * 0.01 ) );
-				float2 rotator138_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos138_g379 , -sin138_g379 , sin138_g379 , cos138_g379 )) + float2( 0.5,0.5 );
-				float cos198_g379 = cos( ( mulTime178_g379 * -0.02 ) );
-				float sin198_g379 = sin( ( mulTime178_g379 * -0.02 ) );
-				float2 rotator198_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos198_g379 , -sin198_g379 , sin198_g379 , cos198_g379 )) + float2( 0.5,0.5 );
-				float mulTime184_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D216_g379 = snoise( (Pos33_g379*10.0 + mulTime184_g379)*4.0 );
-				float4 CirrostratPattern261_g379 = ( ( saturate( simplePerlin2D224_g379 ) * tex2D( CZY_CirrostratusTexture, (rotator138_g379*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrostratusTexture, (rotator198_g379*1.5 + 0.75) ) * saturate( simplePerlin2D216_g379 ) ) );
-				float2 texCoord234_g379 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_243_0_g379 = ( texCoord234_g379 - float2( 0.5,0.5 ) );
-				float dotResult238_g379 = dot( temp_output_243_0_g379 , temp_output_243_0_g379 );
-				float clampResult264_g379 = clamp( ( CZY_CirrostratusMultiplier * 0.5 ) , 0.0 , 0.98 );
-				float CirrostratLightTransport281_g379 = ( ( CirrostratPattern261_g379 * saturate(  (0.4 + ( dotResult238_g379 - 0.0 ) * ( 2.0 - 0.4 ) / ( 0.1 - 0.0 ) ) ) ).r > ( 1.0 - clampResult264_g379 ) ? 1.0 : 0.0 );
-				float CSCustomLightsClipping309_g379 = ( CirrostratLightTransport281_g379 * ( SimpleRadiance268_g379 > Clipping208_g379 ? 0.0 : 1.0 ) );
-				float CustomRadiance340_g379 = saturate( ( ACCustomLightsClipping387_g379 + CSCustomLightsClipping309_g379 ) );
-				float4 lerpResult331_g379 = lerp( ( lerpResult342_g379 + ( SunThroughClouds399_g379 * CloudHighlightColor55_g379 ) ) , CirrusCustomLightColor350_g379 , CustomRadiance340_g379);
-				float FinalAlpha375_g379 = saturate( ( DetailedClouds252_g379 + BorderLightTransport278_g379 + AltoCumulusLightTransport393_g379 + ChemtrailsFinal248_g379 + CirrostratLightTransport281_g379 + CirrusAlpha250_g379 + NimbusLightTransport269_g379 ) );
-				float4 appendResult420_g379 = (float4((lerpResult331_g379).rgb , FinalAlpha375_g379));
-				float4 FinalCloudColor325_g379 = appendResult420_g379;
-				bool enabled20_g384 =(bool)_UnderwaterRenderingEnabled;
-				bool submerged20_g384 =(bool)_FullySubmerged;
-				float textureSample20_g384 = tex2Dlod( _UnderwaterMask, float4( ScreenPosNorm.xy, 0, 0.0) ).r;
-				float localHLSL20_g384 = HLSL20_g384( enabled20_g384 , submerged20_g384 , textureSample20_g384 );
+				float3 hsvTorgb2_g364 = RGBToHSV( CZY_CloudColor.rgb );
+				float3 hsvTorgb3_g364 = HSVToRGB( float3(hsvTorgb2_g364.x,saturate( ( hsvTorgb2_g364.y + CZY_FilterSaturation ) ),( hsvTorgb2_g364.z + CZY_FilterValue )) );
+				float4 temp_output_10_0_g364 = ( float4( hsvTorgb3_g364 , 0.0 ) * CZY_FilterColor );
+				float4 CloudColor41_g363 = ( temp_output_10_0_g364 * CZY_CloudFilterColor );
+				float3 hsvTorgb2_g368 = RGBToHSV( CZY_CloudHighlightColor.rgb );
+				float3 hsvTorgb3_g368 = HSVToRGB( float3(hsvTorgb2_g368.x,saturate( ( hsvTorgb2_g368.y + CZY_FilterSaturation ) ),( hsvTorgb2_g368.z + CZY_FilterValue )) );
+				float4 temp_output_10_0_g368 = ( float4( hsvTorgb3_g368 , 0.0 ) * CZY_FilterColor );
+				float4 CloudHighlightColor55_g363 = ( temp_output_10_0_g368 * CZY_SunFilterColor );
+				float2 texCoord31_g363 = input.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 Pos33_g363 = texCoord31_g363;
+				float mulTime29_g363 = _TimeParameters.x * ( 0.001 * CZY_WindSpeed );
+				float TIme30_g363 = mulTime29_g363;
+				float simplePerlin2D409_g363 = snoise( ( Pos33_g363 + ( TIme30_g363 * float2( 0.2,-0.4 ) ) )*( 100.0 / CZY_MainCloudScale ) );
+				simplePerlin2D409_g363 = simplePerlin2D409_g363*0.5 + 0.5;
+				float SimpleCloudDensity153_g363 = simplePerlin2D409_g363;
+				float time81_g363 = 0.0;
+				float2 voronoiSmoothId81_g363 = 0;
+				float2 temp_output_94_0_g363 = ( Pos33_g363 + ( TIme30_g363 * float2( 0.3,0.2 ) ) );
+				float2 coords81_g363 = temp_output_94_0_g363 * ( 140.0 / CZY_MainCloudScale );
+				float2 id81_g363 = 0;
+				float2 uv81_g363 = 0;
+				float voroi81_g363 = voronoi81_g363( coords81_g363, time81_g363, id81_g363, uv81_g363, 0, voronoiSmoothId81_g363 );
+				float time88_g363 = 0.0;
+				float2 voronoiSmoothId88_g363 = 0;
+				float2 coords88_g363 = temp_output_94_0_g363 * ( 500.0 / CZY_MainCloudScale );
+				float2 id88_g363 = 0;
+				float2 uv88_g363 = 0;
+				float voroi88_g363 = voronoi88_g363( coords88_g363, time88_g363, id88_g363, uv88_g363, 0, voronoiSmoothId88_g363 );
+				float2 appendResult95_g363 = (float2(voroi81_g363 , voroi88_g363));
+				float2 VoroDetails109_g363 = appendResult95_g363;
+				float CumulusCoverage34_g363 = CZY_CumulusCoverageMultiplier;
+				float ComplexCloudDensity141_g363 = (0.0 + (min( SimpleCloudDensity153_g363 , ( 1.0 - VoroDetails109_g363.x ) ) - ( 1.0 - CumulusCoverage34_g363 )) * (1.0 - 0.0) / (1.0 - ( 1.0 - CumulusCoverage34_g363 )));
+				float4 lerpResult315_g363 = lerp( CloudHighlightColor55_g363 , CloudColor41_g363 , saturate( (2.0 + (ComplexCloudDensity141_g363 - 0.0) * (0.7 - 2.0) / (1.0 - 0.0)) ));
+				float3 normalizeResult40_g363 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
+				float dotResult42_g363 = dot( normalizeResult40_g363 , CZY_SunDirection );
+				float temp_output_49_0_g363 = abs( (dotResult42_g363*0.5 + 0.5) );
+				half LightMask56_g363 = saturate( pow( temp_output_49_0_g363 , CZY_SunFlareFalloff ) );
+				float time200_g363 = 0.0;
+				float2 voronoiSmoothId200_g363 = 0;
+				float mulTime163_g363 = _TimeParameters.x * 0.003;
+				float2 coords200_g363 = (Pos33_g363*1.0 + ( float2( 1,-2 ) * mulTime163_g363 )) * 10.0;
+				float2 id200_g363 = 0;
+				float2 uv200_g363 = 0;
+				float voroi200_g363 = voronoi200_g363( coords200_g363, time200_g363, id200_g363, uv200_g363, 0, voronoiSmoothId200_g363 );
+				float time232_g363 = ( 10.0 * mulTime163_g363 );
+				float2 voronoiSmoothId232_g363 = 0;
+				float2 coords232_g363 = input.ase_texcoord3.xy * 10.0;
+				float2 id232_g363 = 0;
+				float2 uv232_g363 = 0;
+				float voroi232_g363 = voronoi232_g363( coords232_g363, time232_g363, id232_g363, uv232_g363, 0, voronoiSmoothId232_g363 );
+				float temp_output_242_0_g363 = ( ( ( 1.0 - 0.0 ) - (1.0 + (voroi200_g363 - 0.0) * (-0.5 - 1.0) / (1.0 - 0.0)) ) - voroi232_g363 );
+				float AltoCumulusPlacement376_g363 = temp_output_242_0_g363;
+				float CloudThicknessDetails286_g363 = ( VoroDetails109_g363.y * saturate( ( AltoCumulusPlacement376_g363 - 0.26 ) ) );
+				float3 normalizeResult43_g363 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
+				float dotResult46_g363 = dot( normalizeResult43_g363 , CZY_MoonDirection );
+				half MoonlightMask57_g363 = saturate( pow( abs( (dotResult46_g363*0.5 + 0.5) ) , CZY_CloudMoonFalloff ) );
+				float3 hsvTorgb2_g365 = RGBToHSV( CZY_CloudMoonColor.rgb );
+				float3 hsvTorgb3_g365 = HSVToRGB( float3(hsvTorgb2_g365.x,saturate( ( hsvTorgb2_g365.y + CZY_FilterSaturation ) ),( hsvTorgb2_g365.z + CZY_FilterValue )) );
+				float4 temp_output_10_0_g365 = ( float4( hsvTorgb3_g365 , 0.0 ) * CZY_FilterColor );
+				float4 MoonlightColor60_g363 = ( temp_output_10_0_g365 * CZY_CloudFilterColor );
+				float4 lerpResult338_g363 = lerp( ( lerpResult315_g363 + ( LightMask56_g363 * CloudHighlightColor55_g363 * ( 1.0 - CloudThicknessDetails286_g363 ) ) + ( MoonlightMask57_g363 * MoonlightColor60_g363 * ( 1.0 - CloudThicknessDetails286_g363 ) ) ) , ( CloudColor41_g363 * float4( 0.5660378,0.5660378,0.5660378,0 ) ) , CloudThicknessDetails286_g363);
+				float time84_g363 = 0.0;
+				float2 voronoiSmoothId84_g363 = 0;
+				float2 coords84_g363 = ( Pos33_g363 + ( TIme30_g363 * float2( 0.3,0.2 ) ) ) * ( 100.0 / CZY_DetailScale );
+				float2 id84_g363 = 0;
+				float2 uv84_g363 = 0;
+				float fade84_g363 = 0.5;
+				float voroi84_g363 = 0;
+				float rest84_g363 = 0;
+				for( int it84_g363 = 0; it84_g363 <3; it84_g363++ ){
+				voroi84_g363 += fade84_g363 * voronoi84_g363( coords84_g363, time84_g363, id84_g363, uv84_g363, 0,voronoiSmoothId84_g363 );
+				rest84_g363 += fade84_g363;
+				coords84_g363 *= 2;
+				fade84_g363 *= 0.5;
+				}//Voronoi84_g363
+				voroi84_g363 /= rest84_g363;
+				float temp_output_173_0_g363 = ( (0.0 + (( 1.0 - voroi84_g363 ) - 0.3) * (0.5 - 0.0) / (1.0 - 0.3)) * 0.1 * CZY_DetailAmount );
+				float DetailedClouds252_g363 = saturate( ( ComplexCloudDensity141_g363 + temp_output_173_0_g363 ) );
+				float CloudDetail179_g363 = temp_output_173_0_g363;
+				float2 texCoord79_g363 = input.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_161_0_g363 = ( texCoord79_g363 - float2( 0.5,0.5 ) );
+				float dotResult212_g363 = dot( temp_output_161_0_g363 , temp_output_161_0_g363 );
+				float BorderHeight154_g363 = ( 1.0 - CZY_BorderHeight );
+				float temp_output_151_0_g363 = ( -2.0 * ( 1.0 - CZY_BorderVariation ) );
+				float clampResult247_g363 = clamp( ( ( ( CloudDetail179_g363 + SimpleCloudDensity153_g363 ) * saturate( (( BorderHeight154_g363 * temp_output_151_0_g363 ) + (dotResult212_g363 - 0.0) * (( temp_output_151_0_g363 * -4.0 ) - ( BorderHeight154_g363 * temp_output_151_0_g363 )) / (0.5 - 0.0)) ) ) * 10.0 * CZY_BorderEffect ) , -1.0 , 1.0 );
+				float BorderLightTransport278_g363 = clampResult247_g363;
+				float3 normalizeResult116_g363 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
+				float3 normalizeResult146_g363 = normalize( CZY_StormDirection );
+				float dotResult150_g363 = dot( normalizeResult116_g363 , normalizeResult146_g363 );
+				float2 texCoord98_g363 = input.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_124_0_g363 = ( texCoord98_g363 - float2( 0.5,0.5 ) );
+				float dotResult125_g363 = dot( temp_output_124_0_g363 , temp_output_124_0_g363 );
+				float temp_output_140_0_g363 = ( -2.0 * ( 1.0 - ( CZY_NimbusVariation * 0.9 ) ) );
+				float NimbusLightTransport269_g363 = saturate( ( ( ( CloudDetail179_g363 + SimpleCloudDensity153_g363 ) * saturate( (( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_140_0_g363 ) + (( dotResult150_g363 + ( CZY_NimbusHeight * 4.0 * dotResult125_g363 ) ) - 0.5) * (( temp_output_140_0_g363 * -4.0 ) - ( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_140_0_g363 )) / (7.0 - 0.5)) ) ) * 10.0 ) );
+				float mulTime104_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D143_g363 = snoise( (Pos33_g363*1.0 + mulTime104_g363)*2.0 );
+				float mulTime93_g363 = _TimeParameters.x * CZY_ChemtrailsMoveSpeed;
+				float cos97_g363 = cos( ( mulTime93_g363 * 0.01 ) );
+				float sin97_g363 = sin( ( mulTime93_g363 * 0.01 ) );
+				float2 rotator97_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos97_g363 , -sin97_g363 , sin97_g363 , cos97_g363 )) + float2( 0.5,0.5 );
+				float cos131_g363 = cos( ( mulTime93_g363 * -0.02 ) );
+				float sin131_g363 = sin( ( mulTime93_g363 * -0.02 ) );
+				float2 rotator131_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos131_g363 , -sin131_g363 , sin131_g363 , cos131_g363 )) + float2( 0.5,0.5 );
+				float mulTime107_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D147_g363 = snoise( (Pos33_g363*1.0 + mulTime107_g363)*4.0 );
+				float4 ChemtrailsPattern210_g363 = ( ( saturate( simplePerlin2D143_g363 ) * tex2D( CZY_ChemtrailsTexture, (rotator97_g363*0.5 + 0.0) ) ) + ( tex2D( CZY_ChemtrailsTexture, rotator131_g363 ) * saturate( simplePerlin2D147_g363 ) ) );
+				float2 texCoord139_g363 = input.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_162_0_g363 = ( texCoord139_g363 - float2( 0.5,0.5 ) );
+				float dotResult207_g363 = dot( temp_output_162_0_g363 , temp_output_162_0_g363 );
+				float ChemtrailsFinal248_g363 = ( ( ChemtrailsPattern210_g363 * saturate( (0.4 + (dotResult207_g363 - 0.0) * (2.0 - 0.4) / (0.1 - 0.0)) ) ).r > ( 1.0 - ( CZY_ChemtrailsMultiplier * 0.5 ) ) ? 1.0 : 0.0 );
+				float mulTime80_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D126_g363 = snoise( (Pos33_g363*1.0 + mulTime80_g363)*2.0 );
+				float mulTime75_g363 = _TimeParameters.x * CZY_CirrusMoveSpeed;
+				float cos101_g363 = cos( ( mulTime75_g363 * 0.01 ) );
+				float sin101_g363 = sin( ( mulTime75_g363 * 0.01 ) );
+				float2 rotator101_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos101_g363 , -sin101_g363 , sin101_g363 , cos101_g363 )) + float2( 0.5,0.5 );
+				float cos112_g363 = cos( ( mulTime75_g363 * -0.02 ) );
+				float sin112_g363 = sin( ( mulTime75_g363 * -0.02 ) );
+				float2 rotator112_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos112_g363 , -sin112_g363 , sin112_g363 , cos112_g363 )) + float2( 0.5,0.5 );
+				float mulTime135_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D122_g363 = snoise( (Pos33_g363*1.0 + mulTime135_g363) );
+				simplePerlin2D122_g363 = simplePerlin2D122_g363*0.5 + 0.5;
+				float4 CirrusPattern137_g363 = ( ( saturate( simplePerlin2D126_g363 ) * tex2D( CZY_CirrusTexture, (rotator101_g363*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrusTexture, (rotator112_g363*1.0 + 0.0) ) * saturate( simplePerlin2D122_g363 ) ) );
+				float2 texCoord134_g363 = input.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_164_0_g363 = ( texCoord134_g363 - float2( 0.5,0.5 ) );
+				float dotResult157_g363 = dot( temp_output_164_0_g363 , temp_output_164_0_g363 );
+				float4 temp_output_217_0_g363 = ( CirrusPattern137_g363 * saturate( (0.0 + (dotResult157_g363 - 0.0) * (2.0 - 0.0) / (0.2 - 0.0)) ) );
+				float Clipping208_g363 = CZY_ClippingThreshold;
+				float CirrusAlpha250_g363 = ( ( temp_output_217_0_g363 * ( CZY_CirrusMultiplier * 10.0 ) ).r > Clipping208_g363 ? 1.0 : 0.0 );
+				float SimpleRadiance268_g363 = saturate( ( DetailedClouds252_g363 + BorderLightTransport278_g363 + NimbusLightTransport269_g363 + ChemtrailsFinal248_g363 + CirrusAlpha250_g363 ) );
+				float4 lerpResult342_g363 = lerp( CloudColor41_g363 , lerpResult338_g363 , ( 1.0 - SimpleRadiance268_g363 ));
+				float CloudbreakLightDir426_g363 = saturate( pow( temp_output_49_0_g363 , ( CZY_SunFlareFalloff * 0.5 ) ) );
+				float lerpResult316_g363 = lerp( -0.4 , 1.0 , ( saturate( ( ComplexCloudDensity141_g363 - 0.0 ) ) * CloudDetail179_g363 * CloudbreakLightDir426_g363 ));
+				float SunThroughClouds399_g363 = saturate( lerpResult316_g363 );
+				float3 hsvTorgb2_g366 = RGBToHSV( CZY_AltoCloudColor.rgb );
+				float3 hsvTorgb3_g366 = HSVToRGB( float3(hsvTorgb2_g366.x,saturate( ( hsvTorgb2_g366.y + CZY_FilterSaturation ) ),( hsvTorgb2_g366.z + CZY_FilterValue )) );
+				float4 temp_output_10_0_g366 = ( float4( hsvTorgb3_g366 , 0.0 ) * CZY_FilterColor );
+				float4 CirrusCustomLightColor350_g363 = ( CloudColor41_g363 * ( temp_output_10_0_g366 * CZY_CloudFilterColor ) );
+				float temp_output_391_0_g363 = ( AltoCumulusPlacement376_g363 * (0.0 + (tex2D( CZY_AltocumulusTexture, ((Pos33_g363*1.0 + ( CZY_AltocumulusWindSpeed * TIme30_g363 ))*( 1.0 / CZY_AltocumulusScale ) + 0.0) ).r - 0.0) * (1.0 - 0.0) / (0.2 - 0.0)) * CZY_AltocumulusMultiplier );
+				float AltoCumulusLightTransport393_g363 = temp_output_391_0_g363;
+				float ACCustomLightsClipping387_g363 = ( AltoCumulusLightTransport393_g363 * ( SimpleRadiance268_g363 > Clipping208_g363 ? 0.0 : 1.0 ) );
+				float mulTime193_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D224_g363 = snoise( (Pos33_g363*1.0 + mulTime193_g363)*2.0 );
+				float mulTime178_g363 = _TimeParameters.x * CZY_CirrostratusMoveSpeed;
+				float cos138_g363 = cos( ( mulTime178_g363 * 0.01 ) );
+				float sin138_g363 = sin( ( mulTime178_g363 * 0.01 ) );
+				float2 rotator138_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos138_g363 , -sin138_g363 , sin138_g363 , cos138_g363 )) + float2( 0.5,0.5 );
+				float cos198_g363 = cos( ( mulTime178_g363 * -0.02 ) );
+				float sin198_g363 = sin( ( mulTime178_g363 * -0.02 ) );
+				float2 rotator198_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos198_g363 , -sin198_g363 , sin198_g363 , cos198_g363 )) + float2( 0.5,0.5 );
+				float mulTime184_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D216_g363 = snoise( (Pos33_g363*10.0 + mulTime184_g363)*4.0 );
+				float4 CirrostratPattern261_g363 = ( ( saturate( simplePerlin2D224_g363 ) * tex2D( CZY_CirrostratusTexture, (rotator138_g363*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrostratusTexture, (rotator198_g363*1.5 + 0.75) ) * saturate( simplePerlin2D216_g363 ) ) );
+				float2 texCoord234_g363 = input.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_243_0_g363 = ( texCoord234_g363 - float2( 0.5,0.5 ) );
+				float dotResult238_g363 = dot( temp_output_243_0_g363 , temp_output_243_0_g363 );
+				float clampResult264_g363 = clamp( ( CZY_CirrostratusMultiplier * 0.5 ) , 0.0 , 0.98 );
+				float CirrostratLightTransport281_g363 = ( ( CirrostratPattern261_g363 * saturate( (0.4 + (dotResult238_g363 - 0.0) * (2.0 - 0.4) / (0.1 - 0.0)) ) ).r > ( 1.0 - clampResult264_g363 ) ? 1.0 : 0.0 );
+				float CSCustomLightsClipping309_g363 = ( CirrostratLightTransport281_g363 * ( SimpleRadiance268_g363 > Clipping208_g363 ? 0.0 : 1.0 ) );
+				float CustomRadiance340_g363 = saturate( ( ACCustomLightsClipping387_g363 + CSCustomLightsClipping309_g363 ) );
+				float4 lerpResult331_g363 = lerp( ( lerpResult342_g363 + SunThroughClouds399_g363 ) , CirrusCustomLightColor350_g363 , CustomRadiance340_g363);
+				float FinalAlpha375_g363 = saturate( ( DetailedClouds252_g363 + BorderLightTransport278_g363 + AltoCumulusLightTransport393_g363 + ChemtrailsFinal248_g363 + CirrostratLightTransport281_g363 + CirrusAlpha250_g363 + NimbusLightTransport269_g363 ) );
+				float4 appendResult420_g363 = (float4((lerpResult331_g363).rgb , FinalAlpha375_g363));
+				float4 FinalCloudColor325_g363 = appendResult420_g363;
+				bool enabled20_g367 =(bool)_UnderwaterRenderingEnabled;
+				bool submerged20_g367 =(bool)_FullySubmerged;
+				float4 ase_positionSSNorm = ScreenPos / ScreenPos.w;
+				ase_positionSSNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_positionSSNorm.z : ase_positionSSNorm.z * 0.5 + 0.5;
+				float textureSample20_g367 = tex2Dlod( _UnderwaterMask, float4( ase_positionSSNorm.xy, 0, 0.0) ).r;
+				float localHLSL20_g367 = HLSL20_g367( enabled20_g367 , submerged20_g367 , textureSample20_g367 );
 				
 
-				float Alpha = ( ( (FinalCloudColor325_g379).w * ( 1.0 - localHLSL20_g384 ) ) > Clipping208_g379 ? 1.0 : 0.0 );
-				float AlphaClipThreshold = Clipping208_g379;
+				float Alpha = ( ( (FinalCloudColor325_g363).w * ( 1.0 - localHLSL20_g367 ) ) > Clipping208_g363 ? 1.0 : 0.0 );
+				float AlphaClipThreshold = Clipping208_g363;
 
 				#ifdef ASE_DEPTH_WRITE_ON
 					float DepthValue = input.positionCS.z;
@@ -2452,10 +2433,9 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 
 			
 
-			#pragma multi_compile_local _ALPHATEST_ON
 			#define _SURFACE_TYPE_TRANSPARENT 1
-			#define ASE_VERSION 19901
-			#define ASE_SRP_VERSION 140012
+			#define ASE_VERSION 19801
+			#define ASE_SRP_VERSION 140010
 
 
 			
@@ -2496,9 +2476,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
 
-			#define ASE_NEEDS_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_FRAG_TEXTURE_COORDINATES0
-
+			
 
 			struct Attributes
 			{
@@ -2617,25 +2595,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 				return 130.0 * dot( m, g );
 			}
 			
-					float2 voronoihash81_g379( float2 p )
+					float2 voronoihash81_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi81_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi81_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash81_g379( n + g );
+						 		float2 o = voronoihash81_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -2650,25 +2628,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return F1;
 					}
 			
-					float2 voronoihash88_g379( float2 p )
+					float2 voronoihash88_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi88_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi88_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash88_g379( n + g );
+						 		float2 o = voronoihash88_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -2683,25 +2661,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return F1;
 					}
 			
-					float2 voronoihash200_g379( float2 p )
+					float2 voronoihash200_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi200_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi200_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash200_g379( n + g );
+						 		float2 o = voronoihash200_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -2716,25 +2694,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return (F2 + F1) * 0.5;
 					}
 			
-					float2 voronoihash232_g379( float2 p )
+					float2 voronoihash232_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi232_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi232_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash232_g379( n + g );
+						 		float2 o = voronoihash232_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -2749,25 +2727,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return F1;
 					}
 			
-					float2 voronoihash84_g379( float2 p )
+					float2 voronoihash84_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi84_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi84_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash84_g379( n + g );
+						 		float2 o = voronoihash84_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -2782,7 +2760,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return F1;
 					}
 			
-			float HLSL20_g384( bool enabled, bool submerged, float textureSample )
+			float HLSL20_g367( bool enabled, bool submerged, float textureSample )
 			{
 				if(enabled)
 				{
@@ -2933,182 +2911,182 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 			{
 				SurfaceDescription surfaceDescription = (SurfaceDescription)0;
 
-				float3 hsvTorgb2_g380 = RGBToHSV( CZY_CloudColor.rgb );
-				float3 hsvTorgb3_g380 = HSVToRGB( float3(hsvTorgb2_g380.x,saturate( ( hsvTorgb2_g380.y + CZY_FilterSaturation ) ),( hsvTorgb2_g380.z + CZY_FilterValue )) );
-				float4 temp_output_10_0_g380 = ( float4( hsvTorgb3_g380 , 0.0 ) * CZY_FilterColor );
-				float4 CloudColor41_g379 = ( temp_output_10_0_g380 * CZY_CloudFilterColor );
-				float3 hsvTorgb2_g383 = RGBToHSV( CZY_CloudHighlightColor.rgb );
-				float3 hsvTorgb3_g383 = HSVToRGB( float3(hsvTorgb2_g383.x,saturate( ( hsvTorgb2_g383.y + CZY_FilterSaturation ) ),( hsvTorgb2_g383.z + CZY_FilterValue )) );
-				float4 temp_output_10_0_g383 = ( float4( hsvTorgb3_g383 , 0.0 ) * CZY_FilterColor );
-				float4 CloudHighlightColor55_g379 = ( temp_output_10_0_g383 * CZY_SunFilterColor );
-				float2 texCoord31_g379 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 Pos33_g379 = texCoord31_g379;
-				float mulTime29_g379 = _TimeParameters.x * ( 0.001 * CZY_WindSpeed );
-				float TIme30_g379 = mulTime29_g379;
-				float simplePerlin2D409_g379 = snoise( ( Pos33_g379 + ( TIme30_g379 * float2( 0.2,-0.4 ) ) )*( 100.0 / CZY_MainCloudScale ) );
-				simplePerlin2D409_g379 = simplePerlin2D409_g379*0.5 + 0.5;
-				float SimpleCloudDensity153_g379 = simplePerlin2D409_g379;
-				float time81_g379 = 0.0;
-				float2 voronoiSmoothId81_g379 = 0;
-				float2 temp_output_94_0_g379 = ( Pos33_g379 + ( TIme30_g379 * float2( 0.3,0.2 ) ) );
-				float2 coords81_g379 = temp_output_94_0_g379 * ( 140.0 / CZY_MainCloudScale );
-				float2 id81_g379 = 0;
-				float2 uv81_g379 = 0;
-				float voroi81_g379 = voronoi81_g379( coords81_g379, time81_g379, id81_g379, uv81_g379, 0, voronoiSmoothId81_g379 );
-				float time88_g379 = 0.0;
-				float2 voronoiSmoothId88_g379 = 0;
-				float2 coords88_g379 = temp_output_94_0_g379 * ( 500.0 / CZY_MainCloudScale );
-				float2 id88_g379 = 0;
-				float2 uv88_g379 = 0;
-				float voroi88_g379 = voronoi88_g379( coords88_g379, time88_g379, id88_g379, uv88_g379, 0, voronoiSmoothId88_g379 );
-				float2 appendResult95_g379 = (float2(voroi81_g379 , voroi88_g379));
-				float2 VoroDetails109_g379 = appendResult95_g379;
-				float CumulusCoverage34_g379 = CZY_CumulusCoverageMultiplier;
-				float ComplexCloudDensity141_g379 =  (0.0 + ( min( SimpleCloudDensity153_g379 , ( 1.0 - VoroDetails109_g379.x ) ) - ( 1.0 - CumulusCoverage34_g379 ) ) * ( 1.0 - 0.0 ) / ( 1.0 - ( 1.0 - CumulusCoverage34_g379 ) ) );
-				float4 lerpResult315_g379 = lerp( CloudHighlightColor55_g379 , CloudColor41_g379 , saturate(  (2.0 + ( ComplexCloudDensity141_g379 - 0.0 ) * ( 0.7 - 2.0 ) / ( 1.0 - 0.0 ) ) ));
+				float3 hsvTorgb2_g364 = RGBToHSV( CZY_CloudColor.rgb );
+				float3 hsvTorgb3_g364 = HSVToRGB( float3(hsvTorgb2_g364.x,saturate( ( hsvTorgb2_g364.y + CZY_FilterSaturation ) ),( hsvTorgb2_g364.z + CZY_FilterValue )) );
+				float4 temp_output_10_0_g364 = ( float4( hsvTorgb3_g364 , 0.0 ) * CZY_FilterColor );
+				float4 CloudColor41_g363 = ( temp_output_10_0_g364 * CZY_CloudFilterColor );
+				float3 hsvTorgb2_g368 = RGBToHSV( CZY_CloudHighlightColor.rgb );
+				float3 hsvTorgb3_g368 = HSVToRGB( float3(hsvTorgb2_g368.x,saturate( ( hsvTorgb2_g368.y + CZY_FilterSaturation ) ),( hsvTorgb2_g368.z + CZY_FilterValue )) );
+				float4 temp_output_10_0_g368 = ( float4( hsvTorgb3_g368 , 0.0 ) * CZY_FilterColor );
+				float4 CloudHighlightColor55_g363 = ( temp_output_10_0_g368 * CZY_SunFilterColor );
+				float2 texCoord31_g363 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 Pos33_g363 = texCoord31_g363;
+				float mulTime29_g363 = _TimeParameters.x * ( 0.001 * CZY_WindSpeed );
+				float TIme30_g363 = mulTime29_g363;
+				float simplePerlin2D409_g363 = snoise( ( Pos33_g363 + ( TIme30_g363 * float2( 0.2,-0.4 ) ) )*( 100.0 / CZY_MainCloudScale ) );
+				simplePerlin2D409_g363 = simplePerlin2D409_g363*0.5 + 0.5;
+				float SimpleCloudDensity153_g363 = simplePerlin2D409_g363;
+				float time81_g363 = 0.0;
+				float2 voronoiSmoothId81_g363 = 0;
+				float2 temp_output_94_0_g363 = ( Pos33_g363 + ( TIme30_g363 * float2( 0.3,0.2 ) ) );
+				float2 coords81_g363 = temp_output_94_0_g363 * ( 140.0 / CZY_MainCloudScale );
+				float2 id81_g363 = 0;
+				float2 uv81_g363 = 0;
+				float voroi81_g363 = voronoi81_g363( coords81_g363, time81_g363, id81_g363, uv81_g363, 0, voronoiSmoothId81_g363 );
+				float time88_g363 = 0.0;
+				float2 voronoiSmoothId88_g363 = 0;
+				float2 coords88_g363 = temp_output_94_0_g363 * ( 500.0 / CZY_MainCloudScale );
+				float2 id88_g363 = 0;
+				float2 uv88_g363 = 0;
+				float voroi88_g363 = voronoi88_g363( coords88_g363, time88_g363, id88_g363, uv88_g363, 0, voronoiSmoothId88_g363 );
+				float2 appendResult95_g363 = (float2(voroi81_g363 , voroi88_g363));
+				float2 VoroDetails109_g363 = appendResult95_g363;
+				float CumulusCoverage34_g363 = CZY_CumulusCoverageMultiplier;
+				float ComplexCloudDensity141_g363 = (0.0 + (min( SimpleCloudDensity153_g363 , ( 1.0 - VoroDetails109_g363.x ) ) - ( 1.0 - CumulusCoverage34_g363 )) * (1.0 - 0.0) / (1.0 - ( 1.0 - CumulusCoverage34_g363 )));
+				float4 lerpResult315_g363 = lerp( CloudHighlightColor55_g363 , CloudColor41_g363 , saturate( (2.0 + (ComplexCloudDensity141_g363 - 0.0) * (0.7 - 2.0) / (1.0 - 0.0)) ));
 				float3 ase_positionWS = input.ase_texcoord1.xyz;
-				float3 normalizeResult40_g379 = normalize( ( ase_positionWS - _WorldSpaceCameraPos ) );
-				float dotResult42_g379 = dot( normalizeResult40_g379 , CZY_SunDirection );
-				float temp_output_49_0_g379 = abs( (dotResult42_g379*0.5 + 0.5) );
-				half LightMask56_g379 = saturate( pow( temp_output_49_0_g379 , CZY_SunFlareFalloff ) );
-				float time200_g379 = 0.0;
-				float2 voronoiSmoothId200_g379 = 0;
-				float mulTime163_g379 = _TimeParameters.x * 0.003;
-				float2 coords200_g379 = (Pos33_g379*1.0 + ( float2( 1,-2 ) * mulTime163_g379 )) * 10.0;
-				float2 id200_g379 = 0;
-				float2 uv200_g379 = 0;
-				float voroi200_g379 = voronoi200_g379( coords200_g379, time200_g379, id200_g379, uv200_g379, 0, voronoiSmoothId200_g379 );
-				float time232_g379 = ( 10.0 * mulTime163_g379 );
-				float2 voronoiSmoothId232_g379 = 0;
-				float2 coords232_g379 = input.ase_texcoord.xy * 10.0;
-				float2 id232_g379 = 0;
-				float2 uv232_g379 = 0;
-				float voroi232_g379 = voronoi232_g379( coords232_g379, time232_g379, id232_g379, uv232_g379, 0, voronoiSmoothId232_g379 );
-				float temp_output_242_0_g379 = ( ( ( 1.0 - 0.0 ) -  (1.0 + ( voroi200_g379 - 0.0 ) * ( -0.5 - 1.0 ) / ( 1.0 - 0.0 ) ) ) - voroi232_g379 );
-				float AltoCumulusPlacement376_g379 = temp_output_242_0_g379;
-				float CloudThicknessDetails286_g379 = ( VoroDetails109_g379.y * saturate( ( AltoCumulusPlacement376_g379 - 0.26 ) ) );
-				float3 normalizeResult43_g379 = normalize( ( ase_positionWS - _WorldSpaceCameraPos ) );
-				float dotResult46_g379 = dot( normalizeResult43_g379 , CZY_MoonDirection );
-				half MoonlightMask57_g379 = saturate( pow( abs( (dotResult46_g379*0.5 + 0.5) ) , CZY_CloudMoonFalloff ) );
-				float3 hsvTorgb2_g381 = RGBToHSV( CZY_CloudMoonColor.rgb );
-				float3 hsvTorgb3_g381 = HSVToRGB( float3(hsvTorgb2_g381.x,saturate( ( hsvTorgb2_g381.y + CZY_FilterSaturation ) ),( hsvTorgb2_g381.z + CZY_FilterValue )) );
-				float4 temp_output_10_0_g381 = ( float4( hsvTorgb3_g381 , 0.0 ) * CZY_FilterColor );
-				float4 MoonlightColor60_g379 = ( temp_output_10_0_g381 * CZY_CloudFilterColor );
-				float4 lerpResult338_g379 = lerp( ( lerpResult315_g379 + ( LightMask56_g379 * CloudHighlightColor55_g379 * ( 1.0 - CloudThicknessDetails286_g379 ) ) + ( MoonlightMask57_g379 * MoonlightColor60_g379 * ( 1.0 - CloudThicknessDetails286_g379 ) ) ) , ( CloudColor41_g379 * float4( 0.5660378,0.5660378,0.5660378,0 ) ) , CloudThicknessDetails286_g379);
-				float time84_g379 = 0.0;
-				float2 voronoiSmoothId84_g379 = 0;
-				float2 coords84_g379 = ( Pos33_g379 + ( TIme30_g379 * float2( 0.3,0.2 ) ) ) * ( 100.0 / CZY_DetailScale );
-				float2 id84_g379 = 0;
-				float2 uv84_g379 = 0;
-				float fade84_g379 = 0.5;
-				float voroi84_g379 = 0;
-				float rest84_g379 = 0;
-				for( int it84_g379 = 0; it84_g379 <3; it84_g379++ ){
-				voroi84_g379 += fade84_g379 * voronoi84_g379( coords84_g379, time84_g379, id84_g379, uv84_g379, 0,voronoiSmoothId84_g379 );
-				rest84_g379 += fade84_g379;
-				coords84_g379 *= 2;
-				fade84_g379 *= 0.5;
-				}//Voronoi84_g379
-				voroi84_g379 /= rest84_g379;
-				float temp_output_173_0_g379 = (  (0.0 + ( ( 1.0 - voroi84_g379 ) - 0.3 ) * ( 0.5 - 0.0 ) / ( 1.0 - 0.3 ) ) * 0.1 * CZY_DetailAmount );
-				float DetailedClouds252_g379 = saturate( ( ComplexCloudDensity141_g379 + temp_output_173_0_g379 ) );
-				float CloudDetail179_g379 = temp_output_173_0_g379;
-				float2 texCoord79_g379 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_161_0_g379 = ( texCoord79_g379 - float2( 0.5,0.5 ) );
-				float dotResult212_g379 = dot( temp_output_161_0_g379 , temp_output_161_0_g379 );
-				float BorderHeight154_g379 = ( 1.0 - CZY_BorderHeight );
-				float temp_output_151_0_g379 = ( -2.0 * ( 1.0 - CZY_BorderVariation ) );
-				float clampResult247_g379 = clamp( ( ( ( CloudDetail179_g379 + SimpleCloudDensity153_g379 ) * saturate(  (( BorderHeight154_g379 * temp_output_151_0_g379 ) + ( dotResult212_g379 - 0.0 ) * ( ( temp_output_151_0_g379 * -4.0 ) - ( BorderHeight154_g379 * temp_output_151_0_g379 ) ) / ( 0.5 - 0.0 ) ) ) ) * 10.0 * CZY_BorderEffect ) , -1.0 , 1.0 );
-				float BorderLightTransport278_g379 = clampResult247_g379;
-				float3 normalizeResult116_g379 = normalize( ( ase_positionWS - _WorldSpaceCameraPos ) );
-				float3 normalizeResult146_g379 = normalize( CZY_StormDirection );
-				float dotResult150_g379 = dot( normalizeResult116_g379 , normalizeResult146_g379 );
-				float2 texCoord98_g379 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_124_0_g379 = ( texCoord98_g379 - float2( 0.5,0.5 ) );
-				float dotResult125_g379 = dot( temp_output_124_0_g379 , temp_output_124_0_g379 );
-				float temp_output_140_0_g379 = ( -2.0 * ( 1.0 - ( CZY_NimbusVariation * 0.9 ) ) );
-				float NimbusLightTransport269_g379 = saturate( ( ( ( CloudDetail179_g379 + SimpleCloudDensity153_g379 ) * saturate(  (( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_140_0_g379 ) + ( ( dotResult150_g379 + ( CZY_NimbusHeight * 4.0 * dotResult125_g379 ) ) - 0.5 ) * ( ( temp_output_140_0_g379 * -4.0 ) - ( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_140_0_g379 ) ) / ( 7.0 - 0.5 ) ) ) ) * 10.0 ) );
-				float mulTime104_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D143_g379 = snoise( (Pos33_g379*1.0 + mulTime104_g379)*2.0 );
-				float mulTime93_g379 = _TimeParameters.x * CZY_ChemtrailsMoveSpeed;
-				float cos97_g379 = cos( ( mulTime93_g379 * 0.01 ) );
-				float sin97_g379 = sin( ( mulTime93_g379 * 0.01 ) );
-				float2 rotator97_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos97_g379 , -sin97_g379 , sin97_g379 , cos97_g379 )) + float2( 0.5,0.5 );
-				float cos131_g379 = cos( ( mulTime93_g379 * -0.02 ) );
-				float sin131_g379 = sin( ( mulTime93_g379 * -0.02 ) );
-				float2 rotator131_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos131_g379 , -sin131_g379 , sin131_g379 , cos131_g379 )) + float2( 0.5,0.5 );
-				float mulTime107_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D147_g379 = snoise( (Pos33_g379*1.0 + mulTime107_g379)*4.0 );
-				float4 ChemtrailsPattern210_g379 = ( ( saturate( simplePerlin2D143_g379 ) * tex2D( CZY_ChemtrailsTexture, (rotator97_g379*0.5 + 0.0) ) ) + ( tex2D( CZY_ChemtrailsTexture, rotator131_g379 ) * saturate( simplePerlin2D147_g379 ) ) );
-				float2 texCoord139_g379 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_162_0_g379 = ( texCoord139_g379 - float2( 0.5,0.5 ) );
-				float dotResult207_g379 = dot( temp_output_162_0_g379 , temp_output_162_0_g379 );
-				float ChemtrailsFinal248_g379 = ( ( ChemtrailsPattern210_g379 * saturate(  (0.4 + ( dotResult207_g379 - 0.0 ) * ( 2.0 - 0.4 ) / ( 0.1 - 0.0 ) ) ) ).r > ( 1.0 - ( CZY_ChemtrailsMultiplier * 0.5 ) ) ? 1.0 : 0.0 );
-				float mulTime80_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D126_g379 = snoise( (Pos33_g379*1.0 + mulTime80_g379)*2.0 );
-				float mulTime75_g379 = _TimeParameters.x * CZY_CirrusMoveSpeed;
-				float cos101_g379 = cos( ( mulTime75_g379 * 0.01 ) );
-				float sin101_g379 = sin( ( mulTime75_g379 * 0.01 ) );
-				float2 rotator101_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos101_g379 , -sin101_g379 , sin101_g379 , cos101_g379 )) + float2( 0.5,0.5 );
-				float cos112_g379 = cos( ( mulTime75_g379 * -0.02 ) );
-				float sin112_g379 = sin( ( mulTime75_g379 * -0.02 ) );
-				float2 rotator112_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos112_g379 , -sin112_g379 , sin112_g379 , cos112_g379 )) + float2( 0.5,0.5 );
-				float mulTime135_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D122_g379 = snoise( (Pos33_g379*1.0 + mulTime135_g379) );
-				simplePerlin2D122_g379 = simplePerlin2D122_g379*0.5 + 0.5;
-				float4 CirrusPattern137_g379 = ( ( saturate( simplePerlin2D126_g379 ) * tex2D( CZY_CirrusTexture, (rotator101_g379*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrusTexture, (rotator112_g379*1.0 + 0.0) ) * saturate( simplePerlin2D122_g379 ) ) );
-				float2 texCoord134_g379 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_164_0_g379 = ( texCoord134_g379 - float2( 0.5,0.5 ) );
-				float dotResult157_g379 = dot( temp_output_164_0_g379 , temp_output_164_0_g379 );
-				float4 temp_output_217_0_g379 = ( CirrusPattern137_g379 * saturate(  (0.0 + ( dotResult157_g379 - 0.0 ) * ( 2.0 - 0.0 ) / ( 0.2 - 0.0 ) ) ) );
-				float Clipping208_g379 = CZY_ClippingThreshold;
-				float CirrusAlpha250_g379 = ( ( temp_output_217_0_g379 * ( CZY_CirrusMultiplier * 10.0 ) ).r > Clipping208_g379 ? 1.0 : 0.0 );
-				float SimpleRadiance268_g379 = saturate( ( DetailedClouds252_g379 + BorderLightTransport278_g379 + NimbusLightTransport269_g379 + ChemtrailsFinal248_g379 + CirrusAlpha250_g379 ) );
-				float4 lerpResult342_g379 = lerp( CloudColor41_g379 , lerpResult338_g379 , ( 1.0 - SimpleRadiance268_g379 ));
-				float CloudbreakLightDir426_g379 = saturate( pow( temp_output_49_0_g379 , ( CZY_SunFlareFalloff * 0.5 ) ) );
-				float lerpResult316_g379 = lerp( -0.4 , 1.0 , ( saturate( ( ComplexCloudDensity141_g379 - 0.0 ) ) * CloudDetail179_g379 * CloudbreakLightDir426_g379 ));
-				float SunThroughClouds399_g379 = saturate( lerpResult316_g379 );
-				float3 hsvTorgb2_g382 = RGBToHSV( CZY_AltoCloudColor.rgb );
-				float3 hsvTorgb3_g382 = HSVToRGB( float3(hsvTorgb2_g382.x,saturate( ( hsvTorgb2_g382.y + CZY_FilterSaturation ) ),( hsvTorgb2_g382.z + CZY_FilterValue )) );
-				float4 temp_output_10_0_g382 = ( float4( hsvTorgb3_g382 , 0.0 ) * CZY_FilterColor );
-				float4 CirrusCustomLightColor350_g379 = ( CloudColor41_g379 * ( temp_output_10_0_g382 * CZY_CloudFilterColor ) );
-				float temp_output_391_0_g379 = ( AltoCumulusPlacement376_g379 *  (0.0 + ( tex2D( CZY_AltocumulusTexture, ((Pos33_g379*1.0 + ( CZY_AltocumulusWindSpeed * TIme30_g379 ))*( 1.0 / CZY_AltocumulusScale ) + 0.0) ).r - 0.0 ) * ( 1.0 - 0.0 ) / ( 0.2 - 0.0 ) ) * CZY_AltocumulusMultiplier );
-				float AltoCumulusLightTransport393_g379 = temp_output_391_0_g379;
-				float ACCustomLightsClipping387_g379 = ( AltoCumulusLightTransport393_g379 * ( SimpleRadiance268_g379 > Clipping208_g379 ? 0.0 : 1.0 ) );
-				float mulTime193_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D224_g379 = snoise( (Pos33_g379*1.0 + mulTime193_g379)*2.0 );
-				float mulTime178_g379 = _TimeParameters.x * CZY_CirrostratusMoveSpeed;
-				float cos138_g379 = cos( ( mulTime178_g379 * 0.01 ) );
-				float sin138_g379 = sin( ( mulTime178_g379 * 0.01 ) );
-				float2 rotator138_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos138_g379 , -sin138_g379 , sin138_g379 , cos138_g379 )) + float2( 0.5,0.5 );
-				float cos198_g379 = cos( ( mulTime178_g379 * -0.02 ) );
-				float sin198_g379 = sin( ( mulTime178_g379 * -0.02 ) );
-				float2 rotator198_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos198_g379 , -sin198_g379 , sin198_g379 , cos198_g379 )) + float2( 0.5,0.5 );
-				float mulTime184_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D216_g379 = snoise( (Pos33_g379*10.0 + mulTime184_g379)*4.0 );
-				float4 CirrostratPattern261_g379 = ( ( saturate( simplePerlin2D224_g379 ) * tex2D( CZY_CirrostratusTexture, (rotator138_g379*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrostratusTexture, (rotator198_g379*1.5 + 0.75) ) * saturate( simplePerlin2D216_g379 ) ) );
-				float2 texCoord234_g379 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_243_0_g379 = ( texCoord234_g379 - float2( 0.5,0.5 ) );
-				float dotResult238_g379 = dot( temp_output_243_0_g379 , temp_output_243_0_g379 );
-				float clampResult264_g379 = clamp( ( CZY_CirrostratusMultiplier * 0.5 ) , 0.0 , 0.98 );
-				float CirrostratLightTransport281_g379 = ( ( CirrostratPattern261_g379 * saturate(  (0.4 + ( dotResult238_g379 - 0.0 ) * ( 2.0 - 0.4 ) / ( 0.1 - 0.0 ) ) ) ).r > ( 1.0 - clampResult264_g379 ) ? 1.0 : 0.0 );
-				float CSCustomLightsClipping309_g379 = ( CirrostratLightTransport281_g379 * ( SimpleRadiance268_g379 > Clipping208_g379 ? 0.0 : 1.0 ) );
-				float CustomRadiance340_g379 = saturate( ( ACCustomLightsClipping387_g379 + CSCustomLightsClipping309_g379 ) );
-				float4 lerpResult331_g379 = lerp( ( lerpResult342_g379 + ( SunThroughClouds399_g379 * CloudHighlightColor55_g379 ) ) , CirrusCustomLightColor350_g379 , CustomRadiance340_g379);
-				float FinalAlpha375_g379 = saturate( ( DetailedClouds252_g379 + BorderLightTransport278_g379 + AltoCumulusLightTransport393_g379 + ChemtrailsFinal248_g379 + CirrostratLightTransport281_g379 + CirrusAlpha250_g379 + NimbusLightTransport269_g379 ) );
-				float4 appendResult420_g379 = (float4((lerpResult331_g379).rgb , FinalAlpha375_g379));
-				float4 FinalCloudColor325_g379 = appendResult420_g379;
-				bool enabled20_g384 =(bool)_UnderwaterRenderingEnabled;
-				bool submerged20_g384 =(bool)_FullySubmerged;
+				float3 normalizeResult40_g363 = normalize( ( ase_positionWS - _WorldSpaceCameraPos ) );
+				float dotResult42_g363 = dot( normalizeResult40_g363 , CZY_SunDirection );
+				float temp_output_49_0_g363 = abs( (dotResult42_g363*0.5 + 0.5) );
+				half LightMask56_g363 = saturate( pow( temp_output_49_0_g363 , CZY_SunFlareFalloff ) );
+				float time200_g363 = 0.0;
+				float2 voronoiSmoothId200_g363 = 0;
+				float mulTime163_g363 = _TimeParameters.x * 0.003;
+				float2 coords200_g363 = (Pos33_g363*1.0 + ( float2( 1,-2 ) * mulTime163_g363 )) * 10.0;
+				float2 id200_g363 = 0;
+				float2 uv200_g363 = 0;
+				float voroi200_g363 = voronoi200_g363( coords200_g363, time200_g363, id200_g363, uv200_g363, 0, voronoiSmoothId200_g363 );
+				float time232_g363 = ( 10.0 * mulTime163_g363 );
+				float2 voronoiSmoothId232_g363 = 0;
+				float2 coords232_g363 = input.ase_texcoord.xy * 10.0;
+				float2 id232_g363 = 0;
+				float2 uv232_g363 = 0;
+				float voroi232_g363 = voronoi232_g363( coords232_g363, time232_g363, id232_g363, uv232_g363, 0, voronoiSmoothId232_g363 );
+				float temp_output_242_0_g363 = ( ( ( 1.0 - 0.0 ) - (1.0 + (voroi200_g363 - 0.0) * (-0.5 - 1.0) / (1.0 - 0.0)) ) - voroi232_g363 );
+				float AltoCumulusPlacement376_g363 = temp_output_242_0_g363;
+				float CloudThicknessDetails286_g363 = ( VoroDetails109_g363.y * saturate( ( AltoCumulusPlacement376_g363 - 0.26 ) ) );
+				float3 normalizeResult43_g363 = normalize( ( ase_positionWS - _WorldSpaceCameraPos ) );
+				float dotResult46_g363 = dot( normalizeResult43_g363 , CZY_MoonDirection );
+				half MoonlightMask57_g363 = saturate( pow( abs( (dotResult46_g363*0.5 + 0.5) ) , CZY_CloudMoonFalloff ) );
+				float3 hsvTorgb2_g365 = RGBToHSV( CZY_CloudMoonColor.rgb );
+				float3 hsvTorgb3_g365 = HSVToRGB( float3(hsvTorgb2_g365.x,saturate( ( hsvTorgb2_g365.y + CZY_FilterSaturation ) ),( hsvTorgb2_g365.z + CZY_FilterValue )) );
+				float4 temp_output_10_0_g365 = ( float4( hsvTorgb3_g365 , 0.0 ) * CZY_FilterColor );
+				float4 MoonlightColor60_g363 = ( temp_output_10_0_g365 * CZY_CloudFilterColor );
+				float4 lerpResult338_g363 = lerp( ( lerpResult315_g363 + ( LightMask56_g363 * CloudHighlightColor55_g363 * ( 1.0 - CloudThicknessDetails286_g363 ) ) + ( MoonlightMask57_g363 * MoonlightColor60_g363 * ( 1.0 - CloudThicknessDetails286_g363 ) ) ) , ( CloudColor41_g363 * float4( 0.5660378,0.5660378,0.5660378,0 ) ) , CloudThicknessDetails286_g363);
+				float time84_g363 = 0.0;
+				float2 voronoiSmoothId84_g363 = 0;
+				float2 coords84_g363 = ( Pos33_g363 + ( TIme30_g363 * float2( 0.3,0.2 ) ) ) * ( 100.0 / CZY_DetailScale );
+				float2 id84_g363 = 0;
+				float2 uv84_g363 = 0;
+				float fade84_g363 = 0.5;
+				float voroi84_g363 = 0;
+				float rest84_g363 = 0;
+				for( int it84_g363 = 0; it84_g363 <3; it84_g363++ ){
+				voroi84_g363 += fade84_g363 * voronoi84_g363( coords84_g363, time84_g363, id84_g363, uv84_g363, 0,voronoiSmoothId84_g363 );
+				rest84_g363 += fade84_g363;
+				coords84_g363 *= 2;
+				fade84_g363 *= 0.5;
+				}//Voronoi84_g363
+				voroi84_g363 /= rest84_g363;
+				float temp_output_173_0_g363 = ( (0.0 + (( 1.0 - voroi84_g363 ) - 0.3) * (0.5 - 0.0) / (1.0 - 0.3)) * 0.1 * CZY_DetailAmount );
+				float DetailedClouds252_g363 = saturate( ( ComplexCloudDensity141_g363 + temp_output_173_0_g363 ) );
+				float CloudDetail179_g363 = temp_output_173_0_g363;
+				float2 texCoord79_g363 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_161_0_g363 = ( texCoord79_g363 - float2( 0.5,0.5 ) );
+				float dotResult212_g363 = dot( temp_output_161_0_g363 , temp_output_161_0_g363 );
+				float BorderHeight154_g363 = ( 1.0 - CZY_BorderHeight );
+				float temp_output_151_0_g363 = ( -2.0 * ( 1.0 - CZY_BorderVariation ) );
+				float clampResult247_g363 = clamp( ( ( ( CloudDetail179_g363 + SimpleCloudDensity153_g363 ) * saturate( (( BorderHeight154_g363 * temp_output_151_0_g363 ) + (dotResult212_g363 - 0.0) * (( temp_output_151_0_g363 * -4.0 ) - ( BorderHeight154_g363 * temp_output_151_0_g363 )) / (0.5 - 0.0)) ) ) * 10.0 * CZY_BorderEffect ) , -1.0 , 1.0 );
+				float BorderLightTransport278_g363 = clampResult247_g363;
+				float3 normalizeResult116_g363 = normalize( ( ase_positionWS - _WorldSpaceCameraPos ) );
+				float3 normalizeResult146_g363 = normalize( CZY_StormDirection );
+				float dotResult150_g363 = dot( normalizeResult116_g363 , normalizeResult146_g363 );
+				float2 texCoord98_g363 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_124_0_g363 = ( texCoord98_g363 - float2( 0.5,0.5 ) );
+				float dotResult125_g363 = dot( temp_output_124_0_g363 , temp_output_124_0_g363 );
+				float temp_output_140_0_g363 = ( -2.0 * ( 1.0 - ( CZY_NimbusVariation * 0.9 ) ) );
+				float NimbusLightTransport269_g363 = saturate( ( ( ( CloudDetail179_g363 + SimpleCloudDensity153_g363 ) * saturate( (( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_140_0_g363 ) + (( dotResult150_g363 + ( CZY_NimbusHeight * 4.0 * dotResult125_g363 ) ) - 0.5) * (( temp_output_140_0_g363 * -4.0 ) - ( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_140_0_g363 )) / (7.0 - 0.5)) ) ) * 10.0 ) );
+				float mulTime104_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D143_g363 = snoise( (Pos33_g363*1.0 + mulTime104_g363)*2.0 );
+				float mulTime93_g363 = _TimeParameters.x * CZY_ChemtrailsMoveSpeed;
+				float cos97_g363 = cos( ( mulTime93_g363 * 0.01 ) );
+				float sin97_g363 = sin( ( mulTime93_g363 * 0.01 ) );
+				float2 rotator97_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos97_g363 , -sin97_g363 , sin97_g363 , cos97_g363 )) + float2( 0.5,0.5 );
+				float cos131_g363 = cos( ( mulTime93_g363 * -0.02 ) );
+				float sin131_g363 = sin( ( mulTime93_g363 * -0.02 ) );
+				float2 rotator131_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos131_g363 , -sin131_g363 , sin131_g363 , cos131_g363 )) + float2( 0.5,0.5 );
+				float mulTime107_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D147_g363 = snoise( (Pos33_g363*1.0 + mulTime107_g363)*4.0 );
+				float4 ChemtrailsPattern210_g363 = ( ( saturate( simplePerlin2D143_g363 ) * tex2D( CZY_ChemtrailsTexture, (rotator97_g363*0.5 + 0.0) ) ) + ( tex2D( CZY_ChemtrailsTexture, rotator131_g363 ) * saturate( simplePerlin2D147_g363 ) ) );
+				float2 texCoord139_g363 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_162_0_g363 = ( texCoord139_g363 - float2( 0.5,0.5 ) );
+				float dotResult207_g363 = dot( temp_output_162_0_g363 , temp_output_162_0_g363 );
+				float ChemtrailsFinal248_g363 = ( ( ChemtrailsPattern210_g363 * saturate( (0.4 + (dotResult207_g363 - 0.0) * (2.0 - 0.4) / (0.1 - 0.0)) ) ).r > ( 1.0 - ( CZY_ChemtrailsMultiplier * 0.5 ) ) ? 1.0 : 0.0 );
+				float mulTime80_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D126_g363 = snoise( (Pos33_g363*1.0 + mulTime80_g363)*2.0 );
+				float mulTime75_g363 = _TimeParameters.x * CZY_CirrusMoveSpeed;
+				float cos101_g363 = cos( ( mulTime75_g363 * 0.01 ) );
+				float sin101_g363 = sin( ( mulTime75_g363 * 0.01 ) );
+				float2 rotator101_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos101_g363 , -sin101_g363 , sin101_g363 , cos101_g363 )) + float2( 0.5,0.5 );
+				float cos112_g363 = cos( ( mulTime75_g363 * -0.02 ) );
+				float sin112_g363 = sin( ( mulTime75_g363 * -0.02 ) );
+				float2 rotator112_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos112_g363 , -sin112_g363 , sin112_g363 , cos112_g363 )) + float2( 0.5,0.5 );
+				float mulTime135_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D122_g363 = snoise( (Pos33_g363*1.0 + mulTime135_g363) );
+				simplePerlin2D122_g363 = simplePerlin2D122_g363*0.5 + 0.5;
+				float4 CirrusPattern137_g363 = ( ( saturate( simplePerlin2D126_g363 ) * tex2D( CZY_CirrusTexture, (rotator101_g363*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrusTexture, (rotator112_g363*1.0 + 0.0) ) * saturate( simplePerlin2D122_g363 ) ) );
+				float2 texCoord134_g363 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_164_0_g363 = ( texCoord134_g363 - float2( 0.5,0.5 ) );
+				float dotResult157_g363 = dot( temp_output_164_0_g363 , temp_output_164_0_g363 );
+				float4 temp_output_217_0_g363 = ( CirrusPattern137_g363 * saturate( (0.0 + (dotResult157_g363 - 0.0) * (2.0 - 0.0) / (0.2 - 0.0)) ) );
+				float Clipping208_g363 = CZY_ClippingThreshold;
+				float CirrusAlpha250_g363 = ( ( temp_output_217_0_g363 * ( CZY_CirrusMultiplier * 10.0 ) ).r > Clipping208_g363 ? 1.0 : 0.0 );
+				float SimpleRadiance268_g363 = saturate( ( DetailedClouds252_g363 + BorderLightTransport278_g363 + NimbusLightTransport269_g363 + ChemtrailsFinal248_g363 + CirrusAlpha250_g363 ) );
+				float4 lerpResult342_g363 = lerp( CloudColor41_g363 , lerpResult338_g363 , ( 1.0 - SimpleRadiance268_g363 ));
+				float CloudbreakLightDir426_g363 = saturate( pow( temp_output_49_0_g363 , ( CZY_SunFlareFalloff * 0.5 ) ) );
+				float lerpResult316_g363 = lerp( -0.4 , 1.0 , ( saturate( ( ComplexCloudDensity141_g363 - 0.0 ) ) * CloudDetail179_g363 * CloudbreakLightDir426_g363 ));
+				float SunThroughClouds399_g363 = saturate( lerpResult316_g363 );
+				float3 hsvTorgb2_g366 = RGBToHSV( CZY_AltoCloudColor.rgb );
+				float3 hsvTorgb3_g366 = HSVToRGB( float3(hsvTorgb2_g366.x,saturate( ( hsvTorgb2_g366.y + CZY_FilterSaturation ) ),( hsvTorgb2_g366.z + CZY_FilterValue )) );
+				float4 temp_output_10_0_g366 = ( float4( hsvTorgb3_g366 , 0.0 ) * CZY_FilterColor );
+				float4 CirrusCustomLightColor350_g363 = ( CloudColor41_g363 * ( temp_output_10_0_g366 * CZY_CloudFilterColor ) );
+				float temp_output_391_0_g363 = ( AltoCumulusPlacement376_g363 * (0.0 + (tex2D( CZY_AltocumulusTexture, ((Pos33_g363*1.0 + ( CZY_AltocumulusWindSpeed * TIme30_g363 ))*( 1.0 / CZY_AltocumulusScale ) + 0.0) ).r - 0.0) * (1.0 - 0.0) / (0.2 - 0.0)) * CZY_AltocumulusMultiplier );
+				float AltoCumulusLightTransport393_g363 = temp_output_391_0_g363;
+				float ACCustomLightsClipping387_g363 = ( AltoCumulusLightTransport393_g363 * ( SimpleRadiance268_g363 > Clipping208_g363 ? 0.0 : 1.0 ) );
+				float mulTime193_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D224_g363 = snoise( (Pos33_g363*1.0 + mulTime193_g363)*2.0 );
+				float mulTime178_g363 = _TimeParameters.x * CZY_CirrostratusMoveSpeed;
+				float cos138_g363 = cos( ( mulTime178_g363 * 0.01 ) );
+				float sin138_g363 = sin( ( mulTime178_g363 * 0.01 ) );
+				float2 rotator138_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos138_g363 , -sin138_g363 , sin138_g363 , cos138_g363 )) + float2( 0.5,0.5 );
+				float cos198_g363 = cos( ( mulTime178_g363 * -0.02 ) );
+				float sin198_g363 = sin( ( mulTime178_g363 * -0.02 ) );
+				float2 rotator198_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos198_g363 , -sin198_g363 , sin198_g363 , cos198_g363 )) + float2( 0.5,0.5 );
+				float mulTime184_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D216_g363 = snoise( (Pos33_g363*10.0 + mulTime184_g363)*4.0 );
+				float4 CirrostratPattern261_g363 = ( ( saturate( simplePerlin2D224_g363 ) * tex2D( CZY_CirrostratusTexture, (rotator138_g363*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrostratusTexture, (rotator198_g363*1.5 + 0.75) ) * saturate( simplePerlin2D216_g363 ) ) );
+				float2 texCoord234_g363 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_243_0_g363 = ( texCoord234_g363 - float2( 0.5,0.5 ) );
+				float dotResult238_g363 = dot( temp_output_243_0_g363 , temp_output_243_0_g363 );
+				float clampResult264_g363 = clamp( ( CZY_CirrostratusMultiplier * 0.5 ) , 0.0 , 0.98 );
+				float CirrostratLightTransport281_g363 = ( ( CirrostratPattern261_g363 * saturate( (0.4 + (dotResult238_g363 - 0.0) * (2.0 - 0.4) / (0.1 - 0.0)) ) ).r > ( 1.0 - clampResult264_g363 ) ? 1.0 : 0.0 );
+				float CSCustomLightsClipping309_g363 = ( CirrostratLightTransport281_g363 * ( SimpleRadiance268_g363 > Clipping208_g363 ? 0.0 : 1.0 ) );
+				float CustomRadiance340_g363 = saturate( ( ACCustomLightsClipping387_g363 + CSCustomLightsClipping309_g363 ) );
+				float4 lerpResult331_g363 = lerp( ( lerpResult342_g363 + SunThroughClouds399_g363 ) , CirrusCustomLightColor350_g363 , CustomRadiance340_g363);
+				float FinalAlpha375_g363 = saturate( ( DetailedClouds252_g363 + BorderLightTransport278_g363 + AltoCumulusLightTransport393_g363 + ChemtrailsFinal248_g363 + CirrostratLightTransport281_g363 + CirrusAlpha250_g363 + NimbusLightTransport269_g363 ) );
+				float4 appendResult420_g363 = (float4((lerpResult331_g363).rgb , FinalAlpha375_g363));
+				float4 FinalCloudColor325_g363 = appendResult420_g363;
+				bool enabled20_g367 =(bool)_UnderwaterRenderingEnabled;
+				bool submerged20_g367 =(bool)_FullySubmerged;
 				float4 screenPos = input.ase_texcoord2;
 				float4 ase_positionSSNorm = screenPos / screenPos.w;
 				ase_positionSSNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_positionSSNorm.z : ase_positionSSNorm.z * 0.5 + 0.5;
-				float textureSample20_g384 = tex2Dlod( _UnderwaterMask, float4( ase_positionSSNorm.xy, 0, 0.0) ).r;
-				float localHLSL20_g384 = HLSL20_g384( enabled20_g384 , submerged20_g384 , textureSample20_g384 );
+				float textureSample20_g367 = tex2Dlod( _UnderwaterMask, float4( ase_positionSSNorm.xy, 0, 0.0) ).r;
+				float localHLSL20_g367 = HLSL20_g367( enabled20_g367 , submerged20_g367 , textureSample20_g367 );
 				
 
-				surfaceDescription.Alpha = ( ( (FinalCloudColor325_g379).w * ( 1.0 - localHLSL20_g384 ) ) > Clipping208_g379 ? 1.0 : 0.0 );
-				surfaceDescription.AlphaClipThreshold = Clipping208_g379;
+				surfaceDescription.Alpha = ( ( (FinalCloudColor325_g363).w * ( 1.0 - localHLSL20_g367 ) ) > Clipping208_g363 ? 1.0 : 0.0 );
+				surfaceDescription.AlphaClipThreshold = Clipping208_g363;
 
 				#if _ALPHATEST_ON
 					float alphaClipThreshold = 0.01f;
@@ -3137,10 +3115,9 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 
 			
 
-			#pragma multi_compile_local _ALPHATEST_ON
 			#define _SURFACE_TYPE_TRANSPARENT 1
-			#define ASE_VERSION 19901
-			#define ASE_SRP_VERSION 140012
+			#define ASE_VERSION 19801
+			#define ASE_SRP_VERSION 140010
 
 
 			
@@ -3186,9 +3163,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
             #endif
 
-			#define ASE_NEEDS_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_FRAG_TEXTURE_COORDINATES0
-
+			
 
 			struct Attributes
 			{
@@ -3307,25 +3282,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 				return 130.0 * dot( m, g );
 			}
 			
-					float2 voronoihash81_g379( float2 p )
+					float2 voronoihash81_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi81_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi81_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash81_g379( n + g );
+						 		float2 o = voronoihash81_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -3340,25 +3315,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return F1;
 					}
 			
-					float2 voronoihash88_g379( float2 p )
+					float2 voronoihash88_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi88_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi88_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash88_g379( n + g );
+						 		float2 o = voronoihash88_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -3373,25 +3348,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return F1;
 					}
 			
-					float2 voronoihash200_g379( float2 p )
+					float2 voronoihash200_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi200_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi200_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash200_g379( n + g );
+						 		float2 o = voronoihash200_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -3406,25 +3381,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return (F2 + F1) * 0.5;
 					}
 			
-					float2 voronoihash232_g379( float2 p )
+					float2 voronoihash232_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi232_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi232_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash232_g379( n + g );
+						 		float2 o = voronoihash232_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -3439,25 +3414,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return F1;
 					}
 			
-					float2 voronoihash84_g379( float2 p )
+					float2 voronoihash84_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi84_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi84_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash84_g379( n + g );
+						 		float2 o = voronoihash84_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -3472,7 +3447,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return F1;
 					}
 			
-			float HLSL20_g384( bool enabled, bool submerged, float textureSample )
+			float HLSL20_g367( bool enabled, bool submerged, float textureSample )
 			{
 				if(enabled)
 				{
@@ -3620,182 +3595,182 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 			{
 				SurfaceDescription surfaceDescription = (SurfaceDescription)0;
 
-				float3 hsvTorgb2_g380 = RGBToHSV( CZY_CloudColor.rgb );
-				float3 hsvTorgb3_g380 = HSVToRGB( float3(hsvTorgb2_g380.x,saturate( ( hsvTorgb2_g380.y + CZY_FilterSaturation ) ),( hsvTorgb2_g380.z + CZY_FilterValue )) );
-				float4 temp_output_10_0_g380 = ( float4( hsvTorgb3_g380 , 0.0 ) * CZY_FilterColor );
-				float4 CloudColor41_g379 = ( temp_output_10_0_g380 * CZY_CloudFilterColor );
-				float3 hsvTorgb2_g383 = RGBToHSV( CZY_CloudHighlightColor.rgb );
-				float3 hsvTorgb3_g383 = HSVToRGB( float3(hsvTorgb2_g383.x,saturate( ( hsvTorgb2_g383.y + CZY_FilterSaturation ) ),( hsvTorgb2_g383.z + CZY_FilterValue )) );
-				float4 temp_output_10_0_g383 = ( float4( hsvTorgb3_g383 , 0.0 ) * CZY_FilterColor );
-				float4 CloudHighlightColor55_g379 = ( temp_output_10_0_g383 * CZY_SunFilterColor );
-				float2 texCoord31_g379 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 Pos33_g379 = texCoord31_g379;
-				float mulTime29_g379 = _TimeParameters.x * ( 0.001 * CZY_WindSpeed );
-				float TIme30_g379 = mulTime29_g379;
-				float simplePerlin2D409_g379 = snoise( ( Pos33_g379 + ( TIme30_g379 * float2( 0.2,-0.4 ) ) )*( 100.0 / CZY_MainCloudScale ) );
-				simplePerlin2D409_g379 = simplePerlin2D409_g379*0.5 + 0.5;
-				float SimpleCloudDensity153_g379 = simplePerlin2D409_g379;
-				float time81_g379 = 0.0;
-				float2 voronoiSmoothId81_g379 = 0;
-				float2 temp_output_94_0_g379 = ( Pos33_g379 + ( TIme30_g379 * float2( 0.3,0.2 ) ) );
-				float2 coords81_g379 = temp_output_94_0_g379 * ( 140.0 / CZY_MainCloudScale );
-				float2 id81_g379 = 0;
-				float2 uv81_g379 = 0;
-				float voroi81_g379 = voronoi81_g379( coords81_g379, time81_g379, id81_g379, uv81_g379, 0, voronoiSmoothId81_g379 );
-				float time88_g379 = 0.0;
-				float2 voronoiSmoothId88_g379 = 0;
-				float2 coords88_g379 = temp_output_94_0_g379 * ( 500.0 / CZY_MainCloudScale );
-				float2 id88_g379 = 0;
-				float2 uv88_g379 = 0;
-				float voroi88_g379 = voronoi88_g379( coords88_g379, time88_g379, id88_g379, uv88_g379, 0, voronoiSmoothId88_g379 );
-				float2 appendResult95_g379 = (float2(voroi81_g379 , voroi88_g379));
-				float2 VoroDetails109_g379 = appendResult95_g379;
-				float CumulusCoverage34_g379 = CZY_CumulusCoverageMultiplier;
-				float ComplexCloudDensity141_g379 =  (0.0 + ( min( SimpleCloudDensity153_g379 , ( 1.0 - VoroDetails109_g379.x ) ) - ( 1.0 - CumulusCoverage34_g379 ) ) * ( 1.0 - 0.0 ) / ( 1.0 - ( 1.0 - CumulusCoverage34_g379 ) ) );
-				float4 lerpResult315_g379 = lerp( CloudHighlightColor55_g379 , CloudColor41_g379 , saturate(  (2.0 + ( ComplexCloudDensity141_g379 - 0.0 ) * ( 0.7 - 2.0 ) / ( 1.0 - 0.0 ) ) ));
+				float3 hsvTorgb2_g364 = RGBToHSV( CZY_CloudColor.rgb );
+				float3 hsvTorgb3_g364 = HSVToRGB( float3(hsvTorgb2_g364.x,saturate( ( hsvTorgb2_g364.y + CZY_FilterSaturation ) ),( hsvTorgb2_g364.z + CZY_FilterValue )) );
+				float4 temp_output_10_0_g364 = ( float4( hsvTorgb3_g364 , 0.0 ) * CZY_FilterColor );
+				float4 CloudColor41_g363 = ( temp_output_10_0_g364 * CZY_CloudFilterColor );
+				float3 hsvTorgb2_g368 = RGBToHSV( CZY_CloudHighlightColor.rgb );
+				float3 hsvTorgb3_g368 = HSVToRGB( float3(hsvTorgb2_g368.x,saturate( ( hsvTorgb2_g368.y + CZY_FilterSaturation ) ),( hsvTorgb2_g368.z + CZY_FilterValue )) );
+				float4 temp_output_10_0_g368 = ( float4( hsvTorgb3_g368 , 0.0 ) * CZY_FilterColor );
+				float4 CloudHighlightColor55_g363 = ( temp_output_10_0_g368 * CZY_SunFilterColor );
+				float2 texCoord31_g363 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 Pos33_g363 = texCoord31_g363;
+				float mulTime29_g363 = _TimeParameters.x * ( 0.001 * CZY_WindSpeed );
+				float TIme30_g363 = mulTime29_g363;
+				float simplePerlin2D409_g363 = snoise( ( Pos33_g363 + ( TIme30_g363 * float2( 0.2,-0.4 ) ) )*( 100.0 / CZY_MainCloudScale ) );
+				simplePerlin2D409_g363 = simplePerlin2D409_g363*0.5 + 0.5;
+				float SimpleCloudDensity153_g363 = simplePerlin2D409_g363;
+				float time81_g363 = 0.0;
+				float2 voronoiSmoothId81_g363 = 0;
+				float2 temp_output_94_0_g363 = ( Pos33_g363 + ( TIme30_g363 * float2( 0.3,0.2 ) ) );
+				float2 coords81_g363 = temp_output_94_0_g363 * ( 140.0 / CZY_MainCloudScale );
+				float2 id81_g363 = 0;
+				float2 uv81_g363 = 0;
+				float voroi81_g363 = voronoi81_g363( coords81_g363, time81_g363, id81_g363, uv81_g363, 0, voronoiSmoothId81_g363 );
+				float time88_g363 = 0.0;
+				float2 voronoiSmoothId88_g363 = 0;
+				float2 coords88_g363 = temp_output_94_0_g363 * ( 500.0 / CZY_MainCloudScale );
+				float2 id88_g363 = 0;
+				float2 uv88_g363 = 0;
+				float voroi88_g363 = voronoi88_g363( coords88_g363, time88_g363, id88_g363, uv88_g363, 0, voronoiSmoothId88_g363 );
+				float2 appendResult95_g363 = (float2(voroi81_g363 , voroi88_g363));
+				float2 VoroDetails109_g363 = appendResult95_g363;
+				float CumulusCoverage34_g363 = CZY_CumulusCoverageMultiplier;
+				float ComplexCloudDensity141_g363 = (0.0 + (min( SimpleCloudDensity153_g363 , ( 1.0 - VoroDetails109_g363.x ) ) - ( 1.0 - CumulusCoverage34_g363 )) * (1.0 - 0.0) / (1.0 - ( 1.0 - CumulusCoverage34_g363 )));
+				float4 lerpResult315_g363 = lerp( CloudHighlightColor55_g363 , CloudColor41_g363 , saturate( (2.0 + (ComplexCloudDensity141_g363 - 0.0) * (0.7 - 2.0) / (1.0 - 0.0)) ));
 				float3 ase_positionWS = input.ase_texcoord1.xyz;
-				float3 normalizeResult40_g379 = normalize( ( ase_positionWS - _WorldSpaceCameraPos ) );
-				float dotResult42_g379 = dot( normalizeResult40_g379 , CZY_SunDirection );
-				float temp_output_49_0_g379 = abs( (dotResult42_g379*0.5 + 0.5) );
-				half LightMask56_g379 = saturate( pow( temp_output_49_0_g379 , CZY_SunFlareFalloff ) );
-				float time200_g379 = 0.0;
-				float2 voronoiSmoothId200_g379 = 0;
-				float mulTime163_g379 = _TimeParameters.x * 0.003;
-				float2 coords200_g379 = (Pos33_g379*1.0 + ( float2( 1,-2 ) * mulTime163_g379 )) * 10.0;
-				float2 id200_g379 = 0;
-				float2 uv200_g379 = 0;
-				float voroi200_g379 = voronoi200_g379( coords200_g379, time200_g379, id200_g379, uv200_g379, 0, voronoiSmoothId200_g379 );
-				float time232_g379 = ( 10.0 * mulTime163_g379 );
-				float2 voronoiSmoothId232_g379 = 0;
-				float2 coords232_g379 = input.ase_texcoord.xy * 10.0;
-				float2 id232_g379 = 0;
-				float2 uv232_g379 = 0;
-				float voroi232_g379 = voronoi232_g379( coords232_g379, time232_g379, id232_g379, uv232_g379, 0, voronoiSmoothId232_g379 );
-				float temp_output_242_0_g379 = ( ( ( 1.0 - 0.0 ) -  (1.0 + ( voroi200_g379 - 0.0 ) * ( -0.5 - 1.0 ) / ( 1.0 - 0.0 ) ) ) - voroi232_g379 );
-				float AltoCumulusPlacement376_g379 = temp_output_242_0_g379;
-				float CloudThicknessDetails286_g379 = ( VoroDetails109_g379.y * saturate( ( AltoCumulusPlacement376_g379 - 0.26 ) ) );
-				float3 normalizeResult43_g379 = normalize( ( ase_positionWS - _WorldSpaceCameraPos ) );
-				float dotResult46_g379 = dot( normalizeResult43_g379 , CZY_MoonDirection );
-				half MoonlightMask57_g379 = saturate( pow( abs( (dotResult46_g379*0.5 + 0.5) ) , CZY_CloudMoonFalloff ) );
-				float3 hsvTorgb2_g381 = RGBToHSV( CZY_CloudMoonColor.rgb );
-				float3 hsvTorgb3_g381 = HSVToRGB( float3(hsvTorgb2_g381.x,saturate( ( hsvTorgb2_g381.y + CZY_FilterSaturation ) ),( hsvTorgb2_g381.z + CZY_FilterValue )) );
-				float4 temp_output_10_0_g381 = ( float4( hsvTorgb3_g381 , 0.0 ) * CZY_FilterColor );
-				float4 MoonlightColor60_g379 = ( temp_output_10_0_g381 * CZY_CloudFilterColor );
-				float4 lerpResult338_g379 = lerp( ( lerpResult315_g379 + ( LightMask56_g379 * CloudHighlightColor55_g379 * ( 1.0 - CloudThicknessDetails286_g379 ) ) + ( MoonlightMask57_g379 * MoonlightColor60_g379 * ( 1.0 - CloudThicknessDetails286_g379 ) ) ) , ( CloudColor41_g379 * float4( 0.5660378,0.5660378,0.5660378,0 ) ) , CloudThicknessDetails286_g379);
-				float time84_g379 = 0.0;
-				float2 voronoiSmoothId84_g379 = 0;
-				float2 coords84_g379 = ( Pos33_g379 + ( TIme30_g379 * float2( 0.3,0.2 ) ) ) * ( 100.0 / CZY_DetailScale );
-				float2 id84_g379 = 0;
-				float2 uv84_g379 = 0;
-				float fade84_g379 = 0.5;
-				float voroi84_g379 = 0;
-				float rest84_g379 = 0;
-				for( int it84_g379 = 0; it84_g379 <3; it84_g379++ ){
-				voroi84_g379 += fade84_g379 * voronoi84_g379( coords84_g379, time84_g379, id84_g379, uv84_g379, 0,voronoiSmoothId84_g379 );
-				rest84_g379 += fade84_g379;
-				coords84_g379 *= 2;
-				fade84_g379 *= 0.5;
-				}//Voronoi84_g379
-				voroi84_g379 /= rest84_g379;
-				float temp_output_173_0_g379 = (  (0.0 + ( ( 1.0 - voroi84_g379 ) - 0.3 ) * ( 0.5 - 0.0 ) / ( 1.0 - 0.3 ) ) * 0.1 * CZY_DetailAmount );
-				float DetailedClouds252_g379 = saturate( ( ComplexCloudDensity141_g379 + temp_output_173_0_g379 ) );
-				float CloudDetail179_g379 = temp_output_173_0_g379;
-				float2 texCoord79_g379 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_161_0_g379 = ( texCoord79_g379 - float2( 0.5,0.5 ) );
-				float dotResult212_g379 = dot( temp_output_161_0_g379 , temp_output_161_0_g379 );
-				float BorderHeight154_g379 = ( 1.0 - CZY_BorderHeight );
-				float temp_output_151_0_g379 = ( -2.0 * ( 1.0 - CZY_BorderVariation ) );
-				float clampResult247_g379 = clamp( ( ( ( CloudDetail179_g379 + SimpleCloudDensity153_g379 ) * saturate(  (( BorderHeight154_g379 * temp_output_151_0_g379 ) + ( dotResult212_g379 - 0.0 ) * ( ( temp_output_151_0_g379 * -4.0 ) - ( BorderHeight154_g379 * temp_output_151_0_g379 ) ) / ( 0.5 - 0.0 ) ) ) ) * 10.0 * CZY_BorderEffect ) , -1.0 , 1.0 );
-				float BorderLightTransport278_g379 = clampResult247_g379;
-				float3 normalizeResult116_g379 = normalize( ( ase_positionWS - _WorldSpaceCameraPos ) );
-				float3 normalizeResult146_g379 = normalize( CZY_StormDirection );
-				float dotResult150_g379 = dot( normalizeResult116_g379 , normalizeResult146_g379 );
-				float2 texCoord98_g379 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_124_0_g379 = ( texCoord98_g379 - float2( 0.5,0.5 ) );
-				float dotResult125_g379 = dot( temp_output_124_0_g379 , temp_output_124_0_g379 );
-				float temp_output_140_0_g379 = ( -2.0 * ( 1.0 - ( CZY_NimbusVariation * 0.9 ) ) );
-				float NimbusLightTransport269_g379 = saturate( ( ( ( CloudDetail179_g379 + SimpleCloudDensity153_g379 ) * saturate(  (( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_140_0_g379 ) + ( ( dotResult150_g379 + ( CZY_NimbusHeight * 4.0 * dotResult125_g379 ) ) - 0.5 ) * ( ( temp_output_140_0_g379 * -4.0 ) - ( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_140_0_g379 ) ) / ( 7.0 - 0.5 ) ) ) ) * 10.0 ) );
-				float mulTime104_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D143_g379 = snoise( (Pos33_g379*1.0 + mulTime104_g379)*2.0 );
-				float mulTime93_g379 = _TimeParameters.x * CZY_ChemtrailsMoveSpeed;
-				float cos97_g379 = cos( ( mulTime93_g379 * 0.01 ) );
-				float sin97_g379 = sin( ( mulTime93_g379 * 0.01 ) );
-				float2 rotator97_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos97_g379 , -sin97_g379 , sin97_g379 , cos97_g379 )) + float2( 0.5,0.5 );
-				float cos131_g379 = cos( ( mulTime93_g379 * -0.02 ) );
-				float sin131_g379 = sin( ( mulTime93_g379 * -0.02 ) );
-				float2 rotator131_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos131_g379 , -sin131_g379 , sin131_g379 , cos131_g379 )) + float2( 0.5,0.5 );
-				float mulTime107_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D147_g379 = snoise( (Pos33_g379*1.0 + mulTime107_g379)*4.0 );
-				float4 ChemtrailsPattern210_g379 = ( ( saturate( simplePerlin2D143_g379 ) * tex2D( CZY_ChemtrailsTexture, (rotator97_g379*0.5 + 0.0) ) ) + ( tex2D( CZY_ChemtrailsTexture, rotator131_g379 ) * saturate( simplePerlin2D147_g379 ) ) );
-				float2 texCoord139_g379 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_162_0_g379 = ( texCoord139_g379 - float2( 0.5,0.5 ) );
-				float dotResult207_g379 = dot( temp_output_162_0_g379 , temp_output_162_0_g379 );
-				float ChemtrailsFinal248_g379 = ( ( ChemtrailsPattern210_g379 * saturate(  (0.4 + ( dotResult207_g379 - 0.0 ) * ( 2.0 - 0.4 ) / ( 0.1 - 0.0 ) ) ) ).r > ( 1.0 - ( CZY_ChemtrailsMultiplier * 0.5 ) ) ? 1.0 : 0.0 );
-				float mulTime80_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D126_g379 = snoise( (Pos33_g379*1.0 + mulTime80_g379)*2.0 );
-				float mulTime75_g379 = _TimeParameters.x * CZY_CirrusMoveSpeed;
-				float cos101_g379 = cos( ( mulTime75_g379 * 0.01 ) );
-				float sin101_g379 = sin( ( mulTime75_g379 * 0.01 ) );
-				float2 rotator101_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos101_g379 , -sin101_g379 , sin101_g379 , cos101_g379 )) + float2( 0.5,0.5 );
-				float cos112_g379 = cos( ( mulTime75_g379 * -0.02 ) );
-				float sin112_g379 = sin( ( mulTime75_g379 * -0.02 ) );
-				float2 rotator112_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos112_g379 , -sin112_g379 , sin112_g379 , cos112_g379 )) + float2( 0.5,0.5 );
-				float mulTime135_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D122_g379 = snoise( (Pos33_g379*1.0 + mulTime135_g379) );
-				simplePerlin2D122_g379 = simplePerlin2D122_g379*0.5 + 0.5;
-				float4 CirrusPattern137_g379 = ( ( saturate( simplePerlin2D126_g379 ) * tex2D( CZY_CirrusTexture, (rotator101_g379*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrusTexture, (rotator112_g379*1.0 + 0.0) ) * saturate( simplePerlin2D122_g379 ) ) );
-				float2 texCoord134_g379 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_164_0_g379 = ( texCoord134_g379 - float2( 0.5,0.5 ) );
-				float dotResult157_g379 = dot( temp_output_164_0_g379 , temp_output_164_0_g379 );
-				float4 temp_output_217_0_g379 = ( CirrusPattern137_g379 * saturate(  (0.0 + ( dotResult157_g379 - 0.0 ) * ( 2.0 - 0.0 ) / ( 0.2 - 0.0 ) ) ) );
-				float Clipping208_g379 = CZY_ClippingThreshold;
-				float CirrusAlpha250_g379 = ( ( temp_output_217_0_g379 * ( CZY_CirrusMultiplier * 10.0 ) ).r > Clipping208_g379 ? 1.0 : 0.0 );
-				float SimpleRadiance268_g379 = saturate( ( DetailedClouds252_g379 + BorderLightTransport278_g379 + NimbusLightTransport269_g379 + ChemtrailsFinal248_g379 + CirrusAlpha250_g379 ) );
-				float4 lerpResult342_g379 = lerp( CloudColor41_g379 , lerpResult338_g379 , ( 1.0 - SimpleRadiance268_g379 ));
-				float CloudbreakLightDir426_g379 = saturate( pow( temp_output_49_0_g379 , ( CZY_SunFlareFalloff * 0.5 ) ) );
-				float lerpResult316_g379 = lerp( -0.4 , 1.0 , ( saturate( ( ComplexCloudDensity141_g379 - 0.0 ) ) * CloudDetail179_g379 * CloudbreakLightDir426_g379 ));
-				float SunThroughClouds399_g379 = saturate( lerpResult316_g379 );
-				float3 hsvTorgb2_g382 = RGBToHSV( CZY_AltoCloudColor.rgb );
-				float3 hsvTorgb3_g382 = HSVToRGB( float3(hsvTorgb2_g382.x,saturate( ( hsvTorgb2_g382.y + CZY_FilterSaturation ) ),( hsvTorgb2_g382.z + CZY_FilterValue )) );
-				float4 temp_output_10_0_g382 = ( float4( hsvTorgb3_g382 , 0.0 ) * CZY_FilterColor );
-				float4 CirrusCustomLightColor350_g379 = ( CloudColor41_g379 * ( temp_output_10_0_g382 * CZY_CloudFilterColor ) );
-				float temp_output_391_0_g379 = ( AltoCumulusPlacement376_g379 *  (0.0 + ( tex2D( CZY_AltocumulusTexture, ((Pos33_g379*1.0 + ( CZY_AltocumulusWindSpeed * TIme30_g379 ))*( 1.0 / CZY_AltocumulusScale ) + 0.0) ).r - 0.0 ) * ( 1.0 - 0.0 ) / ( 0.2 - 0.0 ) ) * CZY_AltocumulusMultiplier );
-				float AltoCumulusLightTransport393_g379 = temp_output_391_0_g379;
-				float ACCustomLightsClipping387_g379 = ( AltoCumulusLightTransport393_g379 * ( SimpleRadiance268_g379 > Clipping208_g379 ? 0.0 : 1.0 ) );
-				float mulTime193_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D224_g379 = snoise( (Pos33_g379*1.0 + mulTime193_g379)*2.0 );
-				float mulTime178_g379 = _TimeParameters.x * CZY_CirrostratusMoveSpeed;
-				float cos138_g379 = cos( ( mulTime178_g379 * 0.01 ) );
-				float sin138_g379 = sin( ( mulTime178_g379 * 0.01 ) );
-				float2 rotator138_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos138_g379 , -sin138_g379 , sin138_g379 , cos138_g379 )) + float2( 0.5,0.5 );
-				float cos198_g379 = cos( ( mulTime178_g379 * -0.02 ) );
-				float sin198_g379 = sin( ( mulTime178_g379 * -0.02 ) );
-				float2 rotator198_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos198_g379 , -sin198_g379 , sin198_g379 , cos198_g379 )) + float2( 0.5,0.5 );
-				float mulTime184_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D216_g379 = snoise( (Pos33_g379*10.0 + mulTime184_g379)*4.0 );
-				float4 CirrostratPattern261_g379 = ( ( saturate( simplePerlin2D224_g379 ) * tex2D( CZY_CirrostratusTexture, (rotator138_g379*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrostratusTexture, (rotator198_g379*1.5 + 0.75) ) * saturate( simplePerlin2D216_g379 ) ) );
-				float2 texCoord234_g379 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_243_0_g379 = ( texCoord234_g379 - float2( 0.5,0.5 ) );
-				float dotResult238_g379 = dot( temp_output_243_0_g379 , temp_output_243_0_g379 );
-				float clampResult264_g379 = clamp( ( CZY_CirrostratusMultiplier * 0.5 ) , 0.0 , 0.98 );
-				float CirrostratLightTransport281_g379 = ( ( CirrostratPattern261_g379 * saturate(  (0.4 + ( dotResult238_g379 - 0.0 ) * ( 2.0 - 0.4 ) / ( 0.1 - 0.0 ) ) ) ).r > ( 1.0 - clampResult264_g379 ) ? 1.0 : 0.0 );
-				float CSCustomLightsClipping309_g379 = ( CirrostratLightTransport281_g379 * ( SimpleRadiance268_g379 > Clipping208_g379 ? 0.0 : 1.0 ) );
-				float CustomRadiance340_g379 = saturate( ( ACCustomLightsClipping387_g379 + CSCustomLightsClipping309_g379 ) );
-				float4 lerpResult331_g379 = lerp( ( lerpResult342_g379 + ( SunThroughClouds399_g379 * CloudHighlightColor55_g379 ) ) , CirrusCustomLightColor350_g379 , CustomRadiance340_g379);
-				float FinalAlpha375_g379 = saturate( ( DetailedClouds252_g379 + BorderLightTransport278_g379 + AltoCumulusLightTransport393_g379 + ChemtrailsFinal248_g379 + CirrostratLightTransport281_g379 + CirrusAlpha250_g379 + NimbusLightTransport269_g379 ) );
-				float4 appendResult420_g379 = (float4((lerpResult331_g379).rgb , FinalAlpha375_g379));
-				float4 FinalCloudColor325_g379 = appendResult420_g379;
-				bool enabled20_g384 =(bool)_UnderwaterRenderingEnabled;
-				bool submerged20_g384 =(bool)_FullySubmerged;
+				float3 normalizeResult40_g363 = normalize( ( ase_positionWS - _WorldSpaceCameraPos ) );
+				float dotResult42_g363 = dot( normalizeResult40_g363 , CZY_SunDirection );
+				float temp_output_49_0_g363 = abs( (dotResult42_g363*0.5 + 0.5) );
+				half LightMask56_g363 = saturate( pow( temp_output_49_0_g363 , CZY_SunFlareFalloff ) );
+				float time200_g363 = 0.0;
+				float2 voronoiSmoothId200_g363 = 0;
+				float mulTime163_g363 = _TimeParameters.x * 0.003;
+				float2 coords200_g363 = (Pos33_g363*1.0 + ( float2( 1,-2 ) * mulTime163_g363 )) * 10.0;
+				float2 id200_g363 = 0;
+				float2 uv200_g363 = 0;
+				float voroi200_g363 = voronoi200_g363( coords200_g363, time200_g363, id200_g363, uv200_g363, 0, voronoiSmoothId200_g363 );
+				float time232_g363 = ( 10.0 * mulTime163_g363 );
+				float2 voronoiSmoothId232_g363 = 0;
+				float2 coords232_g363 = input.ase_texcoord.xy * 10.0;
+				float2 id232_g363 = 0;
+				float2 uv232_g363 = 0;
+				float voroi232_g363 = voronoi232_g363( coords232_g363, time232_g363, id232_g363, uv232_g363, 0, voronoiSmoothId232_g363 );
+				float temp_output_242_0_g363 = ( ( ( 1.0 - 0.0 ) - (1.0 + (voroi200_g363 - 0.0) * (-0.5 - 1.0) / (1.0 - 0.0)) ) - voroi232_g363 );
+				float AltoCumulusPlacement376_g363 = temp_output_242_0_g363;
+				float CloudThicknessDetails286_g363 = ( VoroDetails109_g363.y * saturate( ( AltoCumulusPlacement376_g363 - 0.26 ) ) );
+				float3 normalizeResult43_g363 = normalize( ( ase_positionWS - _WorldSpaceCameraPos ) );
+				float dotResult46_g363 = dot( normalizeResult43_g363 , CZY_MoonDirection );
+				half MoonlightMask57_g363 = saturate( pow( abs( (dotResult46_g363*0.5 + 0.5) ) , CZY_CloudMoonFalloff ) );
+				float3 hsvTorgb2_g365 = RGBToHSV( CZY_CloudMoonColor.rgb );
+				float3 hsvTorgb3_g365 = HSVToRGB( float3(hsvTorgb2_g365.x,saturate( ( hsvTorgb2_g365.y + CZY_FilterSaturation ) ),( hsvTorgb2_g365.z + CZY_FilterValue )) );
+				float4 temp_output_10_0_g365 = ( float4( hsvTorgb3_g365 , 0.0 ) * CZY_FilterColor );
+				float4 MoonlightColor60_g363 = ( temp_output_10_0_g365 * CZY_CloudFilterColor );
+				float4 lerpResult338_g363 = lerp( ( lerpResult315_g363 + ( LightMask56_g363 * CloudHighlightColor55_g363 * ( 1.0 - CloudThicknessDetails286_g363 ) ) + ( MoonlightMask57_g363 * MoonlightColor60_g363 * ( 1.0 - CloudThicknessDetails286_g363 ) ) ) , ( CloudColor41_g363 * float4( 0.5660378,0.5660378,0.5660378,0 ) ) , CloudThicknessDetails286_g363);
+				float time84_g363 = 0.0;
+				float2 voronoiSmoothId84_g363 = 0;
+				float2 coords84_g363 = ( Pos33_g363 + ( TIme30_g363 * float2( 0.3,0.2 ) ) ) * ( 100.0 / CZY_DetailScale );
+				float2 id84_g363 = 0;
+				float2 uv84_g363 = 0;
+				float fade84_g363 = 0.5;
+				float voroi84_g363 = 0;
+				float rest84_g363 = 0;
+				for( int it84_g363 = 0; it84_g363 <3; it84_g363++ ){
+				voroi84_g363 += fade84_g363 * voronoi84_g363( coords84_g363, time84_g363, id84_g363, uv84_g363, 0,voronoiSmoothId84_g363 );
+				rest84_g363 += fade84_g363;
+				coords84_g363 *= 2;
+				fade84_g363 *= 0.5;
+				}//Voronoi84_g363
+				voroi84_g363 /= rest84_g363;
+				float temp_output_173_0_g363 = ( (0.0 + (( 1.0 - voroi84_g363 ) - 0.3) * (0.5 - 0.0) / (1.0 - 0.3)) * 0.1 * CZY_DetailAmount );
+				float DetailedClouds252_g363 = saturate( ( ComplexCloudDensity141_g363 + temp_output_173_0_g363 ) );
+				float CloudDetail179_g363 = temp_output_173_0_g363;
+				float2 texCoord79_g363 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_161_0_g363 = ( texCoord79_g363 - float2( 0.5,0.5 ) );
+				float dotResult212_g363 = dot( temp_output_161_0_g363 , temp_output_161_0_g363 );
+				float BorderHeight154_g363 = ( 1.0 - CZY_BorderHeight );
+				float temp_output_151_0_g363 = ( -2.0 * ( 1.0 - CZY_BorderVariation ) );
+				float clampResult247_g363 = clamp( ( ( ( CloudDetail179_g363 + SimpleCloudDensity153_g363 ) * saturate( (( BorderHeight154_g363 * temp_output_151_0_g363 ) + (dotResult212_g363 - 0.0) * (( temp_output_151_0_g363 * -4.0 ) - ( BorderHeight154_g363 * temp_output_151_0_g363 )) / (0.5 - 0.0)) ) ) * 10.0 * CZY_BorderEffect ) , -1.0 , 1.0 );
+				float BorderLightTransport278_g363 = clampResult247_g363;
+				float3 normalizeResult116_g363 = normalize( ( ase_positionWS - _WorldSpaceCameraPos ) );
+				float3 normalizeResult146_g363 = normalize( CZY_StormDirection );
+				float dotResult150_g363 = dot( normalizeResult116_g363 , normalizeResult146_g363 );
+				float2 texCoord98_g363 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_124_0_g363 = ( texCoord98_g363 - float2( 0.5,0.5 ) );
+				float dotResult125_g363 = dot( temp_output_124_0_g363 , temp_output_124_0_g363 );
+				float temp_output_140_0_g363 = ( -2.0 * ( 1.0 - ( CZY_NimbusVariation * 0.9 ) ) );
+				float NimbusLightTransport269_g363 = saturate( ( ( ( CloudDetail179_g363 + SimpleCloudDensity153_g363 ) * saturate( (( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_140_0_g363 ) + (( dotResult150_g363 + ( CZY_NimbusHeight * 4.0 * dotResult125_g363 ) ) - 0.5) * (( temp_output_140_0_g363 * -4.0 ) - ( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_140_0_g363 )) / (7.0 - 0.5)) ) ) * 10.0 ) );
+				float mulTime104_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D143_g363 = snoise( (Pos33_g363*1.0 + mulTime104_g363)*2.0 );
+				float mulTime93_g363 = _TimeParameters.x * CZY_ChemtrailsMoveSpeed;
+				float cos97_g363 = cos( ( mulTime93_g363 * 0.01 ) );
+				float sin97_g363 = sin( ( mulTime93_g363 * 0.01 ) );
+				float2 rotator97_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos97_g363 , -sin97_g363 , sin97_g363 , cos97_g363 )) + float2( 0.5,0.5 );
+				float cos131_g363 = cos( ( mulTime93_g363 * -0.02 ) );
+				float sin131_g363 = sin( ( mulTime93_g363 * -0.02 ) );
+				float2 rotator131_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos131_g363 , -sin131_g363 , sin131_g363 , cos131_g363 )) + float2( 0.5,0.5 );
+				float mulTime107_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D147_g363 = snoise( (Pos33_g363*1.0 + mulTime107_g363)*4.0 );
+				float4 ChemtrailsPattern210_g363 = ( ( saturate( simplePerlin2D143_g363 ) * tex2D( CZY_ChemtrailsTexture, (rotator97_g363*0.5 + 0.0) ) ) + ( tex2D( CZY_ChemtrailsTexture, rotator131_g363 ) * saturate( simplePerlin2D147_g363 ) ) );
+				float2 texCoord139_g363 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_162_0_g363 = ( texCoord139_g363 - float2( 0.5,0.5 ) );
+				float dotResult207_g363 = dot( temp_output_162_0_g363 , temp_output_162_0_g363 );
+				float ChemtrailsFinal248_g363 = ( ( ChemtrailsPattern210_g363 * saturate( (0.4 + (dotResult207_g363 - 0.0) * (2.0 - 0.4) / (0.1 - 0.0)) ) ).r > ( 1.0 - ( CZY_ChemtrailsMultiplier * 0.5 ) ) ? 1.0 : 0.0 );
+				float mulTime80_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D126_g363 = snoise( (Pos33_g363*1.0 + mulTime80_g363)*2.0 );
+				float mulTime75_g363 = _TimeParameters.x * CZY_CirrusMoveSpeed;
+				float cos101_g363 = cos( ( mulTime75_g363 * 0.01 ) );
+				float sin101_g363 = sin( ( mulTime75_g363 * 0.01 ) );
+				float2 rotator101_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos101_g363 , -sin101_g363 , sin101_g363 , cos101_g363 )) + float2( 0.5,0.5 );
+				float cos112_g363 = cos( ( mulTime75_g363 * -0.02 ) );
+				float sin112_g363 = sin( ( mulTime75_g363 * -0.02 ) );
+				float2 rotator112_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos112_g363 , -sin112_g363 , sin112_g363 , cos112_g363 )) + float2( 0.5,0.5 );
+				float mulTime135_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D122_g363 = snoise( (Pos33_g363*1.0 + mulTime135_g363) );
+				simplePerlin2D122_g363 = simplePerlin2D122_g363*0.5 + 0.5;
+				float4 CirrusPattern137_g363 = ( ( saturate( simplePerlin2D126_g363 ) * tex2D( CZY_CirrusTexture, (rotator101_g363*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrusTexture, (rotator112_g363*1.0 + 0.0) ) * saturate( simplePerlin2D122_g363 ) ) );
+				float2 texCoord134_g363 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_164_0_g363 = ( texCoord134_g363 - float2( 0.5,0.5 ) );
+				float dotResult157_g363 = dot( temp_output_164_0_g363 , temp_output_164_0_g363 );
+				float4 temp_output_217_0_g363 = ( CirrusPattern137_g363 * saturate( (0.0 + (dotResult157_g363 - 0.0) * (2.0 - 0.0) / (0.2 - 0.0)) ) );
+				float Clipping208_g363 = CZY_ClippingThreshold;
+				float CirrusAlpha250_g363 = ( ( temp_output_217_0_g363 * ( CZY_CirrusMultiplier * 10.0 ) ).r > Clipping208_g363 ? 1.0 : 0.0 );
+				float SimpleRadiance268_g363 = saturate( ( DetailedClouds252_g363 + BorderLightTransport278_g363 + NimbusLightTransport269_g363 + ChemtrailsFinal248_g363 + CirrusAlpha250_g363 ) );
+				float4 lerpResult342_g363 = lerp( CloudColor41_g363 , lerpResult338_g363 , ( 1.0 - SimpleRadiance268_g363 ));
+				float CloudbreakLightDir426_g363 = saturate( pow( temp_output_49_0_g363 , ( CZY_SunFlareFalloff * 0.5 ) ) );
+				float lerpResult316_g363 = lerp( -0.4 , 1.0 , ( saturate( ( ComplexCloudDensity141_g363 - 0.0 ) ) * CloudDetail179_g363 * CloudbreakLightDir426_g363 ));
+				float SunThroughClouds399_g363 = saturate( lerpResult316_g363 );
+				float3 hsvTorgb2_g366 = RGBToHSV( CZY_AltoCloudColor.rgb );
+				float3 hsvTorgb3_g366 = HSVToRGB( float3(hsvTorgb2_g366.x,saturate( ( hsvTorgb2_g366.y + CZY_FilterSaturation ) ),( hsvTorgb2_g366.z + CZY_FilterValue )) );
+				float4 temp_output_10_0_g366 = ( float4( hsvTorgb3_g366 , 0.0 ) * CZY_FilterColor );
+				float4 CirrusCustomLightColor350_g363 = ( CloudColor41_g363 * ( temp_output_10_0_g366 * CZY_CloudFilterColor ) );
+				float temp_output_391_0_g363 = ( AltoCumulusPlacement376_g363 * (0.0 + (tex2D( CZY_AltocumulusTexture, ((Pos33_g363*1.0 + ( CZY_AltocumulusWindSpeed * TIme30_g363 ))*( 1.0 / CZY_AltocumulusScale ) + 0.0) ).r - 0.0) * (1.0 - 0.0) / (0.2 - 0.0)) * CZY_AltocumulusMultiplier );
+				float AltoCumulusLightTransport393_g363 = temp_output_391_0_g363;
+				float ACCustomLightsClipping387_g363 = ( AltoCumulusLightTransport393_g363 * ( SimpleRadiance268_g363 > Clipping208_g363 ? 0.0 : 1.0 ) );
+				float mulTime193_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D224_g363 = snoise( (Pos33_g363*1.0 + mulTime193_g363)*2.0 );
+				float mulTime178_g363 = _TimeParameters.x * CZY_CirrostratusMoveSpeed;
+				float cos138_g363 = cos( ( mulTime178_g363 * 0.01 ) );
+				float sin138_g363 = sin( ( mulTime178_g363 * 0.01 ) );
+				float2 rotator138_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos138_g363 , -sin138_g363 , sin138_g363 , cos138_g363 )) + float2( 0.5,0.5 );
+				float cos198_g363 = cos( ( mulTime178_g363 * -0.02 ) );
+				float sin198_g363 = sin( ( mulTime178_g363 * -0.02 ) );
+				float2 rotator198_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos198_g363 , -sin198_g363 , sin198_g363 , cos198_g363 )) + float2( 0.5,0.5 );
+				float mulTime184_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D216_g363 = snoise( (Pos33_g363*10.0 + mulTime184_g363)*4.0 );
+				float4 CirrostratPattern261_g363 = ( ( saturate( simplePerlin2D224_g363 ) * tex2D( CZY_CirrostratusTexture, (rotator138_g363*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrostratusTexture, (rotator198_g363*1.5 + 0.75) ) * saturate( simplePerlin2D216_g363 ) ) );
+				float2 texCoord234_g363 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_243_0_g363 = ( texCoord234_g363 - float2( 0.5,0.5 ) );
+				float dotResult238_g363 = dot( temp_output_243_0_g363 , temp_output_243_0_g363 );
+				float clampResult264_g363 = clamp( ( CZY_CirrostratusMultiplier * 0.5 ) , 0.0 , 0.98 );
+				float CirrostratLightTransport281_g363 = ( ( CirrostratPattern261_g363 * saturate( (0.4 + (dotResult238_g363 - 0.0) * (2.0 - 0.4) / (0.1 - 0.0)) ) ).r > ( 1.0 - clampResult264_g363 ) ? 1.0 : 0.0 );
+				float CSCustomLightsClipping309_g363 = ( CirrostratLightTransport281_g363 * ( SimpleRadiance268_g363 > Clipping208_g363 ? 0.0 : 1.0 ) );
+				float CustomRadiance340_g363 = saturate( ( ACCustomLightsClipping387_g363 + CSCustomLightsClipping309_g363 ) );
+				float4 lerpResult331_g363 = lerp( ( lerpResult342_g363 + SunThroughClouds399_g363 ) , CirrusCustomLightColor350_g363 , CustomRadiance340_g363);
+				float FinalAlpha375_g363 = saturate( ( DetailedClouds252_g363 + BorderLightTransport278_g363 + AltoCumulusLightTransport393_g363 + ChemtrailsFinal248_g363 + CirrostratLightTransport281_g363 + CirrusAlpha250_g363 + NimbusLightTransport269_g363 ) );
+				float4 appendResult420_g363 = (float4((lerpResult331_g363).rgb , FinalAlpha375_g363));
+				float4 FinalCloudColor325_g363 = appendResult420_g363;
+				bool enabled20_g367 =(bool)_UnderwaterRenderingEnabled;
+				bool submerged20_g367 =(bool)_FullySubmerged;
 				float4 screenPos = input.ase_texcoord2;
 				float4 ase_positionSSNorm = screenPos / screenPos.w;
 				ase_positionSSNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_positionSSNorm.z : ase_positionSSNorm.z * 0.5 + 0.5;
-				float textureSample20_g384 = tex2Dlod( _UnderwaterMask, float4( ase_positionSSNorm.xy, 0, 0.0) ).r;
-				float localHLSL20_g384 = HLSL20_g384( enabled20_g384 , submerged20_g384 , textureSample20_g384 );
+				float textureSample20_g367 = tex2Dlod( _UnderwaterMask, float4( ase_positionSSNorm.xy, 0, 0.0) ).r;
+				float localHLSL20_g367 = HLSL20_g367( enabled20_g367 , submerged20_g367 , textureSample20_g367 );
 				
 
-				surfaceDescription.Alpha = ( ( (FinalCloudColor325_g379).w * ( 1.0 - localHLSL20_g384 ) ) > Clipping208_g379 ? 1.0 : 0.0 );
-				surfaceDescription.AlphaClipThreshold = Clipping208_g379;
+				surfaceDescription.Alpha = ( ( (FinalCloudColor325_g363).w * ( 1.0 - localHLSL20_g367 ) ) > Clipping208_g363 ? 1.0 : 0.0 );
+				surfaceDescription.AlphaClipThreshold = Clipping208_g363;
 
 				#if _ALPHATEST_ON
 					float alphaClipThreshold = 0.01f;
@@ -3828,11 +3803,11 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 
 			
 
-        	#pragma multi_compile_local _ALPHATEST_ON
+        	#pragma multi_compile _ALPHATEST_ON
         	#pragma multi_compile_instancing
         	#define _SURFACE_TYPE_TRANSPARENT 1
-        	#define ASE_VERSION 19901
-        	#define ASE_SRP_VERSION 140012
+        	#define ASE_VERSION 19801
+        	#define ASE_SRP_VERSION 140010
 
 
 			
@@ -3883,11 +3858,8 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
             #endif
 
-			#define ASE_NEEDS_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_WORLD_POSITION
 			#define ASE_NEEDS_FRAG_WORLD_POSITION
-			#define ASE_NEEDS_FRAG_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_FRAG_SCREEN_POSITION_NORMALIZED
+			#define ASE_NEEDS_FRAG_SCREEN_POSITION
 
 
 			#if defined(ASE_EARLY_Z_DEPTH_OPTIMIZE) && (SHADER_TARGET >= 45)
@@ -3909,9 +3881,10 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 			struct PackedVaryings
 			{
 				ASE_SV_POSITION_QUALIFIERS float4 positionCS : SV_POSITION;
-				float3 positionWS : TEXCOORD0;
-				float3 normalWS : TEXCOORD1;
-				float4 ase_texcoord2 : TEXCOORD2;
+				float4 clipPosV : TEXCOORD0;
+				float3 positionWS : TEXCOORD1;
+				float3 normalWS : TEXCOORD2;
+				float4 ase_texcoord3 : TEXCOORD3;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
@@ -4015,25 +3988,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 				return 130.0 * dot( m, g );
 			}
 			
-					float2 voronoihash81_g379( float2 p )
+					float2 voronoihash81_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi81_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi81_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash81_g379( n + g );
+						 		float2 o = voronoihash81_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -4048,25 +4021,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return F1;
 					}
 			
-					float2 voronoihash88_g379( float2 p )
+					float2 voronoihash88_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi88_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi88_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash88_g379( n + g );
+						 		float2 o = voronoihash88_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -4081,25 +4054,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return F1;
 					}
 			
-					float2 voronoihash200_g379( float2 p )
+					float2 voronoihash200_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi200_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi200_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash200_g379( n + g );
+						 		float2 o = voronoihash200_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -4114,25 +4087,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return (F2 + F1) * 0.5;
 					}
 			
-					float2 voronoihash232_g379( float2 p )
+					float2 voronoihash232_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi232_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi232_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash232_g379( n + g );
+						 		float2 o = voronoihash232_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -4147,25 +4120,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return F1;
 					}
 			
-					float2 voronoihash84_g379( float2 p )
+					float2 voronoihash84_g363( float2 p )
 					{
 						
 						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
 						return frac( sin( p ) *43758.5453);
 					}
 			
-					float voronoi84_g379( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+					float voronoi84_g363( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
 					{
 						float2 n = floor( v );
 						float2 f = frac( v );
 						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
+						float F2 = 8.0; float2 mg = 0;
+						for ( int j = -1; j <= 1; j++ )
 						{
-							for ( i = -1; i <= 1; i++ )
+							for ( int i = -1; i <= 1; i++ )
 						 	{
 						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash84_g379( n + g );
+						 		float2 o = voronoihash84_g363( n + g );
 								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
 								float d = 0.5 * dot( r, r );
 						 		if( d<F1 ) {
@@ -4180,7 +4153,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 						return F1;
 					}
 			
-			float HLSL20_g384( bool enabled, bool submerged, float textureSample )
+			float HLSL20_g367( bool enabled, bool submerged, float textureSample )
 			{
 				if(enabled)
 				{
@@ -4209,10 +4182,10 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 				UNITY_TRANSFER_INSTANCE_ID(input, output);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
-				output.ase_texcoord2.xy = input.ase_texcoord.xy;
+				output.ase_texcoord3.xy = input.ase_texcoord.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				output.ase_texcoord2.zw = 0;
+				output.ase_texcoord3.zw = 0;
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					float3 defaultVertexValue = input.positionOS.xyz;
 				#else
@@ -4232,6 +4205,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 				VertexPositionInputs vertexInput = GetVertexPositionInputs( input.positionOS.xyz );
 
 				output.positionCS = vertexInput.positionCS;
+				output.clipPosV = vertexInput.positionCS;
 				output.positionWS = vertexInput.positionWS;
 				output.normalWS = TransformObjectToWorldNormal( input.normalOS );
 				return output;
@@ -4331,182 +4305,183 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( input );
 				float3 WorldPosition = input.positionWS;
 				float3 WorldNormal = input.normalWS;
-				float4 ScreenPosNorm = float4( GetNormalizedScreenSpaceUV( input.positionCS ), input.positionCS.zw );
-				float4 ClipPos = ComputeClipSpacePosition( ScreenPosNorm.xy, input.positionCS.z ) * input.positionCS.w;
-				float4 ScreenPos = ComputeScreenPos( ClipPos );
+				float4 ClipPos = input.clipPosV;
+				float4 ScreenPos = ComputeScreenPos( input.clipPosV );
 
-				float3 hsvTorgb2_g380 = RGBToHSV( CZY_CloudColor.rgb );
-				float3 hsvTorgb3_g380 = HSVToRGB( float3(hsvTorgb2_g380.x,saturate( ( hsvTorgb2_g380.y + CZY_FilterSaturation ) ),( hsvTorgb2_g380.z + CZY_FilterValue )) );
-				float4 temp_output_10_0_g380 = ( float4( hsvTorgb3_g380 , 0.0 ) * CZY_FilterColor );
-				float4 CloudColor41_g379 = ( temp_output_10_0_g380 * CZY_CloudFilterColor );
-				float3 hsvTorgb2_g383 = RGBToHSV( CZY_CloudHighlightColor.rgb );
-				float3 hsvTorgb3_g383 = HSVToRGB( float3(hsvTorgb2_g383.x,saturate( ( hsvTorgb2_g383.y + CZY_FilterSaturation ) ),( hsvTorgb2_g383.z + CZY_FilterValue )) );
-				float4 temp_output_10_0_g383 = ( float4( hsvTorgb3_g383 , 0.0 ) * CZY_FilterColor );
-				float4 CloudHighlightColor55_g379 = ( temp_output_10_0_g383 * CZY_SunFilterColor );
-				float2 texCoord31_g379 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 Pos33_g379 = texCoord31_g379;
-				float mulTime29_g379 = _TimeParameters.x * ( 0.001 * CZY_WindSpeed );
-				float TIme30_g379 = mulTime29_g379;
-				float simplePerlin2D409_g379 = snoise( ( Pos33_g379 + ( TIme30_g379 * float2( 0.2,-0.4 ) ) )*( 100.0 / CZY_MainCloudScale ) );
-				simplePerlin2D409_g379 = simplePerlin2D409_g379*0.5 + 0.5;
-				float SimpleCloudDensity153_g379 = simplePerlin2D409_g379;
-				float time81_g379 = 0.0;
-				float2 voronoiSmoothId81_g379 = 0;
-				float2 temp_output_94_0_g379 = ( Pos33_g379 + ( TIme30_g379 * float2( 0.3,0.2 ) ) );
-				float2 coords81_g379 = temp_output_94_0_g379 * ( 140.0 / CZY_MainCloudScale );
-				float2 id81_g379 = 0;
-				float2 uv81_g379 = 0;
-				float voroi81_g379 = voronoi81_g379( coords81_g379, time81_g379, id81_g379, uv81_g379, 0, voronoiSmoothId81_g379 );
-				float time88_g379 = 0.0;
-				float2 voronoiSmoothId88_g379 = 0;
-				float2 coords88_g379 = temp_output_94_0_g379 * ( 500.0 / CZY_MainCloudScale );
-				float2 id88_g379 = 0;
-				float2 uv88_g379 = 0;
-				float voroi88_g379 = voronoi88_g379( coords88_g379, time88_g379, id88_g379, uv88_g379, 0, voronoiSmoothId88_g379 );
-				float2 appendResult95_g379 = (float2(voroi81_g379 , voroi88_g379));
-				float2 VoroDetails109_g379 = appendResult95_g379;
-				float CumulusCoverage34_g379 = CZY_CumulusCoverageMultiplier;
-				float ComplexCloudDensity141_g379 =  (0.0 + ( min( SimpleCloudDensity153_g379 , ( 1.0 - VoroDetails109_g379.x ) ) - ( 1.0 - CumulusCoverage34_g379 ) ) * ( 1.0 - 0.0 ) / ( 1.0 - ( 1.0 - CumulusCoverage34_g379 ) ) );
-				float4 lerpResult315_g379 = lerp( CloudHighlightColor55_g379 , CloudColor41_g379 , saturate(  (2.0 + ( ComplexCloudDensity141_g379 - 0.0 ) * ( 0.7 - 2.0 ) / ( 1.0 - 0.0 ) ) ));
-				float3 normalizeResult40_g379 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
-				float dotResult42_g379 = dot( normalizeResult40_g379 , CZY_SunDirection );
-				float temp_output_49_0_g379 = abs( (dotResult42_g379*0.5 + 0.5) );
-				half LightMask56_g379 = saturate( pow( temp_output_49_0_g379 , CZY_SunFlareFalloff ) );
-				float time200_g379 = 0.0;
-				float2 voronoiSmoothId200_g379 = 0;
-				float mulTime163_g379 = _TimeParameters.x * 0.003;
-				float2 coords200_g379 = (Pos33_g379*1.0 + ( float2( 1,-2 ) * mulTime163_g379 )) * 10.0;
-				float2 id200_g379 = 0;
-				float2 uv200_g379 = 0;
-				float voroi200_g379 = voronoi200_g379( coords200_g379, time200_g379, id200_g379, uv200_g379, 0, voronoiSmoothId200_g379 );
-				float time232_g379 = ( 10.0 * mulTime163_g379 );
-				float2 voronoiSmoothId232_g379 = 0;
-				float2 coords232_g379 = input.ase_texcoord2.xy * 10.0;
-				float2 id232_g379 = 0;
-				float2 uv232_g379 = 0;
-				float voroi232_g379 = voronoi232_g379( coords232_g379, time232_g379, id232_g379, uv232_g379, 0, voronoiSmoothId232_g379 );
-				float temp_output_242_0_g379 = ( ( ( 1.0 - 0.0 ) -  (1.0 + ( voroi200_g379 - 0.0 ) * ( -0.5 - 1.0 ) / ( 1.0 - 0.0 ) ) ) - voroi232_g379 );
-				float AltoCumulusPlacement376_g379 = temp_output_242_0_g379;
-				float CloudThicknessDetails286_g379 = ( VoroDetails109_g379.y * saturate( ( AltoCumulusPlacement376_g379 - 0.26 ) ) );
-				float3 normalizeResult43_g379 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
-				float dotResult46_g379 = dot( normalizeResult43_g379 , CZY_MoonDirection );
-				half MoonlightMask57_g379 = saturate( pow( abs( (dotResult46_g379*0.5 + 0.5) ) , CZY_CloudMoonFalloff ) );
-				float3 hsvTorgb2_g381 = RGBToHSV( CZY_CloudMoonColor.rgb );
-				float3 hsvTorgb3_g381 = HSVToRGB( float3(hsvTorgb2_g381.x,saturate( ( hsvTorgb2_g381.y + CZY_FilterSaturation ) ),( hsvTorgb2_g381.z + CZY_FilterValue )) );
-				float4 temp_output_10_0_g381 = ( float4( hsvTorgb3_g381 , 0.0 ) * CZY_FilterColor );
-				float4 MoonlightColor60_g379 = ( temp_output_10_0_g381 * CZY_CloudFilterColor );
-				float4 lerpResult338_g379 = lerp( ( lerpResult315_g379 + ( LightMask56_g379 * CloudHighlightColor55_g379 * ( 1.0 - CloudThicknessDetails286_g379 ) ) + ( MoonlightMask57_g379 * MoonlightColor60_g379 * ( 1.0 - CloudThicknessDetails286_g379 ) ) ) , ( CloudColor41_g379 * float4( 0.5660378,0.5660378,0.5660378,0 ) ) , CloudThicknessDetails286_g379);
-				float time84_g379 = 0.0;
-				float2 voronoiSmoothId84_g379 = 0;
-				float2 coords84_g379 = ( Pos33_g379 + ( TIme30_g379 * float2( 0.3,0.2 ) ) ) * ( 100.0 / CZY_DetailScale );
-				float2 id84_g379 = 0;
-				float2 uv84_g379 = 0;
-				float fade84_g379 = 0.5;
-				float voroi84_g379 = 0;
-				float rest84_g379 = 0;
-				for( int it84_g379 = 0; it84_g379 <3; it84_g379++ ){
-				voroi84_g379 += fade84_g379 * voronoi84_g379( coords84_g379, time84_g379, id84_g379, uv84_g379, 0,voronoiSmoothId84_g379 );
-				rest84_g379 += fade84_g379;
-				coords84_g379 *= 2;
-				fade84_g379 *= 0.5;
-				}//Voronoi84_g379
-				voroi84_g379 /= rest84_g379;
-				float temp_output_173_0_g379 = (  (0.0 + ( ( 1.0 - voroi84_g379 ) - 0.3 ) * ( 0.5 - 0.0 ) / ( 1.0 - 0.3 ) ) * 0.1 * CZY_DetailAmount );
-				float DetailedClouds252_g379 = saturate( ( ComplexCloudDensity141_g379 + temp_output_173_0_g379 ) );
-				float CloudDetail179_g379 = temp_output_173_0_g379;
-				float2 texCoord79_g379 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_161_0_g379 = ( texCoord79_g379 - float2( 0.5,0.5 ) );
-				float dotResult212_g379 = dot( temp_output_161_0_g379 , temp_output_161_0_g379 );
-				float BorderHeight154_g379 = ( 1.0 - CZY_BorderHeight );
-				float temp_output_151_0_g379 = ( -2.0 * ( 1.0 - CZY_BorderVariation ) );
-				float clampResult247_g379 = clamp( ( ( ( CloudDetail179_g379 + SimpleCloudDensity153_g379 ) * saturate(  (( BorderHeight154_g379 * temp_output_151_0_g379 ) + ( dotResult212_g379 - 0.0 ) * ( ( temp_output_151_0_g379 * -4.0 ) - ( BorderHeight154_g379 * temp_output_151_0_g379 ) ) / ( 0.5 - 0.0 ) ) ) ) * 10.0 * CZY_BorderEffect ) , -1.0 , 1.0 );
-				float BorderLightTransport278_g379 = clampResult247_g379;
-				float3 normalizeResult116_g379 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
-				float3 normalizeResult146_g379 = normalize( CZY_StormDirection );
-				float dotResult150_g379 = dot( normalizeResult116_g379 , normalizeResult146_g379 );
-				float2 texCoord98_g379 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_124_0_g379 = ( texCoord98_g379 - float2( 0.5,0.5 ) );
-				float dotResult125_g379 = dot( temp_output_124_0_g379 , temp_output_124_0_g379 );
-				float temp_output_140_0_g379 = ( -2.0 * ( 1.0 - ( CZY_NimbusVariation * 0.9 ) ) );
-				float NimbusLightTransport269_g379 = saturate( ( ( ( CloudDetail179_g379 + SimpleCloudDensity153_g379 ) * saturate(  (( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_140_0_g379 ) + ( ( dotResult150_g379 + ( CZY_NimbusHeight * 4.0 * dotResult125_g379 ) ) - 0.5 ) * ( ( temp_output_140_0_g379 * -4.0 ) - ( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_140_0_g379 ) ) / ( 7.0 - 0.5 ) ) ) ) * 10.0 ) );
-				float mulTime104_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D143_g379 = snoise( (Pos33_g379*1.0 + mulTime104_g379)*2.0 );
-				float mulTime93_g379 = _TimeParameters.x * CZY_ChemtrailsMoveSpeed;
-				float cos97_g379 = cos( ( mulTime93_g379 * 0.01 ) );
-				float sin97_g379 = sin( ( mulTime93_g379 * 0.01 ) );
-				float2 rotator97_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos97_g379 , -sin97_g379 , sin97_g379 , cos97_g379 )) + float2( 0.5,0.5 );
-				float cos131_g379 = cos( ( mulTime93_g379 * -0.02 ) );
-				float sin131_g379 = sin( ( mulTime93_g379 * -0.02 ) );
-				float2 rotator131_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos131_g379 , -sin131_g379 , sin131_g379 , cos131_g379 )) + float2( 0.5,0.5 );
-				float mulTime107_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D147_g379 = snoise( (Pos33_g379*1.0 + mulTime107_g379)*4.0 );
-				float4 ChemtrailsPattern210_g379 = ( ( saturate( simplePerlin2D143_g379 ) * tex2D( CZY_ChemtrailsTexture, (rotator97_g379*0.5 + 0.0) ) ) + ( tex2D( CZY_ChemtrailsTexture, rotator131_g379 ) * saturate( simplePerlin2D147_g379 ) ) );
-				float2 texCoord139_g379 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_162_0_g379 = ( texCoord139_g379 - float2( 0.5,0.5 ) );
-				float dotResult207_g379 = dot( temp_output_162_0_g379 , temp_output_162_0_g379 );
-				float ChemtrailsFinal248_g379 = ( ( ChemtrailsPattern210_g379 * saturate(  (0.4 + ( dotResult207_g379 - 0.0 ) * ( 2.0 - 0.4 ) / ( 0.1 - 0.0 ) ) ) ).r > ( 1.0 - ( CZY_ChemtrailsMultiplier * 0.5 ) ) ? 1.0 : 0.0 );
-				float mulTime80_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D126_g379 = snoise( (Pos33_g379*1.0 + mulTime80_g379)*2.0 );
-				float mulTime75_g379 = _TimeParameters.x * CZY_CirrusMoveSpeed;
-				float cos101_g379 = cos( ( mulTime75_g379 * 0.01 ) );
-				float sin101_g379 = sin( ( mulTime75_g379 * 0.01 ) );
-				float2 rotator101_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos101_g379 , -sin101_g379 , sin101_g379 , cos101_g379 )) + float2( 0.5,0.5 );
-				float cos112_g379 = cos( ( mulTime75_g379 * -0.02 ) );
-				float sin112_g379 = sin( ( mulTime75_g379 * -0.02 ) );
-				float2 rotator112_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos112_g379 , -sin112_g379 , sin112_g379 , cos112_g379 )) + float2( 0.5,0.5 );
-				float mulTime135_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D122_g379 = snoise( (Pos33_g379*1.0 + mulTime135_g379) );
-				simplePerlin2D122_g379 = simplePerlin2D122_g379*0.5 + 0.5;
-				float4 CirrusPattern137_g379 = ( ( saturate( simplePerlin2D126_g379 ) * tex2D( CZY_CirrusTexture, (rotator101_g379*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrusTexture, (rotator112_g379*1.0 + 0.0) ) * saturate( simplePerlin2D122_g379 ) ) );
-				float2 texCoord134_g379 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_164_0_g379 = ( texCoord134_g379 - float2( 0.5,0.5 ) );
-				float dotResult157_g379 = dot( temp_output_164_0_g379 , temp_output_164_0_g379 );
-				float4 temp_output_217_0_g379 = ( CirrusPattern137_g379 * saturate(  (0.0 + ( dotResult157_g379 - 0.0 ) * ( 2.0 - 0.0 ) / ( 0.2 - 0.0 ) ) ) );
-				float Clipping208_g379 = CZY_ClippingThreshold;
-				float CirrusAlpha250_g379 = ( ( temp_output_217_0_g379 * ( CZY_CirrusMultiplier * 10.0 ) ).r > Clipping208_g379 ? 1.0 : 0.0 );
-				float SimpleRadiance268_g379 = saturate( ( DetailedClouds252_g379 + BorderLightTransport278_g379 + NimbusLightTransport269_g379 + ChemtrailsFinal248_g379 + CirrusAlpha250_g379 ) );
-				float4 lerpResult342_g379 = lerp( CloudColor41_g379 , lerpResult338_g379 , ( 1.0 - SimpleRadiance268_g379 ));
-				float CloudbreakLightDir426_g379 = saturate( pow( temp_output_49_0_g379 , ( CZY_SunFlareFalloff * 0.5 ) ) );
-				float lerpResult316_g379 = lerp( -0.4 , 1.0 , ( saturate( ( ComplexCloudDensity141_g379 - 0.0 ) ) * CloudDetail179_g379 * CloudbreakLightDir426_g379 ));
-				float SunThroughClouds399_g379 = saturate( lerpResult316_g379 );
-				float3 hsvTorgb2_g382 = RGBToHSV( CZY_AltoCloudColor.rgb );
-				float3 hsvTorgb3_g382 = HSVToRGB( float3(hsvTorgb2_g382.x,saturate( ( hsvTorgb2_g382.y + CZY_FilterSaturation ) ),( hsvTorgb2_g382.z + CZY_FilterValue )) );
-				float4 temp_output_10_0_g382 = ( float4( hsvTorgb3_g382 , 0.0 ) * CZY_FilterColor );
-				float4 CirrusCustomLightColor350_g379 = ( CloudColor41_g379 * ( temp_output_10_0_g382 * CZY_CloudFilterColor ) );
-				float temp_output_391_0_g379 = ( AltoCumulusPlacement376_g379 *  (0.0 + ( tex2D( CZY_AltocumulusTexture, ((Pos33_g379*1.0 + ( CZY_AltocumulusWindSpeed * TIme30_g379 ))*( 1.0 / CZY_AltocumulusScale ) + 0.0) ).r - 0.0 ) * ( 1.0 - 0.0 ) / ( 0.2 - 0.0 ) ) * CZY_AltocumulusMultiplier );
-				float AltoCumulusLightTransport393_g379 = temp_output_391_0_g379;
-				float ACCustomLightsClipping387_g379 = ( AltoCumulusLightTransport393_g379 * ( SimpleRadiance268_g379 > Clipping208_g379 ? 0.0 : 1.0 ) );
-				float mulTime193_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D224_g379 = snoise( (Pos33_g379*1.0 + mulTime193_g379)*2.0 );
-				float mulTime178_g379 = _TimeParameters.x * CZY_CirrostratusMoveSpeed;
-				float cos138_g379 = cos( ( mulTime178_g379 * 0.01 ) );
-				float sin138_g379 = sin( ( mulTime178_g379 * 0.01 ) );
-				float2 rotator138_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos138_g379 , -sin138_g379 , sin138_g379 , cos138_g379 )) + float2( 0.5,0.5 );
-				float cos198_g379 = cos( ( mulTime178_g379 * -0.02 ) );
-				float sin198_g379 = sin( ( mulTime178_g379 * -0.02 ) );
-				float2 rotator198_g379 = mul( Pos33_g379 - float2( 0.5,0.5 ) , float2x2( cos198_g379 , -sin198_g379 , sin198_g379 , cos198_g379 )) + float2( 0.5,0.5 );
-				float mulTime184_g379 = _TimeParameters.x * 0.01;
-				float simplePerlin2D216_g379 = snoise( (Pos33_g379*10.0 + mulTime184_g379)*4.0 );
-				float4 CirrostratPattern261_g379 = ( ( saturate( simplePerlin2D224_g379 ) * tex2D( CZY_CirrostratusTexture, (rotator138_g379*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrostratusTexture, (rotator198_g379*1.5 + 0.75) ) * saturate( simplePerlin2D216_g379 ) ) );
-				float2 texCoord234_g379 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
-				float2 temp_output_243_0_g379 = ( texCoord234_g379 - float2( 0.5,0.5 ) );
-				float dotResult238_g379 = dot( temp_output_243_0_g379 , temp_output_243_0_g379 );
-				float clampResult264_g379 = clamp( ( CZY_CirrostratusMultiplier * 0.5 ) , 0.0 , 0.98 );
-				float CirrostratLightTransport281_g379 = ( ( CirrostratPattern261_g379 * saturate(  (0.4 + ( dotResult238_g379 - 0.0 ) * ( 2.0 - 0.4 ) / ( 0.1 - 0.0 ) ) ) ).r > ( 1.0 - clampResult264_g379 ) ? 1.0 : 0.0 );
-				float CSCustomLightsClipping309_g379 = ( CirrostratLightTransport281_g379 * ( SimpleRadiance268_g379 > Clipping208_g379 ? 0.0 : 1.0 ) );
-				float CustomRadiance340_g379 = saturate( ( ACCustomLightsClipping387_g379 + CSCustomLightsClipping309_g379 ) );
-				float4 lerpResult331_g379 = lerp( ( lerpResult342_g379 + ( SunThroughClouds399_g379 * CloudHighlightColor55_g379 ) ) , CirrusCustomLightColor350_g379 , CustomRadiance340_g379);
-				float FinalAlpha375_g379 = saturate( ( DetailedClouds252_g379 + BorderLightTransport278_g379 + AltoCumulusLightTransport393_g379 + ChemtrailsFinal248_g379 + CirrostratLightTransport281_g379 + CirrusAlpha250_g379 + NimbusLightTransport269_g379 ) );
-				float4 appendResult420_g379 = (float4((lerpResult331_g379).rgb , FinalAlpha375_g379));
-				float4 FinalCloudColor325_g379 = appendResult420_g379;
-				bool enabled20_g384 =(bool)_UnderwaterRenderingEnabled;
-				bool submerged20_g384 =(bool)_FullySubmerged;
-				float textureSample20_g384 = tex2Dlod( _UnderwaterMask, float4( ScreenPosNorm.xy, 0, 0.0) ).r;
-				float localHLSL20_g384 = HLSL20_g384( enabled20_g384 , submerged20_g384 , textureSample20_g384 );
+				float3 hsvTorgb2_g364 = RGBToHSV( CZY_CloudColor.rgb );
+				float3 hsvTorgb3_g364 = HSVToRGB( float3(hsvTorgb2_g364.x,saturate( ( hsvTorgb2_g364.y + CZY_FilterSaturation ) ),( hsvTorgb2_g364.z + CZY_FilterValue )) );
+				float4 temp_output_10_0_g364 = ( float4( hsvTorgb3_g364 , 0.0 ) * CZY_FilterColor );
+				float4 CloudColor41_g363 = ( temp_output_10_0_g364 * CZY_CloudFilterColor );
+				float3 hsvTorgb2_g368 = RGBToHSV( CZY_CloudHighlightColor.rgb );
+				float3 hsvTorgb3_g368 = HSVToRGB( float3(hsvTorgb2_g368.x,saturate( ( hsvTorgb2_g368.y + CZY_FilterSaturation ) ),( hsvTorgb2_g368.z + CZY_FilterValue )) );
+				float4 temp_output_10_0_g368 = ( float4( hsvTorgb3_g368 , 0.0 ) * CZY_FilterColor );
+				float4 CloudHighlightColor55_g363 = ( temp_output_10_0_g368 * CZY_SunFilterColor );
+				float2 texCoord31_g363 = input.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 Pos33_g363 = texCoord31_g363;
+				float mulTime29_g363 = _TimeParameters.x * ( 0.001 * CZY_WindSpeed );
+				float TIme30_g363 = mulTime29_g363;
+				float simplePerlin2D409_g363 = snoise( ( Pos33_g363 + ( TIme30_g363 * float2( 0.2,-0.4 ) ) )*( 100.0 / CZY_MainCloudScale ) );
+				simplePerlin2D409_g363 = simplePerlin2D409_g363*0.5 + 0.5;
+				float SimpleCloudDensity153_g363 = simplePerlin2D409_g363;
+				float time81_g363 = 0.0;
+				float2 voronoiSmoothId81_g363 = 0;
+				float2 temp_output_94_0_g363 = ( Pos33_g363 + ( TIme30_g363 * float2( 0.3,0.2 ) ) );
+				float2 coords81_g363 = temp_output_94_0_g363 * ( 140.0 / CZY_MainCloudScale );
+				float2 id81_g363 = 0;
+				float2 uv81_g363 = 0;
+				float voroi81_g363 = voronoi81_g363( coords81_g363, time81_g363, id81_g363, uv81_g363, 0, voronoiSmoothId81_g363 );
+				float time88_g363 = 0.0;
+				float2 voronoiSmoothId88_g363 = 0;
+				float2 coords88_g363 = temp_output_94_0_g363 * ( 500.0 / CZY_MainCloudScale );
+				float2 id88_g363 = 0;
+				float2 uv88_g363 = 0;
+				float voroi88_g363 = voronoi88_g363( coords88_g363, time88_g363, id88_g363, uv88_g363, 0, voronoiSmoothId88_g363 );
+				float2 appendResult95_g363 = (float2(voroi81_g363 , voroi88_g363));
+				float2 VoroDetails109_g363 = appendResult95_g363;
+				float CumulusCoverage34_g363 = CZY_CumulusCoverageMultiplier;
+				float ComplexCloudDensity141_g363 = (0.0 + (min( SimpleCloudDensity153_g363 , ( 1.0 - VoroDetails109_g363.x ) ) - ( 1.0 - CumulusCoverage34_g363 )) * (1.0 - 0.0) / (1.0 - ( 1.0 - CumulusCoverage34_g363 )));
+				float4 lerpResult315_g363 = lerp( CloudHighlightColor55_g363 , CloudColor41_g363 , saturate( (2.0 + (ComplexCloudDensity141_g363 - 0.0) * (0.7 - 2.0) / (1.0 - 0.0)) ));
+				float3 normalizeResult40_g363 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
+				float dotResult42_g363 = dot( normalizeResult40_g363 , CZY_SunDirection );
+				float temp_output_49_0_g363 = abs( (dotResult42_g363*0.5 + 0.5) );
+				half LightMask56_g363 = saturate( pow( temp_output_49_0_g363 , CZY_SunFlareFalloff ) );
+				float time200_g363 = 0.0;
+				float2 voronoiSmoothId200_g363 = 0;
+				float mulTime163_g363 = _TimeParameters.x * 0.003;
+				float2 coords200_g363 = (Pos33_g363*1.0 + ( float2( 1,-2 ) * mulTime163_g363 )) * 10.0;
+				float2 id200_g363 = 0;
+				float2 uv200_g363 = 0;
+				float voroi200_g363 = voronoi200_g363( coords200_g363, time200_g363, id200_g363, uv200_g363, 0, voronoiSmoothId200_g363 );
+				float time232_g363 = ( 10.0 * mulTime163_g363 );
+				float2 voronoiSmoothId232_g363 = 0;
+				float2 coords232_g363 = input.ase_texcoord3.xy * 10.0;
+				float2 id232_g363 = 0;
+				float2 uv232_g363 = 0;
+				float voroi232_g363 = voronoi232_g363( coords232_g363, time232_g363, id232_g363, uv232_g363, 0, voronoiSmoothId232_g363 );
+				float temp_output_242_0_g363 = ( ( ( 1.0 - 0.0 ) - (1.0 + (voroi200_g363 - 0.0) * (-0.5 - 1.0) / (1.0 - 0.0)) ) - voroi232_g363 );
+				float AltoCumulusPlacement376_g363 = temp_output_242_0_g363;
+				float CloudThicknessDetails286_g363 = ( VoroDetails109_g363.y * saturate( ( AltoCumulusPlacement376_g363 - 0.26 ) ) );
+				float3 normalizeResult43_g363 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
+				float dotResult46_g363 = dot( normalizeResult43_g363 , CZY_MoonDirection );
+				half MoonlightMask57_g363 = saturate( pow( abs( (dotResult46_g363*0.5 + 0.5) ) , CZY_CloudMoonFalloff ) );
+				float3 hsvTorgb2_g365 = RGBToHSV( CZY_CloudMoonColor.rgb );
+				float3 hsvTorgb3_g365 = HSVToRGB( float3(hsvTorgb2_g365.x,saturate( ( hsvTorgb2_g365.y + CZY_FilterSaturation ) ),( hsvTorgb2_g365.z + CZY_FilterValue )) );
+				float4 temp_output_10_0_g365 = ( float4( hsvTorgb3_g365 , 0.0 ) * CZY_FilterColor );
+				float4 MoonlightColor60_g363 = ( temp_output_10_0_g365 * CZY_CloudFilterColor );
+				float4 lerpResult338_g363 = lerp( ( lerpResult315_g363 + ( LightMask56_g363 * CloudHighlightColor55_g363 * ( 1.0 - CloudThicknessDetails286_g363 ) ) + ( MoonlightMask57_g363 * MoonlightColor60_g363 * ( 1.0 - CloudThicknessDetails286_g363 ) ) ) , ( CloudColor41_g363 * float4( 0.5660378,0.5660378,0.5660378,0 ) ) , CloudThicknessDetails286_g363);
+				float time84_g363 = 0.0;
+				float2 voronoiSmoothId84_g363 = 0;
+				float2 coords84_g363 = ( Pos33_g363 + ( TIme30_g363 * float2( 0.3,0.2 ) ) ) * ( 100.0 / CZY_DetailScale );
+				float2 id84_g363 = 0;
+				float2 uv84_g363 = 0;
+				float fade84_g363 = 0.5;
+				float voroi84_g363 = 0;
+				float rest84_g363 = 0;
+				for( int it84_g363 = 0; it84_g363 <3; it84_g363++ ){
+				voroi84_g363 += fade84_g363 * voronoi84_g363( coords84_g363, time84_g363, id84_g363, uv84_g363, 0,voronoiSmoothId84_g363 );
+				rest84_g363 += fade84_g363;
+				coords84_g363 *= 2;
+				fade84_g363 *= 0.5;
+				}//Voronoi84_g363
+				voroi84_g363 /= rest84_g363;
+				float temp_output_173_0_g363 = ( (0.0 + (( 1.0 - voroi84_g363 ) - 0.3) * (0.5 - 0.0) / (1.0 - 0.3)) * 0.1 * CZY_DetailAmount );
+				float DetailedClouds252_g363 = saturate( ( ComplexCloudDensity141_g363 + temp_output_173_0_g363 ) );
+				float CloudDetail179_g363 = temp_output_173_0_g363;
+				float2 texCoord79_g363 = input.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_161_0_g363 = ( texCoord79_g363 - float2( 0.5,0.5 ) );
+				float dotResult212_g363 = dot( temp_output_161_0_g363 , temp_output_161_0_g363 );
+				float BorderHeight154_g363 = ( 1.0 - CZY_BorderHeight );
+				float temp_output_151_0_g363 = ( -2.0 * ( 1.0 - CZY_BorderVariation ) );
+				float clampResult247_g363 = clamp( ( ( ( CloudDetail179_g363 + SimpleCloudDensity153_g363 ) * saturate( (( BorderHeight154_g363 * temp_output_151_0_g363 ) + (dotResult212_g363 - 0.0) * (( temp_output_151_0_g363 * -4.0 ) - ( BorderHeight154_g363 * temp_output_151_0_g363 )) / (0.5 - 0.0)) ) ) * 10.0 * CZY_BorderEffect ) , -1.0 , 1.0 );
+				float BorderLightTransport278_g363 = clampResult247_g363;
+				float3 normalizeResult116_g363 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
+				float3 normalizeResult146_g363 = normalize( CZY_StormDirection );
+				float dotResult150_g363 = dot( normalizeResult116_g363 , normalizeResult146_g363 );
+				float2 texCoord98_g363 = input.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_124_0_g363 = ( texCoord98_g363 - float2( 0.5,0.5 ) );
+				float dotResult125_g363 = dot( temp_output_124_0_g363 , temp_output_124_0_g363 );
+				float temp_output_140_0_g363 = ( -2.0 * ( 1.0 - ( CZY_NimbusVariation * 0.9 ) ) );
+				float NimbusLightTransport269_g363 = saturate( ( ( ( CloudDetail179_g363 + SimpleCloudDensity153_g363 ) * saturate( (( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_140_0_g363 ) + (( dotResult150_g363 + ( CZY_NimbusHeight * 4.0 * dotResult125_g363 ) ) - 0.5) * (( temp_output_140_0_g363 * -4.0 ) - ( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_140_0_g363 )) / (7.0 - 0.5)) ) ) * 10.0 ) );
+				float mulTime104_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D143_g363 = snoise( (Pos33_g363*1.0 + mulTime104_g363)*2.0 );
+				float mulTime93_g363 = _TimeParameters.x * CZY_ChemtrailsMoveSpeed;
+				float cos97_g363 = cos( ( mulTime93_g363 * 0.01 ) );
+				float sin97_g363 = sin( ( mulTime93_g363 * 0.01 ) );
+				float2 rotator97_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos97_g363 , -sin97_g363 , sin97_g363 , cos97_g363 )) + float2( 0.5,0.5 );
+				float cos131_g363 = cos( ( mulTime93_g363 * -0.02 ) );
+				float sin131_g363 = sin( ( mulTime93_g363 * -0.02 ) );
+				float2 rotator131_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos131_g363 , -sin131_g363 , sin131_g363 , cos131_g363 )) + float2( 0.5,0.5 );
+				float mulTime107_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D147_g363 = snoise( (Pos33_g363*1.0 + mulTime107_g363)*4.0 );
+				float4 ChemtrailsPattern210_g363 = ( ( saturate( simplePerlin2D143_g363 ) * tex2D( CZY_ChemtrailsTexture, (rotator97_g363*0.5 + 0.0) ) ) + ( tex2D( CZY_ChemtrailsTexture, rotator131_g363 ) * saturate( simplePerlin2D147_g363 ) ) );
+				float2 texCoord139_g363 = input.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_162_0_g363 = ( texCoord139_g363 - float2( 0.5,0.5 ) );
+				float dotResult207_g363 = dot( temp_output_162_0_g363 , temp_output_162_0_g363 );
+				float ChemtrailsFinal248_g363 = ( ( ChemtrailsPattern210_g363 * saturate( (0.4 + (dotResult207_g363 - 0.0) * (2.0 - 0.4) / (0.1 - 0.0)) ) ).r > ( 1.0 - ( CZY_ChemtrailsMultiplier * 0.5 ) ) ? 1.0 : 0.0 );
+				float mulTime80_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D126_g363 = snoise( (Pos33_g363*1.0 + mulTime80_g363)*2.0 );
+				float mulTime75_g363 = _TimeParameters.x * CZY_CirrusMoveSpeed;
+				float cos101_g363 = cos( ( mulTime75_g363 * 0.01 ) );
+				float sin101_g363 = sin( ( mulTime75_g363 * 0.01 ) );
+				float2 rotator101_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos101_g363 , -sin101_g363 , sin101_g363 , cos101_g363 )) + float2( 0.5,0.5 );
+				float cos112_g363 = cos( ( mulTime75_g363 * -0.02 ) );
+				float sin112_g363 = sin( ( mulTime75_g363 * -0.02 ) );
+				float2 rotator112_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos112_g363 , -sin112_g363 , sin112_g363 , cos112_g363 )) + float2( 0.5,0.5 );
+				float mulTime135_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D122_g363 = snoise( (Pos33_g363*1.0 + mulTime135_g363) );
+				simplePerlin2D122_g363 = simplePerlin2D122_g363*0.5 + 0.5;
+				float4 CirrusPattern137_g363 = ( ( saturate( simplePerlin2D126_g363 ) * tex2D( CZY_CirrusTexture, (rotator101_g363*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrusTexture, (rotator112_g363*1.0 + 0.0) ) * saturate( simplePerlin2D122_g363 ) ) );
+				float2 texCoord134_g363 = input.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_164_0_g363 = ( texCoord134_g363 - float2( 0.5,0.5 ) );
+				float dotResult157_g363 = dot( temp_output_164_0_g363 , temp_output_164_0_g363 );
+				float4 temp_output_217_0_g363 = ( CirrusPattern137_g363 * saturate( (0.0 + (dotResult157_g363 - 0.0) * (2.0 - 0.0) / (0.2 - 0.0)) ) );
+				float Clipping208_g363 = CZY_ClippingThreshold;
+				float CirrusAlpha250_g363 = ( ( temp_output_217_0_g363 * ( CZY_CirrusMultiplier * 10.0 ) ).r > Clipping208_g363 ? 1.0 : 0.0 );
+				float SimpleRadiance268_g363 = saturate( ( DetailedClouds252_g363 + BorderLightTransport278_g363 + NimbusLightTransport269_g363 + ChemtrailsFinal248_g363 + CirrusAlpha250_g363 ) );
+				float4 lerpResult342_g363 = lerp( CloudColor41_g363 , lerpResult338_g363 , ( 1.0 - SimpleRadiance268_g363 ));
+				float CloudbreakLightDir426_g363 = saturate( pow( temp_output_49_0_g363 , ( CZY_SunFlareFalloff * 0.5 ) ) );
+				float lerpResult316_g363 = lerp( -0.4 , 1.0 , ( saturate( ( ComplexCloudDensity141_g363 - 0.0 ) ) * CloudDetail179_g363 * CloudbreakLightDir426_g363 ));
+				float SunThroughClouds399_g363 = saturate( lerpResult316_g363 );
+				float3 hsvTorgb2_g366 = RGBToHSV( CZY_AltoCloudColor.rgb );
+				float3 hsvTorgb3_g366 = HSVToRGB( float3(hsvTorgb2_g366.x,saturate( ( hsvTorgb2_g366.y + CZY_FilterSaturation ) ),( hsvTorgb2_g366.z + CZY_FilterValue )) );
+				float4 temp_output_10_0_g366 = ( float4( hsvTorgb3_g366 , 0.0 ) * CZY_FilterColor );
+				float4 CirrusCustomLightColor350_g363 = ( CloudColor41_g363 * ( temp_output_10_0_g366 * CZY_CloudFilterColor ) );
+				float temp_output_391_0_g363 = ( AltoCumulusPlacement376_g363 * (0.0 + (tex2D( CZY_AltocumulusTexture, ((Pos33_g363*1.0 + ( CZY_AltocumulusWindSpeed * TIme30_g363 ))*( 1.0 / CZY_AltocumulusScale ) + 0.0) ).r - 0.0) * (1.0 - 0.0) / (0.2 - 0.0)) * CZY_AltocumulusMultiplier );
+				float AltoCumulusLightTransport393_g363 = temp_output_391_0_g363;
+				float ACCustomLightsClipping387_g363 = ( AltoCumulusLightTransport393_g363 * ( SimpleRadiance268_g363 > Clipping208_g363 ? 0.0 : 1.0 ) );
+				float mulTime193_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D224_g363 = snoise( (Pos33_g363*1.0 + mulTime193_g363)*2.0 );
+				float mulTime178_g363 = _TimeParameters.x * CZY_CirrostratusMoveSpeed;
+				float cos138_g363 = cos( ( mulTime178_g363 * 0.01 ) );
+				float sin138_g363 = sin( ( mulTime178_g363 * 0.01 ) );
+				float2 rotator138_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos138_g363 , -sin138_g363 , sin138_g363 , cos138_g363 )) + float2( 0.5,0.5 );
+				float cos198_g363 = cos( ( mulTime178_g363 * -0.02 ) );
+				float sin198_g363 = sin( ( mulTime178_g363 * -0.02 ) );
+				float2 rotator198_g363 = mul( Pos33_g363 - float2( 0.5,0.5 ) , float2x2( cos198_g363 , -sin198_g363 , sin198_g363 , cos198_g363 )) + float2( 0.5,0.5 );
+				float mulTime184_g363 = _TimeParameters.x * 0.01;
+				float simplePerlin2D216_g363 = snoise( (Pos33_g363*10.0 + mulTime184_g363)*4.0 );
+				float4 CirrostratPattern261_g363 = ( ( saturate( simplePerlin2D224_g363 ) * tex2D( CZY_CirrostratusTexture, (rotator138_g363*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrostratusTexture, (rotator198_g363*1.5 + 0.75) ) * saturate( simplePerlin2D216_g363 ) ) );
+				float2 texCoord234_g363 = input.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 temp_output_243_0_g363 = ( texCoord234_g363 - float2( 0.5,0.5 ) );
+				float dotResult238_g363 = dot( temp_output_243_0_g363 , temp_output_243_0_g363 );
+				float clampResult264_g363 = clamp( ( CZY_CirrostratusMultiplier * 0.5 ) , 0.0 , 0.98 );
+				float CirrostratLightTransport281_g363 = ( ( CirrostratPattern261_g363 * saturate( (0.4 + (dotResult238_g363 - 0.0) * (2.0 - 0.4) / (0.1 - 0.0)) ) ).r > ( 1.0 - clampResult264_g363 ) ? 1.0 : 0.0 );
+				float CSCustomLightsClipping309_g363 = ( CirrostratLightTransport281_g363 * ( SimpleRadiance268_g363 > Clipping208_g363 ? 0.0 : 1.0 ) );
+				float CustomRadiance340_g363 = saturate( ( ACCustomLightsClipping387_g363 + CSCustomLightsClipping309_g363 ) );
+				float4 lerpResult331_g363 = lerp( ( lerpResult342_g363 + SunThroughClouds399_g363 ) , CirrusCustomLightColor350_g363 , CustomRadiance340_g363);
+				float FinalAlpha375_g363 = saturate( ( DetailedClouds252_g363 + BorderLightTransport278_g363 + AltoCumulusLightTransport393_g363 + ChemtrailsFinal248_g363 + CirrostratLightTransport281_g363 + CirrusAlpha250_g363 + NimbusLightTransport269_g363 ) );
+				float4 appendResult420_g363 = (float4((lerpResult331_g363).rgb , FinalAlpha375_g363));
+				float4 FinalCloudColor325_g363 = appendResult420_g363;
+				bool enabled20_g367 =(bool)_UnderwaterRenderingEnabled;
+				bool submerged20_g367 =(bool)_FullySubmerged;
+				float4 ase_positionSSNorm = ScreenPos / ScreenPos.w;
+				ase_positionSSNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_positionSSNorm.z : ase_positionSSNorm.z * 0.5 + 0.5;
+				float textureSample20_g367 = tex2Dlod( _UnderwaterMask, float4( ase_positionSSNorm.xy, 0, 0.0) ).r;
+				float localHLSL20_g367 = HLSL20_g367( enabled20_g367 , submerged20_g367 , textureSample20_g367 );
 				
 
-				float Alpha = ( ( (FinalCloudColor325_g379).w * ( 1.0 - localHLSL20_g384 ) ) > Clipping208_g379 ? 1.0 : 0.0 );
-				float AlphaClipThreshold = Clipping208_g379;
+				float Alpha = ( ( (FinalCloudColor325_g363).w * ( 1.0 - localHLSL20_g367 ) ) > Clipping208_g363 ? 1.0 : 0.0 );
+				float AlphaClipThreshold = Clipping208_g363;
 
 				#ifdef ASE_DEPTH_WRITE_ON
 					float DepthValue = input.positionCS.z;
@@ -4552,26 +4527,26 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop)"
 	Fallback "Hidden/InternalErrorShader"
 }
 /*ASEBEGIN
-Version=19901
-Node;AmplifyShaderEditor.FunctionNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;874;-3744,-688;Inherit;False;AddFogToSkyLayer;-1;;369;36a78fe96c9f6fa4dab85c7793736468;0;3;89;COLOR;0,0,0,0;False;91;FLOAT;0;False;59;FLOAT;0;False;2;COLOR;84;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;876;-4080,-480;Inherit;False;Global;CZY_CloudsFogAmount;CZY_CloudsFogAmount;8;0;Create;True;0;0;0;False;0;False;0;0.2;0;1;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;875;-4080,-560;Inherit;False;Global;CZY_CloudsFogLightAmount;CZY_CloudsFogLightAmount;7;0;Create;True;0;0;0;False;0;False;0;0.2;0;1;0;1;FLOAT;0
-Node;AmplifyShaderEditor.FunctionNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;880;-4064,-688;Inherit;False;Stylized Clouds (Desktop);0;;379;b8040dba3255391449edffa0921d9c37;0;0;3;FLOAT4;0;FLOAT;414;FLOAT;415
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;803;-678.2959,-671.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;Meta;0;4;Meta;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Meta;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;802;-678.2959,-671.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthOnly;0;3;DepthOnly;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;False;False;True;1;LightMode=DepthOnly;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;801;-678.2959,-671.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ShadowCaster;0;2;ShadowCaster;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=ShadowCaster;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;804;-677.2959,-599.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;Universal2D;0;5;Universal2D;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=Universal2D;False;False;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;805;-677.2959,-599.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;SceneSelectionPass;0;6;SceneSelectionPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=SceneSelectionPass;False;False;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;806;-677.2959,-599.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ScenePickingPass;0;7;ScenePickingPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Picking;False;False;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;807;-677.2959,-599.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthNormals;0;8;DepthNormals;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=DepthNormalsOnly;False;False;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;808;-677.2959,-599.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthNormalsOnly;0;9;DepthNormalsOnly;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=DepthNormalsOnly;False;True;9;d3d11;metal;vulkan;xboxone;xboxseries;playstation;ps4;ps5;switch;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;799;-3024,-688;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ExtraPrePass;0;0;ExtraPrePass;5;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;0;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;800;-3248,-688;Float;False;True;-1;2;DistantLands.Cozy.EditorScripts.EmptyShaderGUI;0;13;Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop);2992e84f91cbeb14eab234972e07ea9d;True;Forward;0;1;Forward;9;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;1;False;;False;False;False;False;False;False;False;False;True;True;True;221;False;;255;False;;255;False;;7;False;;2;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=-50;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;True;1;5;False;;10;False;;1;1;False;;10;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;True;2;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForwardOnly;False;False;0;Hidden/InternalErrorShader;0;0;Standard;25;Surface;1;638295390293297003;  Blend;0;0;Two Sided;2;638295390676621873;Alpha Clipping;1;0;  Use Shadow Threshold;0;0;Forward Only;1;638295390392913430;Cast Shadows;1;0;Receive Shadows;1;0;GPU Instancing;1;0;LOD CrossFade;0;0;Built-in Fog;0;0;Meta Pass;0;0;Extra Pre Pass;0;0;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Write Depth;0;0;  Early Z;0;0;Vertex Position,InvertActionOnDeselection;1;0;0;10;False;True;True;True;False;False;True;True;True;False;False;;False;0
-WireConnection;874;89;880;0
+Version=19801
+Node;AmplifyShaderEditor.FunctionNode;873;-4064,-688;Inherit;False;Stylized Clouds (Desktop);0;;363;b8040dba3255391449edffa0921d9c37;0;0;3;FLOAT4;0;FLOAT;414;FLOAT;415
+Node;AmplifyShaderEditor.FunctionNode;874;-3744,-688;Inherit;False;AddFogToSkyLayer;-1;;369;36a78fe96c9f6fa4dab85c7793736468;0;3;89;COLOR;0,0,0,0;False;91;FLOAT;0;False;59;FLOAT;0;False;2;COLOR;84;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;876;-4080,-480;Inherit;False;Global;CZY_CloudsFogAmount;CZY_CloudsFogAmount;8;0;Create;True;0;0;0;False;0;False;0;0.509;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;875;-4080,-560;Inherit;False;Global;CZY_CloudsFogLightAmount;CZY_CloudsFogLightAmount;7;0;Create;True;0;0;0;False;0;False;0;1;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;803;-678.2959,-671.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;Meta;0;4;Meta;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Meta;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;802;-678.2959,-671.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthOnly;0;3;DepthOnly;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;False;False;True;1;LightMode=DepthOnly;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;801;-678.2959,-671.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ShadowCaster;0;2;ShadowCaster;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=ShadowCaster;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;804;-677.2959,-599.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;Universal2D;0;5;Universal2D;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=Universal2D;False;False;0;;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;805;-677.2959,-599.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;SceneSelectionPass;0;6;SceneSelectionPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=SceneSelectionPass;False;False;0;;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;806;-677.2959,-599.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ScenePickingPass;0;7;ScenePickingPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Picking;False;False;0;;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;807;-677.2959,-599.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthNormals;0;8;DepthNormals;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=DepthNormalsOnly;False;False;0;;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;808;-677.2959,-599.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthNormalsOnly;0;9;DepthNormalsOnly;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=DepthNormalsOnly;False;True;9;d3d11;metal;vulkan;xboxone;xboxseries;playstation;ps4;ps5;switch;0;;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;799;-3024,-688;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ExtraPrePass;0;0;ExtraPrePass;5;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;0;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;800;-3424,-688;Float;False;True;-1;2;DistantLands.Cozy.EditorScripts.EmptyShaderGUI;0;13;Distant Lands/Cozy/URP/Stylized Clouds (COZY Desktop);2992e84f91cbeb14eab234972e07ea9d;True;Forward;0;1;Forward;9;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;1;False;;False;False;False;False;False;False;False;False;True;True;True;221;False;;255;False;;255;False;;7;False;;2;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=-50;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;True;1;5;False;;10;False;;1;1;False;;10;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;True;2;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForwardOnly;False;False;0;Hidden/InternalErrorShader;0;0;Standard;25;Surface;1;638295390293297003;  Blend;0;0;Two Sided;2;638295390676621873;Alpha Clipping;1;0;  Use Shadow Threshold;0;0;Forward Only;1;638295390392913430;Cast Shadows;1;0;Receive Shadows;1;0;GPU Instancing;1;0;LOD CrossFade;0;0;Built-in Fog;0;0;Meta Pass;0;0;Extra Pre Pass;0;0;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Write Depth;0;0;  Early Z;0;0;Vertex Position,InvertActionOnDeselection;1;0;0;10;False;True;True;True;False;False;True;True;True;False;False;;False;0
+WireConnection;874;89;873;0
 WireConnection;874;91;875;0
 WireConnection;874;59;876;0
 WireConnection;800;2;874;84
-WireConnection;800;3;880;414
-WireConnection;800;4;880;415
+WireConnection;800;3;873;414
+WireConnection;800;4;873;415
 ASEEND*/
-//CHKSM=47B3F6F2B6CB9CD6A0A076CE3551ACDAE0AA7DD6
+//CHKSM=C23FE38C81CB369A5DF276263D869DFCCEEBCF3C

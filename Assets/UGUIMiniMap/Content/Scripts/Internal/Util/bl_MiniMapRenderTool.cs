@@ -2,6 +2,7 @@
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using System.IO;
+using UnityEngine.UI;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -11,9 +12,6 @@ namespace Lovatto.MiniMap
     [RequireComponent(typeof(Camera)), ExecuteInEditMode]
     public class bl_MiniMapRenderTool : MonoBehaviour
     {
-        /// <summary>
-        /// The applied MSAA, possible values are 1,2,4 nad 8
-        /// </summary>
         public int msaa = 1;
         public bl_MapRender.RendersDivisions renderDivisions = bl_MapRender.RendersDivisions.Single;
         public string[] Resolutions = new string[] { "4096", "2048", "1024", "512", "256" };
@@ -22,6 +20,19 @@ namespace Lovatto.MiniMap
         public bool previewBorders = true;
         public bool blackBorders = true;
         public bl_MiniMap miniMap;
+
+        [Header("Grid")]
+        public bool showGrid = false;
+        public bool previewGrid = true;
+        public bool overrideExisting = false;
+        public float gridCellSize = 20;
+        public Color gridLineColor = new Color(1, 1, 1, 0.5f);
+        public float gridLineThickness = 1;
+        public Color gridTextColor = Color.white;
+        public int gridTextSize = 10;
+        public Font gridFont;
+        public bool showGridLabels = true;
+        public float gridLabelPadding = 0;
 
         /// <summary>
         /// 
@@ -56,6 +67,10 @@ namespace Lovatto.MiniMap
 
         public void CenterBounds()
         {
+#if UNITY_EDITOR
+            if (!PrefabUtility.IsPartOfPrefabInstance(gameObject)) return;
+#endif
+
             Vector3 v = transform.position;
             v.x = miniMap.mapBounds.position.x;
             v.z = miniMap.mapBounds.position.z;
@@ -104,7 +119,7 @@ namespace Lovatto.MiniMap
             GUILayout.BeginVertical("Settings", "box");
             script.CurrentResolution = EditorGUILayout.Popup("Resolution", script.CurrentResolution, script.Resolutions);
             script.renderDivisions = (bl_MapRender.RendersDivisions)EditorGUILayout.EnumPopup("Render Divisions", script.renderDivisions);
-            script.msaa = EditorGUILayout.IntSlider("MSAA", script.msaa, 1, 4);
+            script.msaa = EditorGUILayout.IntSlider(new GUIContent("MSAA", "The applied MSAA, possible values are 1,2,4 nad 8"), script.msaa, 1, 4);
             m_Camera.orthographicSize = EditorGUILayout.Slider("Size", m_Camera.orthographicSize, 1f, 1000f);
             script.backgroundTransparent = EditorGUILayout.ToggleLeft("Transparent Background", script.backgroundTransparent);
             script.previewBorders = EditorGUILayout.ToggleLeft("Preview Borders", script.previewBorders);
@@ -119,14 +134,55 @@ namespace Lovatto.MiniMap
             mapBounds = EditorGUILayout.ObjectField("Map Bounds", mapBounds, typeof(bl_MiniMapBounds), true) as bl_MiniMapBounds;
             GUILayout.EndVertical();
 
+            GUILayout.BeginVertical("Grid Settings", "box");
+            script.showGrid = EditorGUILayout.ToggleLeft("Render Grid", script.showGrid);
+            if (script.showGrid)
+            {
+                EditorGUI.BeginChangeCheck();
+                script.previewGrid = EditorGUILayout.ToggleLeft("Preview Grid", script.previewGrid);
+                script.gridCellSize = EditorGUILayout.FloatField("Cell Size", script.gridCellSize);
+                script.gridLineColor = EditorGUILayout.ColorField("Line Color", script.gridLineColor);
+                script.gridLineThickness = EditorGUILayout.FloatField("Line Thickness", script.gridLineThickness);
+                script.gridTextColor = EditorGUILayout.ColorField("Text Color", script.gridTextColor);
+                script.gridTextSize = EditorGUILayout.IntField("Text Size", script.gridTextSize);
+                script.gridFont = EditorGUILayout.ObjectField("Font", script.gridFont, typeof(Font), false) as Font;
+                script.showGridLabels = EditorGUILayout.ToggleLeft("Show Labels", script.showGridLabels);
+                if (script.showGridLabels)
+                {
+                    script.gridLabelPadding = EditorGUILayout.FloatField("Label Padding", script.gridLabelPadding);
+                }
+
+                if (EditorGUI.EndChangeCheck())
+                {
+                    if (script.previewGrid)
+                    {
+                        UpdateGridPreview();
+                    }
+                    else
+                    {
+                        DestroyGridOverlay();
+                    }
+                }
+            }
+            else
+            {
+                if (gridCanvas != null) DestroyGridOverlay();
+                // Also check if there is any lingering grid object in the script transform
+                var existingGrid = script.transform.Find("MiniMapGridCanvas");
+                if (existingGrid != null) DestroyImmediate(existingGrid.gameObject);
+            }
+            GUILayout.EndVertical();
+
+            script.overrideExisting = EditorGUILayout.ToggleLeft("Override Existing Files", script.overrideExisting);
+
             GUILayout.BeginVertical("box");
             GUILayout.BeginHorizontal();
-            GUI.enabled = mapBounds != null;
+            GUI.enabled = mapBounds != null && IsInScene();
             if (GUILayout.Button("Fit Size to Bounds"))
             {
                 m_Camera.orthographicSize = mapBounds.BoundTransform.sizeDelta.x * 0.5f;
             }
-            GUI.enabled = true;
+            GUI.enabled = IsInScene();
 
             if (GUILayout.Button("Center Bounds"))
             {
@@ -162,9 +218,22 @@ namespace Lovatto.MiniMap
             renderContainer.renderDivisions = script.renderDivisions;
             renderContainer.snapshots = new List<Texture2D>();
 
+            Vector3 defaultPosition = script.transform.position;
+            float defaultSize = m_Camera.orthographicSize;
+
+            if (!script.previewGrid)
+            {
+                CreateGridOverlay(defaultPosition, defaultSize);
+            }
+
             if (script.renderDivisions == bl_MapRender.RendersDivisions.Single)
             {
                 var snapshot = Render(w, h);
+                if (!script.previewGrid)
+                {
+                    DestroyGridOverlay();
+                }
+
                 string savePath = SaveImage(path, "", snapshot);
                 AssetDatabase.Refresh();
                 string relativepath = "Assets" + savePath.Substring(Application.dataPath.Length);
@@ -185,9 +254,6 @@ namespace Lovatto.MiniMap
 
             var renders = new Texture2D[divisions * divisions];
 
-            Vector3 defaultPosition = transform.position;
-            float defaultSize = m_Camera.orthographicSize;
-
             float divSize = defaultSize / divisions;
             float halfDiv = (float)divisions / 2f;
 
@@ -205,8 +271,6 @@ namespace Lovatto.MiniMap
                 for (int e = 0; e < divisions; e++)
                 {
                     renders[renderId] = Render(w, h);
-                    // Debug.Log($"render {renderId} pos: {renderPos}, render size: {renderSize} row size: {rowSize}");
-
                     renderPos.x += divSize * 2;
                     transform.position = renderPos;
                     renderId++;
@@ -218,6 +282,10 @@ namespace Lovatto.MiniMap
 
             transform.position = defaultPosition;
             m_Camera.orthographicSize = defaultSize;
+            if (!script.previewGrid)
+            {
+                DestroyGridOverlay();
+            }
 
             // save shots
             renderId = 0;
@@ -248,10 +316,6 @@ namespace Lovatto.MiniMap
 
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="path"></param>
         private void SetupTextureAsset(string path)
         {
             TextureImporter ti = (TextureImporter)TextureImporter.GetAtPath(path);
@@ -267,12 +331,149 @@ namespace Lovatto.MiniMap
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <returns></returns>
+        private GameObject gridCanvas;
+
+        private void UpdateGridPreview()
+        {
+            if (!IsInScene()) return;
+            DestroyGridOverlay();
+            if (script.showGrid && script.previewGrid)
+            {
+                CreateGridOverlay(script.transform.position, m_Camera.orthographicSize);
+            }
+        }
+
+        private void CreateGridOverlay(Vector3 center, float orthoSize)
+        {
+            if (!IsInScene() || !script.showGrid) return;
+
+            float width = orthoSize * 2;
+            float height = orthoSize * 2;
+            float cellSize = script.gridCellSize;
+
+            gridCanvas = new GameObject("MiniMapGridCanvas");
+            gridCanvas.transform.SetParent(script.transform);
+            Vector3 gridPos = center;
+            // Place grid slightly in front of the camera to ensure it renders on top of map objects
+            // Assuming camera is looking down (Rotation 90, 0, 0)
+            gridPos.y = script.transform.position.y - 1;
+            gridCanvas.transform.position = gridPos;
+            gridCanvas.transform.rotation = Quaternion.Euler(90, 0, 0);
+
+            Canvas canvas = gridCanvas.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.WorldSpace;
+            RectTransform rt = gridCanvas.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(width, height);
+
+            int cols = Mathf.CeilToInt(width / cellSize);
+            int rows = Mathf.CeilToInt(height / cellSize);
+
+            float startX = -width / 2;
+            float startY = height / 2;
+
+            // Vertical Lines & Column Numbers
+            for (int i = 0; i <= cols; i++)
+            {
+                float x = startX + (i * cellSize);
+                if (x > width / 2) break;
+
+                CreateLine(gridCanvas.transform, new Vector2(x, 0), new Vector2(script.gridLineThickness, height));
+
+                if (i < cols && script.showGridLabels)
+                {
+                    float labelX = x + (cellSize / 2);
+                    CreateLabel(gridCanvas.transform, (i + 1).ToString(), new Vector2(labelX, height / 2 - (script.gridTextSize) - script.gridLabelPadding));
+                }
+            }
+
+            // Horizontal Lines & Row Letters
+            for (int i = 0; i <= rows; i++)
+            {
+                float y = startY - (i * cellSize);
+                if (y < -height / 2) break;
+
+                CreateLine(gridCanvas.transform, new Vector2(0, y), new Vector2(width, script.gridLineThickness));
+
+                if (i < rows && script.showGridLabels)
+                {
+                    float labelY = y - (cellSize / 2);
+                    CreateLabel(gridCanvas.transform, GetColumnName(i), new Vector2(-width / 2 + (script.gridTextSize) + script.gridLabelPadding, labelY));
+                }
+            }
+        }
+
+        private void CreateLine(Transform parent, Vector2 pos, Vector2 size)
+        {
+            GameObject line = new GameObject("Line");
+            line.transform.SetParent(parent, false);
+            Image img = line.AddComponent<Image>();
+            img.color = script.gridLineColor;
+            RectTransform rt = line.GetComponent<RectTransform>();
+            rt.anchoredPosition = pos;
+            rt.sizeDelta = size;
+        }
+
+        private void CreateLabel(Transform parent, string text, Vector2 pos)
+        {
+            GameObject label = new GameObject("Label");
+            label.transform.SetParent(parent, false);
+            Text txt = label.AddComponent<Text>();
+            txt.text = text;
+            if (script.gridFont != null)
+            {
+                txt.font = script.gridFont;
+            }
+            else
+            {
+                txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            }
+            txt.fontSize = script.gridTextSize;
+            txt.color = script.gridTextColor;
+            txt.alignment = TextAnchor.MiddleCenter;
+            txt.horizontalOverflow = HorizontalWrapMode.Overflow;
+            txt.verticalOverflow = VerticalWrapMode.Overflow;
+
+            RectTransform rt = label.GetComponent<RectTransform>();
+            rt.anchoredPosition = pos;
+            rt.sizeDelta = new Vector2(script.gridCellSize, script.gridCellSize);
+        }
+
+        private string GetColumnName(int index)
+        {
+            int dividend = index + 1;
+            string columnName = string.Empty;
+            while (dividend > 0)
+            {
+                int modulo = (dividend - 1) % 26;
+                columnName = System.Convert.ToChar(65 + modulo).ToString() + columnName;
+                dividend = (int)((dividend - modulo) / 26);
+            }
+            return columnName;
+        }
+
+        private void DestroyGridOverlay()
+        {
+            if (!IsInScene()) return;
+            if (gridCanvas != null)
+            {
+                DestroyImmediate(gridCanvas);
+            }
+            else
+            {
+                // Try to find it in children first
+                var child = script.transform.Find("MiniMapGridCanvas");
+                if (child != null)
+                {
+                    DestroyImmediate(child.gameObject);
+                }
+                else
+                {
+                    GameObject g = GameObject.Find("MiniMapGridCanvas");
+                    if (g != null) DestroyImmediate(g);
+                }
+            }
+        }
+
         private Texture2D Render(int width, int height)
         {
             var camera = m_Camera;
@@ -298,14 +499,6 @@ namespace Lovatto.MiniMap
             return snapshot;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="folderPath"></param>
-        /// <param name="fileName"></param>
-        /// <param name="image"></param>
-        /// <param name="cleanAfter"></param>
-        /// <returns></returns>
         private string SaveImage(string folderPath, string fileName, Texture2D image, bool cleanAfter = true)
         {
             if (string.IsNullOrEmpty(fileName))
@@ -314,7 +507,17 @@ namespace Lovatto.MiniMap
             }
 
             string savePath = Path.Combine(folderPath, fileName);
-            // savePath = AssetDatabase.GenerateUniqueAssetPath(savePath);
+
+            if (!script.overrideExisting)
+            {
+                if (savePath.StartsWith(Application.dataPath))
+                {
+                    string relative = "Assets" + savePath.Substring(Application.dataPath.Length);
+                    relative = AssetDatabase.GenerateUniqueAssetPath(relative);
+                    savePath = Path.Combine(Path.GetDirectoryName(Application.dataPath), relative);
+                }
+            }
+
             byte[] buffer = image.EncodeToPNG();
             File.WriteAllBytes(savePath, buffer);
 
@@ -323,14 +526,12 @@ namespace Lovatto.MiniMap
             return savePath;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="instance"></param>
-        /// <param name="path"></param>
-        /// <returns></returns>
         private bl_MapRender SaveRenderContainer(bl_MapRender instance, string path)
         {
+            if (!script.overrideExisting)
+            {
+                path = AssetDatabase.GenerateUniqueAssetPath(path);
+            }
             AssetDatabase.CreateAsset(instance, path);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -456,6 +657,11 @@ namespace Lovatto.MiniMap
             }
 
             return $"MiniMap-{levelName}-{width}x{height}{endPoint}.png";
+        }
+
+        private bool IsInScene()
+        {
+            return PrefabUtility.IsPartOfPrefabInstance(script.gameObject);
         }
     }
 #endif

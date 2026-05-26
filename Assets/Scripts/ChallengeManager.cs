@@ -19,6 +19,31 @@ public class ChallengeManager : MonoBehaviour
     public int maxActiveWorldEvents = 1;
     public int maxDailyChallenges = 3;
     public int maxWeeklyChallenges = 2;
+
+    [Header("Dynamic Encounter Director")]
+    [Tooltip("Enables real-time pacing adjustments based on player performance during active challenges.")]
+    public bool enableDynamicDirector = true;
+    [Tooltip("How quickly director values adapt to new performance data.")]
+    [Range(0.05f, 2f)] public float directorAdaptSpeed = 0.35f;
+    [Tooltip("Minimum spawn interval when player is dominating encounters.")]
+    public float minDynamicSpawnInterval = 120f;
+    [Tooltip("Maximum spawn interval when player is under pressure.")]
+    public float maxDynamicSpawnInterval = 420f;
+    [Tooltip("Lower bound for active world events managed by the director.")]
+    public int minDynamicActiveWorldEvents = 1;
+    [Tooltip("Upper bound for active world events managed by the director.")]
+    public int maxDynamicActiveWorldEvents = 2;
+    [Tooltip("Additional XP/currency multiplier applied while the player is struggling.")]
+    [Range(0f, 0.5f)] public float maxStruggleRewardBonus = 0.2f;
+
+    [Header("Director Debug (Runtime)")]
+    [Tooltip("Shows live director values in the inspector while playing.")]
+    public bool showDirectorDebugInInspector = true;
+    [SerializeField, Range(0f, 1f)] private float debugPerformanceScore = 0.5f;
+    [SerializeField] private float debugSpawnInterval;
+    [SerializeField] private int debugWorldEventLimit;
+    [SerializeField] private int debugActiveWorldEvents;
+    [SerializeField] private int debugActiveChallenges;
     
     [Header("Visual Markers")]
     public GameObject worldMarkerPrefab;
@@ -48,6 +73,9 @@ public class ChallengeManager : MonoBehaviour
 
     // OPTIMIZATION: Cache the active world events count to avoid LINQ in Update
     private int cachedActiveWorldEventsCount = 0;
+    private float dynamicSpawnInterval;
+    private int dynamicMaxActiveWorldEvents;
+    private float smoothedPerformance = 0.5f;
 
     private void Awake()
     {
@@ -82,8 +110,11 @@ public class ChallengeManager : MonoBehaviour
         LoadChallenges();
         GenerateDailyChallenges();
         GenerateWeeklyChallenges();
-        spawnTimer = worldEventSpawnInterval;
+        dynamicSpawnInterval = Mathf.Max(30f, worldEventSpawnInterval);
+        dynamicMaxActiveWorldEvents = Mathf.Max(1, maxActiveWorldEvents);
+        spawnTimer = dynamicSpawnInterval;
         UpdateActiveWorldEventsCount();
+        UpdateDirectorDebugFields();
     }
 
     /// <summary>
@@ -128,15 +159,17 @@ public class ChallengeManager : MonoBehaviour
     
     private void Update()
     {
+        UpdateDynamicDirector(Time.deltaTime);
+
         if (autoSpawnChallenges)
         {
             spawnTimer -= Time.deltaTime;
 
             // OPTIMIZED: Use cached count instead of LINQ query each frame
-            if (spawnTimer <= 0f && cachedActiveWorldEventsCount < maxActiveWorldEvents)
+            if (spawnTimer <= 0f && cachedActiveWorldEventsCount < GetActiveWorldEventLimit())
             {
                 SpawnRandomWorldEvent();
-                spawnTimer = worldEventSpawnInterval;
+                spawnTimer = dynamicSpawnInterval;
             }
         }
 
@@ -199,14 +232,14 @@ public class ChallengeManager : MonoBehaviour
         }
 
         // OPTIMIZED: Use cached count instead of LINQ
-        if (cachedActiveWorldEventsCount >= maxActiveWorldEvents)
+        if (cachedActiveWorldEventsCount >= GetActiveWorldEventLimit())
         {
-            Debug.Log($"Max active challenges reached ({maxActiveWorldEvents}). Waiting for current challenge to complete.");
+            Debug.Log($"Max active challenges reached ({GetActiveWorldEventLimit()}). Waiting for current challenge to complete.");
             return;
         }
 
         Transform spawnZone = spawnZones[Random.Range(0, spawnZones.Count)];
-        ChallengeData challenge = worldEventChallenges[Random.Range(0, worldEventChallenges.Count)];
+        ChallengeData challenge = SelectWorldEventChallenge();
 
         SpawnChallenge(challenge, spawnZone.position);
     }
@@ -214,9 +247,9 @@ public class ChallengeManager : MonoBehaviour
     public void SpawnChallenge(ChallengeData challenge, Vector3 position)
     {
         // OPTIMIZED: Use cached count instead of LINQ
-        if (challenge.frequency == ChallengeData.ChallengeFrequency.WorldEvent && cachedActiveWorldEventsCount >= maxActiveWorldEvents)
+        if (challenge.frequency == ChallengeData.ChallengeFrequency.WorldEvent && cachedActiveWorldEventsCount >= GetActiveWorldEventLimit())
         {
-            Debug.LogWarning($"Cannot spawn challenge '{challenge.challengeName}': Max active challenges ({maxActiveWorldEvents}) already reached.");
+            Debug.LogWarning($"Cannot spawn challenge '{challenge.challengeName}': Max active challenges ({GetActiveWorldEventLimit()}) already reached.");
             return;
         }
         ActiveChallenge activeChallenge = new ActiveChallenge(challenge, position, challenge.timeLimit);
@@ -318,11 +351,13 @@ public class ChallengeManager : MonoBehaviour
                 if (challenge.challengeData.allowRetry)
                 {
                     challenge.FailChallenge();
+                    RecordChallengeOutcome(challenge, false);
                     Debug.Log($"Challenge failed (time expired): {challenge.challengeData.challengeName} - Retry available in {challenge.retryCooldown}s");
                     onChallengeExpired?.Invoke(challenge);
                 }
                 else
                 {
+                    RecordChallengeOutcome(challenge, false);
                     // Permanent failure
                     onChallengeExpired?.Invoke(challenge);
                     CleanupChallenge(challenge);
@@ -330,7 +365,7 @@ public class ChallengeManager : MonoBehaviour
                     // OPTIMIZATION: Update cache before removing
                     if (challenge.challengeData.frequency == ChallengeData.ChallengeFrequency.WorldEvent)
                     {
-                        cachedActiveWorldEventsCount--;
+                        cachedActiveWorldEventsCount = Mathf.Max(0, cachedActiveWorldEventsCount - 1);
                     }
 
                     activeChallenges.RemoveAt(i);
@@ -340,12 +375,11 @@ public class ChallengeManager : MonoBehaviour
             else if (challenge.IsCompleted())
             {
                 CompleteChallenge(challenge);
-                CleanupChallenge(challenge);
 
                 // OPTIMIZATION: Update cache before removing
                 if (challenge.challengeData.frequency == ChallengeData.ChallengeFrequency.WorldEvent)
                 {
-                    cachedActiveWorldEventsCount--;
+                    cachedActiveWorldEventsCount = Mathf.Max(0, cachedActiveWorldEventsCount - 1);
                 }
 
                 activeChallenges.RemoveAt(i);
@@ -359,6 +393,8 @@ public class ChallengeManager : MonoBehaviour
         {
             audioSource.PlayOneShot(challenge.challengeData.completeSound);
         }
+
+        RecordChallengeOutcome(challenge, true);
         
         // Grant scaled rewards
         GrantChallengeRewards(challenge);
@@ -378,6 +414,9 @@ public class ChallengeManager : MonoBehaviour
             audioSource.PlayOneShot(challenge.challengeData.failSound);
         }
 
+        challenge.playerDied = true;
+        RecordChallengeOutcome(challenge, false);
+
         onChallengeFailed?.Invoke(challenge);
         CleanupChallenge(challenge);
         Debug.Log($"Challenge failed: {challenge.challengeData.challengeName}");
@@ -387,9 +426,12 @@ public class ChallengeManager : MonoBehaviour
     {
         // Mark as completed to record completion time
         challenge.MarkCompleted();
+
+        float struggleFactor = Mathf.Clamp01(1f - smoothedPerformance);
+        float struggleBonusMultiplier = 1f + (struggleFactor * maxStruggleRewardBonus);
         
         // Grant XP with all bonuses
-        int xpReward = challenge.GetTotalXPReward();
+        int xpReward = Mathf.RoundToInt(challenge.GetTotalXPReward() * struggleBonusMultiplier);
         if (ProgressionManager.Instance != null)
         {
             ProgressionManager.Instance.AddExperience(xpReward);
@@ -397,9 +439,9 @@ public class ChallengeManager : MonoBehaviour
         }
         
         // Grant currency with modifiers
-        int currencyReward = challenge.GetTotalCurrencyReward();
+        int currencyReward = Mathf.RoundToInt(challenge.GetTotalCurrencyReward() * struggleBonusMultiplier);
         // TODO: Integrate with your currency system when available
-        Debug.Log($"Currency reward: {currencyReward}");
+        Debug.Log($"Currency reward: {currencyReward} (Director bonus x{struggleBonusMultiplier:F2})");
         
         // Spawn loot with scaled rarity and count
         if (LootManager.Instance != null)
@@ -433,6 +475,7 @@ public class ChallengeManager : MonoBehaviour
     public void OnEnemyKilled(ActiveChallenge challenge)
     {
         challenge.enemiesKilled++;
+        challenge.lastEnemyKillTime = Time.time;
         challenge.currentProgress = challenge.enemiesKilled;
         onChallengeProgress?.Invoke(challenge);
 
@@ -468,8 +511,227 @@ public class ChallengeManager : MonoBehaviour
         if (challenge.challengeData.requireNoDeaths)
         {
             FailChallenge(challenge);
+
+            if (challenge.challengeData.frequency == ChallengeData.ChallengeFrequency.WorldEvent)
+            {
+                cachedActiveWorldEventsCount = Mathf.Max(0, cachedActiveWorldEventsCount - 1);
+            }
+
             activeChallenges.Remove(challenge);
         }
+    }
+
+    /// <summary>
+    /// Called by player systems when the player loses health.
+    /// Marks nearby active challenges as taking damage pressure so the
+    /// encounter director can ease pacing if needed.
+    /// </summary>
+    public void OnPlayerDamaged(Vector3 playerPosition, float damageAmount)
+    {
+        if (damageAmount <= 0f) return;
+
+        for (int i = 0; i < activeChallenges.Count; i++)
+        {
+            ActiveChallenge challenge = activeChallenges[i];
+            if (challenge == null || challenge.state != ActiveChallenge.ChallengeState.Active)
+                continue;
+
+            if (!challenge.IsPlayerInRange(playerPosition))
+                continue;
+
+            challenge.OnPlayerDamaged();
+            challenge.lastPlayerDamageTime = Time.time;
+        }
+    }
+
+    /// <summary>
+    /// Called by player systems when the player dies.
+    /// This strongly impacts director performance and marks nearby challenges.
+    /// </summary>
+    public void OnPlayerDied(Vector3 playerPosition)
+    {
+        bool anyChallengeMarked = false;
+
+        for (int i = 0; i < activeChallenges.Count; i++)
+        {
+            ActiveChallenge challenge = activeChallenges[i];
+            if (challenge == null || challenge.state != ActiveChallenge.ChallengeState.Active)
+                continue;
+
+            if (!challenge.IsPlayerInRange(playerPosition))
+                continue;
+
+            challenge.playerDied = true;
+            challenge.playerDeathCount++;
+            challenge.lastPlayerDamageTime = Time.time;
+            anyChallengeMarked = true;
+        }
+
+        if (anyChallengeMarked)
+        {
+            smoothedPerformance = Mathf.Lerp(smoothedPerformance, 0.05f, 0.6f);
+        }
+    }
+
+    private int GetActiveWorldEventLimit()
+    {
+        if (!enableDynamicDirector)
+        {
+            return Mathf.Max(1, maxActiveWorldEvents);
+        }
+
+        return Mathf.Clamp(dynamicMaxActiveWorldEvents, 1, Mathf.Max(1, maxDynamicActiveWorldEvents));
+    }
+
+    private void UpdateDynamicDirector(float deltaTime)
+    {
+        if (!enableDynamicDirector)
+        {
+            dynamicSpawnInterval = Mathf.Max(30f, worldEventSpawnInterval);
+            dynamicMaxActiveWorldEvents = Mathf.Max(1, maxActiveWorldEvents);
+            UpdateDirectorDebugFields();
+            return;
+        }
+
+        float targetPerformance = EvaluateCurrentPerformance();
+        float lerpT = Mathf.Clamp01(deltaTime * Mathf.Max(0.05f, directorAdaptSpeed));
+        smoothedPerformance = Mathf.Lerp(smoothedPerformance, targetPerformance, lerpT);
+
+        int safeMinEvents = Mathf.Max(1, minDynamicActiveWorldEvents);
+        int safeMaxEvents = Mathf.Max(safeMinEvents, maxDynamicActiveWorldEvents);
+        float safeMinInterval = Mathf.Max(30f, minDynamicSpawnInterval);
+        float safeMaxInterval = Mathf.Max(safeMinInterval, maxDynamicSpawnInterval);
+
+        // High performance means faster pacing and more concurrent world events.
+        dynamicSpawnInterval = Mathf.Lerp(safeMaxInterval, safeMinInterval, smoothedPerformance);
+        dynamicMaxActiveWorldEvents = Mathf.RoundToInt(Mathf.Lerp(safeMinEvents, safeMaxEvents, smoothedPerformance));
+
+        UpdateDirectorDebugFields();
+    }
+
+    private void UpdateDirectorDebugFields()
+    {
+        if (!showDirectorDebugInInspector) return;
+
+        debugPerformanceScore = smoothedPerformance;
+        debugSpawnInterval = dynamicSpawnInterval;
+        debugWorldEventLimit = GetActiveWorldEventLimit();
+        debugActiveWorldEvents = cachedActiveWorldEventsCount;
+        debugActiveChallenges = activeChallenges != null ? activeChallenges.Count : 0;
+    }
+
+    private float EvaluateCurrentPerformance()
+    {
+        List<ActiveChallenge> inProgress = GetActiveChallengesInProgress();
+        if (inProgress.Count == 0)
+        {
+            return smoothedPerformance;
+        }
+
+        float totalPerformance = 0f;
+        float gearQuality = 1f;
+        if (ProgressionManager.Instance != null)
+        {
+            gearQuality = ProgressionManager.Instance.GetGearQuality();
+        }
+
+        foreach (ActiveChallenge challenge in inProgress)
+        {
+            float objectiveProgress = challenge.GetProgress();
+            float timeProgress = challenge.GetTimeProgress();
+
+            // Positive when objective progress outpaces elapsed mission time.
+            float paceBalance = 0.5f + ((objectiveProgress - timeProgress) * 0.9f);
+            float paceScore = Mathf.Clamp01(paceBalance);
+
+            // Slow kill cadence means the encounter is likely overwhelming.
+            float killCadenceScore = 0.5f;
+            if (challenge.lastEnemyKillTime > 0f)
+            {
+                float secondsSinceKill = Time.time - challenge.lastEnemyKillTime;
+                killCadenceScore = Mathf.Clamp01(1f - (secondsSinceKill / 25f));
+            }
+
+            float damagePenalty = challenge.tookDamage ? 0.15f : 0f;
+            if (challenge.lastPlayerDamageTime > 0f)
+            {
+                float recentDamageWindow = Mathf.Clamp01(1f - ((Time.time - challenge.lastPlayerDamageTime) / 12f));
+                damagePenalty += recentDamageWindow * 0.2f;
+            }
+
+            float deathPenalty = Mathf.Clamp(challenge.playerDeathCount * 0.25f, 0f, 0.5f);
+            float challengePerformance =
+                (paceScore * 0.55f) +
+                (killCadenceScore * 0.25f) +
+                (gearQuality * 0.20f) -
+                damagePenalty -
+                deathPenalty;
+
+            totalPerformance += Mathf.Clamp01(challengePerformance);
+        }
+
+        return totalPerformance / inProgress.Count;
+    }
+
+    private ChallengeData SelectWorldEventChallenge()
+    {
+        if (!enableDynamicDirector || worldEventChallenges.Count <= 1)
+        {
+            return worldEventChallenges[Random.Range(0, worldEventChallenges.Count)];
+        }
+
+        int targetDifficulty = Mathf.RoundToInt(Mathf.Lerp(
+            (int)ChallengeData.ChallengeDifficulty.Easy,
+            (int)ChallengeData.ChallengeDifficulty.Extreme,
+            smoothedPerformance
+        ));
+
+        int playerLevel = 1;
+        if (ProgressionManager.Instance != null)
+        {
+            playerLevel = Mathf.Max(1, ProgressionManager.Instance.currentLevel);
+        }
+
+        ChallengeData best = null;
+        float bestScore = float.MaxValue;
+
+        for (int i = 0; i < worldEventChallenges.Count; i++)
+        {
+            ChallengeData candidate = worldEventChallenges[i];
+            int difficultyDelta = Mathf.Abs((int)candidate.difficulty - targetDifficulty);
+            float levelDelta = Mathf.Abs(candidate.recommendedLevel - playerLevel) * 0.08f;
+            float score = difficultyDelta + levelDelta + Random.Range(0f, 0.35f);
+
+            if (score < bestScore)
+            {
+                bestScore = score;
+                best = candidate;
+            }
+        }
+
+        return best ?? worldEventChallenges[Random.Range(0, worldEventChallenges.Count)];
+    }
+
+    private void RecordChallengeOutcome(ActiveChallenge challenge, bool success)
+    {
+        if (!enableDynamicDirector || challenge == null)
+        {
+            return;
+        }
+
+        float outcomeScore;
+        if (success)
+        {
+            float speedBonus = challenge.CheckSpeedCompletion() ? 0.2f : 0f;
+            float cleanBonus = (!challenge.tookDamage && !challenge.playerDied) ? 0.15f : 0f;
+            outcomeScore = Mathf.Clamp01(0.65f + speedBonus + cleanBonus);
+        }
+        else
+        {
+            outcomeScore = challenge.tookDamage ? 0.1f : 0.2f;
+        }
+
+        smoothedPerformance = Mathf.Lerp(smoothedPerformance, outcomeScore, 0.3f);
     }
 
     public void UpdateChallengeProgress(ActiveChallenge challenge, int amount = 1)
@@ -710,6 +972,9 @@ public class ActiveChallenge
     public ChallengeData.ChallengeDifficulty actualDifficulty;
     public float enemyHealthMultiplier;
     public float enemyDamageMultiplier;
+    public float lastEnemyKillTime;
+    public float lastPlayerDamageTime;
+    public int playerDeathCount;
     
     // Bonus tracking
     public float startTime;

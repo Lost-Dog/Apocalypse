@@ -23,10 +23,25 @@ public interface IPlayerProvider
     /// <summary>Sets health directly, clamped to [0, MaxHealth].</summary>
     void SetHealth(float value);
 
-    /// <summary>Applies a damage amount (positive = damage, negative = heal).</summary>
+    /// <summary>
+    /// Applies a damage amount (positive = damage, negative = heal).
+    /// Damage is routed through armour first: armour absorbs all damage until it
+    /// drops below 25% of its maximum, after which health begins taking damage.
+    /// </summary>
     void ApplyDamage(float amount);
 
-    // ── Shield ────────────────────────────────────────────────────────────────
+    // ── Armour ────────────────────────────────────────────────────────────────
+
+    /// <summary>Current armour value.</summary>
+    float Armour    { get; }
+
+    /// <summary>Maximum armour value for the current level.</summary>
+    float MaxArmour { get; }
+
+    /// <summary>Sets armour directly, clamped to [0, MaxArmour].</summary>
+    void SetArmour(float value);
+
+    // ── Shield (legacy — kept for backward compatibility) ─────────────────────
 
     float Shield    { get; }
     float MaxShield { get; }
@@ -46,4 +61,7 @@ public interface IPlayerProvider
 
     /// <summary>Fired whenever Health changes. Passes (currentHealth, maxHealth).</summary>
     event System.Action<float, float> OnHealthChanged;
+
+    /// <summary>Fired whenever Armour changes. Passes (currentArmour, maxArmour).</summary>
+    event System.Action<float, float> OnArmourChanged;
 }

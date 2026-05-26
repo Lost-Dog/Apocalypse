@@ -5,6 +5,8 @@ using UnityEngine;
 public class bl_MiniMapData : ScriptableObject
 {
     public RenderPipeline renderPipeline = RenderPipeline.BuiltIn;
+    [Tooltip("If true all minimap planes will be visible in the hierarchy for debugging purposes.")]
+    public bool showPlanesInHierarchy = false;
 
     [Header("References")]
     public GameObject IconPrefab;

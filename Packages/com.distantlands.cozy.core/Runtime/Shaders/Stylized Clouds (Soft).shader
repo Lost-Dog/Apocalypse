@@ -1,4 +1,4 @@
-// Made with Amplify Shader Editor v1.9.9.4
+// Made with Amplify Shader Editor v1.9.5.1
 // Available at the Unity Asset Store - http://u3d.as/y3X 
 Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 {
@@ -22,7 +22,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
         [HideInInspector][NoScaleOffset] unity_LightmapsInd("unity_LightmapsInd", 2DArray) = "" {}
         [HideInInspector][NoScaleOffset] unity_ShadowMasks("unity_ShadowMasks", 2DArray) = "" {}
 
-		[HideInInspector][ToggleOff] _ReceiveShadows("Receive Shadows", Float) = 1
+		[HideInInspector][ToggleOff] _ReceiveShadows("Receive Shadows", Float) = 1.0
 	}
 
 	SubShader
@@ -31,7 +31,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 
 		
 
-		Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Transparent" "Queue"="Transparent" "UniversalMaterialType"="Unlit" }
+		Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Transparent" "Queue"="Transparent-50" "UniversalMaterialType"="Unlit" }
 
 		Cull Front
 		AlphaToMask Off
@@ -49,10 +49,6 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 		#pragma target 4.5
 		#pragma prefer_hlslcc gles
 		// ensure rendering platforms toggle list is visible
-
-		#if ( SHADER_TARGET > 35 ) && defined( SHADER_API_GLES3 )
-			#error For WebGL2/GLES3, please set your shader target to 3.5 via SubShader options. URP shaders in ASE use target 4.5 by default.
-		#endif
 
 		#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
 		#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Filtering.hlsl"
@@ -179,16 +175,16 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 
 			
 
-			#pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
 			#pragma multi_compile_instancing
 			#pragma instancing_options renderinglayer
 			#define _SURFACE_TYPE_TRANSPARENT 1
-			#define ASE_VERSION 19904
-			#define ASE_SRP_VERSION 140012
+			#define ASE_SRP_VERSION 140010
 
 
 			
 
+			#pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
 			#pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
 
 			
@@ -241,35 +237,32 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
             #endif
 
-			#define ASE_NEEDS_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_WORLD_POSITION
 			#define ASE_NEEDS_FRAG_WORLD_POSITION
-			#define ASE_NEEDS_FRAG_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_FRAG_SCREEN_POSITION_NORMALIZED
+			#define ASE_NEEDS_FRAG_SCREEN_POSITION
 
 
-			#if defined(ASE_EARLY_Z_DEPTH_OPTIMIZE) && (SHADER_TARGET >= 45)
-				#define ASE_SV_DEPTH SV_DepthLessEqual
-				#define ASE_SV_POSITION_QUALIFIERS linear noperspective centroid
-			#else
-				#define ASE_SV_DEPTH SV_Depth
-				#define ASE_SV_POSITION_QUALIFIERS
-			#endif
-
-			struct Attributes
+			struct VertexInput
 			{
 				float4 positionOS : POSITION;
-				half3 normalOS : NORMAL;
+				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
-			struct PackedVaryings
+			struct VertexOutput
 			{
-				ASE_SV_POSITION_QUALIFIERS float4 positionCS : SV_POSITION;
-				float4 positionWSAndFogFactor : TEXCOORD0;
-				half3 normalWS : TEXCOORD1;
-				float4 ase_texcoord2 : TEXCOORD2;
+				float4 positionCS : SV_POSITION;
+				float4 clipPosV : TEXCOORD0;
+				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
+					float3 positionWS : TEXCOORD1;
+				#endif
+				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
+					float4 shadowCoord : TEXCOORD2;
+				#endif
+				#ifdef ASE_FOG
+					float fogFactor : TEXCOORD3;
+				#endif
+				float4 ase_texcoord4 : TEXCOORD4;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
@@ -385,203 +378,203 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				return 130.0 * dot( m, g );
 			}
 			
-					float2 voronoihash84_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash84_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi84_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash84_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return (F2 + F1) * 0.5;
-					}
+			float voronoi84_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash84_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return (F2 + F1) * 0.5;
+			}
 			
-					float2 voronoihash91_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash91_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi91_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash91_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return (F2 + F1) * 0.5;
-					}
+			float voronoi91_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash91_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return (F2 + F1) * 0.5;
+			}
 			
-					float2 voronoihash87_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash87_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi87_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash87_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return F1;
-					}
+			float voronoi87_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash87_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return F1;
+			}
 			
-					float2 voronoihash201_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash201_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi201_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash201_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return (F2 + F1) * 0.5;
-					}
+			float voronoi201_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash201_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return (F2 + F1) * 0.5;
+			}
 			
-					float2 voronoihash234_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash234_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi234_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash234_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return F1;
-					}
+			float voronoi234_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash234_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return F1;
+			}
 			
-					float2 voronoihash287_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash287_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi287_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash287_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return F1;
-					}
+			float voronoi287_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash287_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return F1;
+			}
 			
 			float HLSL20_g71( bool enabled, bool submerged, float textureSample )
 			{
@@ -597,20 +590,20 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 			}
 			
 
-			PackedVaryings VertexFunction( Attributes input  )
+			VertexOutput VertexFunction( VertexInput v  )
 			{
-				PackedVaryings output = (PackedVaryings)0;
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_TRANSFER_INSTANCE_ID(input, output);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+				VertexOutput o = (VertexOutput)0;
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-				output.ase_texcoord2.xy = input.ase_texcoord.xy;
+				o.ase_texcoord4.xy = v.ase_texcoord.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				output.ase_texcoord2.zw = 0;
+				o.ase_texcoord4.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					float3 defaultVertexValue = input.positionOS.xyz;
+					float3 defaultVertexValue = v.positionOS.xyz;
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
@@ -618,32 +611,37 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float3 vertexValue = defaultVertexValue;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					input.positionOS.xyz = vertexValue;
+					v.positionOS.xyz = vertexValue;
 				#else
-					input.positionOS.xyz += vertexValue;
+					v.positionOS.xyz += vertexValue;
 				#endif
 
-				input.normalOS = input.normalOS;
+				v.normalOS = v.normalOS;
 
-				VertexPositionInputs vertexInput = GetVertexPositionInputs( input.positionOS.xyz );
-				VertexNormalInputs normalInput = GetVertexNormalInputs( input.normalOS );
+				VertexPositionInputs vertexInput = GetVertexPositionInputs( v.positionOS.xyz );
 
-				float fogFactor = 0;
-				#if defined(ASE_FOG) && !defined(_FOG_FRAGMENT)
-					fogFactor = ComputeFogFactor(vertexInput.positionCS.z);
+				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
+					o.positionWS = vertexInput.positionWS;
 				#endif
 
-				output.positionCS = vertexInput.positionCS;
-				output.positionWSAndFogFactor = float4( vertexInput.positionWS, fogFactor );
-				output.normalWS = normalInput.normalWS;
-				return output;
+				#ifdef ASE_FOG
+					o.fogFactor = ComputeFogFactor( vertexInput.positionCS.z );
+				#endif
+
+				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
+					o.shadowCoord = GetShadowCoord( vertexInput );
+				#endif
+
+				o.positionCS = vertexInput.positionCS;
+				o.clipPosV = vertexInput.positionCS;
+				return o;
 			}
 
 			#if defined(ASE_TESSELLATION)
 			struct VertexControl
 			{
-				float4 positionOS : INTERNALTESSPOS;
-				half3 normalOS : NORMAL;
+				float4 vertex : INTERNALTESSPOS;
+				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 
 				UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -655,34 +653,34 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float inside : SV_InsideTessFactor;
 			};
 
-			VertexControl vert ( Attributes input )
+			VertexControl vert ( VertexInput v )
 			{
-				VertexControl output;
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_TRANSFER_INSTANCE_ID(input, output);
-				output.positionOS = input.positionOS;
-				output.normalOS = input.normalOS;
-				output.ase_texcoord = input.ase_texcoord;
-				return output;
+				VertexControl o;
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				o.vertex = v.positionOS;
+				o.normalOS = v.normalOS;
+				o.ase_texcoord = v.ase_texcoord;
+				return o;
 			}
 
-			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> input)
+			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> v)
 			{
-				TessellationFactors output;
+				TessellationFactors o;
 				float4 tf = 1;
 				float tessValue = _TessValue; float tessMin = _TessMin; float tessMax = _TessMax;
 				float edgeLength = _TessEdgeLength; float tessMaxDisp = _TessMaxDisp;
 				#if defined(ASE_FIXED_TESSELLATION)
 				tf = FixedTess( tessValue );
 				#elif defined(ASE_DISTANCE_TESSELLATION)
-				tf = DistanceBasedTess(input[0].positionOS, input[1].positionOS, input[2].positionOS, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
+				tf = DistanceBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
 				#elif defined(ASE_LENGTH_TESSELLATION)
-				tf = EdgeLengthBasedTess(input[0].positionOS, input[1].positionOS, input[2].positionOS, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
+				tf = EdgeLengthBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
 				#elif defined(ASE_LENGTH_CULL_TESSELLATION)
-				tf = EdgeLengthBasedTessCull(input[0].positionOS, input[1].positionOS, input[2].positionOS, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
+				tf = EdgeLengthBasedTessCull(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
 				#endif
-				output.edge[0] = tf.x; output.edge[1] = tf.y; output.edge[2] = tf.z; output.inside = tf.w;
-				return output;
+				o.edge[0] = tf.x; o.edge[1] = tf.y; o.edge[2] = tf.z; o.inside = tf.w;
+				return o;
 			}
 
 			[domain("tri")]
@@ -696,65 +694,54 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 			}
 
 			[domain("tri")]
-			PackedVaryings DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
+			VertexOutput DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
 			{
-				Attributes output = (Attributes) 0;
-				output.positionOS = patch[0].positionOS * bary.x + patch[1].positionOS * bary.y + patch[2].positionOS * bary.z;
-				output.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
-				output.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
+				VertexInput o = (VertexInput) 0;
+				o.positionOS = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
+				o.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
+				o.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
-					pp[i] = output.positionOS.xyz - patch[i].normalOS * (dot(output.positionOS.xyz, patch[i].normalOS) - dot(patch[i].positionOS.xyz, patch[i].normalOS));
+					pp[i] = o.positionOS.xyz - patch[i].normalOS * (dot(o.positionOS.xyz, patch[i].normalOS) - dot(patch[i].vertex.xyz, patch[i].normalOS));
 				float phongStrength = _TessPhongStrength;
-				output.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * output.positionOS.xyz;
+				o.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.positionOS.xyz;
 				#endif
-				UNITY_TRANSFER_INSTANCE_ID(patch[0], output);
-				return VertexFunction(output);
+				UNITY_TRANSFER_INSTANCE_ID(patch[0], o);
+				return VertexFunction(o);
 			}
 			#else
-			PackedVaryings vert ( Attributes input )
+			VertexOutput vert ( VertexInput v )
 			{
-				return VertexFunction( input );
+				return VertexFunction( v );
 			}
 			#endif
 
-			half4 frag ( PackedVaryings input
-						#if defined( ASE_DEPTH_WRITE_ON )
-						,out float outputDepth : ASE_SV_DEPTH
-						#endif
-						#ifdef _WRITE_RENDERING_LAYERS
-						, out float4 outRenderingLayers : SV_Target1
-						#endif
-						 ) : SV_Target
+			half4 frag ( VertexOutput IN
+				#ifdef _WRITE_RENDERING_LAYERS
+				, out float4 outRenderingLayers : SV_Target1
+				#endif
+				 ) : SV_Target
 			{
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+				UNITY_SETUP_INSTANCE_ID( IN );
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( IN );
 
-				#if defined( _SURFACE_TYPE_TRANSPARENT )
-					const bool isTransparent = true;
-				#else
-					const bool isTransparent = false;
+				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
+					float3 WorldPosition = IN.positionWS;
 				#endif
 
-				#if defined(LOD_FADE_CROSSFADE)
-					LODFadeCrossFade( input.positionCS );
-				#endif
+				float4 ShadowCoords = float4( 0, 0, 0, 0 );
 
-				#if defined(MAIN_LIGHT_CALCULATE_SHADOWS)
-					float4 shadowCoord = TransformWorldToShadowCoord( input.positionWSAndFogFactor.xyz );
-				#else
-					float4 shadowCoord = float4(0, 0, 0, 0);
-				#endif
+				float4 ClipPos = IN.clipPosV;
+				float4 ScreenPos = ComputeScreenPos( IN.clipPosV );
 
-				float3 PositionWS = input.positionWSAndFogFactor.xyz;
-				float3 PositionRWS = GetCameraRelativePositionWS( PositionWS );
-				half3 ViewDirWS = GetWorldSpaceNormalizeViewDir( PositionWS );
-				float4 ShadowCoord = shadowCoord;
-				float4 ScreenPosNorm = float4( GetNormalizedScreenSpaceUV( input.positionCS ), input.positionCS.zw );
-				float4 ClipPos = ComputeClipSpacePosition( ScreenPosNorm.xy, input.positionCS.z ) * input.positionCS.w;
-				float4 ScreenPos = ComputeScreenPos( ClipPos );
-				half3 NormalWS = normalize( input.normalWS );
+				#if defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
+					#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+						ShadowCoords = IN.shadowCoord;
+					#elif defined(MAIN_LIGHT_CALCULATE_SHADOWS)
+						ShadowCoords = TransformWorldToShadowCoord( WorldPosition );
+					#endif
+				#endif
 
 				float3 hsvTorgb2_g68 = RGBToHSV( CZY_CloudColor.rgb );
 				float3 hsvTorgb3_g68 = HSVToRGB( float3(hsvTorgb2_g68.x,saturate( ( hsvTorgb2_g68.y + CZY_FilterSaturation ) ),( hsvTorgb2_g68.z + CZY_FilterValue )) );
@@ -764,7 +751,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float3 hsvTorgb3_g67 = HSVToRGB( float3(hsvTorgb2_g67.x,saturate( ( hsvTorgb2_g67.y + CZY_FilterSaturation ) ),( hsvTorgb2_g67.z + CZY_FilterValue )) );
 				float4 temp_output_10_0_g67 = ( float4( hsvTorgb3_g67 , 0.0 ) * CZY_FilterColor );
 				float4 CloudHighlightColor56_g66 = ( temp_output_10_0_g67 * CZY_SunFilterColor );
-				float2 texCoord31_g66 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord31_g66 = IN.ase_texcoord4.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 Pos33_g66 = texCoord31_g66;
 				float mulTime29_g66 = _TimeParameters.x * ( 0.001 * CZY_WindSpeed );
 				float TIme30_g66 = mulTime29_g66;
@@ -787,14 +774,14 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float2 appendResult98_g66 = (float2(voroi84_g66 , voroi91_g66));
 				float2 VoroDetails112_g66 = appendResult98_g66;
 				float CumulusCoverage34_g66 = CZY_CumulusCoverageMultiplier;
-				float ComplexCloudDensity144_g66 =  (0.0 + ( min( SimpleCloudDensity155_g66 , ( 1.0 - VoroDetails112_g66.x ) ) - ( 1.0 - CumulusCoverage34_g66 ) ) * ( 1.0 - 0.0 ) / ( 1.0 - ( 1.0 - CumulusCoverage34_g66 ) ) );
-				float4 lerpResult334_g66 = lerp( CloudHighlightColor56_g66 , CloudColor41_g66 , saturate(  (2.0 + ( ComplexCloudDensity144_g66 - 0.0 ) * ( 0.7 - 2.0 ) / ( 1.0 - 0.0 ) ) ));
-				float3 normalizeResult40_g66 = normalize( ( PositionWS - _WorldSpaceCameraPos ) );
+				float ComplexCloudDensity144_g66 = (0.0 + (min( SimpleCloudDensity155_g66 , ( 1.0 - VoroDetails112_g66.x ) ) - ( 1.0 - CumulusCoverage34_g66 )) * (1.0 - 0.0) / (1.0 - ( 1.0 - CumulusCoverage34_g66 )));
+				float4 lerpResult334_g66 = lerp( CloudHighlightColor56_g66 , CloudColor41_g66 , saturate( (2.0 + (ComplexCloudDensity144_g66 - 0.0) * (0.7 - 2.0) / (1.0 - 0.0)) ));
+				float3 normalizeResult40_g66 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
 				float dotResult42_g66 = dot( normalizeResult40_g66 , CZY_SunDirection );
 				float temp_output_50_0_g66 = abs( (dotResult42_g66*0.5 + 0.5) );
 				half LightMask57_g66 = saturate( pow( temp_output_50_0_g66 , CZY_SunFlareFalloff ) );
 				float CloudThicknessDetails301_g66 = ( VoroDetails112_g66.y * saturate( ( CumulusCoverage34_g66 - 0.8 ) ) );
-				float3 normalizeResult43_g66 = normalize( ( PositionWS - _WorldSpaceCameraPos ) );
+				float3 normalizeResult43_g66 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
 				float dotResult47_g66 = dot( normalizeResult43_g66 , CZY_MoonDirection );
 				half MoonlightMask58_g66 = saturate( pow( abs( (dotResult47_g66*0.5 + 0.5) ) , CZY_MoonFlareFalloff ) );
 				float3 hsvTorgb2_g69 = RGBToHSV( CZY_CloudMoonColor.rgb );
@@ -817,24 +804,24 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				fade87_g66 *= 0.5;
 				}//Voronoi87_g66
 				voroi87_g66 /= rest87_g66;
-				float temp_output_174_0_g66 = (  (0.0 + ( ( 1.0 - voroi87_g66 ) - 0.3 ) * ( 0.5 - 0.0 ) / ( 1.0 - 0.3 ) ) * 0.1 * CZY_DetailAmount );
+				float temp_output_174_0_g66 = ( (0.0 + (( 1.0 - voroi87_g66 ) - 0.3) * (0.5 - 0.0) / (1.0 - 0.3)) * 0.1 * CZY_DetailAmount );
 				float DetailedClouds258_g66 = saturate( ( ComplexCloudDensity144_g66 + temp_output_174_0_g66 ) );
 				float CloudDetail180_g66 = temp_output_174_0_g66;
-				float2 texCoord82_g66 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord82_g66 = IN.ase_texcoord4.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_163_0_g66 = ( texCoord82_g66 - float2( 0.5,0.5 ) );
 				float dotResult214_g66 = dot( temp_output_163_0_g66 , temp_output_163_0_g66 );
 				float BorderHeight156_g66 = ( 1.0 - CZY_BorderHeight );
 				float temp_output_153_0_g66 = ( -2.0 * ( 1.0 - CZY_BorderVariation ) );
-				float clampResult253_g66 = clamp( ( ( ( CloudDetail180_g66 + SimpleCloudDensity155_g66 ) * saturate(  (( BorderHeight156_g66 * temp_output_153_0_g66 ) + ( dotResult214_g66 - 0.0 ) * ( ( temp_output_153_0_g66 * -4.0 ) - ( BorderHeight156_g66 * temp_output_153_0_g66 ) ) / ( 1.0 - 0.0 ) ) ) ) * 10.0 * CZY_BorderEffect ) , -1.0 , 1.0 );
+				float clampResult253_g66 = clamp( ( ( ( CloudDetail180_g66 + SimpleCloudDensity155_g66 ) * saturate( (( BorderHeight156_g66 * temp_output_153_0_g66 ) + (dotResult214_g66 - 0.0) * (( temp_output_153_0_g66 * -4.0 ) - ( BorderHeight156_g66 * temp_output_153_0_g66 )) / (1.0 - 0.0)) ) ) * 10.0 * CZY_BorderEffect ) , -1.0 , 1.0 );
 				float BorderLightTransport403_g66 = clampResult253_g66;
-				float3 normalizeResult119_g66 = normalize( ( PositionWS - _WorldSpaceCameraPos ) );
+				float3 normalizeResult119_g66 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
 				float3 normalizeResult149_g66 = normalize( CZY_StormDirection );
 				float dotResult152_g66 = dot( normalizeResult119_g66 , normalizeResult149_g66 );
-				float2 texCoord101_g66 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord101_g66 = IN.ase_texcoord4.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_127_0_g66 = ( texCoord101_g66 - float2( 0.5,0.5 ) );
 				float dotResult128_g66 = dot( temp_output_127_0_g66 , temp_output_127_0_g66 );
 				float temp_output_143_0_g66 = ( -2.0 * ( 1.0 - ( CZY_NimbusVariation * 0.9 ) ) );
-				float NimbusLightTransport280_g66 = saturate( ( ( ( CloudDetail180_g66 + SimpleCloudDensity155_g66 ) * saturate(  (( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_143_0_g66 ) + ( ( dotResult152_g66 + ( CZY_NimbusHeight * 4.0 * dotResult128_g66 ) ) - 0.5 ) * ( ( temp_output_143_0_g66 * -4.0 ) - ( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_143_0_g66 ) ) / ( 7.0 - 0.5 ) ) ) ) * 10.0 ) );
+				float NimbusLightTransport280_g66 = saturate( ( ( ( CloudDetail180_g66 + SimpleCloudDensity155_g66 ) * saturate( (( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_143_0_g66 ) + (( dotResult152_g66 + ( CZY_NimbusHeight * 4.0 * dotResult128_g66 ) ) - 0.5) * (( temp_output_143_0_g66 * -4.0 ) - ( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_143_0_g66 )) / (7.0 - 0.5)) ) ) * 10.0 ) );
 				float mulTime107_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D146_g66 = snoise( (Pos33_g66*1.0 + mulTime107_g66)*2.0 );
 				float mulTime96_g66 = _TimeParameters.x * CZY_ChemtrailsMoveSpeed;
@@ -847,10 +834,10 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float mulTime110_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D150_g66 = snoise( (Pos33_g66*1.0 + mulTime110_g66)*4.0 );
 				float4 ChemtrailsPattern212_g66 = ( ( saturate( simplePerlin2D146_g66 ) * tex2D( CZY_ChemtrailsTexture, (rotator100_g66*0.5 + 0.0) ) ) + ( tex2D( CZY_ChemtrailsTexture, rotator134_g66 ) * saturate( simplePerlin2D150_g66 ) ) );
-				float2 texCoord142_g66 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord142_g66 = IN.ase_texcoord4.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_164_0_g66 = ( texCoord142_g66 - float2( 0.5,0.5 ) );
 				float dotResult209_g66 = dot( temp_output_164_0_g66 , temp_output_164_0_g66 );
-				float ChemtrailsFinal254_g66 = ( ( ChemtrailsPattern212_g66 * saturate(  (0.4 + ( dotResult209_g66 - 0.0 ) * ( 2.0 - 0.4 ) / ( 0.1 - 0.0 ) ) ) ).r > ( 1.0 - ( CZY_ChemtrailsMultiplier * 0.5 ) ) ? 1.0 : 0.0 );
+				float ChemtrailsFinal254_g66 = ( ( ChemtrailsPattern212_g66 * saturate( (0.4 + (dotResult209_g66 - 0.0) * (2.0 - 0.4) / (0.1 - 0.0)) ) ).r > ( 1.0 - ( CZY_ChemtrailsMultiplier * 0.5 ) ) ? 1.0 : 0.0 );
 				float mulTime83_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D129_g66 = snoise( (Pos33_g66*1.0 + mulTime83_g66)*2.0 );
 				float mulTime78_g66 = _TimeParameters.x * CZY_CirrusMoveSpeed;
@@ -864,10 +851,10 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float simplePerlin2D125_g66 = snoise( (Pos33_g66*1.0 + mulTime138_g66) );
 				simplePerlin2D125_g66 = simplePerlin2D125_g66*0.5 + 0.5;
 				float4 CirrusPattern140_g66 = ( ( saturate( simplePerlin2D129_g66 ) * tex2D( CZY_CirrusTexture, (rotator104_g66*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrusTexture, (rotator115_g66*1.0 + 0.0) ) * saturate( simplePerlin2D125_g66 ) ) );
-				float2 texCoord137_g66 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord137_g66 = IN.ase_texcoord4.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_166_0_g66 = ( texCoord137_g66 - float2( 0.5,0.5 ) );
 				float dotResult159_g66 = dot( temp_output_166_0_g66 , temp_output_166_0_g66 );
-				float4 temp_output_219_0_g66 = ( CirrusPattern140_g66 * saturate(  (0.0 + ( dotResult159_g66 - 0.0 ) * ( 2.0 - 0.0 ) / ( 0.2 - 0.0 ) ) ) );
+				float4 temp_output_219_0_g66 = ( CirrusPattern140_g66 * saturate( (0.0 + (dotResult159_g66 - 0.0) * (2.0 - 0.0) / (0.2 - 0.0)) ) );
 				float Clipping210_g66 = CZY_ClippingThreshold;
 				float CirrusAlpha256_g66 = ( ( temp_output_219_0_g66 * ( CZY_CirrusMultiplier * 10.0 ) ).r > Clipping210_g66 ? 1.0 : 0.0 );
 				float SimpleRadiance279_g66 = saturate( ( DetailedClouds258_g66 + BorderLightTransport403_g66 + NimbusLightTransport280_g66 + ChemtrailsFinal254_g66 + CirrusAlpha256_g66 ) );
@@ -888,11 +875,11 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float voroi201_g66 = voronoi201_g66( coords201_g66, time201_g66, id201_g66, uv201_g66, 0, voronoiSmoothId201_g66 );
 				float time234_g66 = ( 10.0 * mulTime165_g66 );
 				float2 voronoiSmoothId234_g66 = 0;
-				float2 coords234_g66 = input.ase_texcoord2.xy * 10.0;
+				float2 coords234_g66 = IN.ase_texcoord4.xy * 10.0;
 				float2 id234_g66 = 0;
 				float2 uv234_g66 = 0;
 				float voroi234_g66 = voronoi234_g66( coords234_g66, time234_g66, id234_g66, uv234_g66, 0, voronoiSmoothId234_g66 );
-				float AltoCumulusPlacement271_g66 = saturate( ( ( ( 1.0 - 0.0 ) -  (1.0 + ( voroi201_g66 - 0.0 ) * ( -0.5 - 1.0 ) / ( 1.0 - 0.0 ) ) ) - voroi234_g66 ) );
+				float AltoCumulusPlacement271_g66 = saturate( ( ( ( 1.0 - 0.0 ) - (1.0 + (voroi201_g66 - 0.0) * (-0.5 - 1.0) / (1.0 - 0.0)) ) - voroi234_g66 ) );
 				float time287_g66 = 51.2;
 				float2 voronoiSmoothId287_g66 = 0;
 				float2 coords287_g66 = (Pos33_g66*1.0 + ( CZY_AltocumulusWindSpeed * TIme30_g66 )) * ( 100.0 / CZY_AltocumulusScale );
@@ -908,7 +895,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				fade287_g66 *= 0.5;
 				}//Voronoi287_g66
 				voroi287_g66 /= rest287_g66;
-				float AltoCumulusLightTransport300_g66 = ( ( AltoCumulusPlacement271_g66 * ( 0.1 > voroi287_g66 ?  (0.5 + ( voroi287_g66 - 0.0 ) * ( 0.0 - 0.5 ) / ( 0.15 - 0.0 ) ) : 0.0 ) * CZY_AltocumulusMultiplier ) > 0.2 ? 1.0 : 0.0 );
+				float AltoCumulusLightTransport300_g66 = ( ( AltoCumulusPlacement271_g66 * ( 0.1 > voroi287_g66 ? (0.5 + (voroi287_g66 - 0.0) * (0.0 - 0.5) / (0.15 - 0.0)) : 0.0 ) * CZY_AltocumulusMultiplier ) > 0.2 ? 1.0 : 0.0 );
 				float ACCustomLightsClipping343_g66 = ( AltoCumulusLightTransport300_g66 * ( SimpleRadiance279_g66 > Clipping210_g66 ? 0.0 : 1.0 ) );
 				float mulTime194_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D226_g66 = snoise( (Pos33_g66*1.0 + mulTime194_g66)*2.0 );
@@ -922,26 +909,27 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float mulTime185_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D218_g66 = snoise( (Pos33_g66*10.0 + mulTime185_g66)*4.0 );
 				float4 CirrostratPattern270_g66 = ( ( saturate( simplePerlin2D226_g66 ) * tex2D( CZY_CirrostratusTexture, (rotator141_g66*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrostratusTexture, (rotator199_g66*1.5 + 0.75) ) * saturate( simplePerlin2D218_g66 ) ) );
-				float2 texCoord238_g66 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord238_g66 = IN.ase_texcoord4.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_249_0_g66 = ( texCoord238_g66 - float2( 0.5,0.5 ) );
 				float dotResult243_g66 = dot( temp_output_249_0_g66 , temp_output_249_0_g66 );
 				float clampResult274_g66 = clamp( ( CZY_CirrostratusMultiplier * 0.5 ) , 0.0 , 0.98 );
-				float CirrostratLightTransport295_g66 = ( ( CirrostratPattern270_g66 * saturate(  (0.4 + ( dotResult243_g66 - 0.0 ) * ( 2.0 - 0.4 ) / ( 0.1 - 0.0 ) ) ) ).r > ( 1.0 - clampResult274_g66 ) ? 1.0 : 0.0 );
+				float CirrostratLightTransport295_g66 = ( ( CirrostratPattern270_g66 * saturate( (0.4 + (dotResult243_g66 - 0.0) * (2.0 - 0.4) / (0.1 - 0.0)) ) ).r > ( 1.0 - clampResult274_g66 ) ? 1.0 : 0.0 );
 				float CSCustomLightsClipping328_g66 = ( CirrostratLightTransport295_g66 * ( SimpleRadiance279_g66 > Clipping210_g66 ? 0.0 : 1.0 ) );
 				float CustomRadiance359_g66 = saturate( ( ACCustomLightsClipping343_g66 + CSCustomLightsClipping328_g66 ) );
 				float4 lerpResult350_g66 = lerp( ( lerpResult361_g66 + SunThroughClouds326_g66 ) , CirrusCustomLightColor369_g66 , CustomRadiance359_g66);
 				float4 FinalCloudColor402_g66 = lerpResult350_g66;
 				float3 hsvTorgb69_g369 = RGBToHSV( CZY_FogColor5.rgb );
+				float3 normalizeResult54_g369 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
+				float3 temp_output_56_0_g369 = ( normalizeResult54_g369 * _ProjectionParams.z );
 				float3 appendResult25_g369 = (float3(1.0 , CZY_LightFlareSquish , 1.0));
-				float3 normalizeResult13_g369 = normalize( ( ( PositionWS * appendResult25_g369 ) - _WorldSpaceCameraPos ) );
+				float3 normalizeResult13_g369 = normalize( ( ( temp_output_56_0_g369 * appendResult25_g369 ) - _WorldSpaceCameraPos ) );
 				float dotResult16_g369 = dot( normalizeResult13_g369 , CZY_SunDirection );
 				half LightMask35_g369 = saturate( pow( abs( ( (dotResult16_g369*0.5 + 0.5) * CZY_LightIntensity ) ) , CZY_LightFalloff ) );
 				float temp_output_91_0_g369 = CZY_CloudsFogLightAmount;
 				float3 hsvTorgb2_g371 = RGBToHSV( ( CZY_LightColor * hsvTorgb69_g369.z * saturate( ( LightMask35_g369 * ( 1.5 * CZY_FogColor5.a ) * temp_output_91_0_g369 ) ) ).rgb );
 				float3 hsvTorgb3_g371 = HSVToRGB( float3(hsvTorgb2_g371.x,saturate( ( hsvTorgb2_g371.y + CZY_FilterSaturation ) ),( hsvTorgb2_g371.z + CZY_FilterValue )) );
 				float4 temp_output_10_0_g371 = ( float4( hsvTorgb3_g371 , 0.0 ) * CZY_FilterColor );
-				float3 normalizeResult93_g369 = normalize( ( PositionWS - _WorldSpaceCameraPos ) );
-				float3 direction88_g369 = normalizeResult93_g369;
+				float3 direction88_g369 = ( temp_output_56_0_g369 - _WorldSpaceCameraPos );
 				float3 normalizeResult32_g369 = normalize( direction88_g369 );
 				float3 normalizeResult30_g369 = normalize( CZY_MoonDirection );
 				float dotResult28_g369 = dot( normalizeResult32_g369 , normalizeResult30_g369 );
@@ -956,7 +944,9 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float FinalAlpha399_g66 = saturate( ( DetailedClouds258_g66 + BorderLightTransport403_g66 + AltoCumulusLightTransport300_g66 + ChemtrailsFinal254_g66 + CirrostratLightTransport295_g66 + CirrusAlpha256_g66 + NimbusLightTransport280_g66 ) );
 				bool enabled20_g71 =(bool)_UnderwaterRenderingEnabled;
 				bool submerged20_g71 =(bool)_FullySubmerged;
-				float textureSample20_g71 = tex2Dlod( _UnderwaterMask, float4( ScreenPosNorm.xy, 0, 0.0) ).r;
+				float4 ase_screenPosNorm = ScreenPos / ScreenPos.w;
+				ase_screenPosNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_screenPosNorm.z : ase_screenPosNorm.z * 0.5 + 0.5;
+				float textureSample20_g71 = tex2Dlod( _UnderwaterMask, float4( ase_screenPosNorm.xy, 0, 0.0) ).r;
 				float localHLSL20_g71 = HLSL20_g71( enabled20_g71 , submerged20_g71 , textureSample20_g71 );
 				
 				float3 BakedAlbedo = 0;
@@ -966,43 +956,20 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float AlphaClipThreshold = 0.5;
 				float AlphaClipThresholdShadow = 0.5;
 
-				#if defined( ASE_DEPTH_WRITE_ON )
-					float DeviceDepth = input.positionCS.z;
-				#endif
-
-				#if defined( _ALPHATEST_ON )
-					AlphaDiscard( Alpha, AlphaClipThreshold );
-				#endif
-
-				#if defined(MAIN_LIGHT_CALCULATE_SHADOWS) && defined(ASE_CHANGES_WORLD_POS)
-					ShadowCoord = TransformWorldToShadowCoord( PositionWS );
-				#endif
-
-				InputData inputData = (InputData)0;
-				inputData.positionWS = PositionWS;
-				inputData.positionCS = float4( input.positionCS.xy, ClipPos.zw / ClipPos.w );
-				inputData.normalizedScreenSpaceUV = ScreenPosNorm.xy;
-				inputData.normalWS = NormalWS;
-				inputData.viewDirectionWS = ViewDirWS;
-
-				#ifdef ASE_FOG
-					inputData.fogCoord = InitializeInputDataFog(float4(inputData.positionWS, 1.0), input.positionWSAndFogFactor.w);
+				#ifdef _ALPHATEST_ON
+					clip( Alpha - AlphaClipThreshold );
 				#endif
 
 				#if defined(_DBUFFER)
-					ApplyDecalToBaseColor(input.positionCS, Color);
+					ApplyDecalToBaseColor(IN.positionCS, Color);
+				#endif
+
+				#ifdef LOD_FADE_CROSSFADE
+					LODFadeCrossFade( IN.positionCS );
 				#endif
 
 				#ifdef ASE_FOG
-					#ifdef TERRAIN_SPLAT_ADDPASS
-						Color.rgb = MixFogColor(Color.rgb, half3(0,0,0), inputData.fogCoord);
-					#else
-						Color.rgb = MixFog(Color.rgb, inputData.fogCoord);
-					#endif
-				#endif
-
-				#if defined( ASE_DEPTH_WRITE_ON )
-					outputDepth = DeviceDepth;
+					Color = MixFog( Color, IN.fogFactor );
 				#endif
 
 				#ifdef _WRITE_RENDERING_LAYERS
@@ -1010,11 +977,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 					outRenderingLayers = float4( EncodeMeshRenderingLayer( renderingLayers ), 0, 0, 0 );
 				#endif
 
-				#if defined( ASE_OPAQUE_KEEP_ALPHA )
-					return half4( Color, Alpha );
-				#else
-					return half4( Color, OutputAlpha( Alpha, isTransparent ) );
-				#endif
+				return half4( Color, Alpha );
 			}
 			ENDHLSL
 		}
@@ -1037,8 +1000,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 
 			#pragma multi_compile_instancing
 			#define _SURFACE_TYPE_TRANSPARENT 1
-			#define ASE_VERSION 19904
-			#define ASE_SRP_VERSION 140012
+			#define ASE_SRP_VERSION 140010
 
 
 			
@@ -1065,32 +1027,28 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
             #endif
 
-			#define ASE_NEEDS_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_FRAG_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_FRAG_SCREEN_POSITION_NORMALIZED
+			#define ASE_NEEDS_FRAG_WORLD_POSITION
 
 
-			#if defined(ASE_EARLY_Z_DEPTH_OPTIMIZE) && (SHADER_TARGET >= 45)
-				#define ASE_SV_DEPTH SV_DepthLessEqual
-				#define ASE_SV_POSITION_QUALIFIERS linear noperspective centroid
-			#else
-				#define ASE_SV_DEPTH SV_Depth
-				#define ASE_SV_POSITION_QUALIFIERS
-			#endif
-
-			struct Attributes
+			struct VertexInput
 			{
 				float4 positionOS : POSITION;
-				half3 normalOS : NORMAL;
+				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
-			struct PackedVaryings
+			struct VertexOutput
 			{
-				ASE_SV_POSITION_QUALIFIERS float4 positionCS : SV_POSITION;
-				float4 ase_texcoord : TEXCOORD0;
-				float4 ase_texcoord1 : TEXCOORD1;
+				float4 positionCS : SV_POSITION;
+				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
+					float3 positionWS : TEXCOORD0;
+				#endif
+				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
+					float4 shadowCoord : TEXCOORD1;
+				#endif
+				float4 ase_texcoord2 : TEXCOORD2;
+				float4 ase_texcoord3 : TEXCOORD3;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
@@ -1165,203 +1123,203 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				return 130.0 * dot( m, g );
 			}
 			
-					float2 voronoihash84_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash84_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi84_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash84_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return (F2 + F1) * 0.5;
-					}
+			float voronoi84_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash84_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return (F2 + F1) * 0.5;
+			}
 			
-					float2 voronoihash91_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash91_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi91_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash91_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return (F2 + F1) * 0.5;
-					}
+			float voronoi91_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash91_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return (F2 + F1) * 0.5;
+			}
 			
-					float2 voronoihash87_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash87_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi87_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash87_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return F1;
-					}
+			float voronoi87_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash87_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return F1;
+			}
 			
-					float2 voronoihash201_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash201_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi201_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash201_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return (F2 + F1) * 0.5;
-					}
+			float voronoi201_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash201_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return (F2 + F1) * 0.5;
+			}
 			
-					float2 voronoihash234_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash234_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi234_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash234_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return F1;
-					}
+			float voronoi234_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash234_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return F1;
+			}
 			
-					float2 voronoihash287_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash287_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi287_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash287_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return F1;
-					}
+			float voronoi287_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash287_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return F1;
+			}
 			
 			float HLSL20_g71( bool enabled, bool submerged, float textureSample )
 			{
@@ -1380,39 +1338,45 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 			float3 _LightDirection;
 			float3 _LightPosition;
 
-			PackedVaryings VertexFunction( Attributes input )
+			VertexOutput VertexFunction( VertexInput v )
 			{
-				PackedVaryings output;
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_TRANSFER_INSTANCE_ID(input, output);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO( output );
+				VertexOutput o;
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO( o );
 
-				float3 ase_positionWS = TransformObjectToWorld( ( input.positionOS ).xyz );
-				output.ase_texcoord1.xyz = ase_positionWS;
+				float4 ase_clipPos = TransformObjectToHClip((v.positionOS).xyz);
+				float4 screenPos = ComputeScreenPos(ase_clipPos);
+				o.ase_texcoord3 = screenPos;
 				
-				output.ase_texcoord.xy = input.ase_texcoord.xy;
+				o.ase_texcoord2.xy = v.ase_texcoord.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				output.ase_texcoord.zw = 0;
-				output.ase_texcoord1.w = 0;
+				o.ase_texcoord2.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					float3 defaultVertexValue = input.positionOS.xyz;
+					float3 defaultVertexValue = v.positionOS.xyz;
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
 
 				float3 vertexValue = defaultVertexValue;
+
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					input.positionOS.xyz = vertexValue;
+					v.positionOS.xyz = vertexValue;
 				#else
-					input.positionOS.xyz += vertexValue;
+					v.positionOS.xyz += vertexValue;
 				#endif
 
-				input.normalOS = input.normalOS;
+				v.normalOS = v.normalOS;
 
-				float3 positionWS = TransformObjectToWorld( input.positionOS.xyz );
-				half3 normalWS = TransformObjectToWorldDir(input.normalOS);
+				float3 positionWS = TransformObjectToWorld( v.positionOS.xyz );
+
+				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
+					o.positionWS = positionWS;
+				#endif
+
+				float3 normalWS = TransformObjectToWorldDir( v.normalOS );
 
 				#if _CASTING_PUNCTUAL_LIGHT_SHADOW
 					float3 lightDirectionWS = normalize(_LightPosition - positionWS);
@@ -1428,15 +1392,23 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 					positionCS.z = max(positionCS.z, UNITY_NEAR_CLIP_VALUE);
 				#endif
 
-				output.positionCS = positionCS;
-				return output;
+				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
+					VertexPositionInputs vertexInput = (VertexPositionInputs)0;
+					vertexInput.positionWS = positionWS;
+					vertexInput.positionCS = positionCS;
+					o.shadowCoord = GetShadowCoord( vertexInput );
+				#endif
+
+				o.positionCS = positionCS;
+
+				return o;
 			}
 
 			#if defined(ASE_TESSELLATION)
 			struct VertexControl
 			{
-				float4 positionOS : INTERNALTESSPOS;
-				half3 normalOS : NORMAL;
+				float4 vertex : INTERNALTESSPOS;
+				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 
 				UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -1448,34 +1420,34 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float inside : SV_InsideTessFactor;
 			};
 
-			VertexControl vert ( Attributes input )
+			VertexControl vert ( VertexInput v )
 			{
-				VertexControl output;
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_TRANSFER_INSTANCE_ID(input, output);
-				output.positionOS = input.positionOS;
-				output.normalOS = input.normalOS;
-				output.ase_texcoord = input.ase_texcoord;
-				return output;
+				VertexControl o;
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				o.vertex = v.positionOS;
+				o.normalOS = v.normalOS;
+				o.ase_texcoord = v.ase_texcoord;
+				return o;
 			}
 
-			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> input)
+			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> v)
 			{
-				TessellationFactors output;
+				TessellationFactors o;
 				float4 tf = 1;
 				float tessValue = _TessValue; float tessMin = _TessMin; float tessMax = _TessMax;
 				float edgeLength = _TessEdgeLength; float tessMaxDisp = _TessMaxDisp;
 				#if defined(ASE_FIXED_TESSELLATION)
 				tf = FixedTess( tessValue );
 				#elif defined(ASE_DISTANCE_TESSELLATION)
-				tf = DistanceBasedTess(input[0].positionOS, input[1].positionOS, input[2].positionOS, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
+				tf = DistanceBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
 				#elif defined(ASE_LENGTH_TESSELLATION)
-				tf = EdgeLengthBasedTess(input[0].positionOS, input[1].positionOS, input[2].positionOS, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
+				tf = EdgeLengthBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
 				#elif defined(ASE_LENGTH_CULL_TESSELLATION)
-				tf = EdgeLengthBasedTessCull(input[0].positionOS, input[1].positionOS, input[2].positionOS, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
+				tf = EdgeLengthBasedTessCull(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
 				#endif
-				output.edge[0] = tf.x; output.edge[1] = tf.y; output.edge[2] = tf.z; output.inside = tf.w;
-				return output;
+				o.edge[0] = tf.x; o.edge[1] = tf.y; o.edge[2] = tf.z; o.inside = tf.w;
+				return o;
 			}
 
 			[domain("tri")]
@@ -1489,43 +1461,49 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 			}
 
 			[domain("tri")]
-			PackedVaryings DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
+			VertexOutput DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
 			{
-				Attributes output = (Attributes) 0;
-				output.positionOS = patch[0].positionOS * bary.x + patch[1].positionOS * bary.y + patch[2].positionOS * bary.z;
-				output.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
-				output.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
+				VertexInput o = (VertexInput) 0;
+				o.positionOS = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
+				o.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
+				o.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
-					pp[i] = output.positionOS.xyz - patch[i].normalOS * (dot(output.positionOS.xyz, patch[i].normalOS) - dot(patch[i].positionOS.xyz, patch[i].normalOS));
+					pp[i] = o.positionOS.xyz - patch[i].normalOS * (dot(o.positionOS.xyz, patch[i].normalOS) - dot(patch[i].vertex.xyz, patch[i].normalOS));
 				float phongStrength = _TessPhongStrength;
-				output.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * output.positionOS.xyz;
+				o.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.positionOS.xyz;
 				#endif
-				UNITY_TRANSFER_INSTANCE_ID(patch[0], output);
-				return VertexFunction(output);
+				UNITY_TRANSFER_INSTANCE_ID(patch[0], o);
+				return VertexFunction(o);
 			}
 			#else
-			PackedVaryings vert ( Attributes input )
+			VertexOutput vert ( VertexInput v )
 			{
-				return VertexFunction( input );
+				return VertexFunction( v );
 			}
 			#endif
 
-			half4 frag(PackedVaryings input
-						#if defined( ASE_DEPTH_WRITE_ON )
-						,out float outputDepth : ASE_SV_DEPTH
-						#endif
-						 ) : SV_Target
+			half4 frag(VertexOutput IN  ) : SV_TARGET
 			{
-				UNITY_SETUP_INSTANCE_ID( input );
-				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( input );
+				UNITY_SETUP_INSTANCE_ID( IN );
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( IN );
 
-				float4 ScreenPosNorm = float4( GetNormalizedScreenSpaceUV( input.positionCS ), input.positionCS.zw );
-				float4 ClipPos = ComputeClipSpacePosition( ScreenPosNorm.xy, input.positionCS.z ) * input.positionCS.w;
-				float4 ScreenPos = ComputeScreenPos( ClipPos );
+				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
+					float3 WorldPosition = IN.positionWS;
+				#endif
 
-				float2 texCoord31_g66 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float4 ShadowCoords = float4( 0, 0, 0, 0 );
+
+				#if defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
+					#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+						ShadowCoords = IN.shadowCoord;
+					#elif defined(MAIN_LIGHT_CALCULATE_SHADOWS)
+						ShadowCoords = TransformWorldToShadowCoord( WorldPosition );
+					#endif
+				#endif
+
+				float2 texCoord31_g66 = IN.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 Pos33_g66 = texCoord31_g66;
 				float mulTime29_g66 = _TimeParameters.x * ( 0.001 * CZY_WindSpeed );
 				float TIme30_g66 = mulTime29_g66;
@@ -1548,7 +1526,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float2 appendResult98_g66 = (float2(voroi84_g66 , voroi91_g66));
 				float2 VoroDetails112_g66 = appendResult98_g66;
 				float CumulusCoverage34_g66 = CZY_CumulusCoverageMultiplier;
-				float ComplexCloudDensity144_g66 =  (0.0 + ( min( SimpleCloudDensity155_g66 , ( 1.0 - VoroDetails112_g66.x ) ) - ( 1.0 - CumulusCoverage34_g66 ) ) * ( 1.0 - 0.0 ) / ( 1.0 - ( 1.0 - CumulusCoverage34_g66 ) ) );
+				float ComplexCloudDensity144_g66 = (0.0 + (min( SimpleCloudDensity155_g66 , ( 1.0 - VoroDetails112_g66.x ) ) - ( 1.0 - CumulusCoverage34_g66 )) * (1.0 - 0.0) / (1.0 - ( 1.0 - CumulusCoverage34_g66 )));
 				float time87_g66 = 0.0;
 				float2 voronoiSmoothId87_g66 = 0;
 				float2 coords87_g66 = ( Pos33_g66 + ( TIme30_g66 * float2( 0.3,0.2 ) ) ) * ( 100.0 / CZY_DetailScale );
@@ -1564,15 +1542,15 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				fade87_g66 *= 0.5;
 				}//Voronoi87_g66
 				voroi87_g66 /= rest87_g66;
-				float temp_output_174_0_g66 = (  (0.0 + ( ( 1.0 - voroi87_g66 ) - 0.3 ) * ( 0.5 - 0.0 ) / ( 1.0 - 0.3 ) ) * 0.1 * CZY_DetailAmount );
+				float temp_output_174_0_g66 = ( (0.0 + (( 1.0 - voroi87_g66 ) - 0.3) * (0.5 - 0.0) / (1.0 - 0.3)) * 0.1 * CZY_DetailAmount );
 				float DetailedClouds258_g66 = saturate( ( ComplexCloudDensity144_g66 + temp_output_174_0_g66 ) );
 				float CloudDetail180_g66 = temp_output_174_0_g66;
-				float2 texCoord82_g66 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord82_g66 = IN.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_163_0_g66 = ( texCoord82_g66 - float2( 0.5,0.5 ) );
 				float dotResult214_g66 = dot( temp_output_163_0_g66 , temp_output_163_0_g66 );
 				float BorderHeight156_g66 = ( 1.0 - CZY_BorderHeight );
 				float temp_output_153_0_g66 = ( -2.0 * ( 1.0 - CZY_BorderVariation ) );
-				float clampResult253_g66 = clamp( ( ( ( CloudDetail180_g66 + SimpleCloudDensity155_g66 ) * saturate(  (( BorderHeight156_g66 * temp_output_153_0_g66 ) + ( dotResult214_g66 - 0.0 ) * ( ( temp_output_153_0_g66 * -4.0 ) - ( BorderHeight156_g66 * temp_output_153_0_g66 ) ) / ( 1.0 - 0.0 ) ) ) ) * 10.0 * CZY_BorderEffect ) , -1.0 , 1.0 );
+				float clampResult253_g66 = clamp( ( ( ( CloudDetail180_g66 + SimpleCloudDensity155_g66 ) * saturate( (( BorderHeight156_g66 * temp_output_153_0_g66 ) + (dotResult214_g66 - 0.0) * (( temp_output_153_0_g66 * -4.0 ) - ( BorderHeight156_g66 * temp_output_153_0_g66 )) / (1.0 - 0.0)) ) ) * 10.0 * CZY_BorderEffect ) , -1.0 , 1.0 );
 				float BorderLightTransport403_g66 = clampResult253_g66;
 				float time201_g66 = 0.0;
 				float2 voronoiSmoothId201_g66 = 0;
@@ -1583,11 +1561,11 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float voroi201_g66 = voronoi201_g66( coords201_g66, time201_g66, id201_g66, uv201_g66, 0, voronoiSmoothId201_g66 );
 				float time234_g66 = ( 10.0 * mulTime165_g66 );
 				float2 voronoiSmoothId234_g66 = 0;
-				float2 coords234_g66 = input.ase_texcoord.xy * 10.0;
+				float2 coords234_g66 = IN.ase_texcoord2.xy * 10.0;
 				float2 id234_g66 = 0;
 				float2 uv234_g66 = 0;
 				float voroi234_g66 = voronoi234_g66( coords234_g66, time234_g66, id234_g66, uv234_g66, 0, voronoiSmoothId234_g66 );
-				float AltoCumulusPlacement271_g66 = saturate( ( ( ( 1.0 - 0.0 ) -  (1.0 + ( voroi201_g66 - 0.0 ) * ( -0.5 - 1.0 ) / ( 1.0 - 0.0 ) ) ) - voroi234_g66 ) );
+				float AltoCumulusPlacement271_g66 = saturate( ( ( ( 1.0 - 0.0 ) - (1.0 + (voroi201_g66 - 0.0) * (-0.5 - 1.0) / (1.0 - 0.0)) ) - voroi234_g66 ) );
 				float time287_g66 = 51.2;
 				float2 voronoiSmoothId287_g66 = 0;
 				float2 coords287_g66 = (Pos33_g66*1.0 + ( CZY_AltocumulusWindSpeed * TIme30_g66 )) * ( 100.0 / CZY_AltocumulusScale );
@@ -1603,7 +1581,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				fade287_g66 *= 0.5;
 				}//Voronoi287_g66
 				voroi287_g66 /= rest287_g66;
-				float AltoCumulusLightTransport300_g66 = ( ( AltoCumulusPlacement271_g66 * ( 0.1 > voroi287_g66 ?  (0.5 + ( voroi287_g66 - 0.0 ) * ( 0.0 - 0.5 ) / ( 0.15 - 0.0 ) ) : 0.0 ) * CZY_AltocumulusMultiplier ) > 0.2 ? 1.0 : 0.0 );
+				float AltoCumulusLightTransport300_g66 = ( ( AltoCumulusPlacement271_g66 * ( 0.1 > voroi287_g66 ? (0.5 + (voroi287_g66 - 0.0) * (0.0 - 0.5) / (0.15 - 0.0)) : 0.0 ) * CZY_AltocumulusMultiplier ) > 0.2 ? 1.0 : 0.0 );
 				float mulTime107_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D146_g66 = snoise( (Pos33_g66*1.0 + mulTime107_g66)*2.0 );
 				float mulTime96_g66 = _TimeParameters.x * CZY_ChemtrailsMoveSpeed;
@@ -1616,10 +1594,10 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float mulTime110_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D150_g66 = snoise( (Pos33_g66*1.0 + mulTime110_g66)*4.0 );
 				float4 ChemtrailsPattern212_g66 = ( ( saturate( simplePerlin2D146_g66 ) * tex2D( CZY_ChemtrailsTexture, (rotator100_g66*0.5 + 0.0) ) ) + ( tex2D( CZY_ChemtrailsTexture, rotator134_g66 ) * saturate( simplePerlin2D150_g66 ) ) );
-				float2 texCoord142_g66 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord142_g66 = IN.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_164_0_g66 = ( texCoord142_g66 - float2( 0.5,0.5 ) );
 				float dotResult209_g66 = dot( temp_output_164_0_g66 , temp_output_164_0_g66 );
-				float ChemtrailsFinal254_g66 = ( ( ChemtrailsPattern212_g66 * saturate(  (0.4 + ( dotResult209_g66 - 0.0 ) * ( 2.0 - 0.4 ) / ( 0.1 - 0.0 ) ) ) ).r > ( 1.0 - ( CZY_ChemtrailsMultiplier * 0.5 ) ) ? 1.0 : 0.0 );
+				float ChemtrailsFinal254_g66 = ( ( ChemtrailsPattern212_g66 * saturate( (0.4 + (dotResult209_g66 - 0.0) * (2.0 - 0.4) / (0.1 - 0.0)) ) ).r > ( 1.0 - ( CZY_ChemtrailsMultiplier * 0.5 ) ) ? 1.0 : 0.0 );
 				float mulTime194_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D226_g66 = snoise( (Pos33_g66*1.0 + mulTime194_g66)*2.0 );
 				float mulTime179_g66 = _TimeParameters.x * CZY_CirrostratusMoveSpeed;
@@ -1632,11 +1610,11 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float mulTime185_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D218_g66 = snoise( (Pos33_g66*10.0 + mulTime185_g66)*4.0 );
 				float4 CirrostratPattern270_g66 = ( ( saturate( simplePerlin2D226_g66 ) * tex2D( CZY_CirrostratusTexture, (rotator141_g66*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrostratusTexture, (rotator199_g66*1.5 + 0.75) ) * saturate( simplePerlin2D218_g66 ) ) );
-				float2 texCoord238_g66 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord238_g66 = IN.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_249_0_g66 = ( texCoord238_g66 - float2( 0.5,0.5 ) );
 				float dotResult243_g66 = dot( temp_output_249_0_g66 , temp_output_249_0_g66 );
 				float clampResult274_g66 = clamp( ( CZY_CirrostratusMultiplier * 0.5 ) , 0.0 , 0.98 );
-				float CirrostratLightTransport295_g66 = ( ( CirrostratPattern270_g66 * saturate(  (0.4 + ( dotResult243_g66 - 0.0 ) * ( 2.0 - 0.4 ) / ( 0.1 - 0.0 ) ) ) ).r > ( 1.0 - clampResult274_g66 ) ? 1.0 : 0.0 );
+				float CirrostratLightTransport295_g66 = ( ( CirrostratPattern270_g66 * saturate( (0.4 + (dotResult243_g66 - 0.0) * (2.0 - 0.4) / (0.1 - 0.0)) ) ).r > ( 1.0 - clampResult274_g66 ) ? 1.0 : 0.0 );
 				float mulTime83_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D129_g66 = snoise( (Pos33_g66*1.0 + mulTime83_g66)*2.0 );
 				float mulTime78_g66 = _TimeParameters.x * CZY_CirrusMoveSpeed;
@@ -1650,25 +1628,27 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float simplePerlin2D125_g66 = snoise( (Pos33_g66*1.0 + mulTime138_g66) );
 				simplePerlin2D125_g66 = simplePerlin2D125_g66*0.5 + 0.5;
 				float4 CirrusPattern140_g66 = ( ( saturate( simplePerlin2D129_g66 ) * tex2D( CZY_CirrusTexture, (rotator104_g66*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrusTexture, (rotator115_g66*1.0 + 0.0) ) * saturate( simplePerlin2D125_g66 ) ) );
-				float2 texCoord137_g66 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord137_g66 = IN.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_166_0_g66 = ( texCoord137_g66 - float2( 0.5,0.5 ) );
 				float dotResult159_g66 = dot( temp_output_166_0_g66 , temp_output_166_0_g66 );
-				float4 temp_output_219_0_g66 = ( CirrusPattern140_g66 * saturate(  (0.0 + ( dotResult159_g66 - 0.0 ) * ( 2.0 - 0.0 ) / ( 0.2 - 0.0 ) ) ) );
+				float4 temp_output_219_0_g66 = ( CirrusPattern140_g66 * saturate( (0.0 + (dotResult159_g66 - 0.0) * (2.0 - 0.0) / (0.2 - 0.0)) ) );
 				float Clipping210_g66 = CZY_ClippingThreshold;
 				float CirrusAlpha256_g66 = ( ( temp_output_219_0_g66 * ( CZY_CirrusMultiplier * 10.0 ) ).r > Clipping210_g66 ? 1.0 : 0.0 );
-				float3 ase_positionWS = input.ase_texcoord1.xyz;
-				float3 normalizeResult119_g66 = normalize( ( ase_positionWS - _WorldSpaceCameraPos ) );
+				float3 normalizeResult119_g66 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
 				float3 normalizeResult149_g66 = normalize( CZY_StormDirection );
 				float dotResult152_g66 = dot( normalizeResult119_g66 , normalizeResult149_g66 );
-				float2 texCoord101_g66 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord101_g66 = IN.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_127_0_g66 = ( texCoord101_g66 - float2( 0.5,0.5 ) );
 				float dotResult128_g66 = dot( temp_output_127_0_g66 , temp_output_127_0_g66 );
 				float temp_output_143_0_g66 = ( -2.0 * ( 1.0 - ( CZY_NimbusVariation * 0.9 ) ) );
-				float NimbusLightTransport280_g66 = saturate( ( ( ( CloudDetail180_g66 + SimpleCloudDensity155_g66 ) * saturate(  (( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_143_0_g66 ) + ( ( dotResult152_g66 + ( CZY_NimbusHeight * 4.0 * dotResult128_g66 ) ) - 0.5 ) * ( ( temp_output_143_0_g66 * -4.0 ) - ( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_143_0_g66 ) ) / ( 7.0 - 0.5 ) ) ) ) * 10.0 ) );
+				float NimbusLightTransport280_g66 = saturate( ( ( ( CloudDetail180_g66 + SimpleCloudDensity155_g66 ) * saturate( (( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_143_0_g66 ) + (( dotResult152_g66 + ( CZY_NimbusHeight * 4.0 * dotResult128_g66 ) ) - 0.5) * (( temp_output_143_0_g66 * -4.0 ) - ( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_143_0_g66 )) / (7.0 - 0.5)) ) ) * 10.0 ) );
 				float FinalAlpha399_g66 = saturate( ( DetailedClouds258_g66 + BorderLightTransport403_g66 + AltoCumulusLightTransport300_g66 + ChemtrailsFinal254_g66 + CirrostratLightTransport295_g66 + CirrusAlpha256_g66 + NimbusLightTransport280_g66 ) );
 				bool enabled20_g71 =(bool)_UnderwaterRenderingEnabled;
 				bool submerged20_g71 =(bool)_FullySubmerged;
-				float textureSample20_g71 = tex2Dlod( _UnderwaterMask, float4( ScreenPosNorm.xy, 0, 0.0) ).r;
+				float4 screenPos = IN.ase_texcoord3;
+				float4 ase_screenPosNorm = screenPos / screenPos.w;
+				ase_screenPosNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_screenPosNorm.z : ase_screenPosNorm.z * 0.5 + 0.5;
+				float textureSample20_g71 = tex2Dlod( _UnderwaterMask, float4( ase_screenPosNorm.xy, 0, 0.0) ).r;
 				float localHLSL20_g71 = HLSL20_g71( enabled20_g71 , submerged20_g71 , textureSample20_g71 );
 				
 
@@ -1676,24 +1656,16 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float AlphaClipThreshold = 0.5;
 				float AlphaClipThresholdShadow = 0.5;
 
-				#if defined( ASE_DEPTH_WRITE_ON )
-					float DeviceDepth = input.positionCS.z;
-				#endif
-
-				#if defined( _ALPHATEST_ON )
-					#if defined( _ALPHATEST_SHADOW_ON )
-						AlphaDiscard( Alpha, AlphaClipThresholdShadow );
+				#ifdef _ALPHATEST_ON
+					#ifdef _ALPHATEST_SHADOW_ON
+						clip(Alpha - AlphaClipThresholdShadow);
 					#else
-						AlphaDiscard( Alpha, AlphaClipThreshold );
+						clip(Alpha - AlphaClipThreshold);
 					#endif
 				#endif
 
-				#if defined(LOD_FADE_CROSSFADE)
-					LODFadeCrossFade( input.positionCS );
-				#endif
-
-				#if defined( ASE_DEPTH_WRITE_ON )
-					outputDepth = DeviceDepth;
+				#ifdef LOD_FADE_CROSSFADE
+					LODFadeCrossFade( IN.positionCS );
 				#endif
 
 				return 0;
@@ -1718,8 +1690,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 
 			#pragma multi_compile_instancing
 			#define _SURFACE_TYPE_TRANSPARENT 1
-			#define ASE_VERSION 19904
-			#define ASE_SRP_VERSION 140012
+			#define ASE_SRP_VERSION 140010
 
 
 			
@@ -1742,32 +1713,29 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
             #endif
 
-			#define ASE_NEEDS_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_FRAG_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_FRAG_SCREEN_POSITION_NORMALIZED
+			#define ASE_NEEDS_FRAG_WORLD_POSITION
+			#define ASE_NEEDS_FRAG_SCREEN_POSITION
 
 
-			#if defined(ASE_EARLY_Z_DEPTH_OPTIMIZE) && (SHADER_TARGET >= 45)
-				#define ASE_SV_DEPTH SV_DepthLessEqual
-				#define ASE_SV_POSITION_QUALIFIERS linear noperspective centroid
-			#else
-				#define ASE_SV_DEPTH SV_Depth
-				#define ASE_SV_POSITION_QUALIFIERS
-			#endif
-
-			struct Attributes
+			struct VertexInput
 			{
 				float4 positionOS : POSITION;
-				half3 normalOS : NORMAL;
+				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
-			struct PackedVaryings
+			struct VertexOutput
 			{
-				ASE_SV_POSITION_QUALIFIERS float4 positionCS : SV_POSITION;
-				float4 ase_texcoord : TEXCOORD0;
-				float4 ase_texcoord1 : TEXCOORD1;
+				float4 positionCS : SV_POSITION;
+				float4 clipPosV : TEXCOORD0;
+				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
+				float3 positionWS : TEXCOORD1;
+				#endif
+				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
+				float4 shadowCoord : TEXCOORD2;
+				#endif
+				float4 ase_texcoord3 : TEXCOORD3;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
@@ -1842,203 +1810,203 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				return 130.0 * dot( m, g );
 			}
 			
-					float2 voronoihash84_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash84_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi84_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash84_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return (F2 + F1) * 0.5;
-					}
+			float voronoi84_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash84_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return (F2 + F1) * 0.5;
+			}
 			
-					float2 voronoihash91_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash91_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi91_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash91_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return (F2 + F1) * 0.5;
-					}
+			float voronoi91_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash91_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return (F2 + F1) * 0.5;
+			}
 			
-					float2 voronoihash87_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash87_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi87_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash87_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return F1;
-					}
+			float voronoi87_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash87_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return F1;
+			}
 			
-					float2 voronoihash201_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash201_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi201_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash201_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return (F2 + F1) * 0.5;
-					}
+			float voronoi201_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash201_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return (F2 + F1) * 0.5;
+			}
 			
-					float2 voronoihash234_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash234_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi234_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash234_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return F1;
-					}
+			float voronoi234_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash234_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return F1;
+			}
 			
-					float2 voronoihash287_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash287_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi287_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash287_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return F1;
-					}
+			float voronoi287_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash287_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return F1;
+			}
 			
 			float HLSL20_g71( bool enabled, bool submerged, float textureSample )
 			{
@@ -2054,24 +2022,20 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 			}
 			
 
-			PackedVaryings VertexFunction( Attributes input  )
+			VertexOutput VertexFunction( VertexInput v  )
 			{
-				PackedVaryings output = (PackedVaryings)0;
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_TRANSFER_INSTANCE_ID(input, output);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+				VertexOutput o = (VertexOutput)0;
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-				float3 ase_positionWS = TransformObjectToWorld( ( input.positionOS ).xyz );
-				output.ase_texcoord1.xyz = ase_positionWS;
-				
-				output.ase_texcoord.xy = input.ase_texcoord.xy;
+				o.ase_texcoord3.xy = v.ase_texcoord.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				output.ase_texcoord.zw = 0;
-				output.ase_texcoord1.w = 0;
+				o.ase_texcoord3.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					float3 defaultVertexValue = input.positionOS.xyz;
+					float3 defaultVertexValue = v.positionOS.xyz;
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
@@ -2079,22 +2043,33 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float3 vertexValue = defaultVertexValue;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					input.positionOS.xyz = vertexValue;
+					v.positionOS.xyz = vertexValue;
 				#else
-					input.positionOS.xyz += vertexValue;
+					v.positionOS.xyz += vertexValue;
 				#endif
 
-				VertexPositionInputs vertexInput = GetVertexPositionInputs( input.positionOS.xyz );
+				v.normalOS = v.normalOS;
 
-				output.positionCS = vertexInput.positionCS;
-				return output;
+				VertexPositionInputs vertexInput = GetVertexPositionInputs( v.positionOS.xyz );
+
+				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
+					o.positionWS = vertexInput.positionWS;
+				#endif
+
+				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
+					o.shadowCoord = GetShadowCoord( vertexInput );
+				#endif
+
+				o.positionCS = vertexInput.positionCS;
+				o.clipPosV = vertexInput.positionCS;
+				return o;
 			}
 
 			#if defined(ASE_TESSELLATION)
 			struct VertexControl
 			{
-				float4 positionOS : INTERNALTESSPOS;
-				half3 normalOS : NORMAL;
+				float4 vertex : INTERNALTESSPOS;
+				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 
 				UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -2106,34 +2081,34 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float inside : SV_InsideTessFactor;
 			};
 
-			VertexControl vert ( Attributes input )
+			VertexControl vert ( VertexInput v )
 			{
-				VertexControl output;
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_TRANSFER_INSTANCE_ID(input, output);
-				output.positionOS = input.positionOS;
-				output.normalOS = input.normalOS;
-				output.ase_texcoord = input.ase_texcoord;
-				return output;
+				VertexControl o;
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				o.vertex = v.positionOS;
+				o.normalOS = v.normalOS;
+				o.ase_texcoord = v.ase_texcoord;
+				return o;
 			}
 
-			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> input)
+			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> v)
 			{
-				TessellationFactors output;
+				TessellationFactors o;
 				float4 tf = 1;
 				float tessValue = _TessValue; float tessMin = _TessMin; float tessMax = _TessMax;
 				float edgeLength = _TessEdgeLength; float tessMaxDisp = _TessMaxDisp;
 				#if defined(ASE_FIXED_TESSELLATION)
 				tf = FixedTess( tessValue );
 				#elif defined(ASE_DISTANCE_TESSELLATION)
-				tf = DistanceBasedTess(input[0].positionOS, input[1].positionOS, input[2].positionOS, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
+				tf = DistanceBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
 				#elif defined(ASE_LENGTH_TESSELLATION)
-				tf = EdgeLengthBasedTess(input[0].positionOS, input[1].positionOS, input[2].positionOS, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
+				tf = EdgeLengthBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
 				#elif defined(ASE_LENGTH_CULL_TESSELLATION)
-				tf = EdgeLengthBasedTessCull(input[0].positionOS, input[1].positionOS, input[2].positionOS, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
+				tf = EdgeLengthBasedTessCull(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
 				#endif
-				output.edge[0] = tf.x; output.edge[1] = tf.y; output.edge[2] = tf.z; output.inside = tf.w;
-				return output;
+				o.edge[0] = tf.x; o.edge[1] = tf.y; o.edge[2] = tf.z; o.inside = tf.w;
+				return o;
 			}
 
 			[domain("tri")]
@@ -2147,43 +2122,52 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 			}
 
 			[domain("tri")]
-			PackedVaryings DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
+			VertexOutput DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
 			{
-				Attributes output = (Attributes) 0;
-				output.positionOS = patch[0].positionOS * bary.x + patch[1].positionOS * bary.y + patch[2].positionOS * bary.z;
-				output.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
-				output.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
+				VertexInput o = (VertexInput) 0;
+				o.positionOS = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
+				o.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
+				o.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
-					pp[i] = output.positionOS.xyz - patch[i].normalOS * (dot(output.positionOS.xyz, patch[i].normalOS) - dot(patch[i].positionOS.xyz, patch[i].normalOS));
+					pp[i] = o.positionOS.xyz - patch[i].normalOS * (dot(o.positionOS.xyz, patch[i].normalOS) - dot(patch[i].vertex.xyz, patch[i].normalOS));
 				float phongStrength = _TessPhongStrength;
-				output.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * output.positionOS.xyz;
+				o.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.positionOS.xyz;
 				#endif
-				UNITY_TRANSFER_INSTANCE_ID(patch[0], output);
-				return VertexFunction(output);
+				UNITY_TRANSFER_INSTANCE_ID(patch[0], o);
+				return VertexFunction(o);
 			}
 			#else
-			PackedVaryings vert ( Attributes input )
+			VertexOutput vert ( VertexInput v )
 			{
-				return VertexFunction( input );
+				return VertexFunction( v );
 			}
 			#endif
 
-			half4 frag(PackedVaryings input
-						#if defined( ASE_DEPTH_WRITE_ON )
-						,out float outputDepth : ASE_SV_DEPTH
-						#endif
-						 ) : SV_Target
+			half4 frag(VertexOutput IN  ) : SV_TARGET
 			{
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( input );
+				UNITY_SETUP_INSTANCE_ID(IN);
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( IN );
 
-				float4 ScreenPosNorm = float4( GetNormalizedScreenSpaceUV( input.positionCS ), input.positionCS.zw );
-				float4 ClipPos = ComputeClipSpacePosition( ScreenPosNorm.xy, input.positionCS.z ) * input.positionCS.w;
-				float4 ScreenPos = ComputeScreenPos( ClipPos );
+				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
+				float3 WorldPosition = IN.positionWS;
+				#endif
 
-				float2 texCoord31_g66 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float4 ShadowCoords = float4( 0, 0, 0, 0 );
+
+				float4 ClipPos = IN.clipPosV;
+				float4 ScreenPos = ComputeScreenPos( IN.clipPosV );
+
+				#if defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
+					#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+						ShadowCoords = IN.shadowCoord;
+					#elif defined(MAIN_LIGHT_CALCULATE_SHADOWS)
+						ShadowCoords = TransformWorldToShadowCoord( WorldPosition );
+					#endif
+				#endif
+
+				float2 texCoord31_g66 = IN.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 Pos33_g66 = texCoord31_g66;
 				float mulTime29_g66 = _TimeParameters.x * ( 0.001 * CZY_WindSpeed );
 				float TIme30_g66 = mulTime29_g66;
@@ -2206,7 +2190,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float2 appendResult98_g66 = (float2(voroi84_g66 , voroi91_g66));
 				float2 VoroDetails112_g66 = appendResult98_g66;
 				float CumulusCoverage34_g66 = CZY_CumulusCoverageMultiplier;
-				float ComplexCloudDensity144_g66 =  (0.0 + ( min( SimpleCloudDensity155_g66 , ( 1.0 - VoroDetails112_g66.x ) ) - ( 1.0 - CumulusCoverage34_g66 ) ) * ( 1.0 - 0.0 ) / ( 1.0 - ( 1.0 - CumulusCoverage34_g66 ) ) );
+				float ComplexCloudDensity144_g66 = (0.0 + (min( SimpleCloudDensity155_g66 , ( 1.0 - VoroDetails112_g66.x ) ) - ( 1.0 - CumulusCoverage34_g66 )) * (1.0 - 0.0) / (1.0 - ( 1.0 - CumulusCoverage34_g66 )));
 				float time87_g66 = 0.0;
 				float2 voronoiSmoothId87_g66 = 0;
 				float2 coords87_g66 = ( Pos33_g66 + ( TIme30_g66 * float2( 0.3,0.2 ) ) ) * ( 100.0 / CZY_DetailScale );
@@ -2222,15 +2206,15 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				fade87_g66 *= 0.5;
 				}//Voronoi87_g66
 				voroi87_g66 /= rest87_g66;
-				float temp_output_174_0_g66 = (  (0.0 + ( ( 1.0 - voroi87_g66 ) - 0.3 ) * ( 0.5 - 0.0 ) / ( 1.0 - 0.3 ) ) * 0.1 * CZY_DetailAmount );
+				float temp_output_174_0_g66 = ( (0.0 + (( 1.0 - voroi87_g66 ) - 0.3) * (0.5 - 0.0) / (1.0 - 0.3)) * 0.1 * CZY_DetailAmount );
 				float DetailedClouds258_g66 = saturate( ( ComplexCloudDensity144_g66 + temp_output_174_0_g66 ) );
 				float CloudDetail180_g66 = temp_output_174_0_g66;
-				float2 texCoord82_g66 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord82_g66 = IN.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_163_0_g66 = ( texCoord82_g66 - float2( 0.5,0.5 ) );
 				float dotResult214_g66 = dot( temp_output_163_0_g66 , temp_output_163_0_g66 );
 				float BorderHeight156_g66 = ( 1.0 - CZY_BorderHeight );
 				float temp_output_153_0_g66 = ( -2.0 * ( 1.0 - CZY_BorderVariation ) );
-				float clampResult253_g66 = clamp( ( ( ( CloudDetail180_g66 + SimpleCloudDensity155_g66 ) * saturate(  (( BorderHeight156_g66 * temp_output_153_0_g66 ) + ( dotResult214_g66 - 0.0 ) * ( ( temp_output_153_0_g66 * -4.0 ) - ( BorderHeight156_g66 * temp_output_153_0_g66 ) ) / ( 1.0 - 0.0 ) ) ) ) * 10.0 * CZY_BorderEffect ) , -1.0 , 1.0 );
+				float clampResult253_g66 = clamp( ( ( ( CloudDetail180_g66 + SimpleCloudDensity155_g66 ) * saturate( (( BorderHeight156_g66 * temp_output_153_0_g66 ) + (dotResult214_g66 - 0.0) * (( temp_output_153_0_g66 * -4.0 ) - ( BorderHeight156_g66 * temp_output_153_0_g66 )) / (1.0 - 0.0)) ) ) * 10.0 * CZY_BorderEffect ) , -1.0 , 1.0 );
 				float BorderLightTransport403_g66 = clampResult253_g66;
 				float time201_g66 = 0.0;
 				float2 voronoiSmoothId201_g66 = 0;
@@ -2241,11 +2225,11 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float voroi201_g66 = voronoi201_g66( coords201_g66, time201_g66, id201_g66, uv201_g66, 0, voronoiSmoothId201_g66 );
 				float time234_g66 = ( 10.0 * mulTime165_g66 );
 				float2 voronoiSmoothId234_g66 = 0;
-				float2 coords234_g66 = input.ase_texcoord.xy * 10.0;
+				float2 coords234_g66 = IN.ase_texcoord3.xy * 10.0;
 				float2 id234_g66 = 0;
 				float2 uv234_g66 = 0;
 				float voroi234_g66 = voronoi234_g66( coords234_g66, time234_g66, id234_g66, uv234_g66, 0, voronoiSmoothId234_g66 );
-				float AltoCumulusPlacement271_g66 = saturate( ( ( ( 1.0 - 0.0 ) -  (1.0 + ( voroi201_g66 - 0.0 ) * ( -0.5 - 1.0 ) / ( 1.0 - 0.0 ) ) ) - voroi234_g66 ) );
+				float AltoCumulusPlacement271_g66 = saturate( ( ( ( 1.0 - 0.0 ) - (1.0 + (voroi201_g66 - 0.0) * (-0.5 - 1.0) / (1.0 - 0.0)) ) - voroi234_g66 ) );
 				float time287_g66 = 51.2;
 				float2 voronoiSmoothId287_g66 = 0;
 				float2 coords287_g66 = (Pos33_g66*1.0 + ( CZY_AltocumulusWindSpeed * TIme30_g66 )) * ( 100.0 / CZY_AltocumulusScale );
@@ -2261,7 +2245,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				fade287_g66 *= 0.5;
 				}//Voronoi287_g66
 				voroi287_g66 /= rest287_g66;
-				float AltoCumulusLightTransport300_g66 = ( ( AltoCumulusPlacement271_g66 * ( 0.1 > voroi287_g66 ?  (0.5 + ( voroi287_g66 - 0.0 ) * ( 0.0 - 0.5 ) / ( 0.15 - 0.0 ) ) : 0.0 ) * CZY_AltocumulusMultiplier ) > 0.2 ? 1.0 : 0.0 );
+				float AltoCumulusLightTransport300_g66 = ( ( AltoCumulusPlacement271_g66 * ( 0.1 > voroi287_g66 ? (0.5 + (voroi287_g66 - 0.0) * (0.0 - 0.5) / (0.15 - 0.0)) : 0.0 ) * CZY_AltocumulusMultiplier ) > 0.2 ? 1.0 : 0.0 );
 				float mulTime107_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D146_g66 = snoise( (Pos33_g66*1.0 + mulTime107_g66)*2.0 );
 				float mulTime96_g66 = _TimeParameters.x * CZY_ChemtrailsMoveSpeed;
@@ -2274,10 +2258,10 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float mulTime110_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D150_g66 = snoise( (Pos33_g66*1.0 + mulTime110_g66)*4.0 );
 				float4 ChemtrailsPattern212_g66 = ( ( saturate( simplePerlin2D146_g66 ) * tex2D( CZY_ChemtrailsTexture, (rotator100_g66*0.5 + 0.0) ) ) + ( tex2D( CZY_ChemtrailsTexture, rotator134_g66 ) * saturate( simplePerlin2D150_g66 ) ) );
-				float2 texCoord142_g66 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord142_g66 = IN.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_164_0_g66 = ( texCoord142_g66 - float2( 0.5,0.5 ) );
 				float dotResult209_g66 = dot( temp_output_164_0_g66 , temp_output_164_0_g66 );
-				float ChemtrailsFinal254_g66 = ( ( ChemtrailsPattern212_g66 * saturate(  (0.4 + ( dotResult209_g66 - 0.0 ) * ( 2.0 - 0.4 ) / ( 0.1 - 0.0 ) ) ) ).r > ( 1.0 - ( CZY_ChemtrailsMultiplier * 0.5 ) ) ? 1.0 : 0.0 );
+				float ChemtrailsFinal254_g66 = ( ( ChemtrailsPattern212_g66 * saturate( (0.4 + (dotResult209_g66 - 0.0) * (2.0 - 0.4) / (0.1 - 0.0)) ) ).r > ( 1.0 - ( CZY_ChemtrailsMultiplier * 0.5 ) ) ? 1.0 : 0.0 );
 				float mulTime194_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D226_g66 = snoise( (Pos33_g66*1.0 + mulTime194_g66)*2.0 );
 				float mulTime179_g66 = _TimeParameters.x * CZY_CirrostratusMoveSpeed;
@@ -2290,11 +2274,11 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float mulTime185_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D218_g66 = snoise( (Pos33_g66*10.0 + mulTime185_g66)*4.0 );
 				float4 CirrostratPattern270_g66 = ( ( saturate( simplePerlin2D226_g66 ) * tex2D( CZY_CirrostratusTexture, (rotator141_g66*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrostratusTexture, (rotator199_g66*1.5 + 0.75) ) * saturate( simplePerlin2D218_g66 ) ) );
-				float2 texCoord238_g66 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord238_g66 = IN.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_249_0_g66 = ( texCoord238_g66 - float2( 0.5,0.5 ) );
 				float dotResult243_g66 = dot( temp_output_249_0_g66 , temp_output_249_0_g66 );
 				float clampResult274_g66 = clamp( ( CZY_CirrostratusMultiplier * 0.5 ) , 0.0 , 0.98 );
-				float CirrostratLightTransport295_g66 = ( ( CirrostratPattern270_g66 * saturate(  (0.4 + ( dotResult243_g66 - 0.0 ) * ( 2.0 - 0.4 ) / ( 0.1 - 0.0 ) ) ) ).r > ( 1.0 - clampResult274_g66 ) ? 1.0 : 0.0 );
+				float CirrostratLightTransport295_g66 = ( ( CirrostratPattern270_g66 * saturate( (0.4 + (dotResult243_g66 - 0.0) * (2.0 - 0.4) / (0.1 - 0.0)) ) ).r > ( 1.0 - clampResult274_g66 ) ? 1.0 : 0.0 );
 				float mulTime83_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D129_g66 = snoise( (Pos33_g66*1.0 + mulTime83_g66)*2.0 );
 				float mulTime78_g66 = _TimeParameters.x * CZY_CirrusMoveSpeed;
@@ -2308,47 +2292,39 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float simplePerlin2D125_g66 = snoise( (Pos33_g66*1.0 + mulTime138_g66) );
 				simplePerlin2D125_g66 = simplePerlin2D125_g66*0.5 + 0.5;
 				float4 CirrusPattern140_g66 = ( ( saturate( simplePerlin2D129_g66 ) * tex2D( CZY_CirrusTexture, (rotator104_g66*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrusTexture, (rotator115_g66*1.0 + 0.0) ) * saturate( simplePerlin2D125_g66 ) ) );
-				float2 texCoord137_g66 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord137_g66 = IN.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_166_0_g66 = ( texCoord137_g66 - float2( 0.5,0.5 ) );
 				float dotResult159_g66 = dot( temp_output_166_0_g66 , temp_output_166_0_g66 );
-				float4 temp_output_219_0_g66 = ( CirrusPattern140_g66 * saturate(  (0.0 + ( dotResult159_g66 - 0.0 ) * ( 2.0 - 0.0 ) / ( 0.2 - 0.0 ) ) ) );
+				float4 temp_output_219_0_g66 = ( CirrusPattern140_g66 * saturate( (0.0 + (dotResult159_g66 - 0.0) * (2.0 - 0.0) / (0.2 - 0.0)) ) );
 				float Clipping210_g66 = CZY_ClippingThreshold;
 				float CirrusAlpha256_g66 = ( ( temp_output_219_0_g66 * ( CZY_CirrusMultiplier * 10.0 ) ).r > Clipping210_g66 ? 1.0 : 0.0 );
-				float3 ase_positionWS = input.ase_texcoord1.xyz;
-				float3 normalizeResult119_g66 = normalize( ( ase_positionWS - _WorldSpaceCameraPos ) );
+				float3 normalizeResult119_g66 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
 				float3 normalizeResult149_g66 = normalize( CZY_StormDirection );
 				float dotResult152_g66 = dot( normalizeResult119_g66 , normalizeResult149_g66 );
-				float2 texCoord101_g66 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord101_g66 = IN.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_127_0_g66 = ( texCoord101_g66 - float2( 0.5,0.5 ) );
 				float dotResult128_g66 = dot( temp_output_127_0_g66 , temp_output_127_0_g66 );
 				float temp_output_143_0_g66 = ( -2.0 * ( 1.0 - ( CZY_NimbusVariation * 0.9 ) ) );
-				float NimbusLightTransport280_g66 = saturate( ( ( ( CloudDetail180_g66 + SimpleCloudDensity155_g66 ) * saturate(  (( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_143_0_g66 ) + ( ( dotResult152_g66 + ( CZY_NimbusHeight * 4.0 * dotResult128_g66 ) ) - 0.5 ) * ( ( temp_output_143_0_g66 * -4.0 ) - ( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_143_0_g66 ) ) / ( 7.0 - 0.5 ) ) ) ) * 10.0 ) );
+				float NimbusLightTransport280_g66 = saturate( ( ( ( CloudDetail180_g66 + SimpleCloudDensity155_g66 ) * saturate( (( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_143_0_g66 ) + (( dotResult152_g66 + ( CZY_NimbusHeight * 4.0 * dotResult128_g66 ) ) - 0.5) * (( temp_output_143_0_g66 * -4.0 ) - ( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_143_0_g66 )) / (7.0 - 0.5)) ) ) * 10.0 ) );
 				float FinalAlpha399_g66 = saturate( ( DetailedClouds258_g66 + BorderLightTransport403_g66 + AltoCumulusLightTransport300_g66 + ChemtrailsFinal254_g66 + CirrostratLightTransport295_g66 + CirrusAlpha256_g66 + NimbusLightTransport280_g66 ) );
 				bool enabled20_g71 =(bool)_UnderwaterRenderingEnabled;
 				bool submerged20_g71 =(bool)_FullySubmerged;
-				float textureSample20_g71 = tex2Dlod( _UnderwaterMask, float4( ScreenPosNorm.xy, 0, 0.0) ).r;
+				float4 ase_screenPosNorm = ScreenPos / ScreenPos.w;
+				ase_screenPosNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_screenPosNorm.z : ase_screenPosNorm.z * 0.5 + 0.5;
+				float textureSample20_g71 = tex2Dlod( _UnderwaterMask, float4( ase_screenPosNorm.xy, 0, 0.0) ).r;
 				float localHLSL20_g71 = HLSL20_g71( enabled20_g71 , submerged20_g71 , textureSample20_g71 );
 				
 
 				float Alpha = ( saturate( ( ( CZY_CloudThickness * 2.0 * FinalAlpha399_g66 ) + FinalAlpha399_g66 ) ) * ( 1.0 - localHLSL20_g71 ) );
 				float AlphaClipThreshold = 0.5;
 
-				#if defined( ASE_DEPTH_WRITE_ON )
-					float DeviceDepth = input.positionCS.z;
+				#ifdef _ALPHATEST_ON
+					clip(Alpha - AlphaClipThreshold);
 				#endif
 
-				#if defined( _ALPHATEST_ON )
-					AlphaDiscard( Alpha, AlphaClipThreshold );
+				#ifdef LOD_FADE_CROSSFADE
+					LODFadeCrossFade( IN.positionCS );
 				#endif
-
-				#if defined(LOD_FADE_CROSSFADE)
-					LODFadeCrossFade( input.positionCS );
-				#endif
-
-				#if defined( ASE_DEPTH_WRITE_ON )
-					outputDepth = DeviceDepth;
-				#endif
-
 				return 0;
 			}
 			ENDHLSL
@@ -2369,8 +2345,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 			
 
 			#define _SURFACE_TYPE_TRANSPARENT 1
-			#define ASE_VERSION 19904
-			#define ASE_SRP_VERSION 140012
+			#define ASE_SRP_VERSION 140010
 
 
 			
@@ -2411,19 +2386,17 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
 
-			#define ASE_NEEDS_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_FRAG_TEXTURE_COORDINATES0
+			
 
-
-			struct Attributes
+			struct VertexInput
 			{
 				float4 positionOS : POSITION;
-				half3 normalOS : NORMAL;
+				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
-			struct PackedVaryings
+			struct VertexOutput
 			{
 				float4 positionCS : SV_POSITION;
 				float4 ase_texcoord : TEXCOORD0;
@@ -2503,203 +2476,203 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				return 130.0 * dot( m, g );
 			}
 			
-					float2 voronoihash84_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash84_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi84_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash84_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return (F2 + F1) * 0.5;
-					}
+			float voronoi84_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash84_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return (F2 + F1) * 0.5;
+			}
 			
-					float2 voronoihash91_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash91_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi91_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash91_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return (F2 + F1) * 0.5;
-					}
+			float voronoi91_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash91_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return (F2 + F1) * 0.5;
+			}
 			
-					float2 voronoihash87_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash87_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi87_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash87_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return F1;
-					}
+			float voronoi87_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash87_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return F1;
+			}
 			
-					float2 voronoihash201_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash201_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi201_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash201_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return (F2 + F1) * 0.5;
-					}
+			float voronoi201_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash201_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return (F2 + F1) * 0.5;
+			}
 			
-					float2 voronoihash234_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash234_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi234_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash234_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return F1;
-					}
+			float voronoi234_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash234_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return F1;
+			}
 			
-					float2 voronoihash287_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash287_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi287_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash287_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return F1;
-					}
+			float voronoi287_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash287_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return F1;
+			}
 			
 			float HLSL20_g71( bool enabled, bool submerged, float textureSample )
 			{
@@ -2724,29 +2697,29 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float AlphaClipThreshold;
 			};
 
-			PackedVaryings VertexFunction(Attributes input  )
+			VertexOutput VertexFunction(VertexInput v  )
 			{
-				PackedVaryings output;
-				ZERO_INITIALIZE(PackedVaryings, output);
+				VertexOutput o;
+				ZERO_INITIALIZE(VertexOutput, o);
 
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_TRANSFER_INSTANCE_ID(input, output);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-				float3 ase_positionWS = TransformObjectToWorld( ( input.positionOS ).xyz );
-				output.ase_texcoord1.xyz = ase_positionWS;
-				float4 ase_positionCS = TransformObjectToHClip( ( input.positionOS ).xyz );
-				float4 screenPos = ComputeScreenPos( ase_positionCS );
-				output.ase_texcoord2 = screenPos;
+				float3 ase_worldPos = TransformObjectToWorld( (v.positionOS).xyz );
+				o.ase_texcoord1.xyz = ase_worldPos;
+				float4 ase_clipPos = TransformObjectToHClip((v.positionOS).xyz);
+				float4 screenPos = ComputeScreenPos(ase_clipPos);
+				o.ase_texcoord2 = screenPos;
 				
-				output.ase_texcoord.xy = input.ase_texcoord.xy;
+				o.ase_texcoord.xy = v.ase_texcoord.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				output.ase_texcoord.zw = 0;
-				output.ase_texcoord1.w = 0;
+				o.ase_texcoord.zw = 0;
+				o.ase_texcoord1.w = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					float3 defaultVertexValue = input.positionOS.xyz;
+					float3 defaultVertexValue = v.positionOS.xyz;
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
@@ -2754,22 +2727,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float3 vertexValue = defaultVertexValue;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					input.positionOS.xyz = vertexValue;
+					v.positionOS.xyz = vertexValue;
 				#else
-					input.positionOS.xyz += vertexValue;
+					v.positionOS.xyz += vertexValue;
 				#endif
 
-				VertexPositionInputs vertexInput = GetVertexPositionInputs( input.positionOS.xyz );
+				v.normalOS = v.normalOS;
 
-				output.positionCS = vertexInput.positionCS;
-				return output;
+				float3 positionWS = TransformObjectToWorld( v.positionOS.xyz );
+
+				o.positionCS = TransformWorldToHClip(positionWS);
+
+				return o;
 			}
 
 			#if defined(ASE_TESSELLATION)
 			struct VertexControl
 			{
-				float4 positionOS : INTERNALTESSPOS;
-				half3 normalOS : NORMAL;
+				float4 vertex : INTERNALTESSPOS;
+				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 
 				UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -2781,34 +2757,34 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float inside : SV_InsideTessFactor;
 			};
 
-			VertexControl vert ( Attributes input )
+			VertexControl vert ( VertexInput v )
 			{
-				VertexControl output;
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_TRANSFER_INSTANCE_ID(input, output);
-				output.positionOS = input.positionOS;
-				output.normalOS = input.normalOS;
-				output.ase_texcoord = input.ase_texcoord;
-				return output;
+				VertexControl o;
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				o.vertex = v.positionOS;
+				o.normalOS = v.normalOS;
+				o.ase_texcoord = v.ase_texcoord;
+				return o;
 			}
 
-			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> input)
+			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> v)
 			{
-				TessellationFactors output;
+				TessellationFactors o;
 				float4 tf = 1;
 				float tessValue = _TessValue; float tessMin = _TessMin; float tessMax = _TessMax;
 				float edgeLength = _TessEdgeLength; float tessMaxDisp = _TessMaxDisp;
 				#if defined(ASE_FIXED_TESSELLATION)
 				tf = FixedTess( tessValue );
 				#elif defined(ASE_DISTANCE_TESSELLATION)
-				tf = DistanceBasedTess(input[0].positionOS, input[1].positionOS, input[2].positionOS, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
+				tf = DistanceBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
 				#elif defined(ASE_LENGTH_TESSELLATION)
-				tf = EdgeLengthBasedTess(input[0].positionOS, input[1].positionOS, input[2].positionOS, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
+				tf = EdgeLengthBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
 				#elif defined(ASE_LENGTH_CULL_TESSELLATION)
-				tf = EdgeLengthBasedTessCull(input[0].positionOS, input[1].positionOS, input[2].positionOS, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
+				tf = EdgeLengthBasedTessCull(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
 				#endif
-				output.edge[0] = tf.x; output.edge[1] = tf.y; output.edge[2] = tf.z; output.inside = tf.w;
-				return output;
+				o.edge[0] = tf.x; o.edge[1] = tf.y; o.edge[2] = tf.z; o.inside = tf.w;
+				return o;
 			}
 
 			[domain("tri")]
@@ -2822,34 +2798,34 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 			}
 
 			[domain("tri")]
-			PackedVaryings DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
+			VertexOutput DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
 			{
-				Attributes output = (Attributes) 0;
-				output.positionOS = patch[0].positionOS * bary.x + patch[1].positionOS * bary.y + patch[2].positionOS * bary.z;
-				output.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
-				output.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
+				VertexInput o = (VertexInput) 0;
+				o.positionOS = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
+				o.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
+				o.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
-					pp[i] = output.positionOS.xyz - patch[i].normalOS * (dot(output.positionOS.xyz, patch[i].normalOS) - dot(patch[i].positionOS.xyz, patch[i].normalOS));
+					pp[i] = o.positionOS.xyz - patch[i].normalOS * (dot(o.positionOS.xyz, patch[i].normalOS) - dot(patch[i].vertex.xyz, patch[i].normalOS));
 				float phongStrength = _TessPhongStrength;
-				output.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * output.positionOS.xyz;
+				o.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.positionOS.xyz;
 				#endif
-				UNITY_TRANSFER_INSTANCE_ID(patch[0], output);
-				return VertexFunction(output);
+				UNITY_TRANSFER_INSTANCE_ID(patch[0], o);
+				return VertexFunction(o);
 			}
 			#else
-			PackedVaryings vert ( Attributes input )
+			VertexOutput vert ( VertexInput v )
 			{
-				return VertexFunction( input );
+				return VertexFunction( v );
 			}
 			#endif
 
-			half4 frag(PackedVaryings input ) : SV_Target
+			half4 frag(VertexOutput IN ) : SV_TARGET
 			{
 				SurfaceDescription surfaceDescription = (SurfaceDescription)0;
 
-				float2 texCoord31_g66 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord31_g66 = IN.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 Pos33_g66 = texCoord31_g66;
 				float mulTime29_g66 = _TimeParameters.x * ( 0.001 * CZY_WindSpeed );
 				float TIme30_g66 = mulTime29_g66;
@@ -2872,7 +2848,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float2 appendResult98_g66 = (float2(voroi84_g66 , voroi91_g66));
 				float2 VoroDetails112_g66 = appendResult98_g66;
 				float CumulusCoverage34_g66 = CZY_CumulusCoverageMultiplier;
-				float ComplexCloudDensity144_g66 =  (0.0 + ( min( SimpleCloudDensity155_g66 , ( 1.0 - VoroDetails112_g66.x ) ) - ( 1.0 - CumulusCoverage34_g66 ) ) * ( 1.0 - 0.0 ) / ( 1.0 - ( 1.0 - CumulusCoverage34_g66 ) ) );
+				float ComplexCloudDensity144_g66 = (0.0 + (min( SimpleCloudDensity155_g66 , ( 1.0 - VoroDetails112_g66.x ) ) - ( 1.0 - CumulusCoverage34_g66 )) * (1.0 - 0.0) / (1.0 - ( 1.0 - CumulusCoverage34_g66 )));
 				float time87_g66 = 0.0;
 				float2 voronoiSmoothId87_g66 = 0;
 				float2 coords87_g66 = ( Pos33_g66 + ( TIme30_g66 * float2( 0.3,0.2 ) ) ) * ( 100.0 / CZY_DetailScale );
@@ -2888,15 +2864,15 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				fade87_g66 *= 0.5;
 				}//Voronoi87_g66
 				voroi87_g66 /= rest87_g66;
-				float temp_output_174_0_g66 = (  (0.0 + ( ( 1.0 - voroi87_g66 ) - 0.3 ) * ( 0.5 - 0.0 ) / ( 1.0 - 0.3 ) ) * 0.1 * CZY_DetailAmount );
+				float temp_output_174_0_g66 = ( (0.0 + (( 1.0 - voroi87_g66 ) - 0.3) * (0.5 - 0.0) / (1.0 - 0.3)) * 0.1 * CZY_DetailAmount );
 				float DetailedClouds258_g66 = saturate( ( ComplexCloudDensity144_g66 + temp_output_174_0_g66 ) );
 				float CloudDetail180_g66 = temp_output_174_0_g66;
-				float2 texCoord82_g66 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord82_g66 = IN.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_163_0_g66 = ( texCoord82_g66 - float2( 0.5,0.5 ) );
 				float dotResult214_g66 = dot( temp_output_163_0_g66 , temp_output_163_0_g66 );
 				float BorderHeight156_g66 = ( 1.0 - CZY_BorderHeight );
 				float temp_output_153_0_g66 = ( -2.0 * ( 1.0 - CZY_BorderVariation ) );
-				float clampResult253_g66 = clamp( ( ( ( CloudDetail180_g66 + SimpleCloudDensity155_g66 ) * saturate(  (( BorderHeight156_g66 * temp_output_153_0_g66 ) + ( dotResult214_g66 - 0.0 ) * ( ( temp_output_153_0_g66 * -4.0 ) - ( BorderHeight156_g66 * temp_output_153_0_g66 ) ) / ( 1.0 - 0.0 ) ) ) ) * 10.0 * CZY_BorderEffect ) , -1.0 , 1.0 );
+				float clampResult253_g66 = clamp( ( ( ( CloudDetail180_g66 + SimpleCloudDensity155_g66 ) * saturate( (( BorderHeight156_g66 * temp_output_153_0_g66 ) + (dotResult214_g66 - 0.0) * (( temp_output_153_0_g66 * -4.0 ) - ( BorderHeight156_g66 * temp_output_153_0_g66 )) / (1.0 - 0.0)) ) ) * 10.0 * CZY_BorderEffect ) , -1.0 , 1.0 );
 				float BorderLightTransport403_g66 = clampResult253_g66;
 				float time201_g66 = 0.0;
 				float2 voronoiSmoothId201_g66 = 0;
@@ -2907,11 +2883,11 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float voroi201_g66 = voronoi201_g66( coords201_g66, time201_g66, id201_g66, uv201_g66, 0, voronoiSmoothId201_g66 );
 				float time234_g66 = ( 10.0 * mulTime165_g66 );
 				float2 voronoiSmoothId234_g66 = 0;
-				float2 coords234_g66 = input.ase_texcoord.xy * 10.0;
+				float2 coords234_g66 = IN.ase_texcoord.xy * 10.0;
 				float2 id234_g66 = 0;
 				float2 uv234_g66 = 0;
 				float voroi234_g66 = voronoi234_g66( coords234_g66, time234_g66, id234_g66, uv234_g66, 0, voronoiSmoothId234_g66 );
-				float AltoCumulusPlacement271_g66 = saturate( ( ( ( 1.0 - 0.0 ) -  (1.0 + ( voroi201_g66 - 0.0 ) * ( -0.5 - 1.0 ) / ( 1.0 - 0.0 ) ) ) - voroi234_g66 ) );
+				float AltoCumulusPlacement271_g66 = saturate( ( ( ( 1.0 - 0.0 ) - (1.0 + (voroi201_g66 - 0.0) * (-0.5 - 1.0) / (1.0 - 0.0)) ) - voroi234_g66 ) );
 				float time287_g66 = 51.2;
 				float2 voronoiSmoothId287_g66 = 0;
 				float2 coords287_g66 = (Pos33_g66*1.0 + ( CZY_AltocumulusWindSpeed * TIme30_g66 )) * ( 100.0 / CZY_AltocumulusScale );
@@ -2927,7 +2903,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				fade287_g66 *= 0.5;
 				}//Voronoi287_g66
 				voroi287_g66 /= rest287_g66;
-				float AltoCumulusLightTransport300_g66 = ( ( AltoCumulusPlacement271_g66 * ( 0.1 > voroi287_g66 ?  (0.5 + ( voroi287_g66 - 0.0 ) * ( 0.0 - 0.5 ) / ( 0.15 - 0.0 ) ) : 0.0 ) * CZY_AltocumulusMultiplier ) > 0.2 ? 1.0 : 0.0 );
+				float AltoCumulusLightTransport300_g66 = ( ( AltoCumulusPlacement271_g66 * ( 0.1 > voroi287_g66 ? (0.5 + (voroi287_g66 - 0.0) * (0.0 - 0.5) / (0.15 - 0.0)) : 0.0 ) * CZY_AltocumulusMultiplier ) > 0.2 ? 1.0 : 0.0 );
 				float mulTime107_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D146_g66 = snoise( (Pos33_g66*1.0 + mulTime107_g66)*2.0 );
 				float mulTime96_g66 = _TimeParameters.x * CZY_ChemtrailsMoveSpeed;
@@ -2940,10 +2916,10 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float mulTime110_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D150_g66 = snoise( (Pos33_g66*1.0 + mulTime110_g66)*4.0 );
 				float4 ChemtrailsPattern212_g66 = ( ( saturate( simplePerlin2D146_g66 ) * tex2D( CZY_ChemtrailsTexture, (rotator100_g66*0.5 + 0.0) ) ) + ( tex2D( CZY_ChemtrailsTexture, rotator134_g66 ) * saturate( simplePerlin2D150_g66 ) ) );
-				float2 texCoord142_g66 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord142_g66 = IN.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_164_0_g66 = ( texCoord142_g66 - float2( 0.5,0.5 ) );
 				float dotResult209_g66 = dot( temp_output_164_0_g66 , temp_output_164_0_g66 );
-				float ChemtrailsFinal254_g66 = ( ( ChemtrailsPattern212_g66 * saturate(  (0.4 + ( dotResult209_g66 - 0.0 ) * ( 2.0 - 0.4 ) / ( 0.1 - 0.0 ) ) ) ).r > ( 1.0 - ( CZY_ChemtrailsMultiplier * 0.5 ) ) ? 1.0 : 0.0 );
+				float ChemtrailsFinal254_g66 = ( ( ChemtrailsPattern212_g66 * saturate( (0.4 + (dotResult209_g66 - 0.0) * (2.0 - 0.4) / (0.1 - 0.0)) ) ).r > ( 1.0 - ( CZY_ChemtrailsMultiplier * 0.5 ) ) ? 1.0 : 0.0 );
 				float mulTime194_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D226_g66 = snoise( (Pos33_g66*1.0 + mulTime194_g66)*2.0 );
 				float mulTime179_g66 = _TimeParameters.x * CZY_CirrostratusMoveSpeed;
@@ -2956,11 +2932,11 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float mulTime185_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D218_g66 = snoise( (Pos33_g66*10.0 + mulTime185_g66)*4.0 );
 				float4 CirrostratPattern270_g66 = ( ( saturate( simplePerlin2D226_g66 ) * tex2D( CZY_CirrostratusTexture, (rotator141_g66*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrostratusTexture, (rotator199_g66*1.5 + 0.75) ) * saturate( simplePerlin2D218_g66 ) ) );
-				float2 texCoord238_g66 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord238_g66 = IN.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_249_0_g66 = ( texCoord238_g66 - float2( 0.5,0.5 ) );
 				float dotResult243_g66 = dot( temp_output_249_0_g66 , temp_output_249_0_g66 );
 				float clampResult274_g66 = clamp( ( CZY_CirrostratusMultiplier * 0.5 ) , 0.0 , 0.98 );
-				float CirrostratLightTransport295_g66 = ( ( CirrostratPattern270_g66 * saturate(  (0.4 + ( dotResult243_g66 - 0.0 ) * ( 2.0 - 0.4 ) / ( 0.1 - 0.0 ) ) ) ).r > ( 1.0 - clampResult274_g66 ) ? 1.0 : 0.0 );
+				float CirrostratLightTransport295_g66 = ( ( CirrostratPattern270_g66 * saturate( (0.4 + (dotResult243_g66 - 0.0) * (2.0 - 0.4) / (0.1 - 0.0)) ) ).r > ( 1.0 - clampResult274_g66 ) ? 1.0 : 0.0 );
 				float mulTime83_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D129_g66 = snoise( (Pos33_g66*1.0 + mulTime83_g66)*2.0 );
 				float mulTime78_g66 = _TimeParameters.x * CZY_CirrusMoveSpeed;
@@ -2974,28 +2950,28 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float simplePerlin2D125_g66 = snoise( (Pos33_g66*1.0 + mulTime138_g66) );
 				simplePerlin2D125_g66 = simplePerlin2D125_g66*0.5 + 0.5;
 				float4 CirrusPattern140_g66 = ( ( saturate( simplePerlin2D129_g66 ) * tex2D( CZY_CirrusTexture, (rotator104_g66*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrusTexture, (rotator115_g66*1.0 + 0.0) ) * saturate( simplePerlin2D125_g66 ) ) );
-				float2 texCoord137_g66 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord137_g66 = IN.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_166_0_g66 = ( texCoord137_g66 - float2( 0.5,0.5 ) );
 				float dotResult159_g66 = dot( temp_output_166_0_g66 , temp_output_166_0_g66 );
-				float4 temp_output_219_0_g66 = ( CirrusPattern140_g66 * saturate(  (0.0 + ( dotResult159_g66 - 0.0 ) * ( 2.0 - 0.0 ) / ( 0.2 - 0.0 ) ) ) );
+				float4 temp_output_219_0_g66 = ( CirrusPattern140_g66 * saturate( (0.0 + (dotResult159_g66 - 0.0) * (2.0 - 0.0) / (0.2 - 0.0)) ) );
 				float Clipping210_g66 = CZY_ClippingThreshold;
 				float CirrusAlpha256_g66 = ( ( temp_output_219_0_g66 * ( CZY_CirrusMultiplier * 10.0 ) ).r > Clipping210_g66 ? 1.0 : 0.0 );
-				float3 ase_positionWS = input.ase_texcoord1.xyz;
-				float3 normalizeResult119_g66 = normalize( ( ase_positionWS - _WorldSpaceCameraPos ) );
+				float3 ase_worldPos = IN.ase_texcoord1.xyz;
+				float3 normalizeResult119_g66 = normalize( ( ase_worldPos - _WorldSpaceCameraPos ) );
 				float3 normalizeResult149_g66 = normalize( CZY_StormDirection );
 				float dotResult152_g66 = dot( normalizeResult119_g66 , normalizeResult149_g66 );
-				float2 texCoord101_g66 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord101_g66 = IN.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_127_0_g66 = ( texCoord101_g66 - float2( 0.5,0.5 ) );
 				float dotResult128_g66 = dot( temp_output_127_0_g66 , temp_output_127_0_g66 );
 				float temp_output_143_0_g66 = ( -2.0 * ( 1.0 - ( CZY_NimbusVariation * 0.9 ) ) );
-				float NimbusLightTransport280_g66 = saturate( ( ( ( CloudDetail180_g66 + SimpleCloudDensity155_g66 ) * saturate(  (( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_143_0_g66 ) + ( ( dotResult152_g66 + ( CZY_NimbusHeight * 4.0 * dotResult128_g66 ) ) - 0.5 ) * ( ( temp_output_143_0_g66 * -4.0 ) - ( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_143_0_g66 ) ) / ( 7.0 - 0.5 ) ) ) ) * 10.0 ) );
+				float NimbusLightTransport280_g66 = saturate( ( ( ( CloudDetail180_g66 + SimpleCloudDensity155_g66 ) * saturate( (( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_143_0_g66 ) + (( dotResult152_g66 + ( CZY_NimbusHeight * 4.0 * dotResult128_g66 ) ) - 0.5) * (( temp_output_143_0_g66 * -4.0 ) - ( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_143_0_g66 )) / (7.0 - 0.5)) ) ) * 10.0 ) );
 				float FinalAlpha399_g66 = saturate( ( DetailedClouds258_g66 + BorderLightTransport403_g66 + AltoCumulusLightTransport300_g66 + ChemtrailsFinal254_g66 + CirrostratLightTransport295_g66 + CirrusAlpha256_g66 + NimbusLightTransport280_g66 ) );
 				bool enabled20_g71 =(bool)_UnderwaterRenderingEnabled;
 				bool submerged20_g71 =(bool)_FullySubmerged;
-				float4 screenPos = input.ase_texcoord2;
-				float4 ase_positionSSNorm = screenPos / screenPos.w;
-				ase_positionSSNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_positionSSNorm.z : ase_positionSSNorm.z * 0.5 + 0.5;
-				float textureSample20_g71 = tex2Dlod( _UnderwaterMask, float4( ase_positionSSNorm.xy, 0, 0.0) ).r;
+				float4 screenPos = IN.ase_texcoord2;
+				float4 ase_screenPosNorm = screenPos / screenPos.w;
+				ase_screenPosNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_screenPosNorm.z : ase_screenPosNorm.z * 0.5 + 0.5;
+				float textureSample20_g71 = tex2Dlod( _UnderwaterMask, float4( ase_screenPosNorm.xy, 0, 0.0) ).r;
 				float localHLSL20_g71 = HLSL20_g71( enabled20_g71 , submerged20_g71 , textureSample20_g71 );
 				
 
@@ -3030,8 +3006,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 			
 
 			#define _SURFACE_TYPE_TRANSPARENT 1
-			#define ASE_VERSION 19904
-			#define ASE_SRP_VERSION 140012
+			#define ASE_SRP_VERSION 140010
 
 
 			
@@ -3077,19 +3052,17 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
             #endif
 
-			#define ASE_NEEDS_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_FRAG_TEXTURE_COORDINATES0
+			
 
-
-			struct Attributes
+			struct VertexInput
 			{
 				float4 positionOS : POSITION;
-				half3 normalOS : NORMAL;
+				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
-			struct PackedVaryings
+			struct VertexOutput
 			{
 				float4 positionCS : SV_POSITION;
 				float4 ase_texcoord : TEXCOORD0;
@@ -3169,203 +3142,203 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				return 130.0 * dot( m, g );
 			}
 			
-					float2 voronoihash84_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash84_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi84_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash84_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return (F2 + F1) * 0.5;
-					}
+			float voronoi84_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash84_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return (F2 + F1) * 0.5;
+			}
 			
-					float2 voronoihash91_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash91_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi91_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash91_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return (F2 + F1) * 0.5;
-					}
+			float voronoi91_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash91_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return (F2 + F1) * 0.5;
+			}
 			
-					float2 voronoihash87_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash87_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi87_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash87_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return F1;
-					}
+			float voronoi87_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash87_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return F1;
+			}
 			
-					float2 voronoihash201_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash201_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi201_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash201_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return (F2 + F1) * 0.5;
-					}
+			float voronoi201_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash201_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return (F2 + F1) * 0.5;
+			}
 			
-					float2 voronoihash234_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash234_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi234_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash234_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return F1;
-					}
+			float voronoi234_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash234_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return F1;
+			}
 			
-					float2 voronoihash287_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash287_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi287_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash287_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return F1;
-					}
+			float voronoi287_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash287_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return F1;
+			}
 			
 			float HLSL20_g71( bool enabled, bool submerged, float textureSample )
 			{
@@ -3389,29 +3362,29 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float AlphaClipThreshold;
 			};
 
-			PackedVaryings VertexFunction(Attributes input  )
+			VertexOutput VertexFunction(VertexInput v  )
 			{
-				PackedVaryings output;
-				ZERO_INITIALIZE(PackedVaryings, output);
+				VertexOutput o;
+				ZERO_INITIALIZE(VertexOutput, o);
 
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_TRANSFER_INSTANCE_ID(input, output);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-				float3 ase_positionWS = TransformObjectToWorld( ( input.positionOS ).xyz );
-				output.ase_texcoord1.xyz = ase_positionWS;
-				float4 ase_positionCS = TransformObjectToHClip( ( input.positionOS ).xyz );
-				float4 screenPos = ComputeScreenPos( ase_positionCS );
-				output.ase_texcoord2 = screenPos;
+				float3 ase_worldPos = TransformObjectToWorld( (v.positionOS).xyz );
+				o.ase_texcoord1.xyz = ase_worldPos;
+				float4 ase_clipPos = TransformObjectToHClip((v.positionOS).xyz);
+				float4 screenPos = ComputeScreenPos(ase_clipPos);
+				o.ase_texcoord2 = screenPos;
 				
-				output.ase_texcoord.xy = input.ase_texcoord.xy;
+				o.ase_texcoord.xy = v.ase_texcoord.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				output.ase_texcoord.zw = 0;
-				output.ase_texcoord1.w = 0;
+				o.ase_texcoord.zw = 0;
+				o.ase_texcoord1.w = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					float3 defaultVertexValue = input.positionOS.xyz;
+					float3 defaultVertexValue = v.positionOS.xyz;
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
@@ -3419,22 +3392,23 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float3 vertexValue = defaultVertexValue;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					input.positionOS.xyz = vertexValue;
+					v.positionOS.xyz = vertexValue;
 				#else
-					input.positionOS.xyz += vertexValue;
+					v.positionOS.xyz += vertexValue;
 				#endif
 
-				VertexPositionInputs vertexInput = GetVertexPositionInputs( input.positionOS.xyz );
+				v.normalOS = v.normalOS;
 
-				output.positionCS = vertexInput.positionCS;
-				return output;
+				float3 positionWS = TransformObjectToWorld( v.positionOS.xyz );
+				o.positionCS = TransformWorldToHClip(positionWS);
+				return o;
 			}
 
 			#if defined(ASE_TESSELLATION)
 			struct VertexControl
 			{
-				float4 positionOS : INTERNALTESSPOS;
-				half3 normalOS : NORMAL;
+				float4 vertex : INTERNALTESSPOS;
+				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 
 				UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -3446,34 +3420,34 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float inside : SV_InsideTessFactor;
 			};
 
-			VertexControl vert ( Attributes input )
+			VertexControl vert ( VertexInput v )
 			{
-				VertexControl output;
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_TRANSFER_INSTANCE_ID(input, output);
-				output.positionOS = input.positionOS;
-				output.normalOS = input.normalOS;
-				output.ase_texcoord = input.ase_texcoord;
-				return output;
+				VertexControl o;
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				o.vertex = v.positionOS;
+				o.normalOS = v.normalOS;
+				o.ase_texcoord = v.ase_texcoord;
+				return o;
 			}
 
-			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> input)
+			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> v)
 			{
-				TessellationFactors output;
+				TessellationFactors o;
 				float4 tf = 1;
 				float tessValue = _TessValue; float tessMin = _TessMin; float tessMax = _TessMax;
 				float edgeLength = _TessEdgeLength; float tessMaxDisp = _TessMaxDisp;
 				#if defined(ASE_FIXED_TESSELLATION)
 				tf = FixedTess( tessValue );
 				#elif defined(ASE_DISTANCE_TESSELLATION)
-				tf = DistanceBasedTess(input[0].positionOS, input[1].positionOS, input[2].positionOS, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
+				tf = DistanceBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
 				#elif defined(ASE_LENGTH_TESSELLATION)
-				tf = EdgeLengthBasedTess(input[0].positionOS, input[1].positionOS, input[2].positionOS, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
+				tf = EdgeLengthBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
 				#elif defined(ASE_LENGTH_CULL_TESSELLATION)
-				tf = EdgeLengthBasedTessCull(input[0].positionOS, input[1].positionOS, input[2].positionOS, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
+				tf = EdgeLengthBasedTessCull(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
 				#endif
-				output.edge[0] = tf.x; output.edge[1] = tf.y; output.edge[2] = tf.z; output.inside = tf.w;
-				return output;
+				o.edge[0] = tf.x; o.edge[1] = tf.y; o.edge[2] = tf.z; o.inside = tf.w;
+				return o;
 			}
 
 			[domain("tri")]
@@ -3487,34 +3461,34 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 			}
 
 			[domain("tri")]
-			PackedVaryings DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
+			VertexOutput DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
 			{
-				Attributes output = (Attributes) 0;
-				output.positionOS = patch[0].positionOS * bary.x + patch[1].positionOS * bary.y + patch[2].positionOS * bary.z;
-				output.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
-				output.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
+				VertexInput o = (VertexInput) 0;
+				o.positionOS = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
+				o.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
+				o.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
-					pp[i] = output.positionOS.xyz - patch[i].normalOS * (dot(output.positionOS.xyz, patch[i].normalOS) - dot(patch[i].positionOS.xyz, patch[i].normalOS));
+					pp[i] = o.positionOS.xyz - patch[i].normalOS * (dot(o.positionOS.xyz, patch[i].normalOS) - dot(patch[i].vertex.xyz, patch[i].normalOS));
 				float phongStrength = _TessPhongStrength;
-				output.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * output.positionOS.xyz;
+				o.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.positionOS.xyz;
 				#endif
-				UNITY_TRANSFER_INSTANCE_ID(patch[0], output);
-				return VertexFunction(output);
+				UNITY_TRANSFER_INSTANCE_ID(patch[0], o);
+				return VertexFunction(o);
 			}
 			#else
-			PackedVaryings vert ( Attributes input )
+			VertexOutput vert ( VertexInput v )
 			{
-				return VertexFunction( input );
+				return VertexFunction( v );
 			}
 			#endif
 
-			half4 frag(PackedVaryings input ) : SV_Target
+			half4 frag(VertexOutput IN ) : SV_TARGET
 			{
 				SurfaceDescription surfaceDescription = (SurfaceDescription)0;
 
-				float2 texCoord31_g66 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord31_g66 = IN.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 Pos33_g66 = texCoord31_g66;
 				float mulTime29_g66 = _TimeParameters.x * ( 0.001 * CZY_WindSpeed );
 				float TIme30_g66 = mulTime29_g66;
@@ -3537,7 +3511,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float2 appendResult98_g66 = (float2(voroi84_g66 , voroi91_g66));
 				float2 VoroDetails112_g66 = appendResult98_g66;
 				float CumulusCoverage34_g66 = CZY_CumulusCoverageMultiplier;
-				float ComplexCloudDensity144_g66 =  (0.0 + ( min( SimpleCloudDensity155_g66 , ( 1.0 - VoroDetails112_g66.x ) ) - ( 1.0 - CumulusCoverage34_g66 ) ) * ( 1.0 - 0.0 ) / ( 1.0 - ( 1.0 - CumulusCoverage34_g66 ) ) );
+				float ComplexCloudDensity144_g66 = (0.0 + (min( SimpleCloudDensity155_g66 , ( 1.0 - VoroDetails112_g66.x ) ) - ( 1.0 - CumulusCoverage34_g66 )) * (1.0 - 0.0) / (1.0 - ( 1.0 - CumulusCoverage34_g66 )));
 				float time87_g66 = 0.0;
 				float2 voronoiSmoothId87_g66 = 0;
 				float2 coords87_g66 = ( Pos33_g66 + ( TIme30_g66 * float2( 0.3,0.2 ) ) ) * ( 100.0 / CZY_DetailScale );
@@ -3553,15 +3527,15 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				fade87_g66 *= 0.5;
 				}//Voronoi87_g66
 				voroi87_g66 /= rest87_g66;
-				float temp_output_174_0_g66 = (  (0.0 + ( ( 1.0 - voroi87_g66 ) - 0.3 ) * ( 0.5 - 0.0 ) / ( 1.0 - 0.3 ) ) * 0.1 * CZY_DetailAmount );
+				float temp_output_174_0_g66 = ( (0.0 + (( 1.0 - voroi87_g66 ) - 0.3) * (0.5 - 0.0) / (1.0 - 0.3)) * 0.1 * CZY_DetailAmount );
 				float DetailedClouds258_g66 = saturate( ( ComplexCloudDensity144_g66 + temp_output_174_0_g66 ) );
 				float CloudDetail180_g66 = temp_output_174_0_g66;
-				float2 texCoord82_g66 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord82_g66 = IN.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_163_0_g66 = ( texCoord82_g66 - float2( 0.5,0.5 ) );
 				float dotResult214_g66 = dot( temp_output_163_0_g66 , temp_output_163_0_g66 );
 				float BorderHeight156_g66 = ( 1.0 - CZY_BorderHeight );
 				float temp_output_153_0_g66 = ( -2.0 * ( 1.0 - CZY_BorderVariation ) );
-				float clampResult253_g66 = clamp( ( ( ( CloudDetail180_g66 + SimpleCloudDensity155_g66 ) * saturate(  (( BorderHeight156_g66 * temp_output_153_0_g66 ) + ( dotResult214_g66 - 0.0 ) * ( ( temp_output_153_0_g66 * -4.0 ) - ( BorderHeight156_g66 * temp_output_153_0_g66 ) ) / ( 1.0 - 0.0 ) ) ) ) * 10.0 * CZY_BorderEffect ) , -1.0 , 1.0 );
+				float clampResult253_g66 = clamp( ( ( ( CloudDetail180_g66 + SimpleCloudDensity155_g66 ) * saturate( (( BorderHeight156_g66 * temp_output_153_0_g66 ) + (dotResult214_g66 - 0.0) * (( temp_output_153_0_g66 * -4.0 ) - ( BorderHeight156_g66 * temp_output_153_0_g66 )) / (1.0 - 0.0)) ) ) * 10.0 * CZY_BorderEffect ) , -1.0 , 1.0 );
 				float BorderLightTransport403_g66 = clampResult253_g66;
 				float time201_g66 = 0.0;
 				float2 voronoiSmoothId201_g66 = 0;
@@ -3572,11 +3546,11 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float voroi201_g66 = voronoi201_g66( coords201_g66, time201_g66, id201_g66, uv201_g66, 0, voronoiSmoothId201_g66 );
 				float time234_g66 = ( 10.0 * mulTime165_g66 );
 				float2 voronoiSmoothId234_g66 = 0;
-				float2 coords234_g66 = input.ase_texcoord.xy * 10.0;
+				float2 coords234_g66 = IN.ase_texcoord.xy * 10.0;
 				float2 id234_g66 = 0;
 				float2 uv234_g66 = 0;
 				float voroi234_g66 = voronoi234_g66( coords234_g66, time234_g66, id234_g66, uv234_g66, 0, voronoiSmoothId234_g66 );
-				float AltoCumulusPlacement271_g66 = saturate( ( ( ( 1.0 - 0.0 ) -  (1.0 + ( voroi201_g66 - 0.0 ) * ( -0.5 - 1.0 ) / ( 1.0 - 0.0 ) ) ) - voroi234_g66 ) );
+				float AltoCumulusPlacement271_g66 = saturate( ( ( ( 1.0 - 0.0 ) - (1.0 + (voroi201_g66 - 0.0) * (-0.5 - 1.0) / (1.0 - 0.0)) ) - voroi234_g66 ) );
 				float time287_g66 = 51.2;
 				float2 voronoiSmoothId287_g66 = 0;
 				float2 coords287_g66 = (Pos33_g66*1.0 + ( CZY_AltocumulusWindSpeed * TIme30_g66 )) * ( 100.0 / CZY_AltocumulusScale );
@@ -3592,7 +3566,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				fade287_g66 *= 0.5;
 				}//Voronoi287_g66
 				voroi287_g66 /= rest287_g66;
-				float AltoCumulusLightTransport300_g66 = ( ( AltoCumulusPlacement271_g66 * ( 0.1 > voroi287_g66 ?  (0.5 + ( voroi287_g66 - 0.0 ) * ( 0.0 - 0.5 ) / ( 0.15 - 0.0 ) ) : 0.0 ) * CZY_AltocumulusMultiplier ) > 0.2 ? 1.0 : 0.0 );
+				float AltoCumulusLightTransport300_g66 = ( ( AltoCumulusPlacement271_g66 * ( 0.1 > voroi287_g66 ? (0.5 + (voroi287_g66 - 0.0) * (0.0 - 0.5) / (0.15 - 0.0)) : 0.0 ) * CZY_AltocumulusMultiplier ) > 0.2 ? 1.0 : 0.0 );
 				float mulTime107_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D146_g66 = snoise( (Pos33_g66*1.0 + mulTime107_g66)*2.0 );
 				float mulTime96_g66 = _TimeParameters.x * CZY_ChemtrailsMoveSpeed;
@@ -3605,10 +3579,10 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float mulTime110_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D150_g66 = snoise( (Pos33_g66*1.0 + mulTime110_g66)*4.0 );
 				float4 ChemtrailsPattern212_g66 = ( ( saturate( simplePerlin2D146_g66 ) * tex2D( CZY_ChemtrailsTexture, (rotator100_g66*0.5 + 0.0) ) ) + ( tex2D( CZY_ChemtrailsTexture, rotator134_g66 ) * saturate( simplePerlin2D150_g66 ) ) );
-				float2 texCoord142_g66 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord142_g66 = IN.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_164_0_g66 = ( texCoord142_g66 - float2( 0.5,0.5 ) );
 				float dotResult209_g66 = dot( temp_output_164_0_g66 , temp_output_164_0_g66 );
-				float ChemtrailsFinal254_g66 = ( ( ChemtrailsPattern212_g66 * saturate(  (0.4 + ( dotResult209_g66 - 0.0 ) * ( 2.0 - 0.4 ) / ( 0.1 - 0.0 ) ) ) ).r > ( 1.0 - ( CZY_ChemtrailsMultiplier * 0.5 ) ) ? 1.0 : 0.0 );
+				float ChemtrailsFinal254_g66 = ( ( ChemtrailsPattern212_g66 * saturate( (0.4 + (dotResult209_g66 - 0.0) * (2.0 - 0.4) / (0.1 - 0.0)) ) ).r > ( 1.0 - ( CZY_ChemtrailsMultiplier * 0.5 ) ) ? 1.0 : 0.0 );
 				float mulTime194_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D226_g66 = snoise( (Pos33_g66*1.0 + mulTime194_g66)*2.0 );
 				float mulTime179_g66 = _TimeParameters.x * CZY_CirrostratusMoveSpeed;
@@ -3621,11 +3595,11 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float mulTime185_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D218_g66 = snoise( (Pos33_g66*10.0 + mulTime185_g66)*4.0 );
 				float4 CirrostratPattern270_g66 = ( ( saturate( simplePerlin2D226_g66 ) * tex2D( CZY_CirrostratusTexture, (rotator141_g66*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrostratusTexture, (rotator199_g66*1.5 + 0.75) ) * saturate( simplePerlin2D218_g66 ) ) );
-				float2 texCoord238_g66 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord238_g66 = IN.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_249_0_g66 = ( texCoord238_g66 - float2( 0.5,0.5 ) );
 				float dotResult243_g66 = dot( temp_output_249_0_g66 , temp_output_249_0_g66 );
 				float clampResult274_g66 = clamp( ( CZY_CirrostratusMultiplier * 0.5 ) , 0.0 , 0.98 );
-				float CirrostratLightTransport295_g66 = ( ( CirrostratPattern270_g66 * saturate(  (0.4 + ( dotResult243_g66 - 0.0 ) * ( 2.0 - 0.4 ) / ( 0.1 - 0.0 ) ) ) ).r > ( 1.0 - clampResult274_g66 ) ? 1.0 : 0.0 );
+				float CirrostratLightTransport295_g66 = ( ( CirrostratPattern270_g66 * saturate( (0.4 + (dotResult243_g66 - 0.0) * (2.0 - 0.4) / (0.1 - 0.0)) ) ).r > ( 1.0 - clampResult274_g66 ) ? 1.0 : 0.0 );
 				float mulTime83_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D129_g66 = snoise( (Pos33_g66*1.0 + mulTime83_g66)*2.0 );
 				float mulTime78_g66 = _TimeParameters.x * CZY_CirrusMoveSpeed;
@@ -3639,28 +3613,28 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float simplePerlin2D125_g66 = snoise( (Pos33_g66*1.0 + mulTime138_g66) );
 				simplePerlin2D125_g66 = simplePerlin2D125_g66*0.5 + 0.5;
 				float4 CirrusPattern140_g66 = ( ( saturate( simplePerlin2D129_g66 ) * tex2D( CZY_CirrusTexture, (rotator104_g66*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrusTexture, (rotator115_g66*1.0 + 0.0) ) * saturate( simplePerlin2D125_g66 ) ) );
-				float2 texCoord137_g66 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord137_g66 = IN.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_166_0_g66 = ( texCoord137_g66 - float2( 0.5,0.5 ) );
 				float dotResult159_g66 = dot( temp_output_166_0_g66 , temp_output_166_0_g66 );
-				float4 temp_output_219_0_g66 = ( CirrusPattern140_g66 * saturate(  (0.0 + ( dotResult159_g66 - 0.0 ) * ( 2.0 - 0.0 ) / ( 0.2 - 0.0 ) ) ) );
+				float4 temp_output_219_0_g66 = ( CirrusPattern140_g66 * saturate( (0.0 + (dotResult159_g66 - 0.0) * (2.0 - 0.0) / (0.2 - 0.0)) ) );
 				float Clipping210_g66 = CZY_ClippingThreshold;
 				float CirrusAlpha256_g66 = ( ( temp_output_219_0_g66 * ( CZY_CirrusMultiplier * 10.0 ) ).r > Clipping210_g66 ? 1.0 : 0.0 );
-				float3 ase_positionWS = input.ase_texcoord1.xyz;
-				float3 normalizeResult119_g66 = normalize( ( ase_positionWS - _WorldSpaceCameraPos ) );
+				float3 ase_worldPos = IN.ase_texcoord1.xyz;
+				float3 normalizeResult119_g66 = normalize( ( ase_worldPos - _WorldSpaceCameraPos ) );
 				float3 normalizeResult149_g66 = normalize( CZY_StormDirection );
 				float dotResult152_g66 = dot( normalizeResult119_g66 , normalizeResult149_g66 );
-				float2 texCoord101_g66 = input.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord101_g66 = IN.ase_texcoord.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_127_0_g66 = ( texCoord101_g66 - float2( 0.5,0.5 ) );
 				float dotResult128_g66 = dot( temp_output_127_0_g66 , temp_output_127_0_g66 );
 				float temp_output_143_0_g66 = ( -2.0 * ( 1.0 - ( CZY_NimbusVariation * 0.9 ) ) );
-				float NimbusLightTransport280_g66 = saturate( ( ( ( CloudDetail180_g66 + SimpleCloudDensity155_g66 ) * saturate(  (( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_143_0_g66 ) + ( ( dotResult152_g66 + ( CZY_NimbusHeight * 4.0 * dotResult128_g66 ) ) - 0.5 ) * ( ( temp_output_143_0_g66 * -4.0 ) - ( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_143_0_g66 ) ) / ( 7.0 - 0.5 ) ) ) ) * 10.0 ) );
+				float NimbusLightTransport280_g66 = saturate( ( ( ( CloudDetail180_g66 + SimpleCloudDensity155_g66 ) * saturate( (( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_143_0_g66 ) + (( dotResult152_g66 + ( CZY_NimbusHeight * 4.0 * dotResult128_g66 ) ) - 0.5) * (( temp_output_143_0_g66 * -4.0 ) - ( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_143_0_g66 )) / (7.0 - 0.5)) ) ) * 10.0 ) );
 				float FinalAlpha399_g66 = saturate( ( DetailedClouds258_g66 + BorderLightTransport403_g66 + AltoCumulusLightTransport300_g66 + ChemtrailsFinal254_g66 + CirrostratLightTransport295_g66 + CirrusAlpha256_g66 + NimbusLightTransport280_g66 ) );
 				bool enabled20_g71 =(bool)_UnderwaterRenderingEnabled;
 				bool submerged20_g71 =(bool)_FullySubmerged;
-				float4 screenPos = input.ase_texcoord2;
-				float4 ase_positionSSNorm = screenPos / screenPos.w;
-				ase_positionSSNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_positionSSNorm.z : ase_positionSSNorm.z * 0.5 + 0.5;
-				float textureSample20_g71 = tex2Dlod( _UnderwaterMask, float4( ase_positionSSNorm.xy, 0, 0.0) ).r;
+				float4 screenPos = IN.ase_texcoord2;
+				float4 ase_screenPosNorm = screenPos / screenPos.w;
+				ase_screenPosNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_screenPosNorm.z : ase_screenPosNorm.z * 0.5 + 0.5;
+				float textureSample20_g71 = tex2Dlod( _UnderwaterMask, float4( ase_screenPosNorm.xy, 0, 0.0) ).r;
 				float localHLSL20_g71 = HLSL20_g71( enabled20_g71 , submerged20_g71 , textureSample20_g71 );
 				
 
@@ -3676,7 +3650,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				#endif
 
 				half4 outColor = 0;
-				outColor = unity_SelectionID;
+				outColor = _SelectionID;
 
 				return outColor;
 			}
@@ -3700,8 +3674,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 
         	#pragma multi_compile_instancing
         	#define _SURFACE_TYPE_TRANSPARENT 1
-        	#define ASE_VERSION 19904
-        	#define ASE_SRP_VERSION 140012
+        	#define ASE_SRP_VERSION 140010
 
 
 			
@@ -3752,33 +3725,24 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
             #endif
 
-			#define ASE_NEEDS_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_FRAG_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_FRAG_SCREEN_POSITION_NORMALIZED
+			#define ASE_NEEDS_FRAG_SCREEN_POSITION
 
 
-			#if defined(ASE_EARLY_Z_DEPTH_OPTIMIZE) && (SHADER_TARGET >= 45)
-				#define ASE_SV_DEPTH SV_DepthLessEqual
-				#define ASE_SV_POSITION_QUALIFIERS linear noperspective centroid
-			#else
-				#define ASE_SV_DEPTH SV_Depth
-				#define ASE_SV_POSITION_QUALIFIERS
-			#endif
-
-			struct Attributes
+			struct VertexInput
 			{
 				float4 positionOS : POSITION;
-				half3 normalOS : NORMAL;
+				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
-			struct PackedVaryings
+			struct VertexOutput
 			{
-				ASE_SV_POSITION_QUALIFIERS float4 positionCS : SV_POSITION;
-				half3 normalWS : TEXCOORD0;
-				float4 ase_texcoord1 : TEXCOORD1;
+				float4 positionCS : SV_POSITION;
+				float4 clipPosV : TEXCOORD0;
+				float3 normalWS : TEXCOORD1;
 				float4 ase_texcoord2 : TEXCOORD2;
+				float4 ase_texcoord3 : TEXCOORD3;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
@@ -3853,203 +3817,203 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				return 130.0 * dot( m, g );
 			}
 			
-					float2 voronoihash84_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash84_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi84_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash84_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return (F2 + F1) * 0.5;
-					}
+			float voronoi84_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash84_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return (F2 + F1) * 0.5;
+			}
 			
-					float2 voronoihash91_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash91_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi91_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash91_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return (F2 + F1) * 0.5;
-					}
+			float voronoi91_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash91_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return (F2 + F1) * 0.5;
+			}
 			
-					float2 voronoihash87_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash87_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi87_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash87_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return F1;
-					}
+			float voronoi87_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash87_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return F1;
+			}
 			
-					float2 voronoihash201_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash201_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi201_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash201_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return (F2 + F1) * 0.5;
-					}
+			float voronoi201_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash201_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return (F2 + F1) * 0.5;
+			}
 			
-					float2 voronoihash234_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash234_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi234_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash234_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return F1;
-					}
+			float voronoi234_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash234_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return F1;
+			}
 			
-					float2 voronoihash287_g66( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash287_g66( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi287_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash287_g66( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return F1;
-					}
+			float voronoi287_g66( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash287_g66( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return F1;
+			}
 			
 			float HLSL20_g71( bool enabled, bool submerged, float textureSample )
 			{
@@ -4071,25 +4035,26 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float AlphaClipThreshold;
 			};
 
-			PackedVaryings VertexFunction( Attributes input  )
+			VertexOutput VertexFunction(VertexInput v  )
 			{
-				PackedVaryings output;
-				ZERO_INITIALIZE(PackedVaryings, output);
+				VertexOutput o;
+				ZERO_INITIALIZE(VertexOutput, o);
 
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_TRANSFER_INSTANCE_ID(input, output);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-				float3 ase_positionWS = TransformObjectToWorld( ( input.positionOS ).xyz );
-				output.ase_texcoord2.xyz = ase_positionWS;
+				float3 ase_worldPos = TransformObjectToWorld( (v.positionOS).xyz );
+				o.ase_texcoord3.xyz = ase_worldPos;
 				
-				output.ase_texcoord1.xy = input.ase_texcoord.xy;
+				o.ase_texcoord2.xy = v.ase_texcoord.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				output.ase_texcoord1.zw = 0;
-				output.ase_texcoord2.w = 0;
+				o.ase_texcoord2.zw = 0;
+				o.ase_texcoord3.w = 0;
+
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					float3 defaultVertexValue = input.positionOS.xyz;
+					float3 defaultVertexValue = v.positionOS.xyz;
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
@@ -4097,26 +4062,26 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float3 vertexValue = defaultVertexValue;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					input.positionOS.xyz = vertexValue;
+					v.positionOS.xyz = vertexValue;
 				#else
-					input.positionOS.xyz += vertexValue;
+					v.positionOS.xyz += vertexValue;
 				#endif
 
-				input.normalOS = input.normalOS;
+				v.normalOS = v.normalOS;
 
-				VertexPositionInputs vertexInput = GetVertexPositionInputs( input.positionOS.xyz );
-				VertexNormalInputs normalInput = GetVertexNormalInputs( input.normalOS );
+				VertexPositionInputs vertexInput = GetVertexPositionInputs( v.positionOS.xyz );
 
-				output.positionCS = vertexInput.positionCS;
-				output.normalWS = normalInput.normalWS;
-				return output;
+				o.positionCS = vertexInput.positionCS;
+				o.clipPosV = vertexInput.positionCS;
+				o.normalWS = TransformObjectToWorldNormal( v.normalOS );
+				return o;
 			}
 
 			#if defined(ASE_TESSELLATION)
 			struct VertexControl
 			{
-				float4 positionOS : INTERNALTESSPOS;
-				half3 normalOS : NORMAL;
+				float4 vertex : INTERNALTESSPOS;
+				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 
 				UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -4128,34 +4093,34 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float inside : SV_InsideTessFactor;
 			};
 
-			VertexControl vert ( Attributes input )
+			VertexControl vert ( VertexInput v )
 			{
-				VertexControl output;
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_TRANSFER_INSTANCE_ID(input, output);
-				output.positionOS = input.positionOS;
-				output.normalOS = input.normalOS;
-				output.ase_texcoord = input.ase_texcoord;
-				return output;
+				VertexControl o;
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				o.vertex = v.positionOS;
+				o.normalOS = v.normalOS;
+				o.ase_texcoord = v.ase_texcoord;
+				return o;
 			}
 
-			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> input)
+			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> v)
 			{
-				TessellationFactors output;
+				TessellationFactors o;
 				float4 tf = 1;
 				float tessValue = _TessValue; float tessMin = _TessMin; float tessMax = _TessMax;
 				float edgeLength = _TessEdgeLength; float tessMaxDisp = _TessMaxDisp;
 				#if defined(ASE_FIXED_TESSELLATION)
 				tf = FixedTess( tessValue );
 				#elif defined(ASE_DISTANCE_TESSELLATION)
-				tf = DistanceBasedTess(input[0].positionOS, input[1].positionOS, input[2].positionOS, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
+				tf = DistanceBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
 				#elif defined(ASE_LENGTH_TESSELLATION)
-				tf = EdgeLengthBasedTess(input[0].positionOS, input[1].positionOS, input[2].positionOS, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
+				tf = EdgeLengthBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
 				#elif defined(ASE_LENGTH_CULL_TESSELLATION)
-				tf = EdgeLengthBasedTessCull(input[0].positionOS, input[1].positionOS, input[2].positionOS, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
+				tf = EdgeLengthBasedTessCull(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
 				#endif
-				output.edge[0] = tf.x; output.edge[1] = tf.y; output.edge[2] = tf.z; output.inside = tf.w;
-				return output;
+				o.edge[0] = tf.x; o.edge[1] = tf.y; o.edge[2] = tf.z; o.inside = tf.w;
+				return o;
 			}
 
 			[domain("tri")]
@@ -4169,48 +4134,40 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 			}
 
 			[domain("tri")]
-			PackedVaryings DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
+			VertexOutput DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
 			{
-				Attributes output = (Attributes) 0;
-				output.positionOS = patch[0].positionOS * bary.x + patch[1].positionOS * bary.y + patch[2].positionOS * bary.z;
-				output.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
-				output.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
+				VertexInput o = (VertexInput) 0;
+				o.positionOS = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
+				o.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
+				o.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
-					pp[i] = output.positionOS.xyz - patch[i].normalOS * (dot(output.positionOS.xyz, patch[i].normalOS) - dot(patch[i].positionOS.xyz, patch[i].normalOS));
+					pp[i] = o.positionOS.xyz - patch[i].normalOS * (dot(o.positionOS.xyz, patch[i].normalOS) - dot(patch[i].vertex.xyz, patch[i].normalOS));
 				float phongStrength = _TessPhongStrength;
-				output.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * output.positionOS.xyz;
+				o.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.positionOS.xyz;
 				#endif
-				UNITY_TRANSFER_INSTANCE_ID(patch[0], output);
-				return VertexFunction(output);
+				UNITY_TRANSFER_INSTANCE_ID(patch[0], o);
+				return VertexFunction(o);
 			}
 			#else
-			PackedVaryings vert ( Attributes input )
+			VertexOutput vert ( VertexInput v )
 			{
-				return VertexFunction( input );
+				return VertexFunction( v );
 			}
 			#endif
 
-			void frag(PackedVaryings input
-						, out half4 outNormalWS : SV_Target0
-						#if defined( ASE_DEPTH_WRITE_ON )
-						,out float outputDepth : ASE_SV_DEPTH
-						#endif
-						#ifdef _WRITE_RENDERING_LAYERS
-						, out float4 outRenderingLayers : SV_Target1
-						#endif
-						 )
+			void frag( VertexOutput IN
+				, out half4 outNormalWS : SV_Target0
+			#ifdef _WRITE_RENDERING_LAYERS
+				, out float4 outRenderingLayers : SV_Target1
+			#endif
+				 )
 			{
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( input );
+				float4 ClipPos = IN.clipPosV;
+				float4 ScreenPos = ComputeScreenPos( IN.clipPosV );
 
-				half3 NormalWS = normalize( input.normalWS );
-				float4 ScreenPosNorm = float4( GetNormalizedScreenSpaceUV( input.positionCS ), input.positionCS.zw );
-				float4 ClipPos = ComputeClipSpacePosition( ScreenPosNorm.xy, input.positionCS.z ) * input.positionCS.w;
-				float4 ScreenPos = ComputeScreenPos( ClipPos );
-
-				float2 texCoord31_g66 = input.ase_texcoord1.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord31_g66 = IN.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 Pos33_g66 = texCoord31_g66;
 				float mulTime29_g66 = _TimeParameters.x * ( 0.001 * CZY_WindSpeed );
 				float TIme30_g66 = mulTime29_g66;
@@ -4233,7 +4190,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float2 appendResult98_g66 = (float2(voroi84_g66 , voroi91_g66));
 				float2 VoroDetails112_g66 = appendResult98_g66;
 				float CumulusCoverage34_g66 = CZY_CumulusCoverageMultiplier;
-				float ComplexCloudDensity144_g66 =  (0.0 + ( min( SimpleCloudDensity155_g66 , ( 1.0 - VoroDetails112_g66.x ) ) - ( 1.0 - CumulusCoverage34_g66 ) ) * ( 1.0 - 0.0 ) / ( 1.0 - ( 1.0 - CumulusCoverage34_g66 ) ) );
+				float ComplexCloudDensity144_g66 = (0.0 + (min( SimpleCloudDensity155_g66 , ( 1.0 - VoroDetails112_g66.x ) ) - ( 1.0 - CumulusCoverage34_g66 )) * (1.0 - 0.0) / (1.0 - ( 1.0 - CumulusCoverage34_g66 )));
 				float time87_g66 = 0.0;
 				float2 voronoiSmoothId87_g66 = 0;
 				float2 coords87_g66 = ( Pos33_g66 + ( TIme30_g66 * float2( 0.3,0.2 ) ) ) * ( 100.0 / CZY_DetailScale );
@@ -4249,15 +4206,15 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				fade87_g66 *= 0.5;
 				}//Voronoi87_g66
 				voroi87_g66 /= rest87_g66;
-				float temp_output_174_0_g66 = (  (0.0 + ( ( 1.0 - voroi87_g66 ) - 0.3 ) * ( 0.5 - 0.0 ) / ( 1.0 - 0.3 ) ) * 0.1 * CZY_DetailAmount );
+				float temp_output_174_0_g66 = ( (0.0 + (( 1.0 - voroi87_g66 ) - 0.3) * (0.5 - 0.0) / (1.0 - 0.3)) * 0.1 * CZY_DetailAmount );
 				float DetailedClouds258_g66 = saturate( ( ComplexCloudDensity144_g66 + temp_output_174_0_g66 ) );
 				float CloudDetail180_g66 = temp_output_174_0_g66;
-				float2 texCoord82_g66 = input.ase_texcoord1.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord82_g66 = IN.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_163_0_g66 = ( texCoord82_g66 - float2( 0.5,0.5 ) );
 				float dotResult214_g66 = dot( temp_output_163_0_g66 , temp_output_163_0_g66 );
 				float BorderHeight156_g66 = ( 1.0 - CZY_BorderHeight );
 				float temp_output_153_0_g66 = ( -2.0 * ( 1.0 - CZY_BorderVariation ) );
-				float clampResult253_g66 = clamp( ( ( ( CloudDetail180_g66 + SimpleCloudDensity155_g66 ) * saturate(  (( BorderHeight156_g66 * temp_output_153_0_g66 ) + ( dotResult214_g66 - 0.0 ) * ( ( temp_output_153_0_g66 * -4.0 ) - ( BorderHeight156_g66 * temp_output_153_0_g66 ) ) / ( 1.0 - 0.0 ) ) ) ) * 10.0 * CZY_BorderEffect ) , -1.0 , 1.0 );
+				float clampResult253_g66 = clamp( ( ( ( CloudDetail180_g66 + SimpleCloudDensity155_g66 ) * saturate( (( BorderHeight156_g66 * temp_output_153_0_g66 ) + (dotResult214_g66 - 0.0) * (( temp_output_153_0_g66 * -4.0 ) - ( BorderHeight156_g66 * temp_output_153_0_g66 )) / (1.0 - 0.0)) ) ) * 10.0 * CZY_BorderEffect ) , -1.0 , 1.0 );
 				float BorderLightTransport403_g66 = clampResult253_g66;
 				float time201_g66 = 0.0;
 				float2 voronoiSmoothId201_g66 = 0;
@@ -4268,11 +4225,11 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float voroi201_g66 = voronoi201_g66( coords201_g66, time201_g66, id201_g66, uv201_g66, 0, voronoiSmoothId201_g66 );
 				float time234_g66 = ( 10.0 * mulTime165_g66 );
 				float2 voronoiSmoothId234_g66 = 0;
-				float2 coords234_g66 = input.ase_texcoord1.xy * 10.0;
+				float2 coords234_g66 = IN.ase_texcoord2.xy * 10.0;
 				float2 id234_g66 = 0;
 				float2 uv234_g66 = 0;
 				float voroi234_g66 = voronoi234_g66( coords234_g66, time234_g66, id234_g66, uv234_g66, 0, voronoiSmoothId234_g66 );
-				float AltoCumulusPlacement271_g66 = saturate( ( ( ( 1.0 - 0.0 ) -  (1.0 + ( voroi201_g66 - 0.0 ) * ( -0.5 - 1.0 ) / ( 1.0 - 0.0 ) ) ) - voroi234_g66 ) );
+				float AltoCumulusPlacement271_g66 = saturate( ( ( ( 1.0 - 0.0 ) - (1.0 + (voroi201_g66 - 0.0) * (-0.5 - 1.0) / (1.0 - 0.0)) ) - voroi234_g66 ) );
 				float time287_g66 = 51.2;
 				float2 voronoiSmoothId287_g66 = 0;
 				float2 coords287_g66 = (Pos33_g66*1.0 + ( CZY_AltocumulusWindSpeed * TIme30_g66 )) * ( 100.0 / CZY_AltocumulusScale );
@@ -4288,7 +4245,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				fade287_g66 *= 0.5;
 				}//Voronoi287_g66
 				voroi287_g66 /= rest287_g66;
-				float AltoCumulusLightTransport300_g66 = ( ( AltoCumulusPlacement271_g66 * ( 0.1 > voroi287_g66 ?  (0.5 + ( voroi287_g66 - 0.0 ) * ( 0.0 - 0.5 ) / ( 0.15 - 0.0 ) ) : 0.0 ) * CZY_AltocumulusMultiplier ) > 0.2 ? 1.0 : 0.0 );
+				float AltoCumulusLightTransport300_g66 = ( ( AltoCumulusPlacement271_g66 * ( 0.1 > voroi287_g66 ? (0.5 + (voroi287_g66 - 0.0) * (0.0 - 0.5) / (0.15 - 0.0)) : 0.0 ) * CZY_AltocumulusMultiplier ) > 0.2 ? 1.0 : 0.0 );
 				float mulTime107_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D146_g66 = snoise( (Pos33_g66*1.0 + mulTime107_g66)*2.0 );
 				float mulTime96_g66 = _TimeParameters.x * CZY_ChemtrailsMoveSpeed;
@@ -4301,10 +4258,10 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float mulTime110_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D150_g66 = snoise( (Pos33_g66*1.0 + mulTime110_g66)*4.0 );
 				float4 ChemtrailsPattern212_g66 = ( ( saturate( simplePerlin2D146_g66 ) * tex2D( CZY_ChemtrailsTexture, (rotator100_g66*0.5 + 0.0) ) ) + ( tex2D( CZY_ChemtrailsTexture, rotator134_g66 ) * saturate( simplePerlin2D150_g66 ) ) );
-				float2 texCoord142_g66 = input.ase_texcoord1.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord142_g66 = IN.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_164_0_g66 = ( texCoord142_g66 - float2( 0.5,0.5 ) );
 				float dotResult209_g66 = dot( temp_output_164_0_g66 , temp_output_164_0_g66 );
-				float ChemtrailsFinal254_g66 = ( ( ChemtrailsPattern212_g66 * saturate(  (0.4 + ( dotResult209_g66 - 0.0 ) * ( 2.0 - 0.4 ) / ( 0.1 - 0.0 ) ) ) ).r > ( 1.0 - ( CZY_ChemtrailsMultiplier * 0.5 ) ) ? 1.0 : 0.0 );
+				float ChemtrailsFinal254_g66 = ( ( ChemtrailsPattern212_g66 * saturate( (0.4 + (dotResult209_g66 - 0.0) * (2.0 - 0.4) / (0.1 - 0.0)) ) ).r > ( 1.0 - ( CZY_ChemtrailsMultiplier * 0.5 ) ) ? 1.0 : 0.0 );
 				float mulTime194_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D226_g66 = snoise( (Pos33_g66*1.0 + mulTime194_g66)*2.0 );
 				float mulTime179_g66 = _TimeParameters.x * CZY_CirrostratusMoveSpeed;
@@ -4317,11 +4274,11 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float mulTime185_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D218_g66 = snoise( (Pos33_g66*10.0 + mulTime185_g66)*4.0 );
 				float4 CirrostratPattern270_g66 = ( ( saturate( simplePerlin2D226_g66 ) * tex2D( CZY_CirrostratusTexture, (rotator141_g66*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrostratusTexture, (rotator199_g66*1.5 + 0.75) ) * saturate( simplePerlin2D218_g66 ) ) );
-				float2 texCoord238_g66 = input.ase_texcoord1.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord238_g66 = IN.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_249_0_g66 = ( texCoord238_g66 - float2( 0.5,0.5 ) );
 				float dotResult243_g66 = dot( temp_output_249_0_g66 , temp_output_249_0_g66 );
 				float clampResult274_g66 = clamp( ( CZY_CirrostratusMultiplier * 0.5 ) , 0.0 , 0.98 );
-				float CirrostratLightTransport295_g66 = ( ( CirrostratPattern270_g66 * saturate(  (0.4 + ( dotResult243_g66 - 0.0 ) * ( 2.0 - 0.4 ) / ( 0.1 - 0.0 ) ) ) ).r > ( 1.0 - clampResult274_g66 ) ? 1.0 : 0.0 );
+				float CirrostratLightTransport295_g66 = ( ( CirrostratPattern270_g66 * saturate( (0.4 + (dotResult243_g66 - 0.0) * (2.0 - 0.4) / (0.1 - 0.0)) ) ).r > ( 1.0 - clampResult274_g66 ) ? 1.0 : 0.0 );
 				float mulTime83_g66 = _TimeParameters.x * 0.01;
 				float simplePerlin2D129_g66 = snoise( (Pos33_g66*1.0 + mulTime83_g66)*2.0 );
 				float mulTime78_g66 = _TimeParameters.x * CZY_CirrusMoveSpeed;
@@ -4335,54 +4292,50 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 				float simplePerlin2D125_g66 = snoise( (Pos33_g66*1.0 + mulTime138_g66) );
 				simplePerlin2D125_g66 = simplePerlin2D125_g66*0.5 + 0.5;
 				float4 CirrusPattern140_g66 = ( ( saturate( simplePerlin2D129_g66 ) * tex2D( CZY_CirrusTexture, (rotator104_g66*1.5 + 0.75) ) ) + ( tex2D( CZY_CirrusTexture, (rotator115_g66*1.0 + 0.0) ) * saturate( simplePerlin2D125_g66 ) ) );
-				float2 texCoord137_g66 = input.ase_texcoord1.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord137_g66 = IN.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_166_0_g66 = ( texCoord137_g66 - float2( 0.5,0.5 ) );
 				float dotResult159_g66 = dot( temp_output_166_0_g66 , temp_output_166_0_g66 );
-				float4 temp_output_219_0_g66 = ( CirrusPattern140_g66 * saturate(  (0.0 + ( dotResult159_g66 - 0.0 ) * ( 2.0 - 0.0 ) / ( 0.2 - 0.0 ) ) ) );
+				float4 temp_output_219_0_g66 = ( CirrusPattern140_g66 * saturate( (0.0 + (dotResult159_g66 - 0.0) * (2.0 - 0.0) / (0.2 - 0.0)) ) );
 				float Clipping210_g66 = CZY_ClippingThreshold;
 				float CirrusAlpha256_g66 = ( ( temp_output_219_0_g66 * ( CZY_CirrusMultiplier * 10.0 ) ).r > Clipping210_g66 ? 1.0 : 0.0 );
-				float3 ase_positionWS = input.ase_texcoord2.xyz;
-				float3 normalizeResult119_g66 = normalize( ( ase_positionWS - _WorldSpaceCameraPos ) );
+				float3 ase_worldPos = IN.ase_texcoord3.xyz;
+				float3 normalizeResult119_g66 = normalize( ( ase_worldPos - _WorldSpaceCameraPos ) );
 				float3 normalizeResult149_g66 = normalize( CZY_StormDirection );
 				float dotResult152_g66 = dot( normalizeResult119_g66 , normalizeResult149_g66 );
-				float2 texCoord101_g66 = input.ase_texcoord1.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord101_g66 = IN.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_127_0_g66 = ( texCoord101_g66 - float2( 0.5,0.5 ) );
 				float dotResult128_g66 = dot( temp_output_127_0_g66 , temp_output_127_0_g66 );
 				float temp_output_143_0_g66 = ( -2.0 * ( 1.0 - ( CZY_NimbusVariation * 0.9 ) ) );
-				float NimbusLightTransport280_g66 = saturate( ( ( ( CloudDetail180_g66 + SimpleCloudDensity155_g66 ) * saturate(  (( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_143_0_g66 ) + ( ( dotResult152_g66 + ( CZY_NimbusHeight * 4.0 * dotResult128_g66 ) ) - 0.5 ) * ( ( temp_output_143_0_g66 * -4.0 ) - ( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_143_0_g66 ) ) / ( 7.0 - 0.5 ) ) ) ) * 10.0 ) );
+				float NimbusLightTransport280_g66 = saturate( ( ( ( CloudDetail180_g66 + SimpleCloudDensity155_g66 ) * saturate( (( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_143_0_g66 ) + (( dotResult152_g66 + ( CZY_NimbusHeight * 4.0 * dotResult128_g66 ) ) - 0.5) * (( temp_output_143_0_g66 * -4.0 ) - ( ( 1.0 - CZY_NimbusMultiplier ) * temp_output_143_0_g66 )) / (7.0 - 0.5)) ) ) * 10.0 ) );
 				float FinalAlpha399_g66 = saturate( ( DetailedClouds258_g66 + BorderLightTransport403_g66 + AltoCumulusLightTransport300_g66 + ChemtrailsFinal254_g66 + CirrostratLightTransport295_g66 + CirrusAlpha256_g66 + NimbusLightTransport280_g66 ) );
 				bool enabled20_g71 =(bool)_UnderwaterRenderingEnabled;
 				bool submerged20_g71 =(bool)_FullySubmerged;
-				float textureSample20_g71 = tex2Dlod( _UnderwaterMask, float4( ScreenPosNorm.xy, 0, 0.0) ).r;
+				float4 ase_screenPosNorm = ScreenPos / ScreenPos.w;
+				ase_screenPosNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_screenPosNorm.z : ase_screenPosNorm.z * 0.5 + 0.5;
+				float textureSample20_g71 = tex2Dlod( _UnderwaterMask, float4( ase_screenPosNorm.xy, 0, 0.0) ).r;
 				float localHLSL20_g71 = HLSL20_g71( enabled20_g71 , submerged20_g71 , textureSample20_g71 );
 				
 
 				float Alpha = ( saturate( ( ( CZY_CloudThickness * 2.0 * FinalAlpha399_g66 ) + FinalAlpha399_g66 ) ) * ( 1.0 - localHLSL20_g71 ) );
 				float AlphaClipThreshold = 0.5;
 
-				#if defined( ASE_DEPTH_WRITE_ON )
-					float DeviceDepth = input.positionCS.z;
+				#if _ALPHATEST_ON
+					clip( Alpha - AlphaClipThreshold );
 				#endif
 
-				#ifdef _ALPHATEST_ON
-					clip(Alpha - AlphaClipThreshold);
-				#endif
-
-				#if defined(LOD_FADE_CROSSFADE)
-					LODFadeCrossFade( input.positionCS );
-				#endif
-
-				#if defined( ASE_DEPTH_WRITE_ON )
-					outputDepth = DeviceDepth;
+				#ifdef LOD_FADE_CROSSFADE
+					LODFadeCrossFade( IN.positionCS );
 				#endif
 
 				#if defined(_GBUFFER_NORMALS_OCT)
-					float2 octNormalWS = PackNormalOctQuadEncode(NormalWS);
-					float2 remappedOctNormalWS = saturate(octNormalWS * 0.5 + 0.5);
-					half3 packedNormalWS = PackFloat2To888(remappedOctNormalWS);
+					float3 normalWS = normalize(IN.normalWS);
+					float2 octNormalWS = PackNormalOctQuadEncode(normalWS);           // values between [-1, +1], must use fp32 on some platforms
+					float2 remappedOctNormalWS = saturate(octNormalWS * 0.5 + 0.5);   // values between [ 0,  1]
+					half3 packedNormalWS = PackFloat2To888(remappedOctNormalWS);      // values between [ 0,  1]
 					outNormalWS = half4(packedNormalWS, 0.0);
 				#else
-					outNormalWS = half4(NormalizeNormalPerPixel( NormalWS ), 0.0);
+					float3 normalWS = IN.normalWS;
+					outNormalWS = half4(NormalizeNormalPerPixel(normalWS), 0.0);
 				#endif
 
 				#ifdef _WRITE_RENDERING_LAYERS
@@ -4390,6 +4343,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 					outRenderingLayers = float4(EncodeMeshRenderingLayer(renderingLayers), 0, 0, 0);
 				#endif
 			}
+
 			ENDHLSL
 		}
 
@@ -4402,25 +4356,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (Soft)"
 	Fallback "Hidden/InternalErrorShader"
 }
 /*ASEBEGIN
-Version=19904
-Node;AmplifyShaderEditor.FunctionNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;1233;-912,-624;Inherit;False;Stylized Clouds (Soft);0;;66;ade1d57100c84e341a80e8ca0ed59008;0;0;2;COLOR;0;FLOAT;420
-Node;AmplifyShaderEditor.RangedFloatNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;1234;-1008,-416;Inherit;False;Global;CZY_CloudsFogAmount;CZY_CloudsFogAmount;8;0;Create;True;0;0;0;False;0;False;0;0.509;0;1;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;1235;-1008,-496;Inherit;False;Global;CZY_CloudsFogLightAmount;CZY_CloudsFogLightAmount;7;0;Create;True;0;0;0;False;0;False;0;1;0;1;0;1;FLOAT;0
-Node;AmplifyShaderEditor.FunctionNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;1236;-672,-624;Inherit;False;AddFogToSkyLayer;-1;;369;36a78fe96c9f6fa4dab85c7793736468;0;3;89;COLOR;0,0,0,0;False;91;FLOAT;0;False;59;FLOAT;0;False;2;COLOR;84;FLOAT;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;807;-400,-624;Float;False;True;-1;2;DistantLands.Cozy.EditorScripts.EmptyShaderGUI;0;13;Distant Lands/Cozy/URP/Stylized Clouds (Soft);2992e84f91cbeb14eab234972e07ea9d;True;Forward;0;1;Forward;9;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;1;False;;False;False;False;False;False;False;False;False;True;True;True;221;False;;255;False;;255;False;;7;False;;2;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;True;1;5;False;;10;False;;1;1;False;;10;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;True;2;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;Hidden/InternalErrorShader;0;0;Standard;27;Surface;1;637952289623616075;  Keep Alpha;0;0;  Blend;0;0;Two Sided;2;638050878722904710;Alpha Clipping;0;639004212337971047;  Use Shadow Threshold;0;0;Forward Only;0;0;Cast Shadows;1;0;Receive Shadows;1;0;Receive SSAO;1;0;GPU Instancing;1;0;LOD CrossFade;0;0;Built-in Fog;0;0;Meta Pass;0;0;Extra Pre Pass;0;0;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Write Depth;0;0;  Early Z;0;0;Vertex Position;1;0;0;10;False;True;True;True;False;False;True;True;True;False;False;;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;806;-677.2959,-624;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ExtraPrePass;0;0;ExtraPrePass;5;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;0;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;808;-678.2959,-671.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ShadowCaster;0;2;ShadowCaster;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=ShadowCaster;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;809;-678.2959,-671.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthOnly;0;3;DepthOnly;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;False;False;True;1;LightMode=DepthOnly;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;810;-678.2959,-671.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;Meta;0;4;Meta;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Meta;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;811;-644.2959,-581.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;Universal2D;0;5;Universal2D;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=Universal2D;False;False;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;812;-644.2959,-581.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;SceneSelectionPass;0;6;SceneSelectionPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=SceneSelectionPass;False;False;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;813;-644.2959,-581.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ScenePickingPass;0;7;ScenePickingPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Picking;False;False;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;814;-644.2959,-581.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthNormals;0;8;DepthNormals;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=DepthNormalsOnly;False;False;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;815;-644.2959,-581.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthNormalsOnly;0;9;DepthNormalsOnly;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=DepthNormalsOnly;False;True;9;d3d11;metal;vulkan;xboxone;xboxseries;playstation;ps4;ps5;switch;0;;0;0;Standard;0;False;0
+Version=19501
+Node;AmplifyShaderEditor.FunctionNode;1233;-912,-624;Inherit;False;Stylized Clouds (Soft);0;;66;ade1d57100c84e341a80e8ca0ed59008;0;0;2;COLOR;0;FLOAT;420
+Node;AmplifyShaderEditor.RangedFloatNode;1234;-1008,-416;Inherit;False;Global;CZY_CloudsFogAmount;CZY_CloudsFogAmount;8;0;Create;True;0;0;0;False;0;False;0;0.82;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;1235;-1008,-496;Inherit;False;Global;CZY_CloudsFogLightAmount;CZY_CloudsFogLightAmount;7;0;Create;True;0;0;0;False;0;False;0;0.443;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.FunctionNode;1236;-672,-624;Inherit;False;AddFogToSkyLayer;-1;;369;36a78fe96c9f6fa4dab85c7793736468;0;3;89;COLOR;0,0,0,0;False;91;FLOAT;0;False;59;FLOAT;0;False;2;COLOR;84;FLOAT;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;807;-400,-624;Float;False;True;-1;2;DistantLands.Cozy.EditorScripts.EmptyShaderGUI;0;13;Distant Lands/Cozy/URP/Stylized Clouds (Soft);2992e84f91cbeb14eab234972e07ea9d;True;Forward;0;1;Forward;8;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;1;False;;False;False;False;False;False;False;False;False;True;True;True;221;False;;255;False;;255;False;;7;False;;2;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=-50;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;True;1;5;False;;10;False;;1;1;False;;10;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;True;2;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;Hidden/InternalErrorShader;0;0;Standard;22;Surface;1;637952289623616075;  Blend;0;0;Two Sided;2;638050878722904710;Forward Only;0;0;Cast Shadows;1;0;  Use Shadow Threshold;0;0;Receive Shadows;1;0;GPU Instancing;1;0;LOD CrossFade;0;0;Built-in Fog;0;0;Meta Pass;0;0;Extra Pre Pass;0;0;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Vertex Position,InvertActionOnDeselection;1;0;0;10;False;True;True;True;False;False;True;True;True;False;False;;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;806;-677.2959,-670.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ExtraPrePass;0;0;ExtraPrePass;5;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;0;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;808;-678.2959,-671.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ShadowCaster;0;2;ShadowCaster;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=ShadowCaster;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;809;-678.2959,-671.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthOnly;0;3;DepthOnly;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;False;False;True;1;LightMode=DepthOnly;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;810;-678.2959,-671.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;Meta;0;4;Meta;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Meta;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;811;-644.2959,-581.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;Universal2D;0;5;Universal2D;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=Universal2D;False;False;0;;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;812;-644.2959,-581.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;SceneSelectionPass;0;6;SceneSelectionPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=SceneSelectionPass;False;False;0;;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;813;-644.2959,-581.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ScenePickingPass;0;7;ScenePickingPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Picking;False;False;0;;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;814;-644.2959,-581.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthNormals;0;8;DepthNormals;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=DepthNormalsOnly;False;False;0;;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;815;-644.2959,-581.1561;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthNormalsOnly;0;9;DepthNormalsOnly;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=DepthNormalsOnly;False;True;9;d3d11;metal;vulkan;xboxone;xboxseries;playstation;ps4;ps5;switch;0;;0;0;Standard;0;False;0
 WireConnection;1236;89;1233;0
 WireConnection;1236;91;1235;0
 WireConnection;1236;59;1234;0
 WireConnection;807;2;1236;84
 WireConnection;807;3;1233;420
 ASEEND*/
-//CHKSM=A197E10612E151E2F53EAA98957E0CECFFEA55C7
+//CHKSM=126D05573ADDF03AB22E9A5C7A81AAE9CAF9AD50

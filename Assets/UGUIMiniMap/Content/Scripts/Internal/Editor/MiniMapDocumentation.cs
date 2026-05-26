@@ -46,6 +46,7 @@ namespace UGUIMiniMap.TutorialWizard
      new Steps { Name = "URP/HDRP", StepsLenght = 1, DrawFunctionName = nameof(URPDoc) },
      new Steps { Name = "Change Position", StepsLenght = 1, DrawFunctionName = nameof(ChangePositionDoc) },
      new Steps { Name = "Compass", StepsLenght = 1, DrawFunctionName = nameof(CompassDoc) },
+     new Steps { Name = "Fog of War", StepsLenght = 1, DrawFunctionName = nameof(FogOfWarDoc) },
      new Steps { Name = "Optimization", StepsLenght = 1, DrawFunctionName = nameof(OptimizationDoc) },
      new Steps { Name = "API", StepsLenght = 1, DrawFunctionName = nameof(APIDoc) },
     };
@@ -373,7 +374,7 @@ namespace UGUIMiniMap.TutorialWizard
 
         void URPDoc()
         {
-            DrawText("By default, the Minimap is set up for Unity's Built-In Render Pipeline. If you're using another render pipeline (URP or HDRP), you need to make one change to ensure compatibility and prevent the minimap from displaying a pink color.\n\n1. <b>Ensure Shader Graph is Installed:</b>\n\n  • Open the Unity Package Manager from the top navigation menu: `<b>Window > Package Manager</b>`.\n  • In the top left corner, select `<b>Packages: Unity Registry</b>`.\n  • Search for the <b>Shader Graph</b> package. If it's not installed, you'll see an install button in the bottom right corner. Click it to install.\n\n2. <b>Configure Minimap Settings:</b>\n\n  • Once Shader Graph is installed, navigate to the <b>Minimap Settings</b> in your project located in: <i>Assets/UGUIMiniMap/Resources/<b>MiniMapData</b></i>\n  • With the scriptable object selected, go to the Inspector window.\n  • In the Render Pipeline field, select the render pipeline you are using.\n\nThat's it! Your minimap should now be compatible with the URP or HDRP render pipeline.");
+            DrawText("By default, the Minimap is set up for Unity's Built-In Render Pipeline. If you're using another render pipeline (URP or HDRP), you need to make a few changes to ensure compatibility and prevent the minimap from displaying a pink color.\n\n1. <b>Ensure Shader Graph is Installed:</b>\n\n  • Open the Unity Package Manager from the top navigation menu: `<b>Window > Package Manager</b>`.\n  • In the top left corner, select `<b>Packages: Unity Registry</b>`.\n  • Search for the <b>Shader Graph</b> package. If it's not installed, you'll see an install button in the bottom right corner. Click it to install.\n\n2. <b>Configure Minimap Settings:</b>\n\n  • Once Shader Graph is installed, navigate to the <b>Minimap Settings</b> in your project located in: <i>Assets/UGUIMiniMap/Resources/<b>MiniMapData</b></i>\n  • With the scriptable object selected, go to the Inspector window.\n  • In the Render Pipeline field, select the render pipeline you are using.\n\n3. <b>Manually Set Shader Graph Active Targets (if needed):</b>\n\n  • Sometimes minimap Shader Graph shaders do not automatically convert to the active render pipeline.\n  • By default, these shaders are configured for the Built-In Render Pipeline only.\n  • The default minimap shaders are located in: <i>Assets/UGUIMiniMap/Content/Art/Shader</i>\n  • Open each minimap shader, then in the Shader Graph window go to <b>Graph Settings</b>.\n  • In <b>Active Targets</b>, add/select the render pipeline currently used by your project (URP or HDRP).\n  • Save the shader changes.\n\nThat's it! Your minimap should now be compatible with the URP or HDRP render pipeline.");
         }
 
         void ChangePositionDoc()
@@ -388,6 +389,18 @@ namespace UGUIMiniMap.TutorialWizard
         {
             DrawText("By default, the minimap prefabs have a cardinals compass UI, if you don't want to use it you can simply remove or deactivate the Compass UI from the MiniMap canvas, this object:");
             DrawServerImage("img-24.png");
+        }
+
+        void FogOfWarDoc()
+        {
+            DrawText("The Fog of War feature allows you to hide unexplored areas of the map, revealing them as the player moves through the world.\n \n<b><size=16>Enable Fog of War</size></b>\n \nTo enable this feature, select the MiniMap in the hierarchy, go to the <b>General Settings</b> section, and find the <b>Fog of War</b> settings group. Check the <b>Has Fog Of War</b> toggle.");
+
+            DrawText("<b><size=16>Settings</size></b>\n \n- <b>Update Rate:</b> How often (in frames) the fog texture updates. Higher values improve performance but make the reveal less smooth.\n- <b>Radius:</b> The radius of the area revealed around the player.\n- <b>Softness:</b> The softness of the edges of the revealed area.\n- <b>Color:</b> The color of the unexplored area (usually black with high alpha).");
+
+            DrawText("<b><size=16>Save & Load</size></b>\n \nYou can save the revealed state of the fog to a file and load it later (e.g., when saving/loading the game). The <b>bl_MiniMapFogOfWar</b> component provides methods for this:\n \n- <b>SaveFog(string path)</b>: Saves the current fog state to a PNG file.\n- <b>LoadFog(string path)</b>: Loads the fog state from a PNG file.");
+
+            Space();
+            DrawCodeText("using Lovatto.MiniMap;\n\nvar fog = FindObjectOfType<bl_MiniMapFogOfWar>();\nif (fog != null)\n{\n    fog.SaveFog(Application.persistentDataPath);\n}");
         }
 
         void OptimizationDoc()

@@ -30,30 +30,12 @@ MonoBehaviour:
   requireNoDeaths: 0
   requireStealth: 0
   objectiveDescription: Kill them all. Fucking bastards.
-  sharedSpawnPoints:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  sharedSpawnPoints: []
   spawnItems:
   - itemName: Regular Enemies
-    prefab: {fileID: 7363399556980340892, guid: 5ed5dd455b845cf41a7bc07197b416f4,
-      type: 3}
+    prefab: {fileID: 1136474490139880, guid: 4e0c7115350630646ba38f469b58723a, type: 3}
     category: 0
-    minCount: 1
+    minCount: 2
     maxCount: 2
     usePoolMode: 1
     customSpawnPoints:
@@ -67,8 +49,7 @@ MonoBehaviour:
     priority: 5
     required: 1
   - itemName: Warlord Boss
-    prefab: {fileID: 4087107557208246455, guid: 3eed6798f0ab4b14289150fc4a4c5158,
-      type: 3}
+    prefab: {fileID: 1645189946640246, guid: b796c65458d0efc44b9b996819aa248f, type: 3}
     category: 7
     minCount: 1
     maxCount: 2
@@ -85,15 +66,14 @@ MonoBehaviour:
     priority: 10
     required: 1
   - itemName: Boss
-    prefab: {fileID: 4087107557208246455, guid: 3eed6798f0ab4b14289150fc4a4c5158,
-      type: 3}
+    prefab: {fileID: 1000012904406218, guid: f4691666b801f124cb5c1f096360610a, type: 3}
     category: 7
-    minCount: 1
+    minCount: 2
     maxCount: 2
     usePoolMode: 0
     customSpawnPoints:
     - {fileID: 0}
-    spawnLocation: 1
+    spawnLocation: 0
     spawnRadius: 15
     offset: {x: 0, y: 0, z: 0}
     requireNavMesh: 1
@@ -128,8 +108,8 @@ MonoBehaviour:
   guaranteedLootRarity: 4
   guaranteedLootCount: 3
   bonusRewards:
-  - {fileID: 6687682940110421504, guid: f0feff2f4bd13aa4c8e09fdee06d883f, type: 3}
-  - {fileID: 3516352575337148050, guid: 07db9bf568242044f9211ec0cd24c092, type: 3}
+  - {fileID: 1136474490139880, guid: 4e0c7115350630646ba38f469b58723a, type: 3}
+  - {fileID: 1831302938180596, guid: 919c5e4c238e26c408ef79c7e7e63a08, type: 3}
   perfectCompletionBonus: 1
   perfectCompletionXPMultiplier: 1.5
   speedCompletionBonus: 1

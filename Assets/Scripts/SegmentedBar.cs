@@ -27,6 +27,14 @@ public class SegmentedBar : MonoBehaviour
     [Tooltip("Optional sprite for each segment. Defaults to a plain white quad.")]
     [SerializeField] private Sprite segmentSprite;
 
+    [Header("Level-Based Segmentation")]
+    [Tooltip("When enabled, segmentCount is driven by player level and the settings below.")]
+    [SerializeField] private bool useLevelSegmentation = false;
+    [Tooltip("Number of segments at level 1.")]
+    [SerializeField] [Min(1)] private int baseSegmentCount = 3;
+    [Tooltip("Add one segment every N levels (e.g. 5 → level 1=3, level 6=4, level 11=5…).")]
+    [SerializeField] [Min(1)] private int levelsPerSegment = 5;
+
     [Header("Colors")]
     [SerializeField] private Color activeColor    = new Color(1f,    0.55f, 0f,   1f);
     [SerializeField] private Color lowHealthColor = new Color(0.95f, 0.1f,  0.1f, 1f);
@@ -60,16 +68,22 @@ public class SegmentedBar : MonoBehaviour
         if (playerProvider == null && sourceSlider == null)
             Debug.LogWarning("[SegmentedBar] No health source assigned.");
 
+        if (useLevelSegmentation)
+            segmentCount = baseSegmentCount; // safe default until LateStart resolves the manager
+
         BuildSegments();
 
-        // Seed the smoothed value from the actual health once all Start()s complete.
-        StartCoroutine(SeedInitialValue());
+        // Defer one frame so all Awake/Start methods (including ProgressionManager) complete first.
+        StartCoroutine(LateStart());
     }
 
     private void OnDestroy()
     {
         if (playerProvider != null)
             playerProvider.OnHealthChanged -= OnHealthChanged;
+
+        if (useLevelSegmentation && ProgressionManager.Instance != null)
+            ProgressionManager.Instance.onLevelUp.RemoveListener(OnLevelUp);
     }
 
     private void Update()
@@ -110,6 +124,27 @@ public class SegmentedBar : MonoBehaviour
     {
         smoothedValue = Mathf.Clamp01(value);
         RefreshSegments(smoothedValue);
+    }
+
+    // ── Level-up handler ──────────────────────────────────────────────────────
+
+    /// <summary>Recalculates segment count when the player levels up.</summary>
+    private void OnLevelUp(int newLevel)
+    {
+        int newCount = CalculateSegmentCount(newLevel);
+        if (newCount == segmentCount) return;
+
+        segmentCount = newCount;
+        BuildSegments();
+    }
+
+    /// <summary>
+    /// Returns the segment count for a given level.
+    /// Formula: baseSegmentCount + floor((level - 1) / levelsPerSegment).
+    /// </summary>
+    private int CalculateSegmentCount(int level)
+    {
+        return baseSegmentCount + Mathf.FloorToInt((level - 1) / (float)levelsPerSegment);
     }
 
     // ── Segment building ──────────────────────────────────────────────────────
@@ -158,10 +193,31 @@ public class SegmentedBar : MonoBehaviour
         RefreshSegments(smoothedValue);
     }
 
-    private IEnumerator SeedInitialValue()
+    private IEnumerator LateStart()
     {
-        yield return null; // wait one frame for all Start()s to complete
+        yield return null; // wait one frame for all Awake/Start methods to complete
 
+        // ── Level segmentation ────────────────────────────────────────────────
+        if (useLevelSegmentation)
+        {
+            if (ProgressionManager.Instance != null)
+            {
+                int resolvedCount = CalculateSegmentCount(ProgressionManager.Instance.currentLevel);
+                ProgressionManager.Instance.onLevelUp.AddListener(OnLevelUp);
+
+                if (resolvedCount != segmentCount)
+                {
+                    segmentCount = resolvedCount;
+                    BuildSegments();
+                }
+            }
+            else
+            {
+                Debug.LogWarning("[SegmentedBar] useLevelSegmentation is true but ProgressionManager.Instance is null.");
+            }
+        }
+
+        // ── Seed health value ─────────────────────────────────────────────────
         if (playerProvider != null && playerProvider.MaxHealth > 0f)
         {
             smoothedValue = playerProvider.Health / playerProvider.MaxHealth;

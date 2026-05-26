@@ -32,7 +32,7 @@ namespace DistantLands.Cozy
         [CozySearchable]
         public MeridiemTime currentTime = 0;
 
-        public int AbsoluteDay => currentDay + DaysPerYear * currentYear;
+        public int AbsoluteDay => (currentDay % DaysPerYear) + DaysPerYear * currentYear;
 
         [CozySearchable]
         public int currentDay;

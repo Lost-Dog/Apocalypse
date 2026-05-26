@@ -8,10 +8,12 @@ using UnityEngine.UI;
 /// </summary>
 public class PlayerXPDisplay : MonoBehaviour
 {
-    private const float RefreshInterval = 1f;
-    private const string XpFormat       = "XP  {0:N0}  /  {1:N0}";
+    private const float RefreshInterval  = 1f;
+    private const string XpFormat        = "XP  {0:N0}  /  {1:N0}";
+    private const string LevelFormat     = "{0}";
 
     [SerializeField] private TextMeshProUGUI xpLabel;
+    [SerializeField] private TextMeshProUGUI levelLabel;
     [SerializeField] private Image           xpBarFill;
 
     private int   _lastXP    = -1;
@@ -43,6 +45,9 @@ public class PlayerXPDisplay : MonoBehaviour
 
         if (xpLabel != null)
             xpLabel.text = string.Format(XpFormat, currentXP, xpToNext);
+
+        if (levelLabel != null)
+            levelLabel.text = string.Format(LevelFormat, level);
 
         if (xpBarFill != null)
             xpBarFill.fillAmount = pm.GetXPProgress();

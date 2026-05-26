@@ -18,14 +18,28 @@ namespace Lovatto.MiniMap
         public float m_GravityMultiplier;
         public bl_MouseLook m_MouseLook;
         public bool m_UseFovKick;
-        public bl_FOVKick m_FovKick = new bl_FOVKick();
+        public bl_FOVKick m_FovKick = new();
         public bool m_UseHeadBob;
-        public bl_CurveControlledBob m_HeadBob = new bl_CurveControlledBob();
-        public bl_LerpControlledBob m_JumpBob = new bl_LerpControlledBob();
+        public bl_CurveControlledBob m_HeadBob = new();
+        public bl_LerpControlledBob m_JumpBob = new();
         public float m_StepInterval;
         public AudioClip[] m_FootstepSounds;    // an array of footstep sounds that will be randomly selected from.
         public AudioClip m_JumpSound;           // the sound played when character leaves the ground.
         public AudioClip m_LandSound;           // the sound played when character touches back on ground.
+
+        [Header("Third Person")]
+        public bool useThirdPerson = false;
+        public float thirdPersonDistance = 5.0f;
+        public float thirdPersonHeight = 2.0f;
+        public Vector2 thirdPersonSensitivity = new Vector2(2, 2);
+        public Vector2 thirdPersonVerticalLimit = new Vector2(-20, 80);
+        public LayerMask cameraCollisionLayers = 1;
+        public float cameraCollisionRadius = 0.3f;
+        public float cameraSmoothTime = 0.1f;
+
+        private float m_Yaw;
+        private float m_Pitch;
+        private Vector3 m_CurrentCameraVelocity;
 
         private Camera m_Camera;
         private bool m_Jump;
@@ -60,6 +74,12 @@ namespace Lovatto.MiniMap
             if (!is2D)
             {
                 m_MouseLook.Init(transform, m_Camera.transform);
+            }
+
+            if (useThirdPerson)
+            {
+                m_Yaw = transform.eulerAngles.y;
+                m_Pitch = 20;
             }
         }
 
@@ -97,12 +117,31 @@ namespace Lovatto.MiniMap
         private void FixedUpdate()
         {
             GetInput(out targetSpeed);
-            // always move along the camera forward as it is the direction that it being aimed at
-            Vector3 desiredMove = transform.forward * m_Input.y + transform.right * m_Input.x;
+            
+            Vector3 desiredMove = Vector3.zero;
+            if (useThirdPerson)
+            {
+                Vector3 forward = m_Camera.transform.forward;
+                Vector3 right = m_Camera.transform.right;
+                forward.y = 0;
+                right.y = 0;
+                forward.Normalize();
+                right.Normalize();
+                desiredMove = forward * m_Input.y + right * m_Input.x;
+
+                if (m_Input.sqrMagnitude > 0.01f && desiredMove.sqrMagnitude > 0.01f)
+                {
+                    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(desiredMove), Time.fixedDeltaTime * 10f);
+                }
+            }
+            else
+            {
+                // always move along the camera forward as it is the direction that it being aimed at
+                desiredMove = transform.forward * m_Input.y + transform.right * m_Input.x;
+            }
 
             // get a normal for the surface that is being touched to move along it
-            RaycastHit hitInfo;
-            Physics.SphereCast(transform.position, m_CharacterController.radius, Vector3.down, out hitInfo,
+            Physics.SphereCast(transform.position, m_CharacterController.radius, Vector3.down, out RaycastHit hitInfo,
                                m_CharacterController.height / 2f);
             desiredMove = Vector3.ProjectOnPlane(desiredMove, hitInfo.normal).normalized;
 
@@ -111,7 +150,6 @@ namespace Lovatto.MiniMap
             {
                 m_MoveDir.z = desiredMove.z * targetSpeed;
             }
-
 
             if (m_CharacterController.isGrounded)
             {
@@ -138,7 +176,7 @@ namespace Lovatto.MiniMap
         {
             if (bl_MiniMap.ActiveMiniMap != null && bl_MiniMap.ActiveMiniMap.IsFullScreen) return;
 
-            if (!is2D)
+            if (!useThirdPerson && !is2D)
             {
                 RotateView();
             }
@@ -146,9 +184,38 @@ namespace Lovatto.MiniMap
             m_CollisionFlags = m_CharacterController.Move(m_MoveDir * Time.fixedDeltaTime);
 
             ProgressStepCycle(targetSpeed);
-            UpdateCameraPosition(targetSpeed);
+            
+            if (useThirdPerson)
+            {
+                UpdateThirdPersonCamera();
+            }
+            else
+            {
+                UpdateCameraPosition(targetSpeed);
+            }
 
             m_PreviouslyGrounded = m_CharacterController.isGrounded;
+        }
+
+        private void UpdateThirdPersonCamera()
+        {
+            m_Yaw += Input.GetAxis("Mouse X") * thirdPersonSensitivity.x;
+            m_Pitch -= Input.GetAxis("Mouse Y") * thirdPersonSensitivity.y;
+            m_Pitch = Mathf.Clamp(m_Pitch, thirdPersonVerticalLimit.x, thirdPersonVerticalLimit.y);
+
+            Vector3 targetPos = transform.position + Vector3.up * thirdPersonHeight;
+            Quaternion rotation = Quaternion.Euler(m_Pitch, m_Yaw, 0);
+            Vector3 negDistance = new Vector3(0.0f, 0.0f, -thirdPersonDistance);
+            Vector3 desiredPos = rotation * negDistance + targetPos;
+
+            // Collision
+            if (Physics.SphereCast(targetPos, cameraCollisionRadius, (desiredPos - targetPos).normalized, out RaycastHit hit, thirdPersonDistance, cameraCollisionLayers))
+            {
+                desiredPos = hit.point + hit.normal * cameraCollisionRadius;
+            }
+
+            m_Camera.transform.position = Vector3.SmoothDamp(m_Camera.transform.position, desiredPos, ref m_CurrentCameraVelocity, cameraSmoothTime);
+            m_Camera.transform.LookAt(targetPos);
         }
 
         private void PlayJumpSound()
@@ -185,6 +252,7 @@ namespace Lovatto.MiniMap
             // excluding sound at index 0
             int n = Random.Range(1, m_FootstepSounds.Length);
             m_AudioSource.clip = m_FootstepSounds[n];
+            m_AudioSource.pitch = Random.Range(0.9f, 1.1f);
             m_AudioSource.PlayOneShot(m_AudioSource.clip);
             // move picked sound to index 0 so it's not picked next time
             m_FootstepSounds[n] = m_FootstepSounds[0];
@@ -221,7 +289,6 @@ namespace Lovatto.MiniMap
                 m_Camera.transform.localPosition = Vector3.Lerp(m_Camera.transform.localPosition, new Vector3(p.x, p.y, m_OriginalCameraPosition.z), Time.deltaTime * 7);
             }
         }
-
 
         private void GetInput(out float speed)
         {

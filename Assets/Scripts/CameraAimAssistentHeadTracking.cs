@@ -70,6 +70,13 @@ public class CameraAimAssistentHeadTracking : MonoBehaviour
         private string[] _allTags;
         private GameObject _objectInCameraCenter;
 
+        // Cached chest transform — only re-resolved when the target GameObject changes.
+        private GameObject _cachedChestTarget;
+        private Transform  _cachedChestTransform;
+
+        // Pre-allocated buffer for OverlapSphereNonAlloc to avoid per-frame heap allocation.
+        private readonly Collider[] _overlapBuffer = new Collider[32];
+
         // Whether a valid target was found this frame.
         private bool _hasTarget;
 
@@ -91,6 +98,9 @@ public class CameraAimAssistentHeadTracking : MonoBehaviour
 
         private void Start()
         {
+            // Always start inactive — InvectorInputBridge enables this only while aim is held.
+            assistActive = false;
+
             _activeCamera = UnityEngine.Camera.main;
             if (_activeCamera == null)
                 Debug.LogWarning("[CameraAimAssistentChestTracking] No main camera found in the scene.");
@@ -149,6 +159,8 @@ public class CameraAimAssistentHeadTracking : MonoBehaviour
             if (!active)
             {
                 _objectInCameraCenter = null;
+                _cachedChestTarget    = null;
+                _cachedChestTransform = null;
                 _hasTarget = false;
             }
         }
@@ -186,18 +198,18 @@ public class CameraAimAssistentHeadTracking : MonoBehaviour
             Vector3 camPos     = _activeCamera.transform.position;
             Vector3 camForward = _activeCamera.transform.forward;
 
-            Collider[] hits = Physics.OverlapSphere(camPos, DistanceToDetect, TargetLayer);
+            int count = Physics.OverlapSphereNonAlloc(camPos, DistanceToDetect, _overlapBuffer, TargetLayer);
 
             GameObject bestTarget   = null;
-            float      bestAngle    = assistAngle; // only accept candidates inside the cone
+            float      bestAngle    = assistAngle;
 
-            foreach (Collider col in hits)
+            for (int i = 0; i < count; i++)
             {
+                Collider col = _overlapBuffer[i];
                 GameObject root = col.attachedRigidbody != null
                     ? col.attachedRigidbody.gameObject
                     : col.gameObject;
 
-                // Must match one of the tracked tags.
                 bool tagMatch = false;
                 foreach (string tag in _allTags)
                 {
@@ -205,7 +217,6 @@ public class CameraAimAssistentHeadTracking : MonoBehaviour
                 }
                 if (!tagMatch) continue;
 
-                // Angle from camera forward to the collider centre.
                 Vector3 toTarget = (col.bounds.center - camPos).normalized;
                 float   angle    = Vector3.Angle(camForward, toTarget);
 
@@ -229,17 +240,21 @@ public class CameraAimAssistentHeadTracking : MonoBehaviour
             }
             else
             {
-                Transform chestTransform = FindChestTransform(target);
-                basePosition = chestTransform != null
-                    ? chestTransform.position
+                // Re-resolve the chest bone only when the target has changed.
+                if (target != _cachedChestTarget)
+                {
+                    _cachedChestTarget    = target;
+                    _cachedChestTransform = FindChestTransform(target);
+                }
+
+                basePosition = _cachedChestTransform != null
+                    ? _cachedChestTransform.position
                     : target.transform.position + Vector3.up * fallbackChestOffset;
             }
 
             if (penetrationDepth <= 0f || _activeCamera == null)
                 return basePosition;
 
-            // Offset the aim target behind the chest surface along the camera-to-chest vector,
-            // so the correction always pulls the crosshair into the body rather than toward its front face.
             Vector3 camToBase = (basePosition - _activeCamera.transform.position).normalized;
             return basePosition + camToBase * penetrationDepth;
         }

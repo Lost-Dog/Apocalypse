@@ -79,6 +79,10 @@ public class ChallengeCompassMarker : MonoBehaviour
         }
 
         UpdateMarkerPosition();
+        if (markerImage != null)
+        {
+            markerImage.color = linkedChallenge.challengeData.GetDifficultyColor();
+        }
     }
 
     private void UpdateMarkerPosition()
@@ -97,15 +101,14 @@ public class ChallengeCompassMarker : MonoBehaviour
         xPosition = Mathf.Clamp(xPosition, -compassWidth * 0.5f + edgePadding, compassWidth * 0.5f - edgePadding);
 
         markerRectTransform.anchoredPosition = new Vector2(xPosition, markerRectTransform.anchoredPosition.y);
-
-        if (markerImage != null && linkedChallenge.challengeData != null)
-        {
-            markerImage.color = linkedChallenge.challengeData.GetDifficultyColor();
-        }
     }
 
     public void SetChallenge(ActiveChallenge challenge)
     {
         linkedChallenge = challenge;
+
+        // Set the difficulty color once here rather than every Update tick.
+        if (markerImage != null && challenge?.challengeData != null)
+            markerImage.color = challenge.challengeData.GetDifficultyColor();
     }
 }

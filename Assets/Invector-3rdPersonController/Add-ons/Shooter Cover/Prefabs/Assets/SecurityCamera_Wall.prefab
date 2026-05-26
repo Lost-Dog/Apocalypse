@@ -26,12 +26,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1624909879957651803}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0, y: -1.22, z: 0}
   m_LocalScale: {x: 0.18365814, y: 0.18365814, z: 0.18365814}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6826993670134752868}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &2108633843843295589
 MeshFilter:
@@ -52,14 +53,21 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 9452ae1262a74094f8a68013fbcd1834, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -77,9 +85,12 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!64 &6543472102683291976
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -88,53 +99,26 @@ MeshCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1624909879957651803}
   m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
   m_IsTrigger: 0
+  m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 4
+  serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &2348246677320919778
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6877967431053797837}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 065db88beeb95054185e2f6e1c8cee54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  openCloseEvents: 0
-  openCloseWindow: 0
-  selectedToolbar: 0
-  damageMultiplier: 1
-  ragdoll: {fileID: 0}
-  overrideReactionID: 0
-  reactionID: 0
-  useRandomValues: 0
-  fixedValues: 0
-  minDamageMultiplier: 0
-  maxDamageMultiplier: 0
-  minReactionID: 0
-  maxReactionID: 0
-  changeToMaxValue: 0
-  targetReceiver: {fileID: 0}
-  _onStartReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  OnGetMaxValue:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1001 &3101742799274396975
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 271144259863727812, guid: c51f61c49fabd0240abcc916a4242b93,
@@ -379,6 +363,17 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 2925829301654669187, guid: c51f61c49fabd0240abcc916a4242b93, type: 3}
+    m_RemovedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 8481896811774651211, guid: c51f61c49fabd0240abcc916a4242b93,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2686551630874728381}
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8392713354821149922, guid: c51f61c49fabd0240abcc916a4242b93,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2348246677320919778}
   m_SourcePrefab: {fileID: 100100000, guid: c51f61c49fabd0240abcc916a4242b93, type: 3}
 --- !u!114 &5339620595614538144 stripped
 MonoBehaviour:
@@ -392,15 +387,51 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67bf2b06cd051934e81096b5b05c987c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &6877967431053797837 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8392713354821149922, guid: c51f61c49fabd0240abcc916a4242b93,
-    type: 3}
-  m_PrefabInstance: {fileID: 3101742799274396975}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &6826993670134752868 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8481896811774651211, guid: c51f61c49fabd0240abcc916a4242b93,
     type: 3}
   m_PrefabInstance: {fileID: 3101742799274396975}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &6877967431053797837 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8392713354821149922, guid: c51f61c49fabd0240abcc916a4242b93,
+    type: 3}
+  m_PrefabInstance: {fileID: 3101742799274396975}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2348246677320919778
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6877967431053797837}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 065db88beeb95054185e2f6e1c8cee54, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  openCloseEvents: 0
+  openCloseWindow: 0
+  selectedToolbar: 0
+  targetReceiver: {fileID: 0}
+  damageMultiplier: 1
+  ragdoll: {fileID: 0}
+  overrideReactionID: 0
+  reactionID: 0
+  useRandomValues: 0
+  fixedValues: 0
+  minDamageMultiplier: 0
+  maxDamageMultiplier: 0
+  minReactionID: 0
+  maxReactionID: 0
+  changeToMaxValue: 0
+  OnGetMaxValue:
+    m_PersistentCalls:
+      m_Calls: []
+  _onStartReceiveDamage:
+    m_PersistentCalls:
+      m_Calls: []
+  _onReceiveDamage:
+    m_PersistentCalls:
+      m_Calls: []

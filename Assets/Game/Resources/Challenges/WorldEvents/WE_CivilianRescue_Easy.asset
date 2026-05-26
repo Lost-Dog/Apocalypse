@@ -50,14 +50,12 @@ MonoBehaviour:
   - {fileID: 0}
   spawnItems:
   - itemName: Patrol AI
-    prefab: {fileID: 7363399556980340892, guid: 5ed5dd455b845cf41a7bc07197b416f4,
-      type: 3}
+    prefab: {fileID: 1663282628823158, guid: 490e7378ddad3d24f893cfd0c3cb4efb, type: 3}
     category: 0
-    minCount: 3
+    minCount: 5
     maxCount: 5
     usePoolMode: 0
-    customSpawnPoints:
-    - {fileID: 0}
+    customSpawnPoints: []
     spawnLocation: 0
     spawnRadius: 20
     offset: {x: 0, y: 0, z: 0}
@@ -67,11 +65,10 @@ MonoBehaviour:
     priority: 10
     required: 1
   - itemName: Civilians
-    prefab: {fileID: 8583763350024215164, guid: 1876db1b509227844897cef711b8244b,
-      type: 3}
+    prefab: {fileID: 1535287099985346, guid: 7e5f04cdafd00a343b4f28d352383062, type: 3}
     category: 1
     minCount: 2
-    maxCount: 3
+    maxCount: 2
     usePoolMode: 0
     customSpawnPoints: []
     spawnLocation: 0
@@ -83,8 +80,7 @@ MonoBehaviour:
     priority: 10
     required: 1
   - itemName: Boss
-    prefab: {fileID: 4087107557208246455, guid: 3eed6798f0ab4b14289150fc4a4c5158,
-      type: 3}
+    prefab: {fileID: 1645189946640246, guid: b796c65458d0efc44b9b996819aa248f, type: 3}
     category: 0
     minCount: 2
     maxCount: 2
@@ -99,8 +95,7 @@ MonoBehaviour:
     priority: 10
     required: 1
   - itemName: Elite
-    prefab: {fileID: 3089473516772616032, guid: 4a0c54d15d1cda84dac5f960c2af8a63,
-      type: 3}
+    prefab: {fileID: 1645189946640246, guid: b796c65458d0efc44b9b996819aa248f, type: 3}
     category: 0
     minCount: 2
     maxCount: 3

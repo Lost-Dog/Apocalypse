@@ -1,5 +1,6 @@
 using Invector.vCharacterController;
 using UnityEngine;
+using UnityEngine.Events;
 
 /// <summary>
 /// Applies <see cref="PlayerTraitConfig"/> values to the Invector player controller at runtime.
@@ -25,6 +26,12 @@ public class PlayerTraitsRuntime : MonoBehaviour
     public float AttackMultiplier   { get; private set; }
     public float DefenseReduction   { get; private set; }
     public int   CurrentLevel       { get; private set; }
+
+    /// <summary>Maximum armour pool for the current level. Read by SurvivalManager.</summary>
+    public int CurrentMaxArmour { get; private set; }
+
+    /// <summary>Fired when the armour cap changes (level up). Passes new max armour.</summary>
+    public event System.Action<int> OnArmourCapChanged;
 
     // ── Unity lifecycle ───────────────────────────────────────────────────────
 
@@ -66,6 +73,13 @@ public class PlayerTraitsRuntime : MonoBehaviour
         AttackMultiplier   = config.GetAttackMultiplier(level);
         DefenseReduction   = config.GetDefenseReduction(level);
 
+        int newMaxArmour = config.GetMaxArmour(level);
+        if (newMaxArmour != CurrentMaxArmour)
+        {
+            CurrentMaxArmour = newMaxArmour;
+            OnArmourCapChanged?.Invoke(CurrentMaxArmour);
+        }
+
         if (controller != null)
         {
             controller.maxHealth  = CurrentMaxHealth;
@@ -75,7 +89,8 @@ public class PlayerTraitsRuntime : MonoBehaviour
         Debug.Log($"[PlayerTraitsRuntime] Level {level} — MaxHP: {CurrentMaxHealth}, " +
                   $"MaxStamina: {CurrentMaxStamina:F0}, " +
                   $"Attack: {AttackMultiplier:F2}x, " +
-                  $"Defense: {DefenseReduction * 100f:F1}%");
+                  $"Defense: {DefenseReduction * 100f:F1}%, " +
+                  $"MaxArmour: {CurrentMaxArmour}");
     }
 
     /// <summary>

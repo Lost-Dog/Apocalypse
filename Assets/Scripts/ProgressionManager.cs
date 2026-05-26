@@ -54,6 +54,10 @@ public class ProgressionManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
+        // Resolve early so ApplyLevel in Start is guaranteed to find the runtime
+        // even if PlayerTraitsRuntime.Awake() runs after this Awake().
+        ResolveTraitsRuntime();
     }
 
     private void Start()

@@ -1,4 +1,4 @@
-// Made with Amplify Shader Editor v1.9.9.1
+// Made with Amplify Shader Editor v1.9.5.1
 // Available at the Unity Asset Store - http://u3d.as/y3X 
 Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 {
@@ -22,7 +22,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
         [HideInInspector][NoScaleOffset] unity_LightmapsInd("unity_LightmapsInd", 2DArray) = "" {}
         [HideInInspector][NoScaleOffset] unity_ShadowMasks("unity_ShadowMasks", 2DArray) = "" {}
 
-		[HideInInspector][ToggleOff] _ReceiveShadows("Receive Shadows", Float) = 1
+		[HideInInspector][ToggleOff] _ReceiveShadows("Receive Shadows", Float) = 1.0
 	}
 
 	SubShader
@@ -46,7 +46,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 		}
 
 		HLSLINCLUDE
-		#pragma target 3.0
+		#pragma target 4.5
 		#pragma prefer_hlslcc gles
 		// ensure rendering platforms toggle list is visible
 
@@ -166,7 +166,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 			Blend One Zero, One Zero
 			ZWrite On
 			ZTest LEqual
-			Offset 0,0
+			Offset 0 , 0
 			ColorMask RGBA
 
 			
@@ -175,11 +175,11 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 
 			
 
-			#pragma multi_compile_local _ALPHATEST_ON
+			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
 			#pragma multi_compile_instancing
 			#pragma instancing_options renderinglayer
-			#define ASE_VERSION 19901
-			#define ASE_SRP_VERSION 140012
+			#define _ALPHATEST_ON 1
+			#define ASE_SRP_VERSION 140010
 
 
 			
@@ -237,49 +237,32 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
             #endif
 
-			#define ASE_NEEDS_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_FRAG_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_WORLD_POSITION
 			#define ASE_NEEDS_FRAG_WORLD_POSITION
-			#define ASE_NEEDS_FRAG_SCREEN_POSITION_NORMALIZED
+			#define ASE_NEEDS_FRAG_SCREEN_POSITION
 
 
-			#if defined(ASE_EARLY_Z_DEPTH_OPTIMIZE) && (SHADER_TARGET >= 45)
-				#define ASE_SV_DEPTH SV_DepthLessEqual
-				#define ASE_SV_POSITION_QUALIFIERS linear noperspective centroid
-			#else
-				#define ASE_SV_DEPTH SV_Depth
-				#define ASE_SV_POSITION_QUALIFIERS
-			#endif
-
-			struct Attributes
+			struct VertexInput
 			{
 				float4 positionOS : POSITION;
 				float3 normalOS : NORMAL;
-				float4 texcoord : TEXCOORD0;
-				float4 texcoord1 : TEXCOORD1;
-				float4 texcoord2 : TEXCOORD2;
-				
+				float4 ase_texcoord : TEXCOORD0;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
-			struct PackedVaryings
+			struct VertexOutput
 			{
-				ASE_SV_POSITION_QUALIFIERS float4 positionCS : SV_POSITION;
-				float3 positionWS : TEXCOORD0;
-				#if defined(ASE_FOG) || defined(_ADDITIONAL_LIGHTS_VERTEX)
-					half4 fogFactorAndVertexLight : TEXCOORD1;
+				float4 positionCS : SV_POSITION;
+				float4 clipPosV : TEXCOORD0;
+				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
+					float3 positionWS : TEXCOORD1;
 				#endif
 				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
 					float4 shadowCoord : TEXCOORD2;
 				#endif
-				#if defined(LIGHTMAP_ON)
-					float4 lightmapUVOrVertexSH : TEXCOORD3;
+				#ifdef ASE_FOG
+					float fogFactor : TEXCOORD3;
 				#endif
-				#if defined(DYNAMICLIGHTMAP_ON)
-					float2 dynamicLightmapUV : TEXCOORD4;
-				#endif
-				float4 ase_texcoord5 : TEXCOORD5;
+				float4 ase_texcoord4 : TEXCOORD4;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
@@ -372,71 +355,71 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				return 130.0 * dot( m, g );
 			}
 			
-					float2 voronoihash22_g70( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash22_g70( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi22_g70( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash22_g70( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return (F2 + F1) * 0.5;
-					}
+			float voronoi22_g70( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash22_g70( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return (F2 + F1) * 0.5;
+			}
 			
-					float2 voronoihash32_g70( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash32_g70( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi32_g70( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash32_g70( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return F1;
-					}
+			float voronoi32_g70( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash32_g70( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return F1;
+			}
 			
 			float HLSL20_g73( bool enabled, bool submerged, float textureSample )
 			{
@@ -452,20 +435,20 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 			}
 			
 
-			PackedVaryings VertexFunction( Attributes input  )
+			VertexOutput VertexFunction( VertexInput v  )
 			{
-				PackedVaryings output = (PackedVaryings)0;
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_TRANSFER_INSTANCE_ID(input, output);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+				VertexOutput o = (VertexOutput)0;
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-				output.ase_texcoord5.xy = input.texcoord.xy;
+				o.ase_texcoord4.xy = v.ase_texcoord.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				output.ase_texcoord5.zw = 0;
+				o.ase_texcoord4.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					float3 defaultVertexValue = input.positionOS.xyz;
+					float3 defaultVertexValue = v.positionOS.xyz;
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
@@ -473,55 +456,39 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				float3 vertexValue = defaultVertexValue;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					input.positionOS.xyz = vertexValue;
+					v.positionOS.xyz = vertexValue;
 				#else
-					input.positionOS.xyz += vertexValue;
+					v.positionOS.xyz += vertexValue;
 				#endif
 
-				input.normalOS = input.normalOS;
+				v.normalOS = v.normalOS;
 
-				VertexPositionInputs vertexInput = GetVertexPositionInputs( input.positionOS.xyz );
+				VertexPositionInputs vertexInput = GetVertexPositionInputs( v.positionOS.xyz );
 
-				#if defined(LIGHTMAP_ON)
-					OUTPUT_LIGHTMAP_UV(input.texcoord1, unity_LightmapST, output.lightmapUVOrVertexSH.xy);
-				#endif
-				#if defined(DYNAMICLIGHTMAP_ON)
-					output.dynamicLightmapUV.xy = input.texcoord2.xy * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
+				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
+					o.positionWS = vertexInput.positionWS;
 				#endif
 
-				#if defined(ASE_FOG) || defined(_ADDITIONAL_LIGHTS_VERTEX)
-					output.fogFactorAndVertexLight = 0;
-					#if defined(ASE_FOG) && !defined(_FOG_FRAGMENT)
-						output.fogFactorAndVertexLight.x = ComputeFogFactor(vertexInput.positionCS.z);
-					#endif
-					#ifdef _ADDITIONAL_LIGHTS_VERTEX
-						half3 vertexLight = VertexLighting( vertexInput.positionWS, normalInput.normalWS );
-						output.fogFactorAndVertexLight.yzw = vertexLight;
-					#endif
+				#ifdef ASE_FOG
+					o.fogFactor = ComputeFogFactor( vertexInput.positionCS.z );
 				#endif
 
 				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
-					output.shadowCoord = GetShadowCoord( vertexInput );
+					o.shadowCoord = GetShadowCoord( vertexInput );
 				#endif
 
-				output.positionCS = vertexInput.positionCS;
-				output.positionWS = vertexInput.positionWS;
-				return output;
+				o.positionCS = vertexInput.positionCS;
+				o.clipPosV = vertexInput.positionCS;
+				return o;
 			}
 
 			#if defined(ASE_TESSELLATION)
 			struct VertexControl
 			{
-				float4 positionOS : INTERNALTESSPOS;
+				float4 vertex : INTERNALTESSPOS;
 				float3 normalOS : NORMAL;
-                float4 texcoord : TEXCOORD0;
-				#if defined(LIGHTMAP_ON) || defined(ASE_NEEDS_TEXTURE_COORDINATES1)
-					float4 texcoord1 : TEXCOORD1;
-				#endif
-				#if defined(DYNAMICLIGHTMAP_ON) || defined(ASE_NEEDS_TEXTURE_COORDINATES2)
-					float4 texcoord2 : TEXCOORD2;
-				#endif
-				
+				float4 ase_texcoord : TEXCOORD0;
+
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
@@ -531,41 +498,34 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				float inside : SV_InsideTessFactor;
 			};
 
-			VertexControl vert ( Attributes input )
+			VertexControl vert ( VertexInput v )
 			{
-				VertexControl output;
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_TRANSFER_INSTANCE_ID(input, output);
-				output.positionOS = input.positionOS;
-				output.normalOS = input.normalOS;
-                output.texcoord = input.texcoord;
-				#if defined(LIGHTMAP_ON) || defined(ASE_NEEDS_TEXTURE_COORDINATES1)
-					output.texcoord1 = input.texcoord1;
-				#endif
-				#if defined(DYNAMICLIGHTMAP_ON) || defined(ASE_NEEDS_TEXTURE_COORDINATES2)
-					output.texcoord2 = input.texcoord2;
-				#endif
-				
-				return output;
+				VertexControl o;
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				o.vertex = v.positionOS;
+				o.normalOS = v.normalOS;
+				o.ase_texcoord = v.ase_texcoord;
+				return o;
 			}
 
-			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> input)
+			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> v)
 			{
-				TessellationFactors output;
+				TessellationFactors o;
 				float4 tf = 1;
 				float tessValue = _TessValue; float tessMin = _TessMin; float tessMax = _TessMax;
 				float edgeLength = _TessEdgeLength; float tessMaxDisp = _TessMaxDisp;
 				#if defined(ASE_FIXED_TESSELLATION)
 				tf = FixedTess( tessValue );
 				#elif defined(ASE_DISTANCE_TESSELLATION)
-				tf = DistanceBasedTess(input[0].positionOS, input[1].positionOS, input[2].positionOS, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
+				tf = DistanceBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
 				#elif defined(ASE_LENGTH_TESSELLATION)
-				tf = EdgeLengthBasedTess(input[0].positionOS, input[1].positionOS, input[2].positionOS, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
+				tf = EdgeLengthBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
 				#elif defined(ASE_LENGTH_CULL_TESSELLATION)
-				tf = EdgeLengthBasedTessCull(input[0].positionOS, input[1].positionOS, input[2].positionOS, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
+				tf = EdgeLengthBasedTessCull(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
 				#endif
-				output.edge[0] = tf.x; output.edge[1] = tf.y; output.edge[2] = tf.z; output.inside = tf.w;
-				return output;
+				o.edge[0] = tf.x; o.edge[1] = tf.y; o.edge[2] = tf.z; o.inside = tf.w;
+				return o;
 			}
 
 			[domain("tri")]
@@ -579,68 +539,54 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 			}
 
 			[domain("tri")]
-			PackedVaryings DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
+			VertexOutput DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
 			{
-				Attributes output = (Attributes) 0;
-				output.positionOS = patch[0].positionOS * bary.x + patch[1].positionOS * bary.y + patch[2].positionOS * bary.z;
-				output.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
-                output.texcoord = patch[0].texcoord * bary.x + patch[1].texcoord * bary.y + patch[2].texcoord * bary.z;
-				#if defined(LIGHTMAP_ON) || defined(ASE_NEEDS_TEXTURE_COORDINATES1)
-					output.texcoord1 = patch[0].texcoord1 * bary.x + patch[1].texcoord1 * bary.y + patch[2].texcoord1 * bary.z;
-				#endif
-				#if defined(DYNAMICLIGHTMAP_ON) || defined(ASE_NEEDS_TEXTURE_COORDINATES2)
-					output.texcoord2 = patch[0].texcoord2 * bary.x + patch[1].texcoord2 * bary.y + patch[2].texcoord2 * bary.z;
-				#endif
-				
+				VertexInput o = (VertexInput) 0;
+				o.positionOS = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
+				o.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
+				o.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
-					pp[i] = output.positionOS.xyz - patch[i].normalOS * (dot(output.positionOS.xyz, patch[i].normalOS) - dot(patch[i].positionOS.xyz, patch[i].normalOS));
+					pp[i] = o.positionOS.xyz - patch[i].normalOS * (dot(o.positionOS.xyz, patch[i].normalOS) - dot(patch[i].vertex.xyz, patch[i].normalOS));
 				float phongStrength = _TessPhongStrength;
-				output.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * output.positionOS.xyz;
+				o.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.positionOS.xyz;
 				#endif
-				UNITY_TRANSFER_INSTANCE_ID(patch[0], output);
-				return VertexFunction(output);
+				UNITY_TRANSFER_INSTANCE_ID(patch[0], o);
+				return VertexFunction(o);
 			}
 			#else
-			PackedVaryings vert ( Attributes input )
+			VertexOutput vert ( VertexInput v )
 			{
-				return VertexFunction( input );
+				return VertexFunction( v );
 			}
 			#endif
 
-			half4 frag ( PackedVaryings input
-						#ifdef ASE_DEPTH_WRITE_ON
-						,out float outputDepth : ASE_SV_DEPTH
-						#endif
-						#ifdef _WRITE_RENDERING_LAYERS
-						, out float4 outRenderingLayers : SV_Target1
-						#endif
-						 ) : SV_Target
+			half4 frag ( VertexOutput IN
+				#ifdef _WRITE_RENDERING_LAYERS
+				, out float4 outRenderingLayers : SV_Target1
+				#endif
+				 ) : SV_Target
 			{
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+				UNITY_SETUP_INSTANCE_ID( IN );
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( IN );
 
-				#if defined(LOD_FADE_CROSSFADE)
-					LODFadeCrossFade( input.positionCS );
+				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
+					float3 WorldPosition = IN.positionWS;
 				#endif
 
-				float3 WorldPosition = input.positionWS;
-				float3 WorldViewDirection = GetWorldSpaceNormalizeViewDir( WorldPosition );
 				float4 ShadowCoords = float4( 0, 0, 0, 0 );
-				float4 ScreenPosNorm = float4( GetNormalizedScreenSpaceUV( input.positionCS ), input.positionCS.zw );
-				float4 ClipPos = ComputeClipSpacePosition( ScreenPosNorm.xy, input.positionCS.z ) * input.positionCS.w;
-				float4 ScreenPos = ComputeScreenPos( ClipPos );
+
+				float4 ClipPos = IN.clipPosV;
+				float4 ScreenPos = ComputeScreenPos( IN.clipPosV );
 
 				#if defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
 					#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
-						ShadowCoords = input.shadowCoord;
+						ShadowCoords = IN.shadowCoord;
 					#elif defined(MAIN_LIGHT_CALCULATE_SHADOWS)
 						ShadowCoords = TransformWorldToShadowCoord( WorldPosition );
 					#endif
 				#endif
-
-				WorldViewDirection = SafeNormalize( WorldViewDirection );
 
 				float3 hsvTorgb2_g71 = RGBToHSV( CZY_CloudColor.rgb );
 				float3 hsvTorgb3_g71 = HSVToRGB( float3(hsvTorgb2_g71.x,saturate( ( hsvTorgb2_g71.y + CZY_FilterSaturation ) ),( hsvTorgb2_g71.z + CZY_FilterValue )) );
@@ -650,25 +596,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				float3 hsvTorgb3_g72 = HSVToRGB( float3(hsvTorgb2_g72.x,saturate( ( hsvTorgb2_g72.y + CZY_FilterSaturation ) ),( hsvTorgb2_g72.z + CZY_FilterValue )) );
 				float4 temp_output_10_0_g72 = ( float4( hsvTorgb3_g72 , 0.0 ) * CZY_FilterColor );
 				float4 temp_output_86_0_g70 = ( temp_output_10_0_g72 * CZY_SunFilterColor );
-				float2 texCoord4_g70 = input.ase_texcoord5.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord4_g70 = IN.ase_texcoord4.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 Pos13_g70 = texCoord4_g70;
 				float mulTime2_g70 = _TimeParameters.x * ( 0.001 * CZY_WindSpeed );
 				float TIme5_g70 = mulTime2_g70;
 				float simplePerlin2D28_g70 = snoise( ( Pos13_g70 + ( TIme5_g70 * float2( 0.2,-0.4 ) ) )*( 100.0 / CZY_MainCloudScale ) );
 				simplePerlin2D28_g70 = simplePerlin2D28_g70*0.5 + 0.5;
-				float2 texCoord27_g70 = input.ase_texcoord5.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord27_g70 = IN.ase_texcoord4.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_24_0_g70 = ( texCoord27_g70 - float2( 0.5,0.5 ) );
 				float dotResult19_g70 = dot( temp_output_24_0_g70 , temp_output_24_0_g70 );
 				float CurrentCloudCover31_g70 = CZY_CumulusCoverageMultiplier;
-				float temp_output_38_0_g70 =  (0.0 + ( dotResult19_g70 - 0.0 ) * ( CurrentCloudCover31_g70 - 0.0 ) / ( 0.27 - 0.0 ) );
+				float temp_output_38_0_g70 = (0.0 + (dotResult19_g70 - 0.0) * (CurrentCloudCover31_g70 - 0.0) / (0.27 - 0.0));
 				float time22_g70 = 0.0;
 				float2 voronoiSmoothId22_g70 = 0;
 				float2 coords22_g70 = ( Pos13_g70 + ( TIme5_g70 * float2( 0.3,0.2 ) ) ) * ( 140.0 / CZY_MainCloudScale );
 				float2 id22_g70 = 0;
 				float2 uv22_g70 = 0;
 				float voroi22_g70 = voronoi22_g70( coords22_g70, time22_g70, id22_g70, uv22_g70, 0, voronoiSmoothId22_g70 );
-				float temp_output_56_0_g70 =  (0.0 + ( min( ( simplePerlin2D28_g70 + temp_output_38_0_g70 ) , ( ( 1.0 - voroi22_g70 ) + temp_output_38_0_g70 ) ) - ( 1.0 - CurrentCloudCover31_g70 ) ) * ( 1.0 - 0.0 ) / ( 1.0 - ( 1.0 - CurrentCloudCover31_g70 ) ) );
-				float4 lerpResult69_g70 = lerp( temp_output_86_0_g70 , temp_output_85_0_g70 , saturate(  (2.0 + ( temp_output_56_0_g70 - 0.0 ) * ( 0.7 - 2.0 ) / ( 1.0 - 0.0 ) ) ));
+				float temp_output_56_0_g70 = (0.0 + (min( ( simplePerlin2D28_g70 + temp_output_38_0_g70 ) , ( ( 1.0 - voroi22_g70 ) + temp_output_38_0_g70 ) ) - ( 1.0 - CurrentCloudCover31_g70 )) * (1.0 - 0.0) / (1.0 - ( 1.0 - CurrentCloudCover31_g70 )));
+				float4 lerpResult69_g70 = lerp( temp_output_86_0_g70 , temp_output_85_0_g70 , saturate( (2.0 + (temp_output_56_0_g70 - 0.0) * (0.7 - 2.0) / (1.0 - 0.0)) ));
 				float3 normalizeResult9_g70 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
 				float dotResult16_g70 = dot( normalizeResult9_g70 , CZY_SunDirection );
 				float temp_output_37_0_g70 = abs( (dotResult16_g70*0.5 + 0.5) );
@@ -690,24 +636,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				fade32_g70 *= 0.5;
 				}//Voronoi32_g70
 				voroi32_g70 /= rest32_g70;
-				float temp_output_50_0_g70 = (  (0.0 + ( ( 1.0 - voroi32_g70 ) - 0.3 ) * ( 0.5 - 0.0 ) / ( 1.0 - 0.3 ) ) * 0.1 * CZY_DetailAmount );
+				float temp_output_50_0_g70 = ( (0.0 + (( 1.0 - voroi32_g70 ) - 0.3) * (0.5 - 0.0) / (1.0 - 0.3)) * 0.1 * CZY_DetailAmount );
 				float temp_output_80_0_g70 = saturate( ( temp_output_56_0_g70 + temp_output_50_0_g70 ) );
-				float4 lerpResult78_g70 = lerp( temp_output_85_0_g70 , lerpResult82_g70 ,  (1.0 + ( temp_output_80_0_g70 - 0.0 ) * ( 0.0 - 1.0 ) / ( 1.0 - 0.0 ) ));
+				float4 lerpResult78_g70 = lerp( temp_output_85_0_g70 , lerpResult82_g70 , (1.0 + (temp_output_80_0_g70 - 0.0) * (0.0 - 1.0) / (1.0 - 0.0)));
 				float CloudDetail51_g70 = temp_output_50_0_g70;
 				float CloudLight54_g70 = saturate( pow( temp_output_37_0_g70 , CZY_CloudFlareFalloff ) );
 				float4 lerpResult75_g70 = lerp( float4( 0,0,0,0 ) , temp_output_86_0_g70 , ( saturate( ( CurrentCloudCover31_g70 - 1.0 ) ) * CloudDetail51_g70 * CloudLight54_g70 ));
 				float4 SunThroughCLouds81_g70 = ( lerpResult75_g70 * 1.3 );
 				float3 hsvTorgb69_g369 = RGBToHSV( CZY_FogColor5.rgb );
+				float3 normalizeResult54_g369 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
+				float3 temp_output_56_0_g369 = ( normalizeResult54_g369 * _ProjectionParams.z );
 				float3 appendResult25_g369 = (float3(1.0 , CZY_LightFlareSquish , 1.0));
-				float3 normalizeResult13_g369 = normalize( ( ( WorldPosition * appendResult25_g369 ) - _WorldSpaceCameraPos ) );
+				float3 normalizeResult13_g369 = normalize( ( ( temp_output_56_0_g369 * appendResult25_g369 ) - _WorldSpaceCameraPos ) );
 				float dotResult16_g369 = dot( normalizeResult13_g369 , CZY_SunDirection );
 				half LightMask35_g369 = saturate( pow( abs( ( (dotResult16_g369*0.5 + 0.5) * CZY_LightIntensity ) ) , CZY_LightFalloff ) );
 				float temp_output_91_0_g369 = CZY_CloudsFogLightAmount;
 				float3 hsvTorgb2_g371 = RGBToHSV( ( CZY_LightColor * hsvTorgb69_g369.z * saturate( ( LightMask35_g369 * ( 1.5 * CZY_FogColor5.a ) * temp_output_91_0_g369 ) ) ).rgb );
 				float3 hsvTorgb3_g371 = HSVToRGB( float3(hsvTorgb2_g371.x,saturate( ( hsvTorgb2_g371.y + CZY_FilterSaturation ) ),( hsvTorgb2_g371.z + CZY_FilterValue )) );
 				float4 temp_output_10_0_g371 = ( float4( hsvTorgb3_g371 , 0.0 ) * CZY_FilterColor );
-				float3 normalizeResult93_g369 = normalize( ( WorldPosition - _WorldSpaceCameraPos ) );
-				float3 direction88_g369 = normalizeResult93_g369;
+				float3 direction88_g369 = ( temp_output_56_0_g369 - _WorldSpaceCameraPos );
 				float3 normalizeResult32_g369 = normalize( direction88_g369 );
 				float3 normalizeResult30_g369 = normalize( CZY_MoonDirection );
 				float dotResult28_g369 = dot( normalizeResult32_g369 , normalizeResult30_g369 );
@@ -721,7 +668,9 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				
 				bool enabled20_g73 =(bool)_UnderwaterRenderingEnabled;
 				bool submerged20_g73 =(bool)_FullySubmerged;
-				float textureSample20_g73 = tex2Dlod( _UnderwaterMask, float4( ScreenPosNorm.xy, 0, 0.0) ).r;
+				float4 ase_screenPosNorm = ScreenPos / ScreenPos.w;
+				ase_screenPosNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_screenPosNorm.z : ase_screenPosNorm.z * 0.5 + 0.5;
+				float textureSample20_g73 = tex2Dlod( _UnderwaterMask, float4( ase_screenPosNorm.xy, 0, 0.0) ).r;
 				float localHLSL20_g73 = HLSL20_g73( enabled20_g73 , submerged20_g73 , textureSample20_g73 );
 				
 				float3 BakedAlbedo = 0;
@@ -731,41 +680,20 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				float AlphaClipThreshold = CZY_ClippingThreshold;
 				float AlphaClipThresholdShadow = 0.5;
 
-				#ifdef ASE_DEPTH_WRITE_ON
-					float DepthValue = input.positionCS.z;
-				#endif
-
 				#ifdef _ALPHATEST_ON
-					clip(Alpha - AlphaClipThreshold);
-				#endif
-
-				InputData inputData = (InputData)0;
-				inputData.positionWS = WorldPosition;
-				inputData.positionCS = float4( input.positionCS.xy, ClipPos.zw / ClipPos.w );
-				inputData.normalizedScreenSpaceUV = ScreenPosNorm.xy;
-				inputData.viewDirectionWS = WorldViewDirection;
-
-				#ifdef ASE_FOG
-					inputData.fogCoord = InitializeInputDataFog(float4(inputData.positionWS, 1.0), input.fogFactorAndVertexLight.x);
-				#endif
-				#ifdef _ADDITIONAL_LIGHTS_VERTEX
-					inputData.vertexLighting = input.fogFactorAndVertexLight.yzw;
+					clip( Alpha - AlphaClipThreshold );
 				#endif
 
 				#if defined(_DBUFFER)
-					ApplyDecalToBaseColor(input.positionCS, Color);
+					ApplyDecalToBaseColor(IN.positionCS, Color);
+				#endif
+
+				#ifdef LOD_FADE_CROSSFADE
+					LODFadeCrossFade( IN.positionCS );
 				#endif
 
 				#ifdef ASE_FOG
-					#ifdef TERRAIN_SPLAT_ADDPASS
-						Color.rgb = MixFogColor(Color.rgb, half3(0,0,0), inputData.fogCoord);
-					#else
-						Color.rgb = MixFog(Color.rgb, inputData.fogCoord);
-					#endif
-				#endif
-
-				#ifdef ASE_DEPTH_WRITE_ON
-					outputDepth = DepthValue;
+					Color = MixFog( Color, IN.fogFactor );
 				#endif
 
 				#ifdef _WRITE_RENDERING_LAYERS
@@ -794,10 +722,9 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 
 			
 
-			#pragma multi_compile_local _ALPHATEST_ON
 			#pragma multi_compile_instancing
-			#define ASE_VERSION 19901
-			#define ASE_SRP_VERSION 140012
+			#define _ALPHATEST_ON 1
+			#define ASE_SRP_VERSION 140010
 
 
 			
@@ -824,20 +751,9 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
             #endif
 
-			#define ASE_NEEDS_FRAG_SCREEN_POSITION_NORMALIZED
-			#define ASE_NEEDS_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_FRAG_TEXTURE_COORDINATES0
+			
 
-
-			#if defined(ASE_EARLY_Z_DEPTH_OPTIMIZE) && (SHADER_TARGET >= 45)
-				#define ASE_SV_DEPTH SV_DepthLessEqual
-				#define ASE_SV_POSITION_QUALIFIERS linear noperspective centroid
-			#else
-				#define ASE_SV_DEPTH SV_Depth
-				#define ASE_SV_POSITION_QUALIFIERS
-			#endif
-
-			struct Attributes
+			struct VertexInput
 			{
 				float4 positionOS : POSITION;
 				float3 normalOS : NORMAL;
@@ -845,9 +761,9 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
-			struct PackedVaryings
+			struct VertexOutput
 			{
-				ASE_SV_POSITION_QUALIFIERS float4 positionCS : SV_POSITION;
+				float4 positionCS : SV_POSITION;
 				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
 					float3 positionWS : TEXCOORD0;
 				#endif
@@ -855,6 +771,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 					float4 shadowCoord : TEXCOORD1;
 				#endif
 				float4 ase_texcoord2 : TEXCOORD2;
+				float4 ase_texcoord3 : TEXCOORD3;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
@@ -922,110 +839,115 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				return 130.0 * dot( m, g );
 			}
 			
-					float2 voronoihash22_g70( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash22_g70( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi22_g70( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash22_g70( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return (F2 + F1) * 0.5;
-					}
+			float voronoi22_g70( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash22_g70( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return (F2 + F1) * 0.5;
+			}
 			
-					float2 voronoihash32_g70( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash32_g70( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi32_g70( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash32_g70( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return F1;
-					}
+			float voronoi32_g70( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash32_g70( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return F1;
+			}
 			
 
 			float3 _LightDirection;
 			float3 _LightPosition;
 
-			PackedVaryings VertexFunction( Attributes input )
+			VertexOutput VertexFunction( VertexInput v )
 			{
-				PackedVaryings output;
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_TRANSFER_INSTANCE_ID(input, output);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO( output );
+				VertexOutput o;
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO( o );
 
-				output.ase_texcoord2.xy = input.ase_texcoord.xy;
+				float4 ase_clipPos = TransformObjectToHClip((v.positionOS).xyz);
+				float4 screenPos = ComputeScreenPos(ase_clipPos);
+				o.ase_texcoord2 = screenPos;
+				
+				o.ase_texcoord3.xy = v.ase_texcoord.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				output.ase_texcoord2.zw = 0;
+				o.ase_texcoord3.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					float3 defaultVertexValue = input.positionOS.xyz;
+					float3 defaultVertexValue = v.positionOS.xyz;
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
 
 				float3 vertexValue = defaultVertexValue;
+
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					input.positionOS.xyz = vertexValue;
+					v.positionOS.xyz = vertexValue;
 				#else
-					input.positionOS.xyz += vertexValue;
+					v.positionOS.xyz += vertexValue;
 				#endif
 
-				input.normalOS = input.normalOS;
+				v.normalOS = v.normalOS;
 
-				float3 positionWS = TransformObjectToWorld( input.positionOS.xyz );
+				float3 positionWS = TransformObjectToWorld( v.positionOS.xyz );
 
 				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-					output.positionWS = positionWS;
+					o.positionWS = positionWS;
 				#endif
 
-				float3 normalWS = TransformObjectToWorldDir(input.normalOS);
+				float3 normalWS = TransformObjectToWorldDir( v.normalOS );
 
 				#if _CASTING_PUNCTUAL_LIGHT_SHADOW
 					float3 lightDirectionWS = normalize(_LightPosition - positionWS);
@@ -1045,17 +967,18 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 					VertexPositionInputs vertexInput = (VertexPositionInputs)0;
 					vertexInput.positionWS = positionWS;
 					vertexInput.positionCS = positionCS;
-					output.shadowCoord = GetShadowCoord( vertexInput );
+					o.shadowCoord = GetShadowCoord( vertexInput );
 				#endif
 
-				output.positionCS = positionCS;
-				return output;
+				o.positionCS = positionCS;
+
+				return o;
 			}
 
 			#if defined(ASE_TESSELLATION)
 			struct VertexControl
 			{
-				float4 positionOS : INTERNALTESSPOS;
+				float4 vertex : INTERNALTESSPOS;
 				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 
@@ -1068,34 +991,34 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				float inside : SV_InsideTessFactor;
 			};
 
-			VertexControl vert ( Attributes input )
+			VertexControl vert ( VertexInput v )
 			{
-				VertexControl output;
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_TRANSFER_INSTANCE_ID(input, output);
-				output.positionOS = input.positionOS;
-				output.normalOS = input.normalOS;
-				output.ase_texcoord = input.ase_texcoord;
-				return output;
+				VertexControl o;
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				o.vertex = v.positionOS;
+				o.normalOS = v.normalOS;
+				o.ase_texcoord = v.ase_texcoord;
+				return o;
 			}
 
-			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> input)
+			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> v)
 			{
-				TessellationFactors output;
+				TessellationFactors o;
 				float4 tf = 1;
 				float tessValue = _TessValue; float tessMin = _TessMin; float tessMax = _TessMax;
 				float edgeLength = _TessEdgeLength; float tessMaxDisp = _TessMaxDisp;
 				#if defined(ASE_FIXED_TESSELLATION)
 				tf = FixedTess( tessValue );
 				#elif defined(ASE_DISTANCE_TESSELLATION)
-				tf = DistanceBasedTess(input[0].positionOS, input[1].positionOS, input[2].positionOS, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
+				tf = DistanceBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
 				#elif defined(ASE_LENGTH_TESSELLATION)
-				tf = EdgeLengthBasedTess(input[0].positionOS, input[1].positionOS, input[2].positionOS, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
+				tf = EdgeLengthBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
 				#elif defined(ASE_LENGTH_CULL_TESSELLATION)
-				tf = EdgeLengthBasedTessCull(input[0].positionOS, input[1].positionOS, input[2].positionOS, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
+				tf = EdgeLengthBasedTessCull(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
 				#endif
-				output.edge[0] = tf.x; output.edge[1] = tf.y; output.edge[2] = tf.z; output.inside = tf.w;
-				return output;
+				o.edge[0] = tf.x; o.edge[1] = tf.y; o.edge[2] = tf.z; o.inside = tf.w;
+				return o;
 			}
 
 			[domain("tri")]
@@ -1109,50 +1032,43 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 			}
 
 			[domain("tri")]
-			PackedVaryings DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
+			VertexOutput DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
 			{
-				Attributes output = (Attributes) 0;
-				output.positionOS = patch[0].positionOS * bary.x + patch[1].positionOS * bary.y + patch[2].positionOS * bary.z;
-				output.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
-				output.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
+				VertexInput o = (VertexInput) 0;
+				o.positionOS = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
+				o.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
+				o.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
-					pp[i] = output.positionOS.xyz - patch[i].normalOS * (dot(output.positionOS.xyz, patch[i].normalOS) - dot(patch[i].positionOS.xyz, patch[i].normalOS));
+					pp[i] = o.positionOS.xyz - patch[i].normalOS * (dot(o.positionOS.xyz, patch[i].normalOS) - dot(patch[i].vertex.xyz, patch[i].normalOS));
 				float phongStrength = _TessPhongStrength;
-				output.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * output.positionOS.xyz;
+				o.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.positionOS.xyz;
 				#endif
-				UNITY_TRANSFER_INSTANCE_ID(patch[0], output);
-				return VertexFunction(output);
+				UNITY_TRANSFER_INSTANCE_ID(patch[0], o);
+				return VertexFunction(o);
 			}
 			#else
-			PackedVaryings vert ( Attributes input )
+			VertexOutput vert ( VertexInput v )
 			{
-				return VertexFunction( input );
+				return VertexFunction( v );
 			}
 			#endif
 
-			half4 frag(PackedVaryings input
-						#ifdef ASE_DEPTH_WRITE_ON
-						,out float outputDepth : ASE_SV_DEPTH
-						#endif
-						 ) : SV_Target
+			half4 frag(VertexOutput IN  ) : SV_TARGET
 			{
-				UNITY_SETUP_INSTANCE_ID( input );
-				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( input );
+				UNITY_SETUP_INSTANCE_ID( IN );
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( IN );
 
 				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-					float3 WorldPosition = input.positionWS;
+					float3 WorldPosition = IN.positionWS;
 				#endif
 
 				float4 ShadowCoords = float4( 0, 0, 0, 0 );
-				float4 ScreenPosNorm = float4( GetNormalizedScreenSpaceUV( input.positionCS ), input.positionCS.zw );
-				float4 ClipPos = ComputeClipSpacePosition( ScreenPosNorm.xy, input.positionCS.z ) * input.positionCS.w;
-				float4 ScreenPos = ComputeScreenPos( ClipPos );
 
 				#if defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
 					#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
-						ShadowCoords = input.shadowCoord;
+						ShadowCoords = IN.shadowCoord;
 					#elif defined(MAIN_LIGHT_CALCULATE_SHADOWS)
 						ShadowCoords = TransformWorldToShadowCoord( WorldPosition );
 					#endif
@@ -1160,26 +1076,29 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 
 				bool enabled20_g73 =(bool)_UnderwaterRenderingEnabled;
 				bool submerged20_g73 =(bool)_FullySubmerged;
-				float textureSample20_g73 = tex2Dlod( _UnderwaterMask, float4( ScreenPosNorm.xy, 0, 0.0) ).r;
+				float4 screenPos = IN.ase_texcoord2;
+				float4 ase_screenPosNorm = screenPos / screenPos.w;
+				ase_screenPosNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_screenPosNorm.z : ase_screenPosNorm.z * 0.5 + 0.5;
+				float textureSample20_g73 = tex2Dlod( _UnderwaterMask, float4( ase_screenPosNorm.xy, 0, 0.0) ).r;
 				float localHLSL20_g73 = HLSL20_g73( enabled20_g73 , submerged20_g73 , textureSample20_g73 );
-				float2 texCoord4_g70 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord4_g70 = IN.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 Pos13_g70 = texCoord4_g70;
 				float mulTime2_g70 = _TimeParameters.x * ( 0.001 * CZY_WindSpeed );
 				float TIme5_g70 = mulTime2_g70;
 				float simplePerlin2D28_g70 = snoise( ( Pos13_g70 + ( TIme5_g70 * float2( 0.2,-0.4 ) ) )*( 100.0 / CZY_MainCloudScale ) );
 				simplePerlin2D28_g70 = simplePerlin2D28_g70*0.5 + 0.5;
-				float2 texCoord27_g70 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord27_g70 = IN.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_24_0_g70 = ( texCoord27_g70 - float2( 0.5,0.5 ) );
 				float dotResult19_g70 = dot( temp_output_24_0_g70 , temp_output_24_0_g70 );
 				float CurrentCloudCover31_g70 = CZY_CumulusCoverageMultiplier;
-				float temp_output_38_0_g70 =  (0.0 + ( dotResult19_g70 - 0.0 ) * ( CurrentCloudCover31_g70 - 0.0 ) / ( 0.27 - 0.0 ) );
+				float temp_output_38_0_g70 = (0.0 + (dotResult19_g70 - 0.0) * (CurrentCloudCover31_g70 - 0.0) / (0.27 - 0.0));
 				float time22_g70 = 0.0;
 				float2 voronoiSmoothId22_g70 = 0;
 				float2 coords22_g70 = ( Pos13_g70 + ( TIme5_g70 * float2( 0.3,0.2 ) ) ) * ( 140.0 / CZY_MainCloudScale );
 				float2 id22_g70 = 0;
 				float2 uv22_g70 = 0;
 				float voroi22_g70 = voronoi22_g70( coords22_g70, time22_g70, id22_g70, uv22_g70, 0, voronoiSmoothId22_g70 );
-				float temp_output_56_0_g70 =  (0.0 + ( min( ( simplePerlin2D28_g70 + temp_output_38_0_g70 ) , ( ( 1.0 - voroi22_g70 ) + temp_output_38_0_g70 ) ) - ( 1.0 - CurrentCloudCover31_g70 ) ) * ( 1.0 - 0.0 ) / ( 1.0 - ( 1.0 - CurrentCloudCover31_g70 ) ) );
+				float temp_output_56_0_g70 = (0.0 + (min( ( simplePerlin2D28_g70 + temp_output_38_0_g70 ) , ( ( 1.0 - voroi22_g70 ) + temp_output_38_0_g70 ) ) - ( 1.0 - CurrentCloudCover31_g70 )) * (1.0 - 0.0) / (1.0 - ( 1.0 - CurrentCloudCover31_g70 )));
 				float time32_g70 = 0.0;
 				float2 voronoiSmoothId32_g70 = 0;
 				float2 coords32_g70 = ( Pos13_g70 + ( TIme5_g70 * float2( 0.3,0.2 ) ) ) * ( 100.0 / CZY_DetailScale );
@@ -1195,17 +1114,13 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				fade32_g70 *= 0.5;
 				}//Voronoi32_g70
 				voroi32_g70 /= rest32_g70;
-				float temp_output_50_0_g70 = (  (0.0 + ( ( 1.0 - voroi32_g70 ) - 0.3 ) * ( 0.5 - 0.0 ) / ( 1.0 - 0.3 ) ) * 0.1 * CZY_DetailAmount );
+				float temp_output_50_0_g70 = ( (0.0 + (( 1.0 - voroi32_g70 ) - 0.3) * (0.5 - 0.0) / (1.0 - 0.3)) * 0.1 * CZY_DetailAmount );
 				float temp_output_80_0_g70 = saturate( ( temp_output_56_0_g70 + temp_output_50_0_g70 ) );
 				
 
 				float Alpha = ( ( 1.0 - localHLSL20_g73 ) * temp_output_80_0_g70 );
 				float AlphaClipThreshold = CZY_ClippingThreshold;
 				float AlphaClipThresholdShadow = 0.5;
-
-				#ifdef ASE_DEPTH_WRITE_ON
-					float DepthValue = input.positionCS.z;
-				#endif
 
 				#ifdef _ALPHATEST_ON
 					#ifdef _ALPHATEST_SHADOW_ON
@@ -1215,12 +1130,8 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 					#endif
 				#endif
 
-				#if defined(LOD_FADE_CROSSFADE)
-					LODFadeCrossFade( input.positionCS );
-				#endif
-
-				#ifdef ASE_DEPTH_WRITE_ON
-					outputDepth = DepthValue;
+				#ifdef LOD_FADE_CROSSFADE
+					LODFadeCrossFade( IN.positionCS );
 				#endif
 
 				return 0;
@@ -1243,10 +1154,9 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 
 			
 
-			#pragma multi_compile_local _ALPHATEST_ON
 			#pragma multi_compile_instancing
-			#define ASE_VERSION 19901
-			#define ASE_SRP_VERSION 140012
+			#define _ALPHATEST_ON 1
+			#define ASE_SRP_VERSION 140010
 
 
 			
@@ -1269,20 +1179,10 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
             #endif
 
-			#define ASE_NEEDS_FRAG_SCREEN_POSITION_NORMALIZED
-			#define ASE_NEEDS_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_FRAG_TEXTURE_COORDINATES0
+			#define ASE_NEEDS_FRAG_SCREEN_POSITION
 
 
-			#if defined(ASE_EARLY_Z_DEPTH_OPTIMIZE) && (SHADER_TARGET >= 45)
-				#define ASE_SV_DEPTH SV_DepthLessEqual
-				#define ASE_SV_POSITION_QUALIFIERS linear noperspective centroid
-			#else
-				#define ASE_SV_DEPTH SV_Depth
-				#define ASE_SV_POSITION_QUALIFIERS
-			#endif
-
-			struct Attributes
+			struct VertexInput
 			{
 				float4 positionOS : POSITION;
 				float3 normalOS : NORMAL;
@@ -1290,16 +1190,17 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
-			struct PackedVaryings
+			struct VertexOutput
 			{
-				ASE_SV_POSITION_QUALIFIERS float4 positionCS : SV_POSITION;
+				float4 positionCS : SV_POSITION;
+				float4 clipPosV : TEXCOORD0;
 				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-					float3 positionWS : TEXCOORD0;
+				float3 positionWS : TEXCOORD1;
 				#endif
 				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
-					float4 shadowCoord : TEXCOORD1;
+				float4 shadowCoord : TEXCOORD2;
 				#endif
-				float4 ase_texcoord2 : TEXCOORD2;
+				float4 ase_texcoord3 : TEXCOORD3;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
@@ -1367,87 +1268,87 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				return 130.0 * dot( m, g );
 			}
 			
-					float2 voronoihash22_g70( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
-			
-					float voronoi22_g70( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash22_g70( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return (F2 + F1) * 0.5;
-					}
-			
-					float2 voronoihash32_g70( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
-			
-					float voronoi32_g70( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash32_g70( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return F1;
-					}
-			
-
-			PackedVaryings VertexFunction( Attributes input  )
+			float2 voronoihash22_g70( float2 p )
 			{
-				PackedVaryings output = (PackedVaryings)0;
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_TRANSFER_INSTANCE_ID(input, output);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
+			
+			float voronoi22_g70( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash22_g70( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return (F2 + F1) * 0.5;
+			}
+			
+			float2 voronoihash32_g70( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
+			
+			float voronoi32_g70( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash32_g70( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return F1;
+			}
+			
 
-				output.ase_texcoord2.xy = input.ase_texcoord.xy;
+			VertexOutput VertexFunction( VertexInput v  )
+			{
+				VertexOutput o = (VertexOutput)0;
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+
+				o.ase_texcoord3.xy = v.ase_texcoord.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				output.ase_texcoord2.zw = 0;
+				o.ase_texcoord3.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					float3 defaultVertexValue = input.positionOS.xyz;
+					float3 defaultVertexValue = v.positionOS.xyz;
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
@@ -1455,31 +1356,32 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				float3 vertexValue = defaultVertexValue;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					input.positionOS.xyz = vertexValue;
+					v.positionOS.xyz = vertexValue;
 				#else
-					input.positionOS.xyz += vertexValue;
+					v.positionOS.xyz += vertexValue;
 				#endif
 
-				input.normalOS = input.normalOS;
+				v.normalOS = v.normalOS;
 
-				VertexPositionInputs vertexInput = GetVertexPositionInputs( input.positionOS.xyz );
+				VertexPositionInputs vertexInput = GetVertexPositionInputs( v.positionOS.xyz );
 
 				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-					output.positionWS = vertexInput.positionWS;
+					o.positionWS = vertexInput.positionWS;
 				#endif
 
 				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR) && defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
-					output.shadowCoord = GetShadowCoord( vertexInput );
+					o.shadowCoord = GetShadowCoord( vertexInput );
 				#endif
 
-				output.positionCS = vertexInput.positionCS;
-				return output;
+				o.positionCS = vertexInput.positionCS;
+				o.clipPosV = vertexInput.positionCS;
+				return o;
 			}
 
 			#if defined(ASE_TESSELLATION)
 			struct VertexControl
 			{
-				float4 positionOS : INTERNALTESSPOS;
+				float4 vertex : INTERNALTESSPOS;
 				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 
@@ -1492,34 +1394,34 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				float inside : SV_InsideTessFactor;
 			};
 
-			VertexControl vert ( Attributes input )
+			VertexControl vert ( VertexInput v )
 			{
-				VertexControl output;
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_TRANSFER_INSTANCE_ID(input, output);
-				output.positionOS = input.positionOS;
-				output.normalOS = input.normalOS;
-				output.ase_texcoord = input.ase_texcoord;
-				return output;
+				VertexControl o;
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				o.vertex = v.positionOS;
+				o.normalOS = v.normalOS;
+				o.ase_texcoord = v.ase_texcoord;
+				return o;
 			}
 
-			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> input)
+			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> v)
 			{
-				TessellationFactors output;
+				TessellationFactors o;
 				float4 tf = 1;
 				float tessValue = _TessValue; float tessMin = _TessMin; float tessMax = _TessMax;
 				float edgeLength = _TessEdgeLength; float tessMaxDisp = _TessMaxDisp;
 				#if defined(ASE_FIXED_TESSELLATION)
 				tf = FixedTess( tessValue );
 				#elif defined(ASE_DISTANCE_TESSELLATION)
-				tf = DistanceBasedTess(input[0].positionOS, input[1].positionOS, input[2].positionOS, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
+				tf = DistanceBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
 				#elif defined(ASE_LENGTH_TESSELLATION)
-				tf = EdgeLengthBasedTess(input[0].positionOS, input[1].positionOS, input[2].positionOS, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
+				tf = EdgeLengthBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
 				#elif defined(ASE_LENGTH_CULL_TESSELLATION)
-				tf = EdgeLengthBasedTessCull(input[0].positionOS, input[1].positionOS, input[2].positionOS, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
+				tf = EdgeLengthBasedTessCull(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
 				#endif
-				output.edge[0] = tf.x; output.edge[1] = tf.y; output.edge[2] = tf.z; output.inside = tf.w;
-				return output;
+				o.edge[0] = tf.x; o.edge[1] = tf.y; o.edge[2] = tf.z; o.inside = tf.w;
+				return o;
 			}
 
 			[domain("tri")]
@@ -1533,50 +1435,46 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 			}
 
 			[domain("tri")]
-			PackedVaryings DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
+			VertexOutput DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
 			{
-				Attributes output = (Attributes) 0;
-				output.positionOS = patch[0].positionOS * bary.x + patch[1].positionOS * bary.y + patch[2].positionOS * bary.z;
-				output.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
-				output.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
+				VertexInput o = (VertexInput) 0;
+				o.positionOS = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
+				o.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
+				o.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
-					pp[i] = output.positionOS.xyz - patch[i].normalOS * (dot(output.positionOS.xyz, patch[i].normalOS) - dot(patch[i].positionOS.xyz, patch[i].normalOS));
+					pp[i] = o.positionOS.xyz - patch[i].normalOS * (dot(o.positionOS.xyz, patch[i].normalOS) - dot(patch[i].vertex.xyz, patch[i].normalOS));
 				float phongStrength = _TessPhongStrength;
-				output.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * output.positionOS.xyz;
+				o.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.positionOS.xyz;
 				#endif
-				UNITY_TRANSFER_INSTANCE_ID(patch[0], output);
-				return VertexFunction(output);
+				UNITY_TRANSFER_INSTANCE_ID(patch[0], o);
+				return VertexFunction(o);
 			}
 			#else
-			PackedVaryings vert ( Attributes input )
+			VertexOutput vert ( VertexInput v )
 			{
-				return VertexFunction( input );
+				return VertexFunction( v );
 			}
 			#endif
 
-			half4 frag(PackedVaryings input
-						#ifdef ASE_DEPTH_WRITE_ON
-						,out float outputDepth : ASE_SV_DEPTH
-						#endif
-						 ) : SV_Target
+			half4 frag(VertexOutput IN  ) : SV_TARGET
 			{
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( input );
+				UNITY_SETUP_INSTANCE_ID(IN);
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( IN );
 
 				#if defined(ASE_NEEDS_FRAG_WORLD_POSITION)
-				float3 WorldPosition = input.positionWS;
+				float3 WorldPosition = IN.positionWS;
 				#endif
 
 				float4 ShadowCoords = float4( 0, 0, 0, 0 );
-				float4 ScreenPosNorm = float4( GetNormalizedScreenSpaceUV( input.positionCS ), input.positionCS.zw );
-				float4 ClipPos = ComputeClipSpacePosition( ScreenPosNorm.xy, input.positionCS.z ) * input.positionCS.w;
-				float4 ScreenPos = ComputeScreenPos( ClipPos );
+
+				float4 ClipPos = IN.clipPosV;
+				float4 ScreenPos = ComputeScreenPos( IN.clipPosV );
 
 				#if defined(ASE_NEEDS_FRAG_SHADOWCOORDS)
 					#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
-						ShadowCoords = input.shadowCoord;
+						ShadowCoords = IN.shadowCoord;
 					#elif defined(MAIN_LIGHT_CALCULATE_SHADOWS)
 						ShadowCoords = TransformWorldToShadowCoord( WorldPosition );
 					#endif
@@ -1584,26 +1482,28 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 
 				bool enabled20_g73 =(bool)_UnderwaterRenderingEnabled;
 				bool submerged20_g73 =(bool)_FullySubmerged;
-				float textureSample20_g73 = tex2Dlod( _UnderwaterMask, float4( ScreenPosNorm.xy, 0, 0.0) ).r;
+				float4 ase_screenPosNorm = ScreenPos / ScreenPos.w;
+				ase_screenPosNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_screenPosNorm.z : ase_screenPosNorm.z * 0.5 + 0.5;
+				float textureSample20_g73 = tex2Dlod( _UnderwaterMask, float4( ase_screenPosNorm.xy, 0, 0.0) ).r;
 				float localHLSL20_g73 = HLSL20_g73( enabled20_g73 , submerged20_g73 , textureSample20_g73 );
-				float2 texCoord4_g70 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord4_g70 = IN.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 Pos13_g70 = texCoord4_g70;
 				float mulTime2_g70 = _TimeParameters.x * ( 0.001 * CZY_WindSpeed );
 				float TIme5_g70 = mulTime2_g70;
 				float simplePerlin2D28_g70 = snoise( ( Pos13_g70 + ( TIme5_g70 * float2( 0.2,-0.4 ) ) )*( 100.0 / CZY_MainCloudScale ) );
 				simplePerlin2D28_g70 = simplePerlin2D28_g70*0.5 + 0.5;
-				float2 texCoord27_g70 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord27_g70 = IN.ase_texcoord3.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_24_0_g70 = ( texCoord27_g70 - float2( 0.5,0.5 ) );
 				float dotResult19_g70 = dot( temp_output_24_0_g70 , temp_output_24_0_g70 );
 				float CurrentCloudCover31_g70 = CZY_CumulusCoverageMultiplier;
-				float temp_output_38_0_g70 =  (0.0 + ( dotResult19_g70 - 0.0 ) * ( CurrentCloudCover31_g70 - 0.0 ) / ( 0.27 - 0.0 ) );
+				float temp_output_38_0_g70 = (0.0 + (dotResult19_g70 - 0.0) * (CurrentCloudCover31_g70 - 0.0) / (0.27 - 0.0));
 				float time22_g70 = 0.0;
 				float2 voronoiSmoothId22_g70 = 0;
 				float2 coords22_g70 = ( Pos13_g70 + ( TIme5_g70 * float2( 0.3,0.2 ) ) ) * ( 140.0 / CZY_MainCloudScale );
 				float2 id22_g70 = 0;
 				float2 uv22_g70 = 0;
 				float voroi22_g70 = voronoi22_g70( coords22_g70, time22_g70, id22_g70, uv22_g70, 0, voronoiSmoothId22_g70 );
-				float temp_output_56_0_g70 =  (0.0 + ( min( ( simplePerlin2D28_g70 + temp_output_38_0_g70 ) , ( ( 1.0 - voroi22_g70 ) + temp_output_38_0_g70 ) ) - ( 1.0 - CurrentCloudCover31_g70 ) ) * ( 1.0 - 0.0 ) / ( 1.0 - ( 1.0 - CurrentCloudCover31_g70 ) ) );
+				float temp_output_56_0_g70 = (0.0 + (min( ( simplePerlin2D28_g70 + temp_output_38_0_g70 ) , ( ( 1.0 - voroi22_g70 ) + temp_output_38_0_g70 ) ) - ( 1.0 - CurrentCloudCover31_g70 )) * (1.0 - 0.0) / (1.0 - ( 1.0 - CurrentCloudCover31_g70 )));
 				float time32_g70 = 0.0;
 				float2 voronoiSmoothId32_g70 = 0;
 				float2 coords32_g70 = ( Pos13_g70 + ( TIme5_g70 * float2( 0.3,0.2 ) ) ) * ( 100.0 / CZY_DetailScale );
@@ -1619,29 +1519,20 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				fade32_g70 *= 0.5;
 				}//Voronoi32_g70
 				voroi32_g70 /= rest32_g70;
-				float temp_output_50_0_g70 = (  (0.0 + ( ( 1.0 - voroi32_g70 ) - 0.3 ) * ( 0.5 - 0.0 ) / ( 1.0 - 0.3 ) ) * 0.1 * CZY_DetailAmount );
+				float temp_output_50_0_g70 = ( (0.0 + (( 1.0 - voroi32_g70 ) - 0.3) * (0.5 - 0.0) / (1.0 - 0.3)) * 0.1 * CZY_DetailAmount );
 				float temp_output_80_0_g70 = saturate( ( temp_output_56_0_g70 + temp_output_50_0_g70 ) );
 				
 
 				float Alpha = ( ( 1.0 - localHLSL20_g73 ) * temp_output_80_0_g70 );
 				float AlphaClipThreshold = CZY_ClippingThreshold;
 
-				#ifdef ASE_DEPTH_WRITE_ON
-					float DepthValue = input.positionCS.z;
-				#endif
-
 				#ifdef _ALPHATEST_ON
 					clip(Alpha - AlphaClipThreshold);
 				#endif
 
-				#if defined(LOD_FADE_CROSSFADE)
-					LODFadeCrossFade( input.positionCS );
+				#ifdef LOD_FADE_CROSSFADE
+					LODFadeCrossFade( IN.positionCS );
 				#endif
-
-				#ifdef ASE_DEPTH_WRITE_ON
-					outputDepth = DepthValue;
-				#endif
-
 				return 0;
 			}
 			ENDHLSL
@@ -1661,9 +1552,8 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 
 			
 
-			#pragma multi_compile_local _ALPHATEST_ON
-			#define ASE_VERSION 19901
-			#define ASE_SRP_VERSION 140012
+			#define _ALPHATEST_ON 1
+			#define ASE_SRP_VERSION 140010
 
 
 			
@@ -1704,11 +1594,9 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
 
-			#define ASE_NEEDS_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_FRAG_TEXTURE_COORDINATES0
+			
 
-
-			struct Attributes
+			struct VertexInput
 			{
 				float4 positionOS : POSITION;
 				float3 normalOS : NORMAL;
@@ -1716,7 +1604,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
-			struct PackedVaryings
+			struct VertexOutput
 			{
 				float4 positionCS : SV_POSITION;
 				float4 ase_texcoord : TEXCOORD0;
@@ -1788,71 +1676,71 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				return 130.0 * dot( m, g );
 			}
 			
-					float2 voronoihash22_g70( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash22_g70( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi22_g70( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash22_g70( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return (F2 + F1) * 0.5;
-					}
+			float voronoi22_g70( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash22_g70( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return (F2 + F1) * 0.5;
+			}
 			
-					float2 voronoihash32_g70( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash32_g70( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi32_g70( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash32_g70( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return F1;
-					}
+			float voronoi32_g70( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash32_g70( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return F1;
+			}
 			
 
 			int _ObjectId;
@@ -1864,26 +1752,26 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				float AlphaClipThreshold;
 			};
 
-			PackedVaryings VertexFunction(Attributes input  )
+			VertexOutput VertexFunction(VertexInput v  )
 			{
-				PackedVaryings output;
-				ZERO_INITIALIZE(PackedVaryings, output);
+				VertexOutput o;
+				ZERO_INITIALIZE(VertexOutput, o);
 
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_TRANSFER_INSTANCE_ID(input, output);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-				float4 ase_positionCS = TransformObjectToHClip( ( input.positionOS ).xyz );
-				float4 screenPos = ComputeScreenPos( ase_positionCS );
-				output.ase_texcoord = screenPos;
+				float4 ase_clipPos = TransformObjectToHClip((v.positionOS).xyz);
+				float4 screenPos = ComputeScreenPos(ase_clipPos);
+				o.ase_texcoord = screenPos;
 				
-				output.ase_texcoord1.xy = input.ase_texcoord.xy;
+				o.ase_texcoord1.xy = v.ase_texcoord.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				output.ase_texcoord1.zw = 0;
+				o.ase_texcoord1.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					float3 defaultVertexValue = input.positionOS.xyz;
+					float3 defaultVertexValue = v.positionOS.xyz;
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
@@ -1891,24 +1779,24 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				float3 vertexValue = defaultVertexValue;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					input.positionOS.xyz = vertexValue;
+					v.positionOS.xyz = vertexValue;
 				#else
-					input.positionOS.xyz += vertexValue;
+					v.positionOS.xyz += vertexValue;
 				#endif
 
-				input.normalOS = input.normalOS;
+				v.normalOS = v.normalOS;
 
-				float3 positionWS = TransformObjectToWorld( input.positionOS.xyz );
+				float3 positionWS = TransformObjectToWorld( v.positionOS.xyz );
 
-				output.positionCS = TransformWorldToHClip(positionWS);
+				o.positionCS = TransformWorldToHClip(positionWS);
 
-				return output;
+				return o;
 			}
 
 			#if defined(ASE_TESSELLATION)
 			struct VertexControl
 			{
-				float4 positionOS : INTERNALTESSPOS;
+				float4 vertex : INTERNALTESSPOS;
 				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 
@@ -1921,34 +1809,34 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				float inside : SV_InsideTessFactor;
 			};
 
-			VertexControl vert ( Attributes input )
+			VertexControl vert ( VertexInput v )
 			{
-				VertexControl output;
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_TRANSFER_INSTANCE_ID(input, output);
-				output.positionOS = input.positionOS;
-				output.normalOS = input.normalOS;
-				output.ase_texcoord = input.ase_texcoord;
-				return output;
+				VertexControl o;
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				o.vertex = v.positionOS;
+				o.normalOS = v.normalOS;
+				o.ase_texcoord = v.ase_texcoord;
+				return o;
 			}
 
-			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> input)
+			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> v)
 			{
-				TessellationFactors output;
+				TessellationFactors o;
 				float4 tf = 1;
 				float tessValue = _TessValue; float tessMin = _TessMin; float tessMax = _TessMax;
 				float edgeLength = _TessEdgeLength; float tessMaxDisp = _TessMaxDisp;
 				#if defined(ASE_FIXED_TESSELLATION)
 				tf = FixedTess( tessValue );
 				#elif defined(ASE_DISTANCE_TESSELLATION)
-				tf = DistanceBasedTess(input[0].positionOS, input[1].positionOS, input[2].positionOS, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
+				tf = DistanceBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
 				#elif defined(ASE_LENGTH_TESSELLATION)
-				tf = EdgeLengthBasedTess(input[0].positionOS, input[1].positionOS, input[2].positionOS, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
+				tf = EdgeLengthBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
 				#elif defined(ASE_LENGTH_CULL_TESSELLATION)
-				tf = EdgeLengthBasedTessCull(input[0].positionOS, input[1].positionOS, input[2].positionOS, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
+				tf = EdgeLengthBasedTessCull(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
 				#endif
-				output.edge[0] = tf.x; output.edge[1] = tf.y; output.edge[2] = tf.z; output.inside = tf.w;
-				return output;
+				o.edge[0] = tf.x; o.edge[1] = tf.y; o.edge[2] = tf.z; o.inside = tf.w;
+				return o;
 			}
 
 			[domain("tri")]
@@ -1962,58 +1850,58 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 			}
 
 			[domain("tri")]
-			PackedVaryings DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
+			VertexOutput DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
 			{
-				Attributes output = (Attributes) 0;
-				output.positionOS = patch[0].positionOS * bary.x + patch[1].positionOS * bary.y + patch[2].positionOS * bary.z;
-				output.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
-				output.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
+				VertexInput o = (VertexInput) 0;
+				o.positionOS = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
+				o.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
+				o.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
-					pp[i] = output.positionOS.xyz - patch[i].normalOS * (dot(output.positionOS.xyz, patch[i].normalOS) - dot(patch[i].positionOS.xyz, patch[i].normalOS));
+					pp[i] = o.positionOS.xyz - patch[i].normalOS * (dot(o.positionOS.xyz, patch[i].normalOS) - dot(patch[i].vertex.xyz, patch[i].normalOS));
 				float phongStrength = _TessPhongStrength;
-				output.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * output.positionOS.xyz;
+				o.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.positionOS.xyz;
 				#endif
-				UNITY_TRANSFER_INSTANCE_ID(patch[0], output);
-				return VertexFunction(output);
+				UNITY_TRANSFER_INSTANCE_ID(patch[0], o);
+				return VertexFunction(o);
 			}
 			#else
-			PackedVaryings vert ( Attributes input )
+			VertexOutput vert ( VertexInput v )
 			{
-				return VertexFunction( input );
+				return VertexFunction( v );
 			}
 			#endif
 
-			half4 frag(PackedVaryings input ) : SV_Target
+			half4 frag(VertexOutput IN ) : SV_TARGET
 			{
 				SurfaceDescription surfaceDescription = (SurfaceDescription)0;
 
 				bool enabled20_g73 =(bool)_UnderwaterRenderingEnabled;
 				bool submerged20_g73 =(bool)_FullySubmerged;
-				float4 screenPos = input.ase_texcoord;
-				float4 ase_positionSSNorm = screenPos / screenPos.w;
-				ase_positionSSNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_positionSSNorm.z : ase_positionSSNorm.z * 0.5 + 0.5;
-				float textureSample20_g73 = tex2Dlod( _UnderwaterMask, float4( ase_positionSSNorm.xy, 0, 0.0) ).r;
+				float4 screenPos = IN.ase_texcoord;
+				float4 ase_screenPosNorm = screenPos / screenPos.w;
+				ase_screenPosNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_screenPosNorm.z : ase_screenPosNorm.z * 0.5 + 0.5;
+				float textureSample20_g73 = tex2Dlod( _UnderwaterMask, float4( ase_screenPosNorm.xy, 0, 0.0) ).r;
 				float localHLSL20_g73 = HLSL20_g73( enabled20_g73 , submerged20_g73 , textureSample20_g73 );
-				float2 texCoord4_g70 = input.ase_texcoord1.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord4_g70 = IN.ase_texcoord1.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 Pos13_g70 = texCoord4_g70;
 				float mulTime2_g70 = _TimeParameters.x * ( 0.001 * CZY_WindSpeed );
 				float TIme5_g70 = mulTime2_g70;
 				float simplePerlin2D28_g70 = snoise( ( Pos13_g70 + ( TIme5_g70 * float2( 0.2,-0.4 ) ) )*( 100.0 / CZY_MainCloudScale ) );
 				simplePerlin2D28_g70 = simplePerlin2D28_g70*0.5 + 0.5;
-				float2 texCoord27_g70 = input.ase_texcoord1.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord27_g70 = IN.ase_texcoord1.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_24_0_g70 = ( texCoord27_g70 - float2( 0.5,0.5 ) );
 				float dotResult19_g70 = dot( temp_output_24_0_g70 , temp_output_24_0_g70 );
 				float CurrentCloudCover31_g70 = CZY_CumulusCoverageMultiplier;
-				float temp_output_38_0_g70 =  (0.0 + ( dotResult19_g70 - 0.0 ) * ( CurrentCloudCover31_g70 - 0.0 ) / ( 0.27 - 0.0 ) );
+				float temp_output_38_0_g70 = (0.0 + (dotResult19_g70 - 0.0) * (CurrentCloudCover31_g70 - 0.0) / (0.27 - 0.0));
 				float time22_g70 = 0.0;
 				float2 voronoiSmoothId22_g70 = 0;
 				float2 coords22_g70 = ( Pos13_g70 + ( TIme5_g70 * float2( 0.3,0.2 ) ) ) * ( 140.0 / CZY_MainCloudScale );
 				float2 id22_g70 = 0;
 				float2 uv22_g70 = 0;
 				float voroi22_g70 = voronoi22_g70( coords22_g70, time22_g70, id22_g70, uv22_g70, 0, voronoiSmoothId22_g70 );
-				float temp_output_56_0_g70 =  (0.0 + ( min( ( simplePerlin2D28_g70 + temp_output_38_0_g70 ) , ( ( 1.0 - voroi22_g70 ) + temp_output_38_0_g70 ) ) - ( 1.0 - CurrentCloudCover31_g70 ) ) * ( 1.0 - 0.0 ) / ( 1.0 - ( 1.0 - CurrentCloudCover31_g70 ) ) );
+				float temp_output_56_0_g70 = (0.0 + (min( ( simplePerlin2D28_g70 + temp_output_38_0_g70 ) , ( ( 1.0 - voroi22_g70 ) + temp_output_38_0_g70 ) ) - ( 1.0 - CurrentCloudCover31_g70 )) * (1.0 - 0.0) / (1.0 - ( 1.0 - CurrentCloudCover31_g70 )));
 				float time32_g70 = 0.0;
 				float2 voronoiSmoothId32_g70 = 0;
 				float2 coords32_g70 = ( Pos13_g70 + ( TIme5_g70 * float2( 0.3,0.2 ) ) ) * ( 100.0 / CZY_DetailScale );
@@ -2029,7 +1917,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				fade32_g70 *= 0.5;
 				}//Voronoi32_g70
 				voroi32_g70 /= rest32_g70;
-				float temp_output_50_0_g70 = (  (0.0 + ( ( 1.0 - voroi32_g70 ) - 0.3 ) * ( 0.5 - 0.0 ) / ( 1.0 - 0.3 ) ) * 0.1 * CZY_DetailAmount );
+				float temp_output_50_0_g70 = ( (0.0 + (( 1.0 - voroi32_g70 ) - 0.3) * (0.5 - 0.0) / (1.0 - 0.3)) * 0.1 * CZY_DetailAmount );
 				float temp_output_80_0_g70 = saturate( ( temp_output_56_0_g70 + temp_output_50_0_g70 ) );
 				
 
@@ -2063,9 +1951,8 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 
 			
 
-			#pragma multi_compile_local _ALPHATEST_ON
-			#define ASE_VERSION 19901
-			#define ASE_SRP_VERSION 140012
+			#define _ALPHATEST_ON 1
+			#define ASE_SRP_VERSION 140010
 
 
 			
@@ -2111,11 +1998,9 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
             #endif
 
-			#define ASE_NEEDS_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_FRAG_TEXTURE_COORDINATES0
+			
 
-
-			struct Attributes
+			struct VertexInput
 			{
 				float4 positionOS : POSITION;
 				float3 normalOS : NORMAL;
@@ -2123,7 +2008,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
-			struct PackedVaryings
+			struct VertexOutput
 			{
 				float4 positionCS : SV_POSITION;
 				float4 ase_texcoord : TEXCOORD0;
@@ -2195,71 +2080,71 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				return 130.0 * dot( m, g );
 			}
 			
-					float2 voronoihash22_g70( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash22_g70( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi22_g70( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash22_g70( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return (F2 + F1) * 0.5;
-					}
+			float voronoi22_g70( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash22_g70( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return (F2 + F1) * 0.5;
+			}
 			
-					float2 voronoihash32_g70( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash32_g70( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi32_g70( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash32_g70( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return F1;
-					}
+			float voronoi32_g70( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash32_g70( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return F1;
+			}
 			
 
 			float4 _SelectionID;
@@ -2270,26 +2155,26 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				float AlphaClipThreshold;
 			};
 
-			PackedVaryings VertexFunction(Attributes input  )
+			VertexOutput VertexFunction(VertexInput v  )
 			{
-				PackedVaryings output;
-				ZERO_INITIALIZE(PackedVaryings, output);
+				VertexOutput o;
+				ZERO_INITIALIZE(VertexOutput, o);
 
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_TRANSFER_INSTANCE_ID(input, output);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-				float4 ase_positionCS = TransformObjectToHClip( ( input.positionOS ).xyz );
-				float4 screenPos = ComputeScreenPos( ase_positionCS );
-				output.ase_texcoord = screenPos;
+				float4 ase_clipPos = TransformObjectToHClip((v.positionOS).xyz);
+				float4 screenPos = ComputeScreenPos(ase_clipPos);
+				o.ase_texcoord = screenPos;
 				
-				output.ase_texcoord1.xy = input.ase_texcoord.xy;
+				o.ase_texcoord1.xy = v.ase_texcoord.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				output.ase_texcoord1.zw = 0;
+				o.ase_texcoord1.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					float3 defaultVertexValue = input.positionOS.xyz;
+					float3 defaultVertexValue = v.positionOS.xyz;
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
@@ -2297,22 +2182,22 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				float3 vertexValue = defaultVertexValue;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					input.positionOS.xyz = vertexValue;
+					v.positionOS.xyz = vertexValue;
 				#else
-					input.positionOS.xyz += vertexValue;
+					v.positionOS.xyz += vertexValue;
 				#endif
 
-				input.normalOS = input.normalOS;
+				v.normalOS = v.normalOS;
 
-				float3 positionWS = TransformObjectToWorld( input.positionOS.xyz );
-				output.positionCS = TransformWorldToHClip(positionWS);
-				return output;
+				float3 positionWS = TransformObjectToWorld( v.positionOS.xyz );
+				o.positionCS = TransformWorldToHClip(positionWS);
+				return o;
 			}
 
 			#if defined(ASE_TESSELLATION)
 			struct VertexControl
 			{
-				float4 positionOS : INTERNALTESSPOS;
+				float4 vertex : INTERNALTESSPOS;
 				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 
@@ -2325,34 +2210,34 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				float inside : SV_InsideTessFactor;
 			};
 
-			VertexControl vert ( Attributes input )
+			VertexControl vert ( VertexInput v )
 			{
-				VertexControl output;
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_TRANSFER_INSTANCE_ID(input, output);
-				output.positionOS = input.positionOS;
-				output.normalOS = input.normalOS;
-				output.ase_texcoord = input.ase_texcoord;
-				return output;
+				VertexControl o;
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				o.vertex = v.positionOS;
+				o.normalOS = v.normalOS;
+				o.ase_texcoord = v.ase_texcoord;
+				return o;
 			}
 
-			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> input)
+			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> v)
 			{
-				TessellationFactors output;
+				TessellationFactors o;
 				float4 tf = 1;
 				float tessValue = _TessValue; float tessMin = _TessMin; float tessMax = _TessMax;
 				float edgeLength = _TessEdgeLength; float tessMaxDisp = _TessMaxDisp;
 				#if defined(ASE_FIXED_TESSELLATION)
 				tf = FixedTess( tessValue );
 				#elif defined(ASE_DISTANCE_TESSELLATION)
-				tf = DistanceBasedTess(input[0].positionOS, input[1].positionOS, input[2].positionOS, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
+				tf = DistanceBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
 				#elif defined(ASE_LENGTH_TESSELLATION)
-				tf = EdgeLengthBasedTess(input[0].positionOS, input[1].positionOS, input[2].positionOS, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
+				tf = EdgeLengthBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
 				#elif defined(ASE_LENGTH_CULL_TESSELLATION)
-				tf = EdgeLengthBasedTessCull(input[0].positionOS, input[1].positionOS, input[2].positionOS, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
+				tf = EdgeLengthBasedTessCull(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
 				#endif
-				output.edge[0] = tf.x; output.edge[1] = tf.y; output.edge[2] = tf.z; output.inside = tf.w;
-				return output;
+				o.edge[0] = tf.x; o.edge[1] = tf.y; o.edge[2] = tf.z; o.inside = tf.w;
+				return o;
 			}
 
 			[domain("tri")]
@@ -2366,58 +2251,58 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 			}
 
 			[domain("tri")]
-			PackedVaryings DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
+			VertexOutput DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
 			{
-				Attributes output = (Attributes) 0;
-				output.positionOS = patch[0].positionOS * bary.x + patch[1].positionOS * bary.y + patch[2].positionOS * bary.z;
-				output.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
-				output.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
+				VertexInput o = (VertexInput) 0;
+				o.positionOS = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
+				o.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
+				o.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
-					pp[i] = output.positionOS.xyz - patch[i].normalOS * (dot(output.positionOS.xyz, patch[i].normalOS) - dot(patch[i].positionOS.xyz, patch[i].normalOS));
+					pp[i] = o.positionOS.xyz - patch[i].normalOS * (dot(o.positionOS.xyz, patch[i].normalOS) - dot(patch[i].vertex.xyz, patch[i].normalOS));
 				float phongStrength = _TessPhongStrength;
-				output.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * output.positionOS.xyz;
+				o.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.positionOS.xyz;
 				#endif
-				UNITY_TRANSFER_INSTANCE_ID(patch[0], output);
-				return VertexFunction(output);
+				UNITY_TRANSFER_INSTANCE_ID(patch[0], o);
+				return VertexFunction(o);
 			}
 			#else
-			PackedVaryings vert ( Attributes input )
+			VertexOutput vert ( VertexInput v )
 			{
-				return VertexFunction( input );
+				return VertexFunction( v );
 			}
 			#endif
 
-			half4 frag(PackedVaryings input ) : SV_Target
+			half4 frag(VertexOutput IN ) : SV_TARGET
 			{
 				SurfaceDescription surfaceDescription = (SurfaceDescription)0;
 
 				bool enabled20_g73 =(bool)_UnderwaterRenderingEnabled;
 				bool submerged20_g73 =(bool)_FullySubmerged;
-				float4 screenPos = input.ase_texcoord;
-				float4 ase_positionSSNorm = screenPos / screenPos.w;
-				ase_positionSSNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_positionSSNorm.z : ase_positionSSNorm.z * 0.5 + 0.5;
-				float textureSample20_g73 = tex2Dlod( _UnderwaterMask, float4( ase_positionSSNorm.xy, 0, 0.0) ).r;
+				float4 screenPos = IN.ase_texcoord;
+				float4 ase_screenPosNorm = screenPos / screenPos.w;
+				ase_screenPosNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_screenPosNorm.z : ase_screenPosNorm.z * 0.5 + 0.5;
+				float textureSample20_g73 = tex2Dlod( _UnderwaterMask, float4( ase_screenPosNorm.xy, 0, 0.0) ).r;
 				float localHLSL20_g73 = HLSL20_g73( enabled20_g73 , submerged20_g73 , textureSample20_g73 );
-				float2 texCoord4_g70 = input.ase_texcoord1.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord4_g70 = IN.ase_texcoord1.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 Pos13_g70 = texCoord4_g70;
 				float mulTime2_g70 = _TimeParameters.x * ( 0.001 * CZY_WindSpeed );
 				float TIme5_g70 = mulTime2_g70;
 				float simplePerlin2D28_g70 = snoise( ( Pos13_g70 + ( TIme5_g70 * float2( 0.2,-0.4 ) ) )*( 100.0 / CZY_MainCloudScale ) );
 				simplePerlin2D28_g70 = simplePerlin2D28_g70*0.5 + 0.5;
-				float2 texCoord27_g70 = input.ase_texcoord1.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord27_g70 = IN.ase_texcoord1.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_24_0_g70 = ( texCoord27_g70 - float2( 0.5,0.5 ) );
 				float dotResult19_g70 = dot( temp_output_24_0_g70 , temp_output_24_0_g70 );
 				float CurrentCloudCover31_g70 = CZY_CumulusCoverageMultiplier;
-				float temp_output_38_0_g70 =  (0.0 + ( dotResult19_g70 - 0.0 ) * ( CurrentCloudCover31_g70 - 0.0 ) / ( 0.27 - 0.0 ) );
+				float temp_output_38_0_g70 = (0.0 + (dotResult19_g70 - 0.0) * (CurrentCloudCover31_g70 - 0.0) / (0.27 - 0.0));
 				float time22_g70 = 0.0;
 				float2 voronoiSmoothId22_g70 = 0;
 				float2 coords22_g70 = ( Pos13_g70 + ( TIme5_g70 * float2( 0.3,0.2 ) ) ) * ( 140.0 / CZY_MainCloudScale );
 				float2 id22_g70 = 0;
 				float2 uv22_g70 = 0;
 				float voroi22_g70 = voronoi22_g70( coords22_g70, time22_g70, id22_g70, uv22_g70, 0, voronoiSmoothId22_g70 );
-				float temp_output_56_0_g70 =  (0.0 + ( min( ( simplePerlin2D28_g70 + temp_output_38_0_g70 ) , ( ( 1.0 - voroi22_g70 ) + temp_output_38_0_g70 ) ) - ( 1.0 - CurrentCloudCover31_g70 ) ) * ( 1.0 - 0.0 ) / ( 1.0 - ( 1.0 - CurrentCloudCover31_g70 ) ) );
+				float temp_output_56_0_g70 = (0.0 + (min( ( simplePerlin2D28_g70 + temp_output_38_0_g70 ) , ( ( 1.0 - voroi22_g70 ) + temp_output_38_0_g70 ) ) - ( 1.0 - CurrentCloudCover31_g70 )) * (1.0 - 0.0) / (1.0 - ( 1.0 - CurrentCloudCover31_g70 )));
 				float time32_g70 = 0.0;
 				float2 voronoiSmoothId32_g70 = 0;
 				float2 coords32_g70 = ( Pos13_g70 + ( TIme5_g70 * float2( 0.3,0.2 ) ) ) * ( 100.0 / CZY_DetailScale );
@@ -2433,7 +2318,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				fade32_g70 *= 0.5;
 				}//Voronoi32_g70
 				voroi32_g70 /= rest32_g70;
-				float temp_output_50_0_g70 = (  (0.0 + ( ( 1.0 - voroi32_g70 ) - 0.3 ) * ( 0.5 - 0.0 ) / ( 1.0 - 0.3 ) ) * 0.1 * CZY_DetailAmount );
+				float temp_output_50_0_g70 = ( (0.0 + (( 1.0 - voroi32_g70 ) - 0.3) * (0.5 - 0.0) / (1.0 - 0.3)) * 0.1 * CZY_DetailAmount );
 				float temp_output_80_0_g70 = saturate( ( temp_output_56_0_g70 + temp_output_50_0_g70 ) );
 				
 
@@ -2471,10 +2356,9 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 
 			
 
-        	#pragma multi_compile_local _ALPHATEST_ON
         	#pragma multi_compile_instancing
-        	#define ASE_VERSION 19901
-        	#define ASE_SRP_VERSION 140012
+        	#define _ALPHATEST_ON 1
+        	#define ASE_SRP_VERSION 140010
 
 
 			
@@ -2525,20 +2409,10 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/LODCrossFade.hlsl"
             #endif
 
-			#define ASE_NEEDS_FRAG_SCREEN_POSITION_NORMALIZED
-			#define ASE_NEEDS_TEXTURE_COORDINATES0
-			#define ASE_NEEDS_FRAG_TEXTURE_COORDINATES0
+			#define ASE_NEEDS_FRAG_SCREEN_POSITION
 
 
-			#if defined(ASE_EARLY_Z_DEPTH_OPTIMIZE) && (SHADER_TARGET >= 45)
-				#define ASE_SV_DEPTH SV_DepthLessEqual
-				#define ASE_SV_POSITION_QUALIFIERS linear noperspective centroid
-			#else
-				#define ASE_SV_DEPTH SV_Depth
-				#define ASE_SV_POSITION_QUALIFIERS
-			#endif
-
-			struct Attributes
+			struct VertexInput
 			{
 				float4 positionOS : POSITION;
 				float3 normalOS : NORMAL;
@@ -2546,10 +2420,10 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
-			struct PackedVaryings
+			struct VertexOutput
 			{
-				ASE_SV_POSITION_QUALIFIERS float4 positionCS : SV_POSITION;
-				float3 positionWS : TEXCOORD0;
+				float4 positionCS : SV_POSITION;
+				float4 clipPosV : TEXCOORD0;
 				float3 normalWS : TEXCOORD1;
 				float4 ase_texcoord2 : TEXCOORD2;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -2619,71 +2493,71 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				return 130.0 * dot( m, g );
 			}
 			
-					float2 voronoihash22_g70( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash22_g70( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi22_g70( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash22_g70( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return (F2 + F1) * 0.5;
-					}
+			float voronoi22_g70( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash22_g70( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return (F2 + F1) * 0.5;
+			}
 			
-					float2 voronoihash32_g70( float2 p )
-					{
-						
-						p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
-						return frac( sin( p ) *43758.5453);
-					}
+			float2 voronoihash32_g70( float2 p )
+			{
+				
+				p = float2( dot( p, float2( 127.1, 311.7 ) ), dot( p, float2( 269.5, 183.3 ) ) );
+				return frac( sin( p ) *43758.5453);
+			}
 			
-					float voronoi32_g70( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
-					{
-						float2 n = floor( v );
-						float2 f = frac( v );
-						float F1 = 8.0;
-						float F2 = 8.0; float2 mg = 0; int i, j;
-						for ( j = -1; j <= 1; j++ )
-						{
-							for ( i = -1; i <= 1; i++ )
-						 	{
-						 		float2 g = float2( i, j );
-						 		float2 o = voronoihash32_g70( n + g );
-								o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
-								float d = 0.5 * dot( r, r );
-						 		if( d<F1 ) {
-						 			F2 = F1;
-						 			F1 = d; mg = g; mr = r; id = o;
-						 		} else if( d<F2 ) {
-						 			F2 = d;
-						
-						 		}
-						 	}
-						}
-						return F1;
-					}
+			float voronoi32_g70( float2 v, float time, inout float2 id, inout float2 mr, float smoothness, inout float2 smoothId )
+			{
+				float2 n = floor( v );
+				float2 f = frac( v );
+				float F1 = 8.0;
+				float F2 = 8.0; float2 mg = 0;
+				for ( int j = -1; j <= 1; j++ )
+				{
+					for ( int i = -1; i <= 1; i++ )
+				 	{
+				 		float2 g = float2( i, j );
+				 		float2 o = voronoihash32_g70( n + g );
+						o = ( sin( time + o * 6.2831 ) * 0.5 + 0.5 ); float2 r = f - g - o;
+						float d = 0.5 * dot( r, r );
+				 		if( d<F1 ) {
+				 			F2 = F1;
+				 			F1 = d; mg = g; mr = r; id = o;
+				 		} else if( d<F2 ) {
+				 			F2 = d;
+				
+				 		}
+				 	}
+				}
+				return F1;
+			}
 			
 
 			struct SurfaceDescription
@@ -2692,21 +2566,22 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				float AlphaClipThreshold;
 			};
 
-			PackedVaryings VertexFunction( Attributes input  )
+			VertexOutput VertexFunction(VertexInput v  )
 			{
-				PackedVaryings output;
-				ZERO_INITIALIZE(PackedVaryings, output);
+				VertexOutput o;
+				ZERO_INITIALIZE(VertexOutput, o);
 
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_TRANSFER_INSTANCE_ID(input, output);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-				output.ase_texcoord2.xy = input.ase_texcoord.xy;
+				o.ase_texcoord2.xy = v.ase_texcoord.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				output.ase_texcoord2.zw = 0;
+				o.ase_texcoord2.zw = 0;
+
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					float3 defaultVertexValue = input.positionOS.xyz;
+					float3 defaultVertexValue = v.positionOS.xyz;
 				#else
 					float3 defaultVertexValue = float3(0, 0, 0);
 				#endif
@@ -2714,25 +2589,25 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				float3 vertexValue = defaultVertexValue;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
-					input.positionOS.xyz = vertexValue;
+					v.positionOS.xyz = vertexValue;
 				#else
-					input.positionOS.xyz += vertexValue;
+					v.positionOS.xyz += vertexValue;
 				#endif
 
-				input.normalOS = input.normalOS;
+				v.normalOS = v.normalOS;
 
-				VertexPositionInputs vertexInput = GetVertexPositionInputs( input.positionOS.xyz );
+				VertexPositionInputs vertexInput = GetVertexPositionInputs( v.positionOS.xyz );
 
-				output.positionCS = vertexInput.positionCS;
-				output.positionWS = vertexInput.positionWS;
-				output.normalWS = TransformObjectToWorldNormal( input.normalOS );
-				return output;
+				o.positionCS = vertexInput.positionCS;
+				o.clipPosV = vertexInput.positionCS;
+				o.normalWS = TransformObjectToWorldNormal( v.normalOS );
+				return o;
 			}
 
 			#if defined(ASE_TESSELLATION)
 			struct VertexControl
 			{
-				float4 positionOS : INTERNALTESSPOS;
+				float4 vertex : INTERNALTESSPOS;
 				float3 normalOS : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
 
@@ -2745,34 +2620,34 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				float inside : SV_InsideTessFactor;
 			};
 
-			VertexControl vert ( Attributes input )
+			VertexControl vert ( VertexInput v )
 			{
-				VertexControl output;
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_TRANSFER_INSTANCE_ID(input, output);
-				output.positionOS = input.positionOS;
-				output.normalOS = input.normalOS;
-				output.ase_texcoord = input.ase_texcoord;
-				return output;
+				VertexControl o;
+				UNITY_SETUP_INSTANCE_ID(v);
+				UNITY_TRANSFER_INSTANCE_ID(v, o);
+				o.vertex = v.positionOS;
+				o.normalOS = v.normalOS;
+				o.ase_texcoord = v.ase_texcoord;
+				return o;
 			}
 
-			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> input)
+			TessellationFactors TessellationFunction (InputPatch<VertexControl,3> v)
 			{
-				TessellationFactors output;
+				TessellationFactors o;
 				float4 tf = 1;
 				float tessValue = _TessValue; float tessMin = _TessMin; float tessMax = _TessMax;
 				float edgeLength = _TessEdgeLength; float tessMaxDisp = _TessMaxDisp;
 				#if defined(ASE_FIXED_TESSELLATION)
 				tf = FixedTess( tessValue );
 				#elif defined(ASE_DISTANCE_TESSELLATION)
-				tf = DistanceBasedTess(input[0].positionOS, input[1].positionOS, input[2].positionOS, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
+				tf = DistanceBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, tessValue, tessMin, tessMax, GetObjectToWorldMatrix(), _WorldSpaceCameraPos );
 				#elif defined(ASE_LENGTH_TESSELLATION)
-				tf = EdgeLengthBasedTess(input[0].positionOS, input[1].positionOS, input[2].positionOS, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
+				tf = EdgeLengthBasedTess(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams );
 				#elif defined(ASE_LENGTH_CULL_TESSELLATION)
-				tf = EdgeLengthBasedTessCull(input[0].positionOS, input[1].positionOS, input[2].positionOS, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
+				tf = EdgeLengthBasedTessCull(v[0].vertex, v[1].vertex, v[2].vertex, edgeLength, tessMaxDisp, GetObjectToWorldMatrix(), _WorldSpaceCameraPos, _ScreenParams, unity_CameraWorldClipPlanes );
 				#endif
-				output.edge[0] = tf.x; output.edge[1] = tf.y; output.edge[2] = tf.z; output.inside = tf.w;
-				return output;
+				o.edge[0] = tf.x; o.edge[1] = tf.y; o.edge[2] = tf.z; o.inside = tf.w;
+				return o;
 			}
 
 			[domain("tri")]
@@ -2786,69 +2661,63 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 			}
 
 			[domain("tri")]
-			PackedVaryings DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
+			VertexOutput DomainFunction(TessellationFactors factors, OutputPatch<VertexControl, 3> patch, float3 bary : SV_DomainLocation)
 			{
-				Attributes output = (Attributes) 0;
-				output.positionOS = patch[0].positionOS * bary.x + patch[1].positionOS * bary.y + patch[2].positionOS * bary.z;
-				output.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
-				output.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
+				VertexInput o = (VertexInput) 0;
+				o.positionOS = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
+				o.normalOS = patch[0].normalOS * bary.x + patch[1].normalOS * bary.y + patch[2].normalOS * bary.z;
+				o.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
-					pp[i] = output.positionOS.xyz - patch[i].normalOS * (dot(output.positionOS.xyz, patch[i].normalOS) - dot(patch[i].positionOS.xyz, patch[i].normalOS));
+					pp[i] = o.positionOS.xyz - patch[i].normalOS * (dot(o.positionOS.xyz, patch[i].normalOS) - dot(patch[i].vertex.xyz, patch[i].normalOS));
 				float phongStrength = _TessPhongStrength;
-				output.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * output.positionOS.xyz;
+				o.positionOS.xyz = phongStrength * (pp[0]*bary.x + pp[1]*bary.y + pp[2]*bary.z) + (1.0f-phongStrength) * o.positionOS.xyz;
 				#endif
-				UNITY_TRANSFER_INSTANCE_ID(patch[0], output);
-				return VertexFunction(output);
+				UNITY_TRANSFER_INSTANCE_ID(patch[0], o);
+				return VertexFunction(o);
 			}
 			#else
-			PackedVaryings vert ( Attributes input )
+			VertexOutput vert ( VertexInput v )
 			{
-				return VertexFunction( input );
+				return VertexFunction( v );
 			}
 			#endif
 
-			void frag(PackedVaryings input
-						, out half4 outNormalWS : SV_Target0
-						#ifdef ASE_DEPTH_WRITE_ON
-						,out float outputDepth : ASE_SV_DEPTH
-						#endif
-						#ifdef _WRITE_RENDERING_LAYERS
-						, out float4 outRenderingLayers : SV_Target1
-						#endif
-						 )
+			void frag( VertexOutput IN
+				, out half4 outNormalWS : SV_Target0
+			#ifdef _WRITE_RENDERING_LAYERS
+				, out float4 outRenderingLayers : SV_Target1
+			#endif
+				 )
 			{
-				UNITY_SETUP_INSTANCE_ID(input);
-				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( input );
-				float3 WorldPosition = input.positionWS;
-				float3 WorldNormal = input.normalWS;
-				float4 ScreenPosNorm = float4( GetNormalizedScreenSpaceUV( input.positionCS ), input.positionCS.zw );
-				float4 ClipPos = ComputeClipSpacePosition( ScreenPosNorm.xy, input.positionCS.z ) * input.positionCS.w;
-				float4 ScreenPos = ComputeScreenPos( ClipPos );
+				float4 ClipPos = IN.clipPosV;
+				float4 ScreenPos = ComputeScreenPos( IN.clipPosV );
 
 				bool enabled20_g73 =(bool)_UnderwaterRenderingEnabled;
 				bool submerged20_g73 =(bool)_FullySubmerged;
-				float textureSample20_g73 = tex2Dlod( _UnderwaterMask, float4( ScreenPosNorm.xy, 0, 0.0) ).r;
+				float4 ase_screenPosNorm = ScreenPos / ScreenPos.w;
+				ase_screenPosNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? ase_screenPosNorm.z : ase_screenPosNorm.z * 0.5 + 0.5;
+				float textureSample20_g73 = tex2Dlod( _UnderwaterMask, float4( ase_screenPosNorm.xy, 0, 0.0) ).r;
 				float localHLSL20_g73 = HLSL20_g73( enabled20_g73 , submerged20_g73 , textureSample20_g73 );
-				float2 texCoord4_g70 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord4_g70 = IN.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 Pos13_g70 = texCoord4_g70;
 				float mulTime2_g70 = _TimeParameters.x * ( 0.001 * CZY_WindSpeed );
 				float TIme5_g70 = mulTime2_g70;
 				float simplePerlin2D28_g70 = snoise( ( Pos13_g70 + ( TIme5_g70 * float2( 0.2,-0.4 ) ) )*( 100.0 / CZY_MainCloudScale ) );
 				simplePerlin2D28_g70 = simplePerlin2D28_g70*0.5 + 0.5;
-				float2 texCoord27_g70 = input.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
+				float2 texCoord27_g70 = IN.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
 				float2 temp_output_24_0_g70 = ( texCoord27_g70 - float2( 0.5,0.5 ) );
 				float dotResult19_g70 = dot( temp_output_24_0_g70 , temp_output_24_0_g70 );
 				float CurrentCloudCover31_g70 = CZY_CumulusCoverageMultiplier;
-				float temp_output_38_0_g70 =  (0.0 + ( dotResult19_g70 - 0.0 ) * ( CurrentCloudCover31_g70 - 0.0 ) / ( 0.27 - 0.0 ) );
+				float temp_output_38_0_g70 = (0.0 + (dotResult19_g70 - 0.0) * (CurrentCloudCover31_g70 - 0.0) / (0.27 - 0.0));
 				float time22_g70 = 0.0;
 				float2 voronoiSmoothId22_g70 = 0;
 				float2 coords22_g70 = ( Pos13_g70 + ( TIme5_g70 * float2( 0.3,0.2 ) ) ) * ( 140.0 / CZY_MainCloudScale );
 				float2 id22_g70 = 0;
 				float2 uv22_g70 = 0;
 				float voroi22_g70 = voronoi22_g70( coords22_g70, time22_g70, id22_g70, uv22_g70, 0, voronoiSmoothId22_g70 );
-				float temp_output_56_0_g70 =  (0.0 + ( min( ( simplePerlin2D28_g70 + temp_output_38_0_g70 ) , ( ( 1.0 - voroi22_g70 ) + temp_output_38_0_g70 ) ) - ( 1.0 - CurrentCloudCover31_g70 ) ) * ( 1.0 - 0.0 ) / ( 1.0 - ( 1.0 - CurrentCloudCover31_g70 ) ) );
+				float temp_output_56_0_g70 = (0.0 + (min( ( simplePerlin2D28_g70 + temp_output_38_0_g70 ) , ( ( 1.0 - voroi22_g70 ) + temp_output_38_0_g70 ) ) - ( 1.0 - CurrentCloudCover31_g70 )) * (1.0 - 0.0) / (1.0 - ( 1.0 - CurrentCloudCover31_g70 )));
 				float time32_g70 = 0.0;
 				float2 voronoiSmoothId32_g70 = 0;
 				float2 coords32_g70 = ( Pos13_g70 + ( TIme5_g70 * float2( 0.3,0.2 ) ) ) * ( 100.0 / CZY_DetailScale );
@@ -2864,37 +2733,29 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 				fade32_g70 *= 0.5;
 				}//Voronoi32_g70
 				voroi32_g70 /= rest32_g70;
-				float temp_output_50_0_g70 = (  (0.0 + ( ( 1.0 - voroi32_g70 ) - 0.3 ) * ( 0.5 - 0.0 ) / ( 1.0 - 0.3 ) ) * 0.1 * CZY_DetailAmount );
+				float temp_output_50_0_g70 = ( (0.0 + (( 1.0 - voroi32_g70 ) - 0.3) * (0.5 - 0.0) / (1.0 - 0.3)) * 0.1 * CZY_DetailAmount );
 				float temp_output_80_0_g70 = saturate( ( temp_output_56_0_g70 + temp_output_50_0_g70 ) );
 				
 
 				float Alpha = ( ( 1.0 - localHLSL20_g73 ) * temp_output_80_0_g70 );
 				float AlphaClipThreshold = CZY_ClippingThreshold;
 
-				#ifdef ASE_DEPTH_WRITE_ON
-					float DepthValue = input.positionCS.z;
+				#if _ALPHATEST_ON
+					clip( Alpha - AlphaClipThreshold );
 				#endif
 
-				#ifdef _ALPHATEST_ON
-					clip(Alpha - AlphaClipThreshold);
-				#endif
-
-				#if defined(LOD_FADE_CROSSFADE)
-					LODFadeCrossFade( input.positionCS );
-				#endif
-
-				#ifdef ASE_DEPTH_WRITE_ON
-					outputDepth = DepthValue;
+				#ifdef LOD_FADE_CROSSFADE
+					LODFadeCrossFade( IN.positionCS );
 				#endif
 
 				#if defined(_GBUFFER_NORMALS_OCT)
-					float3 normalWS = normalize(input.normalWS);
-					float2 octNormalWS = PackNormalOctQuadEncode(normalWS);
-					float2 remappedOctNormalWS = saturate(octNormalWS * 0.5 + 0.5);
-					half3 packedNormalWS = PackFloat2To888(remappedOctNormalWS);
+					float3 normalWS = normalize(IN.normalWS);
+					float2 octNormalWS = PackNormalOctQuadEncode(normalWS);           // values between [-1, +1], must use fp32 on some platforms
+					float2 remappedOctNormalWS = saturate(octNormalWS * 0.5 + 0.5);   // values between [ 0,  1]
+					half3 packedNormalWS = PackFloat2To888(remappedOctNormalWS);      // values between [ 0,  1]
 					outNormalWS = half4(packedNormalWS, 0.0);
 				#else
-					float3 normalWS = input.normalWS;
+					float3 normalWS = IN.normalWS;
 					outNormalWS = half4(NormalizeNormalPerPixel(normalWS), 0.0);
 				#endif
 
@@ -2903,6 +2764,7 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 					outRenderingLayers = float4(EncodeMeshRenderingLayer(renderingLayers), 0, 0, 0);
 				#endif
 			}
+
 			ENDHLSL
 		}
 
@@ -2915,21 +2777,21 @@ Shader "Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile)"
 	Fallback "Hidden/InternalErrorShader"
 }
 /*ASEBEGIN
-Version=19901
-Node;AmplifyShaderEditor.FunctionNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;338;144,0;Inherit;False;Stylized Clouds (Mobile);0;;70;f983fbf9fb93b5247b6549c0ab1e449a;0;0;3;COLOR;0;FLOAT;108;FLOAT;109
-Node;AmplifyShaderEditor.RangedFloatNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;339;96,208;Inherit;False;Global;CZY_CloudsFogAmount;CZY_CloudsFogAmount;8;0;Create;True;0;0;0;False;0;False;0;0.509;0;1;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;340;96,128;Inherit;False;Global;CZY_CloudsFogLightAmount;CZY_CloudsFogLightAmount;7;0;Create;True;0;0;0;False;0;False;0;1;0;1;0;1;FLOAT;0
-Node;AmplifyShaderEditor.FunctionNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;341;432,0;Inherit;False;AddFogToSkyLayer;-1;;369;36a78fe96c9f6fa4dab85c7793736468;0;3;89;COLOR;0,0,0,0;False;91;FLOAT;0;False;59;FLOAT;0;False;2;COLOR;84;FLOAT;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;318;139.7081,0;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ExtraPrePass;0;0;ExtraPrePass;5;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;0;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;320;139.7081,-38.95319;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ShadowCaster;0;2;ShadowCaster;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=ShadowCaster;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;321;139.7081,-38.95319;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthOnly;0;3;DepthOnly;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;False;False;True;1;LightMode=DepthOnly;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;322;139.7081,-38.95319;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;Meta;0;4;Meta;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Meta;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;323;129.7081,32.04681;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;Universal2D;0;5;Universal2D;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=Universal2D;False;False;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;324;129.7081,32.04681;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;SceneSelectionPass;0;6;SceneSelectionPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=SceneSelectionPass;False;False;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;325;129.7081,32.04681;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ScenePickingPass;0;7;ScenePickingPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Picking;False;False;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;326;129.7081,32.04681;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthNormals;0;8;DepthNormals;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=DepthNormalsOnly;False;False;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;327;129.7081,32.04681;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthNormalsOnly;0;9;DepthNormalsOnly;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=DepthNormalsOnly;False;True;9;d3d11;metal;vulkan;xboxone;xboxseries;playstation;ps4;ps5;switch;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode, AmplifyShaderEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null;319;720,0;Float;False;True;-1;2;DistantLands.Cozy.EditorScripts.EmptyShaderGUI;0;13;Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile);2992e84f91cbeb14eab234972e07ea9d;True;Forward;0;1;Forward;9;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;1;False;;False;False;False;False;False;False;False;False;True;True;True;221;False;;255;False;;255;False;;7;False;;2;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Transparent=Queue=-50;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;1;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;True;True;1;False;;True;3;False;;True;False;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;Hidden/InternalErrorShader;0;0;Standard;25;Surface;0;0;  Blend;0;0;Two Sided;2;637952268012538700;Alpha Clipping;1;0;  Use Shadow Threshold;0;0;Forward Only;0;0;Cast Shadows;1;0;Receive Shadows;1;0;GPU Instancing;1;0;LOD CrossFade;0;0;Built-in Fog;0;0;Meta Pass;0;0;Extra Pre Pass;0;0;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Write Depth;0;0;  Early Z;0;0;Vertex Position,InvertActionOnDeselection;1;0;0;10;False;True;True;True;False;False;True;True;True;False;False;;False;0
+Version=19501
+Node;AmplifyShaderEditor.FunctionNode;338;144,0;Inherit;False;Stylized Clouds (Mobile);0;;70;f983fbf9fb93b5247b6549c0ab1e449a;0;0;3;COLOR;0;FLOAT;108;FLOAT;109
+Node;AmplifyShaderEditor.RangedFloatNode;339;96,208;Inherit;False;Global;CZY_CloudsFogAmount;CZY_CloudsFogAmount;8;0;Create;True;0;0;0;False;0;False;0;0.82;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;340;96,128;Inherit;False;Global;CZY_CloudsFogLightAmount;CZY_CloudsFogLightAmount;7;0;Create;True;0;0;0;False;0;False;0;0.443;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.FunctionNode;341;432,0;Inherit;False;AddFogToSkyLayer;-1;;369;36a78fe96c9f6fa4dab85c7793736468;0;3;89;COLOR;0,0,0,0;False;91;FLOAT;0;False;59;FLOAT;0;False;2;COLOR;84;FLOAT;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;318;139.7081,-38.95319;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ExtraPrePass;0;0;ExtraPrePass;5;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;0;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;320;139.7081,-38.95319;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ShadowCaster;0;2;ShadowCaster;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=ShadowCaster;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;321;139.7081,-38.95319;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthOnly;0;3;DepthOnly;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;False;False;True;1;LightMode=DepthOnly;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;322;139.7081,-38.95319;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;Meta;0;4;Meta;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Meta;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;323;129.7081,32.04681;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;Universal2D;0;5;Universal2D;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=Universal2D;False;False;0;;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;324;129.7081,32.04681;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;SceneSelectionPass;0;6;SceneSelectionPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=SceneSelectionPass;False;False;0;;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;325;129.7081,32.04681;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;ScenePickingPass;0;7;ScenePickingPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Picking;False;False;0;;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;326;129.7081,32.04681;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthNormals;0;8;DepthNormals;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=DepthNormalsOnly;False;False;0;;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;327;129.7081,32.04681;Float;False;False;-1;2;UnityEditor.ShaderGraphUnlitGUI;0;13;New Amplify Shader;2992e84f91cbeb14eab234972e07ea9d;True;DepthNormalsOnly;0;9;DepthNormalsOnly;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=DepthNormalsOnly;False;True;9;d3d11;metal;vulkan;xboxone;xboxseries;playstation;ps4;ps5;switch;0;;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;319;720,0;Float;False;True;-1;2;DistantLands.Cozy.EditorScripts.EmptyShaderGUI;0;13;Distant Lands/Cozy/URP/Stylized Clouds (COZY Mobile);2992e84f91cbeb14eab234972e07ea9d;True;Forward;0;1;Forward;8;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;1;False;;False;False;False;False;False;False;False;False;True;True;True;221;False;;255;False;;255;False;;7;False;;2;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;False;False;False;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Transparent=Queue=-50;UniversalMaterialType=Unlit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;1;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;255;False;;255;False;;255;False;;7;False;;1;False;;1;False;;1;False;;7;False;;1;False;;1;False;;1;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;Hidden/InternalErrorShader;0;0;Standard;22;Surface;0;0;  Blend;0;0;Two Sided;2;637952268012538700;Forward Only;0;0;Cast Shadows;1;0;  Use Shadow Threshold;0;0;Receive Shadows;1;0;GPU Instancing;1;0;LOD CrossFade;0;0;Built-in Fog;0;0;Meta Pass;0;0;Extra Pre Pass;0;0;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Vertex Position,InvertActionOnDeselection;1;0;0;10;False;True;True;True;False;False;True;True;True;False;False;;False;0
 WireConnection;341;89;338;0
 WireConnection;341;91;340;0
 WireConnection;341;59;339;0
@@ -2937,4 +2799,4 @@ WireConnection;319;2;341;84
 WireConnection;319;3;338;108
 WireConnection;319;4;338;109
 ASEEND*/
-//CHKSM=8F3F6D0D7AF3FECCE9D9DA87128439CABD33B0F3
+//CHKSM=0AC5FAF45FB32B1480259DA71EF30DE5F25DF7BA

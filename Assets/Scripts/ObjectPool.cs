@@ -69,7 +69,9 @@ public class ObjectPool : MonoBehaviour
     /// </summary>
     private GameObject CreateNewPooledObject()
     {
-        GameObject obj = Instantiate(prefab, poolParent);
+        // Instantiate below the world so Awake() physics registration (Rigidbody, Collider, NavMeshAgent)
+        // never fires at the world origin and interferes with gameplay objects there.
+        GameObject obj = Instantiate(prefab, Vector3.down * 1000f, Quaternion.identity, poolParent);
         obj.SetActive(false);
         obj.name = $"{prefab.name}_{totalCreated}";
 

@@ -17,7 +17,7 @@ MonoBehaviour:
   challengeType: 4
   frequency: 1
   difficulty: 1
-  iconData: {fileID: 0}
+  iconData: {fileID: 11400000, guid: 44a9a005006fac54c8333e0f70f69f37, type: 2}
   recommendedLevel: 1
   requiredPlayerLevel: 1
   timeLimit: 86400
@@ -30,16 +30,17 @@ MonoBehaviour:
   requireNoDeaths: 0
   requireStealth: 0
   objectiveDescription: Complete the challenge
+  sharedSpawnPoints: []
   spawnItems:
   - itemName: Attackers
-    prefab: {fileID: 3089473516772616032, guid: 4a0c54d15d1cda84dac5f960c2af8a63,
-      type: 3}
+    prefab: {fileID: 1106020874876768, guid: 9207965268c61f14d9061b891af542cd, type: 3}
     category: 0
-    minCount: 8
-    maxCount: 12
+    minCount: 10
+    maxCount: 10
     usePoolMode: 0
-    spawnLocation: 1
-    spawnRadius: 25
+    customSpawnPoints: []
+    spawnLocation: 0
+    spawnRadius: 30
     offset: {x: 0, y: 0, z: 0}
     requireNavMesh: 1
     randomRotation: 1

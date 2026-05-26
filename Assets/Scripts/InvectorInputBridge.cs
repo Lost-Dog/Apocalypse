@@ -63,7 +63,7 @@ public class InvectorInputBridge : MonoBehaviour
 
     [Tooltip("Maximum angular correction applied per second (degrees). Caps the assist speed so " +
              "it cannot overshoot the target and cause wiggling.")]
-    public float aimAssistMaxDegPerSec = 30f;
+    public float aimAssistMaxDegPerSec = 90f;
 
     [Header("Debug")]
     public bool debugMode = false;
@@ -108,6 +108,8 @@ public class InvectorInputBridge : MonoBehaviour
     // Grenade / throwable
     private InputAction _throwAimAction;  // Numpad2 — equip & aim grenade toggle
     private InputAction _throwReleaseAction; // LMB / RT — throw while aiming
+    // Health station deploy (LB+RB / Numpad5)
+    private InputAction _deployStationAction;
     // Per-slot cycling: index matches changeEquipmentControllers order
     private readonly List<InputAction> _prevSlotActions = new List<InputAction>();
     private readonly List<InputAction> _nextSlotActions = new List<InputAction>();
@@ -165,6 +167,8 @@ public class InvectorInputBridge : MonoBehaviour
     // Throw / grenade
     private bool _throwAimPressed;          // toggle aim mode (Numpad2)
     private bool _throwReleasePressed;      // launch grenade while aiming (LMB / RT)
+    // Health station deploy
+    private bool _deployStationPressed;
     private readonly List<bool> _prevSlotPressed = new List<bool>();
     private readonly List<bool> _nextSlotPressed = new List<bool>();
     private readonly List<bool> _useItemPressed  = new List<bool>();
@@ -257,13 +261,19 @@ public class InvectorInputBridge : MonoBehaviour
         }
 
         // ── Aim assist ────────────────────────────────────────────────────────
-        // Activate when the player enters aim mode; deactivate when they leave.
+        // Sync assist state every frame so a serialized assistActive=true in the
+        // prefab/scene cannot leave the assist running outside aim mode.
         if (_aimAssist != null && wantsAim != _prevWantsAim)
         {
             _aimAssist.SetAssistActive(wantsAim);
 
             if (debugMode)
                 Debug.Log($"[InvectorInputBridge] Aim assist {(wantsAim ? "enabled" : "disabled")}.");
+        }
+        else if (_aimAssist != null && !wantsAim && _aimAssist.assistActive)
+        {
+            // Safety: deactivate if somehow still on without aim held.
+            _aimAssist.SetAssistActive(false);
         }
         _prevWantsAim = wantsAim;
 
@@ -311,8 +321,9 @@ public class InvectorInputBridge : MonoBehaviour
         _holsterAction         = _actionMap.FindAction("Holster",          throwIfNotFound: true);
         _coverAction           = _actionMap.FindAction("Cover",            throwIfNotFound: true);
         _interactAction        = _actionMap.FindAction("Interact",         throwIfNotFound: true);
-        _throwAimAction        = _actionMap.FindAction("ThrowAim",         throwIfNotFound: true);
-        _throwReleaseAction    = _actionMap.FindAction("ThrowRelease",     throwIfNotFound: true);
+        _throwAimAction        = _actionMap.FindAction("ThrowAim",             throwIfNotFound: true);
+        _throwReleaseAction    = _actionMap.FindAction("ThrowRelease",         throwIfNotFound: true);
+        _deployStationAction   = _actionMap.FindAction("DeployHealthStation",  throwIfNotFound: false);
 
         // Weapon slot actions — populate lists in order (slot 0 then slot 1)
         string[] slots = { "0", "1" };
@@ -457,6 +468,15 @@ public class InvectorInputBridge : MonoBehaviour
         _throwReleaseAction.AddBinding("<Mouse>/leftButton");
         _throwReleaseAction.AddBinding("<Gamepad>/rightTrigger");
 
+        // ── Health station deploy (LB+RB combo / Numpad5) ─────────────────────
+        // LB is leftShoulder, RB is rightShoulder. A one-modifier composite is used:
+        // the binding fires only when rightShoulder is pressed while leftShoulder is held.
+        _deployStationAction = _actionMap.AddAction("DeployHealthStation", InputActionType.Button);
+        _deployStationAction.AddBinding("<Keyboard>/numpad5");
+        _deployStationAction.AddCompositeBinding("OneModifier")
+            .With("Modifier", "<Gamepad>/leftShoulder")
+            .With("Binding",  "<Gamepad>/rightShoulder");
+
         // Weapon slot 0  (primary — e.g. right-hand weapon)
         // Previous = scroll up / left arrow / D-Pad left
         // Next     = scroll down / right arrow / D-Pad right
@@ -573,6 +593,10 @@ public class InvectorInputBridge : MonoBehaviour
         // Grenade / throwable
         _throwAimAction.performed     += ctx => _throwAimPressed     = true;
         _throwReleaseAction.performed += ctx => _throwReleasePressed = true;
+
+        // Health station deploy
+        if (_deployStationAction != null)
+            _deployStationAction.performed += ctx => _deployStationPressed = true;
 
         for (int i = 0; i < _prevSlotActions.Count; i++)
         {
@@ -785,6 +809,14 @@ public class InvectorInputBridge : MonoBehaviour
         // Grenade / throwable
         if (_throwManager != null)
             HandleThrowInput();
+
+        // Health station deploy (LB+RB / Numpad5)
+        if (_deployStationPressed)
+        {
+            if (HealthStationDeployer.Instance != null)
+                HealthStationDeployer.Instance.TryDeploy();
+            _deployStationPressed = false;
+        }
     }
 
     private void HandleMeleeUpdate(vThirdPersonController cc)

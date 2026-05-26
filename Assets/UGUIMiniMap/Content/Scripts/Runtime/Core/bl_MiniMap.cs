@@ -35,7 +35,7 @@ public sealed class bl_MiniMap : MonoBehaviour
     public MiniMapMapShape mapShape = MiniMapMapShape.Rectangle;
     public float CompassSize = 175f;
     public bool iconsAlwaysFacingUp = true;
-    public bool DynamicRotation = true;
+    public MiniMapRotationMode RotationMode = MiniMapRotationMode.RotateMap;
     public bool SmoothRotation = true;
     public float LerpRotation = 8;
     public float mapRotationOffset = 0;
@@ -64,8 +64,8 @@ public sealed class bl_MiniMap : MonoBehaviour
     public bool CanDragMiniMap = true;
     public bool DragOnlyOnFullScreen = true;
     public bool ResetOffSetOnChange = true;
-    public Vector2 DragMovementSpeed = new Vector2(0.5f, 0.35f);
-    public Vector2 MaxOffSetPosition = new Vector2(1000, 1000);
+    public Vector2 DragMovementSpeed = new(0.5f, 0.35f);
+    public Vector2 MaxOffSetPosition = new(1000, 1000);
     public Texture2D DragCursorIcon;
     public Vector2 HotSpot = Vector2.zero;
     public float planeSaturation = 1.4f;
@@ -75,8 +75,14 @@ public sealed class bl_MiniMap : MonoBehaviour
     public Transform minimapRig;
     public MiniMapRTSize _rtSize = MiniMapRTSize._1024;
     public Color playerColor = Color.white;
-    public Color emptySpaceColor = new Color(0, 0, 0, 0.25f);
+    public Color emptySpaceColor = new(0, 0, 0, 0.25f);
     public Color navPathColor = Color.green;
+
+    public bool hasFogOfWar = false;
+    public int fogOfWarUpdateRate = 10;
+    public float fogOfWarRadius = 0.1f;
+    public float fogOfWarSoftness = 0.05f;
+    public Color fogOfWarColor = new Color(0, 0, 0, 0.9f);
     #endregion
 
     #region Public properties
@@ -96,6 +102,13 @@ public sealed class bl_MiniMap : MonoBehaviour
         get;
         set;
     } = false;
+
+    public Vector2 CachedViewportSize { get; private set; }
+    public bool CameraChanged { get; private set; }
+    public bool ViewportChanged { get; private set; }
+    private Vector3 lastCamPos;
+    private Quaternion lastCamRot;
+    private float lastCamFov;
 
     /// <summary>
     /// Current active minimap
@@ -124,13 +137,13 @@ public sealed class bl_MiniMap : MonoBehaviour
     [HideInInspector] public Vector3 MiniMapRotation = Vector3.zero;
     [HideInInspector] public Vector2 MiniMapSize = Vector2.zero;
     private Vector3 DragOffset = Vector3.zero;
-    private bool DefaultRotationMode = false;
+    private MiniMapRotationMode DefaultRotationMode = MiniMapRotationMode.RotateMap;
     private Vector3 DeafultMapRot = Vector3.zero;
     private MiniMapMapShape defaultShape;
     public const string MMHeightKey = "MinimapCameraHeight";
     private bool isAlphaComplete = false;
     private bool isPlanedCreated = false;
-    private readonly List<bl_MiniMapEntityBase> miniMapItems = new List<bl_MiniMapEntityBase>();
+    private readonly List<bl_MiniMapEntityBase> miniMapItems = new();
     private Vector3 playerPosition, targetPosition;
     private Vector3 playerRotation;
     private bool isUpdateFrame = false;
@@ -144,6 +157,7 @@ public sealed class bl_MiniMap : MonoBehaviour
     private float minimapZoom = 0;
     private bl_MiniMapPathNav pathNav;
     private bl_MiniMapTarget targetScript;
+    private Transform _cachedTargetTransform;
     #endregion
 
     /// <summary>
@@ -153,13 +167,14 @@ public sealed class bl_MiniMap : MonoBehaviour
     {
         if (!m_initialized)
         {
+            if (m_Target != null) _cachedTargetTransform = m_Target.transform;
             inputHandler = bl_MiniMapData.Instance.inputHandler;
             if (inputHandler != null) inputHandler.Init();
 
             MiniMapUI?.Setup(this);
             MiniMapUI.MiniMapSize?.Init(this);
             GetMiniMapSize();
-            DefaultRotationMode = DynamicRotation;
+            DefaultRotationMode = RotationMode;
             DeafultMapRot = minimapRig.eulerAngles;
             defaultShape = mapShape;
             m_mapRotationOffsetVector.Set(0, mapRotationOffset, 0);
@@ -186,13 +201,6 @@ public sealed class bl_MiniMap : MonoBehaviour
 
         MiniMapUI.DoStartFade(0, () => { isAlphaComplete = true; });
         m_initialized = true;
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    private void Start()
-    {
         if (ActiveMiniMap == null) ActiveMiniMap = this;
     }
 
@@ -290,12 +298,12 @@ public sealed class bl_MiniMap : MonoBehaviour
     /// </summary>
     public void ConfigureWorldTarget()
     {
-        if (m_Target == null)
+        if (Target == null)
             return;
 
-        if (!m_Target.TryGetComponent<bl_MiniMapEntity>(out var mmi))
+        if (!Target.TryGetComponent<bl_MiniMapEntity>(out var mmi))
         {
-            mmi = m_Target.AddComponent<bl_MiniMapEntity>();
+            mmi = Target.gameObject.AddComponent<bl_MiniMapEntity>();
         }
         MiniMapUI.ConfigureWorldTarget(mmi);
     }
@@ -305,8 +313,16 @@ public sealed class bl_MiniMap : MonoBehaviour
     /// </summary>
     void Update()
     {
-        if (hasError || m_Target == null || miniMapCamera == null)
+        if (hasError || Target == null || miniMapCamera == null)
             return;
+
+        if (MiniMapUI.mapTextureRender != null)
+        {
+            Vector2 newSize = MiniMapUI.mapTextureRender.GetRectSize();
+            ViewportChanged = newSize != CachedViewportSize;
+            CachedViewportSize = newSize;
+        }
+
         isUpdateFrame = (Time.frameCount % UpdateRate) == 0;
 
         if (cameraUpdateMode == MiniMapCameraUpdateMode.RateLimited) miniMapCamera.Render();
@@ -319,6 +335,19 @@ public sealed class bl_MiniMap : MonoBehaviour
         RotationControl();
         //for minimap and world map control
         MapZoomControl();
+
+        if (miniMapCamera != null)
+        {
+            CameraChanged = (miniMapCamera.transform.position - lastCamPos).sqrMagnitude > 0.0001f ||
+                            Quaternion.Angle(miniMapCamera.transform.rotation, lastCamRot) > 0.01f || Mathf.Abs(miniMapCamera.orthographicSize - lastCamFov) > 0.01f;
+            if (CameraChanged)
+            {
+                lastCamPos = miniMapCamera.transform.position;
+                lastCamRot = miniMapCamera.transform.rotation;
+                lastCamFov = miniMapCamera.orthographicSize;
+            }
+        }
+
         //update all items (icons)
         UpdateItems();
     }
@@ -371,7 +400,7 @@ public sealed class bl_MiniMap : MonoBehaviour
     {
         // If the minimap should rotate as the target does, the rotateWithTarget var should be true.
         // An extra catch because rotation with the full screen map is a bit weird.       
-        if (DynamicRotation && mapMode != MiniMapMapType.Global)
+        if (RotationMode == MiniMapRotationMode.RotateMap && mapMode != MiniMapMapType.Global)
         {
             if (isUpdateFrame)
             {
@@ -401,6 +430,39 @@ public sealed class bl_MiniMap : MonoBehaviour
             else
             {
                 minimapRig.eulerAngles = playerRotation;
+            }
+        }
+        else if (RotationMode == MiniMapRotationMode.RotateMapAndPlayer && mapMode != MiniMapMapType.Global)
+        {
+            if (isUpdateFrame)
+            {
+                playerRotation = minimapRig.eulerAngles;
+                playerRotation.y = RotationTarget.eulerAngles.y;
+            }
+
+            if (SmoothRotation)
+            {
+                minimapRig.rotation = Quaternion.Slerp(minimapRig.rotation, Quaternion.Euler(playerRotation), Time.smoothDeltaTime * LerpRotation);
+            }
+            else
+            {
+                minimapRig.eulerAngles = playerRotation;
+            }
+
+            float currentMapRot = minimapRig.eulerAngles.y;
+            float targetRot = Target.eulerAngles.y;
+            float diff = targetRot - currentMapRot;
+
+            Vector3 iconRot = Vector3.zero;
+            iconRot.z = -diff + mapRotationOffset;
+
+            if (canvasRenderMode == MiniMapRenderMode.Mode2D)
+            {
+                MiniMapUI.PlayerIconTransform.eulerAngles = iconRot;
+            }
+            else
+            {
+                MiniMapUI.PlayerIconTransform.localEulerAngles = iconRot;
             }
         }
         else
@@ -498,7 +560,7 @@ public sealed class bl_MiniMap : MonoBehaviour
         }
         if (mapShape != defaultShape) { mapShape = defaultShape; }
         MiniMapUI.minimapMaskManager?.ChangeMaskType(false);
-        if (DynamicRotation != DefaultRotationMode) { DynamicRotation = DefaultRotationMode; }
+        if (RotationMode != DefaultRotationMode) { RotationMode = DefaultRotationMode; }
 
         if (showCursorOnFullscreen)
         {
@@ -537,7 +599,7 @@ public sealed class bl_MiniMap : MonoBehaviour
         }
         mapShape = MiniMapMapShape.Rectangle;
         MiniMapUI.minimapMaskManager?.ChangeMaskType(true);
-        if (DynamicRotation) { DynamicRotation = false; ResetMapRotation(); }
+        if (RotationMode != MiniMapRotationMode.RotatePlayer) { RotationMode = MiniMapRotationMode.RotatePlayer; ResetMapRotation(); }
 
         if (showCursorOnFullscreen)
         {
@@ -584,8 +646,16 @@ public sealed class bl_MiniMap : MonoBehaviour
         if (ActiveMiniMap != null)
         {
             ActiveMiniMap.TransferIconsTo(this);
+            if (m_Target == null && targetScript == null)
+            {
+                m_Target = ActiveMiniMap.m_Target;
+                targetScript = ActiveMiniMap.targetScript;
+                _cachedTargetTransform = Target != null ? Target.transform : null;
+            }
         }
         ActiveMiniMap = this;
+        DragOffset = Vector3.zero;
+        SetToMiniMapSize();
         bl_MiniMapEvents.onActiveMiniMapChanged?.Invoke(this);
     }
 
@@ -681,7 +751,7 @@ public sealed class bl_MiniMap : MonoBehaviour
     }
 
     /// <summary>
-    /// 
+    /// Reset the minimap offset position to the target
     /// </summary>
     /// <returns></returns>
     IEnumerator ResetOffset()
@@ -753,27 +823,18 @@ public sealed class bl_MiniMap : MonoBehaviour
     /// Change the size of Map full screen or mini
     /// </summary>
     /// <param name="fullscreen">is full screen?</param>
-    public void ChangeMapSize(bool fullscreen)
-    {
-        IsFullScreen = fullscreen;
-    }
+    public void ChangeMapSize(bool fullscreen) => IsFullScreen = fullscreen;
 
     /// <summary>
     /// Set target in runtime
     /// </summary>
     /// <param name="t"></param>
-    public void SetTarget(GameObject t)
-    {
-        m_Target = t;
-    }
+    public void SetTarget(GameObject t) => m_Target = t;
 
     /// <summary>
     /// Set target in runtime
     /// </summary>
-    public void SetTarget(bl_MiniMapTarget newTarget)
-    {
-        targetScript = newTarget;
-    }
+    public void SetTarget(bl_MiniMapTarget newTarget) => targetScript = newTarget;
 
     /// <summary>
     /// Set Map Texture in Runtime
@@ -833,14 +894,13 @@ public sealed class bl_MiniMap : MonoBehaviour
 
     /// <summary>
     /// Call this to change the mode of rotation of map
-    /// Static or dynamic
     /// </summary>
-    public void SetMapRotationMode(bool dynamic)
+    public void SetMapRotationMode(MiniMapRotationMode mode)
     {
         if (IsFullScreen) return;
 
-        DynamicRotation = dynamic;
-        DefaultRotationMode = dynamic;
+        RotationMode = mode;
+        DefaultRotationMode = mode;
     }
 
     /// <summary>
@@ -913,7 +973,7 @@ public sealed class bl_MiniMap : MonoBehaviour
     }
 
     /// <summary>
-    /// 
+    /// Minimap target
     /// </summary>
     public Transform Target
     {
@@ -923,11 +983,18 @@ public sealed class bl_MiniMap : MonoBehaviour
             {
                 return targetScript.GetTarget();
             }
-            return m_Target != null ? m_Target.transform : transform;
+            if (_cachedTargetTransform != null) return _cachedTargetTransform;
+            if (m_Target != null)
+            {
+                _cachedTargetTransform = m_Target.transform;
+                return _cachedTargetTransform;
+            }
+            return transform;
         }
         set
         {
             m_Target = value.gameObject;
+            _cachedTargetTransform = value;
         }
     }
 

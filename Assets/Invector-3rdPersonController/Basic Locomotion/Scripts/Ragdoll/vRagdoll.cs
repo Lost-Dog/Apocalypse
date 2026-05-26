@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -208,12 +208,13 @@ namespace Invector.vCharacterController
 
         protected virtual void ChangeToHipsParent()
         {
+            if (characterHips == null || hipsParent == null) return;
+
             if (characterHips.parent != hipsParent)
             {
                 characterHips.position = transform.position;
                 characterHips.SetParent(hipsParent);
             }
-
         }
 
         public virtual void RestoreRagdoll()

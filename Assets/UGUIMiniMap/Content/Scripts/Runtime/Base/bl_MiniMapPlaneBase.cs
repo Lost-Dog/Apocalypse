@@ -33,5 +33,9 @@ namespace Lovatto.MiniMap
         /// </summary>
         /// <param name="size"></param>
         public virtual void SetGridSize(float size) { }
+        
+        public virtual void SetActiveFog(bool active) { }
+        
+        public abstract bl_MiniMap MiniMap { get; }
     }
 }

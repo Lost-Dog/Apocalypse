@@ -1,6 +1,6 @@
 Thanks for purchase UGUI MiniMap.
 
-Version 2.7.1
+Version 2.8
 
 For documentation and tutorials go to the Unity top navigation menu > Window -> MiniMap -> Documentation
 
@@ -19,6 +19,23 @@ If you have a problem or bug, please contact us before leave a bad review, we re
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 Change Log:
+
+2.8
+
+#Added
+- Added Fog Of War system, allowing to hide the minimap and reveal areas where the player pass.
+- Added a new minimap rotation mode 'Rotate Map And Player' which better fit the map rotation in third person games.
+- Added a Third Person scene example.
+- Added a scale mode for the icons, size delta and transform scale, this last one useful for icons with text content.
+
+#Improvements
+- Distribute in separate frames the icon updates to avoid doing the calculation in a single frame.
+- Made multiple micro optimizations to the whole system for better performance.
+- Improve zoom icons consistency during the zoom transition to fix the size jittering.
+- Improved the minimap screenshot baker tool adding an option to bake the grid with customizable options.
+
+#Fixes
+- Fix an error with 'bl_MiniMapTarget.cs' causing the minimap not pick the target in runtime if the minimap is loaded after the player.
 
 2.7.1
 
@@ -47,7 +64,7 @@ Raise minimum Unity version to 2022.3
 - Now multiple layers can be ignored by the minimap camera instead of just one.
 - Now the UI Mask shader support transparency from the alpha channel of the texture.
 - Tweak the default minimap prefabs settings for better performance with virtually no visual differences.
-- Addded option to enable/disable the minimap icons with the transform target of the icon.
+- Added option to enable/disable the minimap icons with the transform target of the icon.
 - Added more optimization options in the bl_MiniMap inspector.
 
 #Fixes

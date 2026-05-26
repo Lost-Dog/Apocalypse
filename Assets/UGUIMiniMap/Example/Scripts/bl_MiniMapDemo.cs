@@ -53,11 +53,11 @@ public class bl_MiniMapDemo : MonoBehaviour
         {
             ChangeRotation();
         }
-        
-        if(Input.GetKeyDown(KeyCode.Escape))
+
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
             Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;       
+            Cursor.visible = true;
         }
         if (Input.GetKeyDown(KeyCode.KeypadEnter))
         {
@@ -69,7 +69,7 @@ public class bl_MiniMapDemo : MonoBehaviour
     void ChangeRotation()
     {
         Rotation = !Rotation;
-        Maps[MapID].GetComponentInChildren<bl_MiniMap>().SetMapRotationMode(Rotation);
+      //  Maps[MapID].GetComponentInChildren<bl_MiniMap>().SetMapRotationMode(Rotation);
 
     }
 
@@ -90,14 +90,14 @@ public class bl_MiniMapDemo : MonoBehaviour
 
     public void SetDynamicRot(bool v)
     {
-        CurrentMiniMap.SetMapRotationMode(v);
+      //  CurrentMiniMap.SetMapRotationMode(v);
     }
 
     public void SetFadeOnFullscreen(bool fadeOn)
     {
         CurrentMiniMap.FadeOnFullScreen = fadeOn;
     }
-    
+
     public void ChangeMap(int i)
     {
         PlayerPrefs.SetInt("MMExampleMapID", i);
