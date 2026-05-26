@@ -32,6 +32,23 @@ public class ObjectPool : MonoBehaviour
 
     private void Awake()
     {
+        // Initialization is deferred to Initialize() so callers can set
+        // properties (prefab, sizes, etc.) before the pool pre-warms.
+        // If this component was added via the Inspector (not via AddComponent at
+        // runtime), call Initialize here so it still works in that flow.
+        if (prefab != null)
+        {
+            Initialize();
+        }
+    }
+
+    /// <summary>
+    /// Set up the pool parent and pre-warm the pool.
+    /// Must be called explicitly when the component is added via AddComponent
+    /// and properties are assigned after construction.
+    /// </summary>
+    public void Initialize()
+    {
         if (poolParent == null)
         {
             GameObject parent = new GameObject($"{prefab.name}_Pool");

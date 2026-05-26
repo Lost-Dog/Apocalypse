@@ -136,6 +136,7 @@ public class LootManager : MonoBehaviour
         pool.initialPoolSize = lootPoolSize;
         pool.maxPoolSize = lootPoolSize * 2;
         pool.canGrow = true;
+        pool.Initialize();
 
         lootObjectPools[prefab] = pool;
     }

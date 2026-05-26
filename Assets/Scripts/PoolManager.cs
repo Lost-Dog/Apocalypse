@@ -109,6 +109,7 @@ public class PoolManager : MonoBehaviour
         pool.maxPoolSize = maxSize;
         pool.canGrow = canGrow;
         pool.showDebugInfo = showDebugInfo;
+        pool.Initialize();
 
         // Register pool
         poolsByName[poolName] = pool;

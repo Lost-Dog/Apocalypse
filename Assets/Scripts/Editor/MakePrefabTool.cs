@@ -401,6 +401,8 @@ public class MakePrefabTool : EditorWindow
     ///   - Ensures InvectorAIBridge is on the root (the vIDamageReceiver implementation that calls EmeraldHealth.Damage).
     ///   - Adds vDamageReceiver to every non-trigger child Collider so bullets that hit
     ///     bone GameObjects can find a vIDamageReceiver and forward damage up to the root bridge.
+    ///   - Wires EmeraldHealth into every EmeraldAIDamageReceiver on child bones so Emerald
+    ///     AI's own projectiles/melee hits correctly route damage (fixes the ⚠ null warnings).
     /// </summary>
     private void AddDamageReceiverToPrefabs()
     {
@@ -413,9 +415,10 @@ public class MakePrefabTool : EditorWindow
             return;
         }
 
-        int prefabsModified       = 0;
-        int bridgesAdded          = 0;
-        int receiversAdded        = 0;
+        int prefabsModified        = 0;
+        int bridgesAdded           = 0;
+        int receiversAdded         = 0;
+        int emeraldHealthWired     = 0;
 
         foreach (string guid in guids)
         {
@@ -466,6 +469,29 @@ public class MakePrefabTool : EditorWindow
                     receiversAdded++;
                     modified = true;
                 }
+
+                // ── Step 3: Wire EmeraldSystem into LocationBasedDamageArea on all bones ──
+                // LocationBasedDamageArea is Emerald AI's bone-level damage component. Its
+                // EmeraldComponent field must point to the root EmeraldSystem so hits on bone
+                // colliders correctly route damage through the AI's health system.
+                EmeraldSystem rootEmerald = root.GetComponent<EmeraldSystem>();
+                if (rootEmerald != null)
+                {
+                    EmeraldAI.LocationBasedDamageArea[] damageAreas = root.GetComponentsInChildren<EmeraldAI.LocationBasedDamageArea>(true);
+                    foreach (EmeraldAI.LocationBasedDamageArea area in damageAreas)
+                    {
+                        var so = new UnityEditor.SerializedObject(area);
+                        var prop = so.FindProperty("EmeraldComponent");
+                        if (prop != null && prop.objectReferenceValue == null)
+                        {
+                            prop.objectReferenceValue = rootEmerald;
+                            so.ApplyModifiedPropertiesWithoutUndo();
+                            damageReceiverLog.Add($"  ~ EmeraldSystem wired → {prefabAsset.name}/{area.gameObject.name}");
+                            emeraldHealthWired++;
+                            modified = true;
+                        }
+                    }
+                }
             }
 
             if (modified) prefabsModified++;
@@ -474,7 +500,7 @@ public class MakePrefabTool : EditorWindow
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        string summary = $"Done — {prefabsModified} prefab(s) modified, {bridgesAdded} InvectorAIBridge(s) added, {receiversAdded} vDamageReceiver(s) added.";
+        string summary = $"Done — {prefabsModified} prefab(s) modified, {bridgesAdded} InvectorAIBridge(s) added, {receiversAdded} vDamageReceiver(s) added, {emeraldHealthWired} EmeraldSystem reference(s) wired.";
         damageReceiverLog.Add(string.Empty);
         damageReceiverLog.Add(summary);
         Debug.Log($"[MakePrefabTool] Setup Damage Receivers: {summary}");

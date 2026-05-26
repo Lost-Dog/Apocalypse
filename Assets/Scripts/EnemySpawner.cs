@@ -68,6 +68,7 @@ public class EnemySpawner : MonoBehaviour
             pool.initialPoolSize = poolSizePerType;
             pool.maxPoolSize = poolSizePerType * 3; // Allow growth up to 3x initial size
             pool.canGrow = true;
+            pool.Initialize();
 
             enemyPools[prefab] = pool;
         }
