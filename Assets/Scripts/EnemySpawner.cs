@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Collections.Generic;
+using Invector;
 using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
@@ -26,6 +28,10 @@ public class EnemySpawner : MonoBehaviour
     public bool useObjectPooling = true;
     [Tooltip("Initial pool size per enemy type")]
     public int poolSizePerType = 5;
+
+    [Header("Death Cleanup")]
+    [Tooltip("Seconds after death before the enemy body is returned to the pool (or destroyed if not pooled).")]
+    public float bodyCleanupDelay = 5f;
 
     [Header("Debug")]
     public bool showSpawnRadius = true;
@@ -141,8 +147,37 @@ public class EnemySpawner : MonoBehaviour
         }
 
         ApplyDifficultyScaling(enemy, level);
+        SubscribeDeathCleanup(enemy);
 
         return enemy;
+    }
+
+    /// <summary>
+    /// Subscribes to the enemy's onDead event so its body is cleaned up after
+    /// <see cref="bodyCleanupDelay"/> seconds — returned to the pool if pooled,
+    /// destroyed otherwise.
+    /// </summary>
+    private void SubscribeDeathCleanup(GameObject enemy)
+    {
+        vHealthController health = enemy.GetComponent<vHealthController>();
+        if (health == null) return;
+
+        health.onDead.AddListener((GameObject deadEnemy) =>
+        {
+            StartCoroutine(CleanupAfterDelay(deadEnemy));
+        });
+    }
+
+    private IEnumerator CleanupAfterDelay(GameObject enemy)
+    {
+        yield return new WaitForSeconds(bodyCleanupDelay);
+
+        if (enemy == null) yield break;
+
+        if (useObjectPooling)
+            ReturnEnemyToPool(enemy);
+        else
+            Destroy(enemy);
     }
     
     private void ApplyDifficultyScaling(GameObject enemy, int level)

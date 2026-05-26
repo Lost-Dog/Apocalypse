@@ -864,14 +864,6 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 4513941851780950472}
-    - targetCorrespondingSourceObject: {fileID: 1136474490139880, guid: 6d87b0d427505f540b2542b407126d4b,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 7391312785689648017}
-    - targetCorrespondingSourceObject: {fileID: 1136474490139880, guid: 6d87b0d427505f540b2542b407126d4b,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2109517325643048184}
   m_SourcePrefab: {fileID: 100100000, guid: 6d87b0d427505f540b2542b407126d4b, type: 3}
 --- !u!95 &1204034420506986307 stripped
 Animator:
@@ -1410,82 +1402,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &7391312785689648017
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1288641638388383605}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0827074d85bacde4485f082ac0820a93, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EmeraldAI.EmeraldSystem
-  CombatTarget: {fileID: 0}
-  TargetToFollow: {fileID: 0}
-  LookAtTarget: {fileID: 0}
-  CurrentTargetInfo:
-    TargetSource: {fileID: 0}
-  m_NavMeshAgent: {fileID: 0}
-  AIBoxCollider: {fileID: 0}
-  AIAnimator: {fileID: 0}
-  TimeSinceEnabled: 0
-  DetectionComponent: {fileID: 0}
-  BehaviorsComponent: {fileID: 0}
-  MovementComponent: {fileID: 0}
-  AnimationComponent: {fileID: 0}
-  CombatComponent: {fileID: 0}
-  SoundComponent: {fileID: 0}
-  HealthComponent: {fileID: 0}
-  OptimizationComponent: {fileID: 0}
-  InverseKinematicsComponent: {fileID: 0}
-  EventsComponent: {fileID: 0}
-  DebuggerComponent: {fileID: 0}
-  UIComponent: {fileID: 0}
-  ItemsComponent: {fileID: 0}
-  SoundDetectorComponent: {fileID: 0}
-  TPMComponent: {fileID: 0}
-  LBDComponent: {fileID: 0}
-  CoverComponent: {fileID: 0}
---- !u!114 &2109517325643048184
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1288641638388383605}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6be3bf20af42de47a28857f2ca6409c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EmeraldAI.InvectorAIBridge
-  openCloseEvents: 0
-  openCloseWindow: 0
-  selectedToolbar: 0
-  _isDead: 1
-  _currentHealth: 0
-  isImmortal: 0
-  fillHealthOnStart: 1
-  _maxHealth: 100
-  _healthRecovery: 0
-  _healthRecoveryDelay: 0
-  checkHealthEvents: []
-  _onStartReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onDead:
-    m_PersistentCalls:
-      m_Calls: []
-  onChangeHealth:
-    m_PersistentCalls:
-      m_Calls: []
-  onResetHealth:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!4 &1294262874201903301 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4503711337061208, guid: 6d87b0d427505f540b2542b407126d4b,

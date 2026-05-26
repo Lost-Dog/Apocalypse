@@ -33,15 +33,30 @@ public class ProgressionManager : MonoBehaviour
     public float xpBase     = 100f;
     public float xpExponent = 1.8f;
 
+    [Header("Trait Reset")]
+    [Tooltip("Seconds the player must wait before using the trait reset again.")]
+    public float traitResetCooldown = 180f;   // 3 minutes
+
     [Header("Progression Events")]
     public UnityEvent<int> onLevelUp;
     public UnityEvent<int> onXPGained;
     public UnityEvent<int> onSkillPointGained;
     public UnityEvent<int> onGearScoreChanged;
+    /// <summary>Fired when a trait reset is performed. Parameter is the cooldown duration in seconds.</summary>
+    public UnityEvent<float> onTraitReset;
 
     // ── Private state ─────────────────────────────────────────────────────────
 
     private const int SkillPointsPerLevel = 1;
+
+    private float _traitResetCooldownRemaining = 0f;
+
+    /// <summary>Returns [0, 1] representing how much of the reset cooldown has elapsed (1 = ready).</summary>
+    public float TraitResetCooldownProgress =>
+        traitResetCooldown <= 0f ? 1f : 1f - Mathf.Clamp01(_traitResetCooldownRemaining / traitResetCooldown);
+
+    /// <summary>True when the trait reset ability is off cooldown and can be used.</summary>
+    public bool IsTraitResetReady => _traitResetCooldownRemaining <= 0f;
 
     // ── Unity lifecycle ───────────────────────────────────────────────────────
 
@@ -64,6 +79,12 @@ public class ProgressionManager : MonoBehaviour
     {
         ResolveTraitsRuntime();
         playerTraitsRuntime?.ApplyLevel(currentLevel);
+    }
+
+    private void Update()
+    {
+        if (_traitResetCooldownRemaining > 0f)
+            _traitResetCooldownRemaining -= Time.deltaTime;
     }
 
     // ── Public API — XP & level ───────────────────────────────────────────────
@@ -95,6 +116,35 @@ public class ProgressionManager : MonoBehaviour
     public void RefundSkillPoint()
     {
         skillPoints++;
+    }
+
+    /// <summary>
+    /// Resets all player traits to level 1 defaults: level, XP, skill points, and all
+    /// stat scaling. Fired by holding LB+RB on a gamepad or Numpad0 on keyboard.
+    /// Enforces a <see cref="traitResetCooldown"/> between uses.
+    /// </summary>
+    /// <returns>True if the reset was applied; false when still on cooldown.</returns>
+    public bool ResetAllTraits()
+    {
+        if (!IsTraitResetReady)
+        {
+            Debug.Log($"[ProgressionManager] Trait reset on cooldown ({_traitResetCooldownRemaining:F1}s remaining).");
+            return false;
+        }
+
+        currentLevel = 1;
+        currentXP    = 0;
+        skillPoints  = 0;
+
+        playerTraitsRuntime?.ApplyLevel(currentLevel);
+
+        onLevelUp?.Invoke(currentLevel);
+        onTraitReset?.Invoke(traitResetCooldown);
+
+        _traitResetCooldownRemaining = traitResetCooldown;
+
+        Debug.Log("[ProgressionManager] All traits reset to level 1.");
+        return true;
     }
 
     // ── Public API — XP progress helpers ─────────────────────────────────────

@@ -832,19 +832,11 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1645189946640246, guid: b796c65458d0efc44b9b996819aa248f,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: -1210609388290083563}
-    - targetCorrespondingSourceObject: {fileID: 1645189946640246, guid: b796c65458d0efc44b9b996819aa248f,
-        type: 3}
-      insertIndex: -1
       addedObject: {fileID: 2244369902949266084}
     - targetCorrespondingSourceObject: {fileID: 1645189946640246, guid: b796c65458d0efc44b9b996819aa248f,
         type: 3}
       insertIndex: -1
       addedObject: {fileID: -4612132436876348579}
-    - targetCorrespondingSourceObject: {fileID: 1645189946640246, guid: b796c65458d0efc44b9b996819aa248f,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1647468418990433377}
   m_SourcePrefab: {fileID: 100100000, guid: b796c65458d0efc44b9b996819aa248f, type: 3}
 --- !u!1 &2747594664780751673 stripped
 GameObject:
@@ -945,31 +937,6 @@ MonoBehaviour:
   disableRagdollBeforeReturn: 1
   resetHealthOnSpawn: 1
   debugLogging: 0
---- !u!114 &-1210609388290083563
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2747594664780751673}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4435fe59ad515fd4d94c2dd09006f199, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EmeraldAI.EmeraldHealth
-  CurrentHealth: 50
-  StartingHealth: 50
-  HealRate: 0
-  AttachHitEffects: 0
-  Immortal: 0
-  CurrentActiveEffects: []
-  HitEffectFoldout: 0
-  UseHitEffect: 0
-  HitEffectPosOffset: {x: 0, y: 0, z: 0}
-  HitEffectTimeoutSeconds: 3
-  HitEffectsList: []
-  HideSettingsFoldout: 0
-  HealthFoldout: 0
 --- !u!65 &2244369902949266084
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1088,44 +1055,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &1647468418990433377
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2747594664780751673}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6be3bf20af42de47a28857f2ca6409c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EmeraldAI.InvectorAIBridge
-  openCloseEvents: 0
-  openCloseWindow: 0
-  selectedToolbar: 0
-  _isDead: 1
-  _currentHealth: 0
-  isImmortal: 0
-  fillHealthOnStart: 1
-  _maxHealth: 100
-  _healthRecovery: 0
-  _healthRecoveryDelay: 0
-  checkHealthEvents: []
-  _onStartReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onDead:
-    m_PersistentCalls:
-      m_Calls: []
-  onChangeHealth:
-    m_PersistentCalls:
-      m_Calls: []
-  onResetHealth:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!4 &2750082346007760483 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4208734411024940, guid: b796c65458d0efc44b9b996819aa248f,

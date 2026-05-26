@@ -11,7 +11,7 @@ public class MakePrefabTool : EditorWindow
 
     // Tabs
     private int activeTab = 0;
-    private readonly string[] tabLabels = { "Make Prefab", "Copy Folder", "Assign Waypoint", "Add Damage Receiver", "Player Bridge", "Hit Effects" };
+    private readonly string[] tabLabels = { "Make Prefab", "Copy Folder", "Assign Waypoint", "Add Damage Receiver", "Player Bridge", "Hit Effects", "Strip Emerald AI" };
 
     // Tab 0 — Make Prefab
     private string savePath = DefaultSavePath;
@@ -46,6 +46,11 @@ public class MakePrefabTool : EditorWindow
     private Vector2 hitEffectsScroll;
     private List<string> hitEffectsLog = new List<string>();
 
+    // Tab 6 — Strip Emerald AI
+    private string stripEmeraldFolder = "Assets/Prefabs/Character_Prefabs/Enemy_Prefabs";
+    private Vector2 stripEmeraldScroll;
+    private List<string> stripEmeraldLog = new List<string>();
+
     [MenuItem("Tools/Make Prefab Tool")]
     public static void ShowWindow()
     {
@@ -75,6 +80,7 @@ public class MakePrefabTool : EditorWindow
             case 3: DrawDamageReceiverTab(); break;
             case 4: DrawPlayerBridgeTab();   break;
             case 5: DrawHitEffectsTab();     break;
+            case 6: DrawStripEmeraldTab();   break;
         }
     }
 
@@ -810,5 +816,146 @@ public class MakePrefabTool : EditorWindow
         hitEffectsLog.Add(summary);
         Debug.Log($"[MakePrefabTool] Patch Hit Effects: {summary}");
         EditorUtility.DisplayDialog("Patch Enemy Hit Effects", summary, "OK");
+    }
+
+    // ------------------------------------------------------------------------------------------------
+    // TAB 6 — STRIP EMERALD AI FROM INVECTOR AI PREFABS
+    // ------------------------------------------------------------------------------------------------
+
+    private void DrawStripEmeraldTab()
+    {
+        EditorGUILayout.LabelField("Strip Emerald AI from Invector AI Prefabs", EditorStyles.boldLabel);
+        EditorGUILayout.HelpBox(
+            "Removes EmeraldSystem, InvectorAIBridge, and all Emerald AI required components " +
+            "(EmeraldAnimation, EmeraldDetection, EmeraldSounds, EmeraldCombat, EmeraldBehaviors, " +
+            "EmeraldMovement, EmeraldHealth) from any prefab that has a vControlAI component.\n\n" +
+            "Prefabs without vControlAI are skipped. vDamageReceiver on child colliders is left intact " +
+            "so Emerald AI NPCs can still deal damage to these characters via their existing vHealthController.",
+            MessageType.Info);
+
+        EditorGUILayout.Space(8);
+
+        EditorGUILayout.BeginHorizontal();
+        EditorGUILayout.LabelField("Prefab Folder", GUILayout.Width(100));
+        stripEmeraldFolder = EditorGUILayout.TextField(stripEmeraldFolder);
+        if (GUILayout.Button("Pick", GUILayout.Width(40)))
+        {
+            string chosen = EditorUtility.OpenFolderPanel("Select Prefab Folder", stripEmeraldFolder, "");
+            if (!string.IsNullOrEmpty(chosen) && chosen.StartsWith(Application.dataPath))
+                stripEmeraldFolder = "Assets" + chosen.Substring(Application.dataPath.Length);
+        }
+        EditorGUILayout.EndHorizontal();
+
+        EditorGUILayout.Space(12);
+
+        bool folderValid = AssetDatabase.IsValidFolder(stripEmeraldFolder);
+        GUI.enabled = folderValid;
+
+        if (GUILayout.Button("STRIP EMERALD AI FROM INVECTOR AI PREFABS", GUILayout.Height(38)))
+            StripEmeraldFromInvectorPrefabs();
+
+        GUI.enabled = true;
+
+        if (!folderValid)
+            EditorGUILayout.HelpBox("Select a valid folder.", MessageType.Warning);
+
+        if (stripEmeraldLog.Count > 0)
+        {
+            EditorGUILayout.Space(8);
+            EditorGUILayout.LabelField("Log", EditorStyles.boldLabel);
+            stripEmeraldScroll = EditorGUILayout.BeginScrollView(stripEmeraldScroll, GUILayout.MaxHeight(220));
+            foreach (string line in stripEmeraldLog)
+                EditorGUILayout.LabelField(line, EditorStyles.helpBox);
+            EditorGUILayout.EndScrollView();
+        }
+    }
+
+    private void StripEmeraldFromInvectorPrefabs()
+    {
+        stripEmeraldLog.Clear();
+
+        // All Emerald AI component types to remove — EmeraldSystem last so
+        // [RequireComponent] enforcement doesn't block the earlier removals.
+        System.Type[] emeraldTypes = new System.Type[]
+        {
+            typeof(InvectorAIBridge),
+            typeof(EmeraldAnimation),
+            typeof(EmeraldDetection),
+            typeof(EmeraldSounds),
+            typeof(EmeraldCombat),
+            typeof(EmeraldBehaviors),
+            typeof(EmeraldMovement),
+            typeof(EmeraldHealth),
+            typeof(EmeraldSystem),
+        };
+
+        string[] guids = AssetDatabase.FindAssets("t:Prefab", new[] { stripEmeraldFolder });
+        if (guids.Length == 0)
+        {
+            stripEmeraldLog.Add("No prefabs found in the specified folder.");
+            return;
+        }
+
+        int prefabsModified = 0;
+        int prefabsSkipped  = 0;
+
+        foreach (string guid in guids)
+        {
+            string prefabPath     = AssetDatabase.GUIDToAssetPath(guid);
+            GameObject prefabAsset = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            if (prefabAsset == null) continue;
+
+            // Only process prefabs that have vControlAI (any partial — Melee, Shooter, or base).
+            bool hasVControlAI = prefabAsset.GetComponent<Invector.vCharacterController.AI.vControlAI>() != null;
+            if (!hasVControlAI)
+            {
+                stripEmeraldLog.Add($"SKIP  {prefabAsset.name}  — no vControlAI");
+                prefabsSkipped++;
+                continue;
+            }
+
+            // Skip if there's nothing Emerald-related to remove.
+            bool hasAnyEmerald = false;
+            foreach (System.Type t in emeraldTypes)
+                if (prefabAsset.GetComponent(t) != null) { hasAnyEmerald = true; break; }
+
+            if (!hasAnyEmerald)
+            {
+                stripEmeraldLog.Add($"SKIP  {prefabAsset.name}  — no Emerald AI components found");
+                prefabsSkipped++;
+                continue;
+            }
+
+            using (var scope = new PrefabUtility.EditPrefabContentsScope(prefabPath))
+            {
+                GameObject root    = scope.prefabContentsRoot;
+                bool prefabChanged = false;
+
+                foreach (System.Type componentType in emeraldTypes)
+                {
+                    // GetComponents handles the case where multiple instances somehow exist.
+                    Component[] components = root.GetComponents(componentType);
+                    foreach (Component comp in components)
+                    {
+                        // DestroyImmediate with allowDestroyingAssets=false is correct inside
+                        // EditPrefabContentsScope — the root is a temporary scene object.
+                        DestroyImmediate(comp);
+                        stripEmeraldLog.Add($"  - Removed {componentType.Name}  ← {prefabAsset.name}");
+                        prefabChanged = true;
+                    }
+                }
+
+                if (prefabChanged) prefabsModified++;
+            }
+        }
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+
+        string summary = $"Done — {prefabsModified} prefab(s) modified, {prefabsSkipped} skipped.";
+        stripEmeraldLog.Add(string.Empty);
+        stripEmeraldLog.Add(summary);
+        Debug.Log($"[MakePrefabTool] Strip Emerald AI: {summary}");
+        EditorUtility.DisplayDialog("Strip Emerald AI", summary, "OK");
     }
 }

@@ -74,6 +74,11 @@ public class InvectorInputBridge : MonoBehaviour
              "built-in code-defined bindings as a fallback.")]
     [SerializeField] private InputActionAsset _inputActionAsset;
 
+    [Header("Trait Reset FX")]
+    [Tooltip("Particle effect prefab to spawn at the player's position on a successful trait reset. " +
+             "FX_LevelUp_01 or FX_Heal_01 from PolygonParticleFX are good defaults.")]
+    [SerializeField] private GameObject _traitResetFXPrefab;
+
     // ── Input Actions (built in code) ─────────────────────────────────────────
 
     // Locomotion
@@ -110,6 +115,8 @@ public class InvectorInputBridge : MonoBehaviour
     private InputAction _throwReleaseAction; // LMB / RT — throw while aiming
     // Health station deploy (LB+RB / Numpad5)
     private InputAction _deployStationAction;
+    // Reset all player traits (hold LB+RB / Numpad0)
+    private InputAction _resetTraitsAction;
     // Per-slot cycling: index matches changeEquipmentControllers order
     private readonly List<InputAction> _prevSlotActions = new List<InputAction>();
     private readonly List<InputAction> _nextSlotActions = new List<InputAction>();
@@ -169,6 +176,8 @@ public class InvectorInputBridge : MonoBehaviour
     private bool _throwReleasePressed;      // launch grenade while aiming (LMB / RT)
     // Health station deploy
     private bool _deployStationPressed;
+    // Reset all traits
+    private bool _resetTraitsPressed;
     private readonly List<bool> _prevSlotPressed = new List<bool>();
     private readonly List<bool> _nextSlotPressed = new List<bool>();
     private readonly List<bool> _useItemPressed  = new List<bool>();
@@ -324,6 +333,7 @@ public class InvectorInputBridge : MonoBehaviour
         _throwAimAction        = _actionMap.FindAction("ThrowAim",             throwIfNotFound: true);
         _throwReleaseAction    = _actionMap.FindAction("ThrowRelease",         throwIfNotFound: true);
         _deployStationAction   = _actionMap.FindAction("DeployHealthStation",  throwIfNotFound: false);
+        _resetTraitsAction     = _actionMap.FindAction("ResetAllTraits",        throwIfNotFound: false);
 
         // Weapon slot actions — populate lists in order (slot 0 then slot 1)
         string[] slots = { "0", "1" };
@@ -477,6 +487,15 @@ public class InvectorInputBridge : MonoBehaviour
             .With("Modifier", "<Gamepad>/leftShoulder")
             .With("Binding",  "<Gamepad>/rightShoulder");
 
+        // ── Reset all player traits (hold LB+RB for 1.5s / Numpad0) ──────────
+        // Same chord as DeployHealthStation but with a Hold interaction so the two
+        // actions are differentiated by duration: tap = deploy station, hold = reset traits.
+        _resetTraitsAction = _actionMap.AddAction("ResetAllTraits", InputActionType.Button);
+        _resetTraitsAction.AddBinding("<Keyboard>/numpad0");
+        _resetTraitsAction.AddCompositeBinding("OneModifier", interactions: "hold(duration=1.5)")
+            .With("Modifier", "<Gamepad>/leftShoulder")
+            .With("Binding",  "<Gamepad>/rightShoulder");
+
         // Weapon slot 0  (primary — e.g. right-hand weapon)
         // Previous = scroll up / left arrow / D-Pad left
         // Next     = scroll down / right arrow / D-Pad right
@@ -597,6 +616,10 @@ public class InvectorInputBridge : MonoBehaviour
         // Health station deploy
         if (_deployStationAction != null)
             _deployStationAction.performed += ctx => _deployStationPressed = true;
+
+        // Reset all traits (hold LB+RB)
+        if (_resetTraitsAction != null)
+            _resetTraitsAction.performed += ctx => _resetTraitsPressed = true;
 
         for (int i = 0; i < _prevSlotActions.Count; i++)
         {
@@ -816,6 +839,21 @@ public class InvectorInputBridge : MonoBehaviour
             if (HealthStationDeployer.Instance != null)
                 HealthStationDeployer.Instance.TryDeploy();
             _deployStationPressed = false;
+        }
+
+        // Reset all player traits (hold LB+RB for 1.5s / Numpad0)
+        if (_resetTraitsPressed)
+        {
+            if (ProgressionManager.Instance != null)
+            {
+                bool didReset = ProgressionManager.Instance.ResetAllTraits();
+                if (didReset && _traitResetFXPrefab != null)
+                {
+                    GameObject fx = Instantiate(_traitResetFXPrefab, transform.position, Quaternion.identity);
+                    Destroy(fx, 5f);
+                }
+            }
+            _resetTraitsPressed = false;
         }
     }
 
