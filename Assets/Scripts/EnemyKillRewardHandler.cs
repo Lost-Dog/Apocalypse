@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using JUTPS;
 
@@ -30,6 +31,14 @@ public class EnemyKillRewardHandler : MonoBehaviour
     [SerializeField] private float staminaRestoreAmount = 0f;
     [Tooltip("Percentage of max stamina to restore (0.1 = 10%)")]
     [SerializeField] private float staminaRestorePercentage = 0.1f;
+
+    [Header("Health On Kill VFX")]
+    [Tooltip("VFX prefab that flies from dead enemy to player when health is restored")]
+    [SerializeField] private GameObject healthOnKillVFXPrefab;
+    [SerializeField] private Vector3 healthVFXStartOffset = Vector3.up;
+    [SerializeField] private Vector3 healthVFXTargetOffset = Vector3.up;
+    [SerializeField, Min(0.05f)] private float healthVFXTravelDuration = 0.35f;
+    [SerializeField, Min(0.1f)] private float healthVFXLifetime = 2f;
     
     private JUHealth health;
     private bool hasRewardedPlayer = false;
@@ -83,7 +92,12 @@ public class EnemyKillRewardHandler : MonoBehaviour
         
         GiveXPReward(playerBridge);
         TryDropLoot(playerBridge);
-        RestoreHealthOnKill(player);
+        bool restoredHealth = RestoreHealthOnKill(player);
+        if (restoredHealth)
+        {
+            SpawnHealthOnKillVFX(player.transform);
+        }
+
         RestoreStaminaOnKill(player);
         RestoreAmmoOnKill(player);
         RestoreTemperatureOnKill(player);
@@ -190,15 +204,15 @@ public class EnemyKillRewardHandler : MonoBehaviour
         }
     }
     
-    private void RestoreHealthOnKill(GameObject player)
+    private bool RestoreHealthOnKill(GameObject player)
     {
-        if (!restoreHealthOnKill) return;
+        if (!restoreHealthOnKill) return false;
         
         JUHealth playerHealth = player.GetComponent<JUHealth>();
         if (playerHealth == null)
         {
             Debug.LogWarning("JUHealth component not found on player! Cannot restore health.");
-            return;
+            return false;
         }
         
         float healthToRestore = healthRestoreAmount;
@@ -216,6 +230,40 @@ public class EnemyKillRewardHandler : MonoBehaviour
         if (actualRestore > 0f)
         {
             Debug.Log($"Restored {actualRestore:F1} health on kill! (Health: {playerHealth.Health:F1}/{playerHealth.MaxHealth})");
+            return true;
+        }
+
+        return false;
+    }
+
+    private void SpawnHealthOnKillVFX(Transform playerTransform)
+    {
+        if (healthOnKillVFXPrefab == null || playerTransform == null) return;
+
+        Vector3 startPosition = transform.position + healthVFXStartOffset;
+        GameObject vfx = Instantiate(healthOnKillVFXPrefab, startPosition, Quaternion.identity);
+        Destroy(vfx, healthVFXTravelDuration + healthVFXLifetime);
+
+        StartCoroutine(MoveVFXToPlayer(vfx.transform, playerTransform, startPosition));
+    }
+
+    private IEnumerator MoveVFXToPlayer(Transform vfxTransform, Transform playerTransform, Vector3 startPosition)
+    {
+        float elapsed = 0f;
+        float duration = Mathf.Max(0.05f, healthVFXTravelDuration);
+
+        while (elapsed < duration && vfxTransform != null && playerTransform != null)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            Vector3 targetPosition = playerTransform.position + healthVFXTargetOffset;
+            vfxTransform.position = Vector3.Lerp(startPosition, targetPosition, t);
+            yield return null;
+        }
+
+        if (vfxTransform != null && playerTransform != null)
+        {
+            vfxTransform.position = playerTransform.position + healthVFXTargetOffset;
         }
     }
     
