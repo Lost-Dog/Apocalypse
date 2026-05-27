@@ -40,6 +40,8 @@ public class CameraAimAssistentHeadTracking : MonoBehaviour
         public float DistanceToDetect = 50;
         public float AssistentForce = 3;
         public LayerMask TargetLayer;
+        [Tooltip("Layers that block line of sight for aim assist. Defaults to Unity's 'Default' layer.")]
+        public LayerMask obstructionLayer = 1 << 0;
         public TargetTagOffset[] TargetsTagsAndOffsets = new[] { new TargetTagOffset("Enemy", 1) };
 
         [Tooltip("Half-angle of the detection cone in degrees. Enemies within this angle of the " +
@@ -76,6 +78,7 @@ public class CameraAimAssistentHeadTracking : MonoBehaviour
 
         // Pre-allocated buffer for OverlapSphereNonAlloc to avoid per-frame heap allocation.
         private readonly Collider[] _overlapBuffer = new Collider[32];
+        private readonly RaycastHit[] _obstructionHits = new RaycastHit[16];
 
         // Whether a valid target was found this frame.
         private bool _hasTarget;
@@ -178,8 +181,8 @@ public class CameraAimAssistentHeadTracking : MonoBehaviour
         /// Returns the best candidate in the detection cone.
         /// When <see cref="assistAngle"/> is 0 a pixel-perfect centre-screen raycast is used.
         /// Otherwise every collider on <see cref="TargetLayer"/> within <see cref="DistanceToDetect"/>
-        /// is tested; the one whose root GameObject matches a tracked tag AND sits closest to the
-        /// camera's forward axis (smallest angle) wins.
+        /// is tested; the one whose root GameObject matches a tracked tag, has clear line of sight,
+        /// and is closest to crosshair (with distance tie-break) wins.
         /// </summary>
         private GameObject GetObjectOnCameraCenter()
         {
@@ -189,9 +192,13 @@ public class CameraAimAssistentHeadTracking : MonoBehaviour
                 Ray ray = _activeCamera.ScreenPointToRay(
                     new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0f));
 
-                return Physics.Raycast(ray, out RaycastHit hit, DistanceToDetect, TargetLayer)
-                    ? hit.collider.gameObject
-                    : null;
+                if (!Physics.Raycast(ray, out RaycastHit targetHit, DistanceToDetect, TargetLayer, QueryTriggerInteraction.Ignore))
+                    return null;
+
+                if (IsObstructed(_activeCamera.transform.position, targetHit.point, targetHit.collider.gameObject))
+                    return null;
+
+                return targetHit.collider.gameObject;
             }
 
             // ── Cone search ───────────────────────────────────────────────────
@@ -201,7 +208,8 @@ public class CameraAimAssistentHeadTracking : MonoBehaviour
             int count = Physics.OverlapSphereNonAlloc(camPos, DistanceToDetect, _overlapBuffer, TargetLayer);
 
             GameObject bestTarget   = null;
-            float      bestAngle    = assistAngle;
+            float      bestAngle    = float.MaxValue;
+            float      bestDistance = float.MaxValue;
 
             for (int i = 0; i < count; i++)
             {
@@ -217,17 +225,56 @@ public class CameraAimAssistentHeadTracking : MonoBehaviour
                 }
                 if (!tagMatch) continue;
 
-                Vector3 toTarget = (col.bounds.center - camPos).normalized;
-                float   angle    = Vector3.Angle(camForward, toTarget);
+                Vector3 targetPoint = col.bounds.center;
+                Vector3 toTarget = targetPoint - camPos;
+                float distance = toTarget.magnitude;
+                if (distance <= 0.0001f) continue;
 
-                if (angle < bestAngle)
+                float angle = Vector3.Angle(camForward, toTarget / distance);
+                if (angle > assistAngle) continue;
+
+                if (IsObstructed(camPos, targetPoint, root)) continue;
+
+                bool isBetterAngle  = angle < bestAngle - 0.01f;
+                bool isSimilarAngle = Mathf.Abs(angle - bestAngle) <= 0.75f;
+                if (isBetterAngle || (isSimilarAngle && distance < bestDistance))
                 {
                     bestAngle  = angle;
+                    bestDistance = distance;
                     bestTarget = root;
                 }
             }
 
             return bestTarget;
+        }
+
+        private bool IsObstructed(Vector3 from, Vector3 to, GameObject targetRoot)
+        {
+            Vector3 direction = to - from;
+            float distance = direction.magnitude;
+            if (distance <= 0.0001f) return false;
+
+            int hitCount = Physics.RaycastNonAlloc(
+                from,
+                direction / distance,
+                _obstructionHits,
+                distance,
+                obstructionLayer,
+                QueryTriggerInteraction.Ignore);
+
+            for (int i = 0; i < hitCount; i++)
+            {
+                Collider hitCollider = _obstructionHits[i].collider;
+                if (hitCollider == null) continue;
+
+                Transform hitTransform = hitCollider.transform;
+                if (hitTransform.IsChildOf(transform)) continue;
+                if (targetRoot != null && (hitTransform == targetRoot.transform || hitTransform.IsChildOf(targetRoot.transform))) continue;
+
+                return true;
+            }
+
+            return false;
         }
 
         private Vector3 GetAimPosition(GameObject target)
