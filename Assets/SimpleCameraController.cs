@@ -108,26 +108,18 @@ namespace UnityTemplateProjects
         
         void Update()
         {
-            // Exit Sample  
-            if (Input.GetKey(KeyCode.Escape))
+            // Unlock and show cursor on Escape
+            if (Input.GetKeyDown(KeyCode.Escape))
             {
-                Application.Quit();
-				#if UNITY_EDITOR
-				UnityEditor.EditorApplication.isPlaying = false; 
-				#endif
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
             }
 
             // Hide and lock cursor when right mouse button pressed
             if (Input.GetMouseButtonDown(1))
             {
                 Cursor.lockState = CursorLockMode.Locked;
-            }
-
-            // Unlock and show cursor when right mouse button released
-            if (Input.GetMouseButtonUp(1))
-            {
-                Cursor.visible = true;
-                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = false;
             }
 
             // Rotation
