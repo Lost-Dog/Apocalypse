@@ -5,6 +5,11 @@ using UnityEngine;
 [AddComponentMenu("Apocalypse/Camera/Aim Assistant (Chest Tracking)")]
 public class CameraAimAssistentHeadTracking : MonoBehaviour
 {
+        private const float DistanceEpsilon = 0.0001f;
+        private const float AngleComparisonEpsilon = 0.01f;
+        // Angle window where distance breaks ties so nearby enemies win when nearly equally centred.
+        private const float AngleSimilarityThreshold = 0.75f;
+
         [System.Serializable]
         public class TargetTagOffset
         {
@@ -41,7 +46,7 @@ public class CameraAimAssistentHeadTracking : MonoBehaviour
         public float AssistentForce = 3;
         public LayerMask TargetLayer;
         [Tooltip("Layers that block line of sight for aim assist. Defaults to Unity's 'Default' layer.")]
-        public LayerMask obstructionLayer = 1 << 0;
+        public LayerMask ObstructionLayer = 1 << 0;
         public TargetTagOffset[] TargetsTagsAndOffsets = new[] { new TargetTagOffset("Enemy", 1) };
 
         [Tooltip("Half-angle of the detection cone in degrees. Enemies within this angle of the " +
@@ -228,15 +233,15 @@ public class CameraAimAssistentHeadTracking : MonoBehaviour
                 Vector3 targetPoint = col.bounds.center;
                 Vector3 toTarget = targetPoint - camPos;
                 float distance = toTarget.magnitude;
-                if (distance <= 0.0001f) continue;
+                if (distance <= DistanceEpsilon) continue;
 
                 float angle = Vector3.Angle(camForward, toTarget / distance);
                 if (angle > assistAngle) continue;
 
                 if (IsObstructed(camPos, targetPoint, root)) continue;
 
-                bool isBetterAngle  = angle < bestAngle - 0.01f;
-                bool isSimilarAngle = Mathf.Abs(angle - bestAngle) <= 0.75f;
+                bool isBetterAngle  = angle < bestAngle - AngleComparisonEpsilon;
+                bool isSimilarAngle = Mathf.Abs(angle - bestAngle) < AngleSimilarityThreshold;
                 if (isBetterAngle || (isSimilarAngle && distance < bestDistance))
                 {
                     bestAngle  = angle;
@@ -252,14 +257,14 @@ public class CameraAimAssistentHeadTracking : MonoBehaviour
         {
             Vector3 direction = to - from;
             float distance = direction.magnitude;
-            if (distance <= 0.0001f) return false;
+            if (distance <= DistanceEpsilon) return false;
 
             int hitCount = Physics.RaycastNonAlloc(
                 from,
                 direction / distance,
                 _obstructionHits,
                 distance,
-                obstructionLayer,
+                ObstructionLayer,
                 QueryTriggerInteraction.Ignore);
 
             for (int i = 0; i < hitCount; i++)
@@ -268,8 +273,9 @@ public class CameraAimAssistentHeadTracking : MonoBehaviour
                 if (hitCollider == null) continue;
 
                 Transform hitTransform = hitCollider.transform;
+                // Ignore the owner hierarchy so the player rig doesn't block its own aim assist.
                 if (hitTransform.IsChildOf(transform)) continue;
-                if (targetRoot != null && (hitTransform == targetRoot.transform || hitTransform.IsChildOf(targetRoot.transform))) continue;
+                if (targetRoot != null && hitTransform.IsChildOf(targetRoot.transform)) continue;
 
                 return true;
             }
