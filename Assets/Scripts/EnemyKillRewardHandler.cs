@@ -242,7 +242,7 @@ public class EnemyKillRewardHandler : MonoBehaviour
 
         Vector3 startPosition = transform.position + healthVFXStartOffset;
         GameObject vfx = Instantiate(healthOnKillVFXPrefab, startPosition, Quaternion.identity);
-        Destroy(vfx, healthVFXTravelDuration + healthVFXLifetime);
+        Destroy(vfx, Mathf.Max(healthVFXLifetime, healthVFXTravelDuration));
 
         StartCoroutine(MoveVFXToPlayer(vfx.transform, playerTransform, startPosition));
     }
@@ -250,7 +250,7 @@ public class EnemyKillRewardHandler : MonoBehaviour
     private IEnumerator MoveVFXToPlayer(Transform vfxTransform, Transform playerTransform, Vector3 startPosition)
     {
         float elapsed = 0f;
-        float duration = Mathf.Max(0.05f, healthVFXTravelDuration);
+        float duration = healthVFXTravelDuration;
 
         while (elapsed < duration && vfxTransform != null && playerTransform != null)
         {
