@@ -1,4 +1,5 @@
 using Invector.vCharacterController;
+using Invector.vShooter;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -19,6 +20,13 @@ public class PlayerTraitsRuntime : MonoBehaviour
     [Tooltip("Leave empty to auto-find by tag on Start.")]
     [SerializeField] private vThirdPersonController controller;
 
+    // ── Per-weapon base clip sizes (captured once to avoid compounding bonuses) ─
+
+    /// <summary>Stores each weapon's original clip size so bonuses are always
+    /// computed relative to the designer-set value, not the last modified value.</summary>
+    private readonly System.Collections.Generic.Dictionary<vShooterWeapon, int> _baseClipSizes
+        = new System.Collections.Generic.Dictionary<vShooterWeapon, int>();
+
     // ── Effective runtime stats (read-only from outside) ──────────────────────
 
     public int   CurrentMaxHealth   { get; private set; }
@@ -26,6 +34,7 @@ public class PlayerTraitsRuntime : MonoBehaviour
     public float AttackMultiplier   { get; private set; }
     public float DefenseReduction   { get; private set; }
     public int   CurrentLevel       { get; private set; }
+    public int   MagazineBonus      { get; private set; }
 
     /// <summary>Maximum armour pool for the current level. Read by SurvivalManager.</summary>
     public int CurrentMaxArmour { get; private set; }
@@ -86,11 +95,15 @@ public class PlayerTraitsRuntime : MonoBehaviour
             controller.maxStamina = CurrentMaxStamina;
         }
 
+        MagazineBonus = config.GetMagazineBonus(level);
+        ApplyMagazineBonus(MagazineBonus);
+
         Debug.Log($"[PlayerTraitsRuntime] Level {level} — MaxHP: {CurrentMaxHealth}, " +
                   $"MaxStamina: {CurrentMaxStamina:F0}, " +
                   $"Attack: {AttackMultiplier:F2}x, " +
                   $"Defense: {DefenseReduction * 100f:F1}%, " +
-                  $"MaxArmour: {CurrentMaxArmour}");
+                  $"MaxArmour: {CurrentMaxArmour}, " +
+                  $"MagazineBonus: +{MagazineBonus}");
     }
 
     /// <summary>
@@ -118,5 +131,28 @@ public class PlayerTraitsRuntime : MonoBehaviour
 
         if (controller == null)
             Debug.LogWarning("[PlayerTraitsRuntime] Could not find vThirdPersonController.");
+    }
+
+    /// <summary>
+    /// Finds every <see cref="vShooterWeapon"/> in the player's hierarchy and sets
+    /// its <c>clipSize</c> to the designer-authored base value plus <paramref name="bonus"/>.
+    /// Base clip sizes are cached on first encounter so bonuses never compound.
+    /// </summary>
+    private void ApplyMagazineBonus(int bonus)
+    {
+        if (controller == null) return;
+
+        vShooterWeapon[] weapons = controller.GetComponentsInChildren<vShooterWeapon>(includeInactive: true);
+        foreach (vShooterWeapon weapon in weapons)
+        {
+            // Cache the original clip size the first time we see this weapon instance.
+            if (!_baseClipSizes.TryGetValue(weapon, out int baseClip))
+            {
+                baseClip = weapon.clipSize;
+                _baseClipSizes[weapon] = baseClip;
+            }
+
+            weapon.clipSize = baseClip + bonus;
+        }
     }
 }

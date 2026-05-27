@@ -38,6 +38,13 @@ public class PlayerTraitConfig : ScriptableObject
     [Tooltip("Flat armour added for each level above 1.")]
     public int armourPerLevel = 20;
 
+    [Header("Per-Level Scaling — Magazine")]
+    [Tooltip("Base magazine bonus added at level 1 on top of the weapon's default clip size. 0 = no bonus at level 1.")]
+    public int baseMagazineBonus = 0;
+
+    [Tooltip("Extra bullets added to every equipped weapon's magazine per level above 1.")]
+    public int magazineBonusPerLevel = 5;
+
     // ── Computed values ───────────────────────────────────────────────────────
 
     /// <summary>Returns the max health value for the given level.</summary>
@@ -62,4 +69,12 @@ public class PlayerTraitConfig : ScriptableObject
     /// <summary>Returns the max armour pool for the given level.</summary>
     public int GetMaxArmour(int level)
         => baseArmour + armourPerLevel * Mathf.Max(0, level - 1);
+
+    /// <summary>
+    /// Returns the flat bonus added to every weapon's base clip size for the given level.
+    /// At level 1 this equals <see cref="baseMagazineBonus"/>; each subsequent level
+    /// adds <see cref="magazineBonusPerLevel"/> on top.
+    /// </summary>
+    public int GetMagazineBonus(int level)
+        => baseMagazineBonus + magazineBonusPerLevel * Mathf.Max(0, level - 1);
 }

@@ -22,6 +22,13 @@ public class LootItem : MonoBehaviour
              "moment it leaves the enemy.")]
     public float pickupDelay = 0.5f;
 
+    [Header("Cleanup")]
+    [Tooltip("Seconds before an uncollected drop is removed. 0 = never expire.")]
+    public float expireAfterSeconds = 300f;   // 5 minutes
+
+    [Tooltip("Distance from the player beyond which an uncollected drop is removed. 0 = disabled.")]
+    public float despawnBeyondRange = 40f;
+
     [Header("Visuals")]
     public VisualEffect visualEffect;
     public Light        rarityLight;
@@ -36,9 +43,12 @@ public class LootItem : MonoBehaviour
     private float     _spawnTime;
     private bool      _collected;
     private Vector3   _basePosition;
+    private Transform _playerTransform;
 
     private const string PlayerTag       = "Player";
     private const float  RotationSpeed   = 90f; // degrees per second
+    private const float  CleanupCheckInterval = 2f; // seconds between range/expire checks
+    private float        _nextCleanupCheck;
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
@@ -47,7 +57,9 @@ public class LootItem : MonoBehaviour
         _collected    = false;
         _spawnTime    = Time.time;
         _basePosition = transform.position;
+        _nextCleanupCheck = Time.time + CleanupCheckInterval;
 
+        CachePlayer();
         ApplyRarityLight();
     }
 
@@ -63,6 +75,13 @@ public class LootItem : MonoBehaviour
             float newY = _basePosition.y + Mathf.Sin((Time.time - _spawnTime) * bobSpeed) * bobHeight;
             transform.position = new Vector3(transform.position.x, newY, transform.position.z);
         }
+
+        // Throttle range/expiry checks — no need to run every frame.
+        if (Time.time < _nextCleanupCheck) return;
+        _nextCleanupCheck = Time.time + CleanupCheckInterval;
+
+        if (ShouldExpire())
+            ReturnToPool();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -92,6 +111,27 @@ public class LootItem : MonoBehaviour
     }
 
     // ── Internal helpers ──────────────────────────────────────────────────────
+
+    private void CachePlayer()
+    {
+        GameObject playerGo = GameObject.FindWithTag(PlayerTag);
+        _playerTransform = playerGo != null ? playerGo.transform : null;
+    }
+
+    private bool ShouldExpire()
+    {
+        if (expireAfterSeconds > 0f && Time.time - _spawnTime >= expireAfterSeconds)
+            return true;
+
+        if (despawnBeyondRange > 0f && _playerTransform != null)
+        {
+            float sqrRange = despawnBeyondRange * despawnBeyondRange;
+            if ((_playerTransform.position - transform.position).sqrMagnitude > sqrRange)
+                return true;
+        }
+
+        return false;
+    }
 
     private void ApplyRarityLight()
     {

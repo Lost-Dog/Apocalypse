@@ -2746,6 +2746,7 @@ GameObject:
   - component: {fileID: 8256871749564618087}
   - component: {fileID: 5861808397308134578}
   - component: {fileID: 130147007563059748}
+  - component: {fileID: 1912736665578736552}
   m_Layer: 9
   m_Name: Woman_03_01
   m_TagString: Enemy
@@ -3260,7 +3261,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4435fe59ad515fd4d94c2dd09006f199, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CurrentHealth: 100
+  CurrentHealth: 300
   StartingHealth: 300
   HealRate: 0
   AttachHitEffects: 1
@@ -3873,8 +3874,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EmeraldAI.InvectorAIBridge
   openCloseEvents: 0
-  openCloseWindow: 0
-  selectedToolbar: 0
+  openCloseWindow: 1
+  selectedToolbar: 1
   _isDead: 1
   _currentHealth: 0
   isImmortal: 0
@@ -3885,7 +3886,19 @@ MonoBehaviour:
   checkHealthEvents: []
   _onStartReceiveDamage:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 4095556980520242076}
+        m_TargetAssemblyTypeName: EmeraldAI.EmeraldAnimation, Assembly-CSharp
+        m_MethodName: PlayWarningAnimation
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   _onReceiveDamage:
     m_PersistentCalls:
       m_Calls: []
@@ -3920,6 +3933,41 @@ MonoBehaviour:
   HideSettingsFoldout: 0
   DecalsFoldout: 0
   MessageDismissed: 0
+--- !u!114 &1912736665578736552
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4784231016005941150}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f131dd35d296fca4e90efc4ed717e48b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::bl_MiniMapEntity
+  Target: {fileID: 7641351790740324054}
+  OffSet: {x: 0, y: 0, z: 0}
+  iconData: {fileID: 11400000, guid: 44a9a005006fac54c8333e0f70f69f37, type: 2}
+  ShowCircleArea: 0
+  CircleAreaRadius: 10
+  CircleAreaColor: {r: 1, g: 1, b: 1, a: 0.9}
+  isInteractable: 1
+  interacableAction: 0
+  InfoItem: Info Icon here
+  keepTextAlwaysFacingUp: 0
+  onClick:
+    m_PersistentCalls:
+      m_Calls: []
+  OffScreen: 1
+  opacityBasedDistance: 0
+  maxDistance: 250
+  iconFaceDirection: 0
+  enableDisableWithTarget: 1
+  DestroyWithObject: 1
+  BorderOffScreen: 0.01
+  RenderDelay: 0.3
+  m_Effect: 2
+  CustomIconPrefab: {fileID: 0}
 --- !u!1 &4847404631849718789
 GameObject:
   m_ObjectHideFlags: 0

@@ -43,8 +43,8 @@ public class InvectorInputBridge : MonoBehaviour
     [Header("Gamepad Feel")]
     [Tooltip("Smoothing factor for gamepad camera rotation. Higher = more responsive but more overshoot. " +
              "Lower = smoother but slightly laggy. 0 = instant (no smoothing).")]
-    [Range(0f, 30f)]
-    public float gamepadLookSmoothing = 12f;
+    [Range(0f, 50f)]
+    public float gamepadLookSmoothing = 25f;
 
     [Tooltip("Radial dead zone applied to the left stick before writing movement input. " +
              "Values below this magnitude are treated as zero, eliminating stick drift and jitter.")]
@@ -766,6 +766,9 @@ public class InvectorInputBridge : MonoBehaviour
             _crouchPressed = false;
         }
 
+        // Invincibility while crouched
+        cc.isImmortal = cc.isCrouching;
+
         // Strafe toggle
         if (_strafePressed)
         {
@@ -854,6 +857,15 @@ public class InvectorInputBridge : MonoBehaviour
                 }
             }
             _resetTraitsPressed = false;
+
+            // LB and RB were held for the full duration of the chord. Flush any flags
+            // those buttons drive so Invector's state machine doesn't see a phantom
+            // reload or weak-attack on the frame the hold completes.
+            _reloadPressed      = false;
+            _weakAttackPressed  = false;
+
+            // Force-read the move axis immediately so cc.input isn't stale for one frame.
+            _moveValue = _moveAction.ReadValue<Vector2>();
         }
     }
 
@@ -1030,11 +1042,22 @@ public class InvectorInputBridge : MonoBehaviour
                     corrX = Mathf.Clamp(corrX, -maxStep, maxStep);
                     corrY = Mathf.Clamp(corrY, -maxStep, maxStep);
 
-                    var   cam    = _tpInput.tpCamera;
-                    float mouseX = (float)_cameraMouseXField.GetValue(cam);
-                    float mouseY = (float)_cameraMouseYField.GetValue(cam);
-                    _cameraMouseXField.SetValue(cam, mouseX + corrX);
-                    _cameraMouseYField.SetValue(cam, mouseY + corrY);
+                    // Anti-opposition guard: if the player is actively rotating away from the
+                    // target, don't fight their input — skip the correction entirely that frame.
+                    Vector2 playerInputDir = new Vector2(x, y);
+                    Vector2 corrDir        = new Vector2(corrX, corrY);
+                    bool opposingInput = playerInputDir.sqrMagnitude > 0.0001f &&
+                                        corrDir.sqrMagnitude > 0.0001f &&
+                                        Vector2.Dot(playerInputDir.normalized, corrDir.normalized) < 0f;
+
+                    if (!opposingInput)
+                    {
+                        var   cam    = _tpInput.tpCamera;
+                        float mouseX = (float)_cameraMouseXField.GetValue(cam);
+                        float mouseY = (float)_cameraMouseYField.GetValue(cam);
+                        _cameraMouseXField.SetValue(cam, mouseX + corrX);
+                        _cameraMouseYField.SetValue(cam, mouseY + corrY);
+                    }
                 }
             }
 

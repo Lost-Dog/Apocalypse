@@ -1,97 +1,64 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 using Invector;
 using Invector.vCharacterController;
 using Invector.vCharacterController.AI;
 
 /// <summary>
-/// Summons a friendly companion AI near the player whenever the player takes damage.
-/// Uses per-prefab object pooling. Companions are returned to the pool when they
-/// die or move too far from the player.
-/// Attach to any persistent scene GameObject (e.g. GameManager or a dedicated Summoner object).
+/// When the player takes damage, recruits the nearest idle friendly AIs already
+/// present in the scene to run to the player and engage the attacker.
+/// No spawning — companions are scene objects with vAICompanion components.
+/// Attach to any persistent scene GameObject (e.g. GameManager).
 /// </summary>
 public class CompanionSummoner : MonoBehaviour
 {
     private const string PlayerTag = "Player";
-    private const int MaxNavMeshSampleAttempts = 15;
-    private const float NavMeshSampleRadius = 5f;
 
-    [Header("Companion Prefabs")]
-    [Tooltip("Companion prefabs to summon. One is picked at random per summon.")]
-    public List<GameObject> companionPrefabs = new List<GameObject>();
-
-    [Header("Pool Settings")]
-    [Tooltip("Pre-warmed instances created per prefab on Start.")]
-    public int initialPoolSizePerPrefab = 2;
-
-    [Header("Summon Settings")]
-    [Tooltip("Maximum number of companions that may be active at the same time.")]
-    public int maxActiveCompanions = 3;
-    [Tooltip("Companions spawn within this radius around the player.")]
-    public float summonRadius = 5f;
-    [Tooltip("Minimum seconds between two consecutive summons (cooldown).")]
-    public float summonCooldown = 5f;
-    [Tooltip("How long a companion stays active before being automatically recalled. 0 = never.")]
-    public float companionLifetime = 60f;
-
-    [Header("Despawn Settings")]
-    [Tooltip("Companions further than this distance from the player are returned to the pool.")]
-    public float despawnDistance = 80f;
-    [Tooltip("How often (seconds) the distance check runs.")]
-    public float despawnCheckInterval = 2f;
+    [Header("Support Settings")]
+    [Tooltip("Maximum number of companions that may be actively helping at the same time.")]
+    public int maxActiveHelpers = 3;
+    [Tooltip("Only recruit companions within this radius of the player. 0 = unlimited.")]
+    public float recruitRadius = 30f;
+    [Tooltip("Minimum seconds between two consecutive recruit calls.")]
+    public float recruitCooldown = 5f;
+    [Tooltip("Speed at which recruited companions run to the player.")]
+    public vAIMovementSpeed approachSpeed = vAIMovementSpeed.Running;
 
     [Header("Player Reference")]
     [Tooltip("Assign the player Transform. If empty, searched at Start by tag + vThirdPersonController.")]
     public Transform playerOverride;
 
+    [Header("Player Provider")]
+    [Tooltip("Assign InvectorPlayerProvider to enable death-recall. Auto-searched if empty.")]
+    public InvectorPlayerProvider playerProvider;
+
     [Header("Debug")]
     public bool logEvents = false;
     public bool showGizmos = true;
-
-    // ── Pooling ───────────────────────────────────────────────────────────────
-
-    private class PrefabPool
-    {
-        public GameObject prefab;
-        public Queue<GameObject> available = new Queue<GameObject>();
-    }
-
-    private Dictionary<GameObject, PrefabPool> pools = new Dictionary<GameObject, PrefabPool>();
-
-    // active instance → source prefab
-    private Dictionary<GameObject, GameObject> activeInstances = new Dictionary<GameObject, GameObject>();
 
     // ── State ─────────────────────────────────────────────────────────────────
 
     private Transform playerTransform;
     private vHealthController playerHealth;
     private vAICompanionControl companionControl;
-    private float lastSummonTime = float.NegativeInfinity;
-    private float despawnTimer;
+    private float lastRecruitTime = float.NegativeInfinity;
+
+    /// <summary>All vAICompanion instances currently helping the player.</summary>
+    private readonly HashSet<vAICompanion> activeHelpers = new HashSet<vAICompanion>();
 
     // ── Unity Lifecycle ───────────────────────────────────────────────────────
 
     private void Start()
     {
         FindPlayer();
-        InitializePools();
+        BindPlayerProvider();
     }
 
     private void OnDestroy()
     {
         UnsubscribeFromPlayer();
-    }
-
-    private void Update()
-    {
-        despawnTimer += Time.deltaTime;
-        if (despawnTimer >= despawnCheckInterval)
-        {
-            despawnTimer = 0f;
-            CheckDespawnDistance();
-        }
+        UnbindPlayerProvider();
     }
 
     // ── Player Discovery ──────────────────────────────────────────────────────
@@ -116,7 +83,7 @@ public class CompanionSummoner : MonoBehaviour
 
         if (playerTransform == null)
         {
-            Debug.LogWarning("[CompanionSummoner] Player not found. Summons will not trigger.", this);
+            Debug.LogWarning("[CompanionSummoner] Player not found. Support will not trigger.", this);
             return;
         }
 
@@ -128,8 +95,6 @@ public class CompanionSummoner : MonoBehaviour
         }
 
         playerHealth.onReceiveDamage.AddListener(OnPlayerDamaged);
-
-        // Register with vAICompanionControl if present so companions auto-target attackers.
         companionControl = playerTransform.GetComponent<vAICompanionControl>();
 
         if (logEvents)
@@ -142,211 +107,168 @@ public class CompanionSummoner : MonoBehaviour
             playerHealth.onReceiveDamage.RemoveListener(OnPlayerDamaged);
     }
 
+    // ── Player Provider (death recall) ────────────────────────────────────────
+
+    private void BindPlayerProvider()
+    {
+        if (playerProvider == null)
+            playerProvider = FindFirstObjectByType<InvectorPlayerProvider>();
+
+        if (playerProvider == null)
+        {
+            if (logEvents)
+                Debug.LogWarning("[CompanionSummoner] InvectorPlayerProvider not found. Death-recall disabled.", this);
+            return;
+        }
+
+        playerProvider.OnDeath += OnPlayerDied;
+    }
+
+    private void UnbindPlayerProvider()
+    {
+        if (playerProvider != null)
+            playerProvider.OnDeath -= OnPlayerDied;
+    }
+
+    private void OnPlayerDied()
+    {
+        StartCoroutine(RecallNextFrame());
+    }
+
+    private IEnumerator RecallNextFrame()
+    {
+        yield return null;
+        RecallAll();
+    }
+
     // ── Damage Callback ───────────────────────────────────────────────────────
 
     private void OnPlayerDamaged(vDamage damage)
     {
         if (playerTransform == null || playerHealth.isDead) return;
-        if (activeInstances.Count >= maxActiveCompanions) return;
-        if (Time.time - lastSummonTime < summonCooldown) return;
+        if (activeHelpers.Count >= maxActiveHelpers) return;
+        if (Time.time - lastRecruitTime < recruitCooldown) return;
 
-        TrySummon(damage.sender);
+        RecruitNearbyCompanions(damage.sender);
     }
 
-    // ── Summon ────────────────────────────────────────────────────────────────
+    // ── Recruitment ───────────────────────────────────────────────────────────
 
-    private void TrySummon(Transform attacker)
+    private void RecruitNearbyCompanions(Transform attacker)
     {
-        if (companionPrefabs.Count == 0) return;
-        if (!TryGetSummonPosition(out Vector3 spawnPosition)) return;
+        vAICompanion[] allCompanions = FindObjectsByType<vAICompanion>(FindObjectsSortMode.None);
 
-        GameObject prefab = companionPrefabs[Random.Range(0, companionPrefabs.Count)];
-        GameObject instance = GetFromPool(prefab);
-        if (instance == null) return;
-
-        // Place and orient toward the attacker
-        Quaternion rotation = attacker != null
-            ? Quaternion.LookRotation((attacker.position - spawnPosition).normalized, Vector3.up)
-            : Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
-
-        instance.transform.SetPositionAndRotation(spawnPosition, rotation);
-
-        NavMeshAgent agent = instance.GetComponent<NavMeshAgent>();
-        if (agent != null)
-            agent.Warp(spawnPosition);
-
-        instance.SetActive(true);
-        activeInstances[instance] = prefab;
-        lastSummonTime = Time.time;
-
-        // Register with companion control so it gets targets relayed from player damage
-        vAICompanion aiCompanion = instance.GetComponent<vAICompanion>();
-        if (aiCompanion != null && companionControl != null
-            && !companionControl.aICompanions.Contains(aiCompanion))
-        {
-            companionControl.aICompanions.Add(aiCompanion);
-        }
-
-        // Immediately point companion at the attacker
-        if (attacker != null)
-        {
-            vControlAI controlAI = instance.GetComponent<vControlAI>();
-            if (controlAI != null)
-                controlAI.SetCurrentTarget(attacker, true);
-        }
-
-        if (companionLifetime > 0f)
-            StartCoroutine(LifetimeRecall(instance, companionLifetime));
-
-        if (logEvents)
-            Debug.Log($"[CompanionSummoner] Summoned '{prefab.name}' at {spawnPosition}. Active: {activeInstances.Count}/{maxActiveCompanions}.", this);
-    }
-
-    // ── NavMesh Sampling ──────────────────────────────────────────────────────
-
-    private bool TryGetSummonPosition(out Vector3 result)
-    {
-        Vector3 playerPos = playerTransform.position;
-
-        for (int i = 0; i < MaxNavMeshSampleAttempts; i++)
-        {
-            Vector2 disc = Random.insideUnitCircle.normalized;
-            float radius = Random.Range(summonRadius * 0.5f, summonRadius);
-            Vector3 candidate = playerPos + new Vector3(disc.x, 0f, disc.y) * radius;
-
-            if (NavMesh.SamplePosition(candidate, out NavMeshHit hit, NavMeshSampleRadius, NavMesh.AllAreas))
-            {
-                result = hit.position;
-                return true;
-            }
-        }
-
-        if (logEvents)
-            Debug.LogWarning("[CompanionSummoner] No valid NavMesh position found for summon.", this);
-
-        result = Vector3.zero;
-        return false;
-    }
-
-    // ── Lifetime Recall ───────────────────────────────────────────────────────
-
-    private IEnumerator LifetimeRecall(GameObject instance, float lifetime)
-    {
-        yield return new WaitForSeconds(lifetime);
-        if (instance != null && activeInstances.ContainsKey(instance))
-            ReturnToPool(instance);
-    }
-
-    // ── Despawn Distance ──────────────────────────────────────────────────────
-
-    private void CheckDespawnDistance()
-    {
-        if (playerTransform == null) return;
-
-        Vector3 playerPos = playerTransform.position;
-        var toReturn = new List<GameObject>();
-
-        foreach (KeyValuePair<GameObject, GameObject> pair in activeInstances)
-        {
-            if (pair.Key == null) continue;
-            if (Vector3.Distance(playerPos, pair.Key.transform.position) > despawnDistance)
-                toReturn.Add(pair.Key);
-        }
-
-        foreach (GameObject instance in toReturn)
-            ReturnToPool(instance);
-    }
-
-    // ── Pool Management ───────────────────────────────────────────────────────
-
-    private void InitializePools()
-    {
-        foreach (GameObject prefab in companionPrefabs)
-        {
-            if (prefab == null || pools.ContainsKey(prefab)) continue;
-
-            PrefabPool pool = new PrefabPool { prefab = prefab };
-            for (int i = 0; i < initialPoolSizePerPrefab; i++)
-                pool.available.Enqueue(CreateInstance(prefab));
-
-            pools[prefab] = pool;
-
-            if (logEvents)
-                Debug.Log($"[CompanionSummoner] Pool created for '{prefab.name}' ({initialPoolSizePerPrefab} instances).", this);
-        }
-    }
-
-    private GameObject CreateInstance(GameObject prefab)
-    {
-        GameObject instance = Instantiate(prefab, transform);
-        instance.SetActive(false);
-        return instance;
-    }
-
-    private GameObject GetFromPool(GameObject prefab)
-    {
-        if (!pools.TryGetValue(prefab, out PrefabPool pool))
-        {
-            Debug.LogWarning($"[CompanionSummoner] No pool found for '{prefab.name}'.", this);
-            return null;
-        }
-
-        if (pool.available.Count > 0)
-            return pool.available.Dequeue();
-
-        if (logEvents)
-            Debug.Log($"[CompanionSummoner] Pool for '{prefab.name}' exhausted — expanding.", this);
-
-        return CreateInstance(prefab);
-    }
-
-    /// <summary>
-    /// Returns an active companion instance to the pool.
-    /// Call this externally when a companion dies.
-    /// </summary>
-    public void ReturnToPool(GameObject instance)
-    {
-        if (instance == null) return;
-
-        if (!activeInstances.TryGetValue(instance, out GameObject sourcePrefab))
+        if (allCompanions.Length == 0)
         {
             if (logEvents)
-                Debug.LogWarning($"[CompanionSummoner] ReturnToPool called for untracked instance '{instance.name}'.", this);
+                Debug.Log("[CompanionSummoner] No vAICompanion instances found in the scene.", this);
             return;
         }
 
-        // Unregister from companion control
-        vAICompanion aiCompanion = instance.GetComponent<vAICompanion>();
-        if (aiCompanion != null && companionControl != null)
-            companionControl.aICompanions.Remove(aiCompanion);
+        // Sort by distance to the player so the closest ones are recruited first.
+        Vector3 playerPos = playerTransform.position;
+        System.Array.Sort(allCompanions, (a, b) =>
+        {
+            float dA = Vector3.SqrMagnitude(a.transform.position - playerPos);
+            float dB = Vector3.SqrMagnitude(b.transform.position - playerPos);
+            return dA.CompareTo(dB);
+        });
 
-        instance.SetActive(false);
-        activeInstances.Remove(instance);
+        int recruited = 0;
+        int slots = maxActiveHelpers - activeHelpers.Count;
 
-        if (pools.TryGetValue(sourcePrefab, out PrefabPool pool))
-            pool.available.Enqueue(instance);
+        foreach (vAICompanion companion in allCompanions)
+        {
+            if (recruited >= slots) break;
+            if (companion == null || !companion.gameObject.activeSelf) continue;
+            if (activeHelpers.Contains(companion)) continue;
+            if (companion.friendIsDead) continue;
+
+            // Distance gate.
+            if (recruitRadius > 0f)
+            {
+                float dist = Vector3.Distance(companion.transform.position, playerPos);
+                if (dist > recruitRadius) continue;
+            }
+
+            ActivateHelper(companion, attacker);
+            recruited++;
+        }
+
+        if (recruited > 0)
+        {
+            lastRecruitTime = Time.time;
+            if (logEvents)
+                Debug.Log($"[CompanionSummoner] Recruited {recruited} companion(s). Active: {activeHelpers.Count}/{maxActiveHelpers}.", this);
+        }
+    }
+
+    private void ActivateHelper(vAICompanion companion, Transform attacker)
+    {
+        activeHelpers.Add(companion);
+
+        // Ensure the companion is linked to the player and runs toward them.
+        if (companion.friend == null || companion.friend.gameObject != playerTransform.gameObject)
+            companion.FindFriend();
+
+        companion.GoToFriend(approachSpeed);
+
+        // Point at the attacker so it engages immediately on arrival.
+        if (attacker != null && companion.controlAI != null)
+            companion.controlAI.SetCurrentTarget(attacker, true);
+
+        // Register with vAICompanionControl so future damage relays reach it.
+        if (companionControl != null && !companionControl.aICompanions.Contains(companion))
+            companionControl.aICompanions.Add(companion);
 
         if (logEvents)
-            Debug.Log($"[CompanionSummoner] '{instance.name}' returned to pool. Active: {activeInstances.Count}/{maxActiveCompanions}.", this);
+            Debug.Log($"[CompanionSummoner] '{companion.name}' is moving to support the player.", this);
+    }
+
+    // ── Recall ────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Releases all active helpers and deregisters them from companion control.
+    /// Call externally for cutscenes, safe zones, etc.
+    /// </summary>
+    public void RecallAll()
+    {
+        foreach (vAICompanion companion in activeHelpers)
+        {
+            if (companion == null) continue;
+            if (companionControl != null)
+                companionControl.aICompanions.Remove(companion);
+        }
+
+        activeHelpers.Clear();
+
+        if (logEvents)
+            Debug.Log("[CompanionSummoner] All companions recalled.", this);
+    }
+
+    /// <summary>
+    /// Notifies the summoner that a helper has died so it is removed from tracking.
+    /// Called by CompanionDeathNotifier on the companion GameObject.
+    /// </summary>
+    public void NotifyHelperDied(vAICompanion companion)
+    {
+        if (activeHelpers.Remove(companion) && logEvents)
+            Debug.Log($"[CompanionSummoner] '{companion.name}' died and was removed. Active: {activeHelpers.Count}/{maxActiveHelpers}.", this);
     }
 
     // ── Public Queries ────────────────────────────────────────────────────────
 
-    /// <summary>Number of currently active summoned companions.</summary>
-    public int ActiveCount => activeInstances.Count;
+    /// <summary>Number of companions currently helping the player.</summary>
+    public int ActiveCount => activeHelpers.Count;
 
     // ── Gizmos ────────────────────────────────────────────────────────────────
 
     private void OnDrawGizmosSelected()
     {
-        if (!showGizmos) return;
+        if (!showGizmos || recruitRadius <= 0f) return;
         Vector3 center = playerTransform != null ? playerTransform.position : transform.position;
-
         Gizmos.color = Color.cyan;
-        DrawGizmoCircle(center, summonRadius);
-
-        Gizmos.color = Color.red;
-        DrawGizmoCircle(center, despawnDistance);
+        DrawGizmoCircle(center, recruitRadius);
     }
 
     private static void DrawGizmoCircle(Vector3 center, float radius, int segments = 32)

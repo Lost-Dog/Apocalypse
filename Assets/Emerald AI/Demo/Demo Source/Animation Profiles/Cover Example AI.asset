@@ -23,9 +23,9 @@ MonoBehaviour:
   AnimatorCullingMode: 0
   WalkFoldout: 1
   RunFoldout: 1
-  TurnFoldout: 0
+  TurnFoldout: 1
   NonCombatDeathFoldout: 1
-  NonCombatAnimationsFoldout: 0
+  NonCombatAnimationsFoldout: 1
   NonCombatIdleFoldout: 1
   NonCombatHitFoldout: 1
   EmotesFoldout: 0
@@ -106,30 +106,24 @@ MonoBehaviour:
       Mirror: 0
     TurnLeft:
       AnimationSpeed: 1
-      AnimationClip: {fileID: 7400000, guid: e155231d6b1cccd4cb7518e4b664cecf, type: 3}
+      AnimationClip: {fileID: 7400000, guid: ad4db833ace48de428dc65427c87865a, type: 3}
       Mirror: 0
     TurnRight:
       AnimationSpeed: 1
-      AnimationClip: {fileID: 7400000, guid: c1f88274db7ed854e8e0e42fc2a99dc9, type: 3}
+      AnimationClip: {fileID: 7400000, guid: 5d5de7d8b48bcdb4bb259176e5e5dd11, type: 3}
       Mirror: 0
     HitList:
     - AnimationSpeed: 1
-      AnimationClip: {fileID: 7400000, guid: 77214854f62866c4db0d2b1999fcdf96, type: 3}
+      AnimationClip: {fileID: 7400022, guid: 71a860de405aaeb44ace152c21808003, type: 3}
       Mirror: 0
     - AnimationSpeed: 1
-      AnimationClip: {fileID: 7400000, guid: e6b48830c0e82694daca1c0281422e0e, type: 3}
+      AnimationClip: {fileID: 7400024, guid: 71a860de405aaeb44ace152c21808003, type: 3}
       Mirror: 0
     - AnimationSpeed: 1
-      AnimationClip: {fileID: 7400000, guid: 00da53bccc2999e4f82c7868a620854c, type: 3}
+      AnimationClip: {fileID: 7400026, guid: 71a860de405aaeb44ace152c21808003, type: 3}
       Mirror: 0
     - AnimationSpeed: 1
-      AnimationClip: {fileID: 7400000, guid: acbe57a104d8c114c8487055894b3188, type: 3}
-      Mirror: 0
-    - AnimationSpeed: 1
-      AnimationClip: {fileID: 7400000, guid: 4a8c4ee06f0c2c942b970ffc15726000, type: 3}
-      Mirror: 0
-    - AnimationSpeed: 1
-      AnimationClip: {fileID: 7400000, guid: 8a97945fe1c9ff84f9f9a4369d5c4a74, type: 3}
+      AnimationClip: {fileID: 7400028, guid: 71a860de405aaeb44ace152c21808003, type: 3}
       Mirror: 0
     DeathList:
     - AnimationSpeed: 1
@@ -256,13 +250,19 @@ MonoBehaviour:
     - AnimationSpeed: 0.75
       AnimationClip: {fileID: 7400028, guid: 71a860de405aaeb44ace152c21808003, type: 3}
       Mirror: 0
-    - AnimationSpeed: 0.75
-      AnimationClip: {fileID: 7400014, guid: 71a860de405aaeb44ace152c21808003, type: 3}
+    DeathList:
+    - AnimationSpeed: 1
+      AnimationClip: {fileID: 7400000, guid: 5f2b83eeb9d4fcf49a6c2e4595a0c926, type: 3}
       Mirror: 0
-    - AnimationSpeed: 0.75
-      AnimationClip: {fileID: 7400018, guid: 71a860de405aaeb44ace152c21808003, type: 3}
+    - AnimationSpeed: 1
+      AnimationClip: {fileID: 7400000, guid: bde63ab6618c8ac4b9f7b92a078f18f6, type: 3}
       Mirror: 0
-    DeathList: []
+    - AnimationSpeed: 1
+      AnimationClip: {fileID: 7400000, guid: 816c7607215d9064495b49411c218d7f, type: 3}
+      Mirror: 0
+    - AnimationSpeed: 1
+      AnimationClip: {fileID: 7400000, guid: c8a1d64137c638341b3045e090617b3d, type: 3}
+      Mirror: 0
     StrafeLeft:
       AnimationSpeed: 1.35
       AnimationClip: {fileID: 7400014, guid: bf4dc8a29061ade4f883afade616675c, type: 3}
