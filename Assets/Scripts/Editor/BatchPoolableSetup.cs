@@ -42,7 +42,7 @@ namespace ApocalypseEditor
                 {
                     poolable.health = health;
                     poolable.returnToPoolOnDeath = true;
-                    poolable.deactivateDelay = 3f;
+                    poolable.deactivateDelay = 5f;
                     poolable.disableRagdollBeforeReturn = true;
                 }
                 else
@@ -93,7 +93,7 @@ namespace ApocalypseEditor
 
     public class PoolSettingsWindow : EditorWindow
     {
-        private float deactivateDelay = 3f;
+        private float deactivateDelay = 5f;
         private bool disableRagdollBeforeReturn = true;
         private bool debugLogging = false;
 

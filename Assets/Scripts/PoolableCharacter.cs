@@ -7,7 +7,7 @@ public class PoolableCharacter : MonoBehaviour
 {
     [Header("Pool Settings")]
     public bool returnToPoolOnDeath = true;
-    public float deactivateDelay = 3f;
+    public float deactivateDelay = 5f;
     
     [Header("Ragdoll Settings")]
     public bool disableRagdollBeforeReturn = true;
