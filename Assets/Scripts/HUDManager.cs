@@ -82,7 +82,11 @@ public class HUDManager : MonoBehaviour
         }
         else if (progressionUIManager == null)
         {
-            Debug.LogWarning("ProgressionUIManager not assigned in HUDManager!");
+            Debug.LogWarning("HUDManager: ProgressionUIManager not assigned!");
+        }
+        else
+        {
+            Debug.LogWarning("HUDManager: ProgressionManager not assigned on GameManager — XP UI will not update!");
         }
         
         if (lootUIManager != null && gameManager.lootManager != null)

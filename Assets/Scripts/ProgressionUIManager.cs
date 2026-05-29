@@ -26,11 +26,39 @@ public class ProgressionUIManager : MonoBehaviour
     private ProgressionManager progressionManager;
     private float levelUpTimer = 0f;
     private float xpGainTimer = 0f;
-    
+
+    private void Start()
+    {
+        // Self-initialize as a fallback if HUDManager didn't call Initialize() in time.
+        if (progressionManager == null)
+        {
+            ProgressionManager found = ProgressionManager.Instance
+                ?? FindFirstObjectByType<ProgressionManager>();
+
+            if (found != null)
+            {
+                Debug.LogWarning("[ProgressionUIManager] HUDManager did not initialize this component — self-initializing via ProgressionManager.Instance.");
+                Initialize(found);
+            }
+            else
+            {
+                Debug.LogError("[ProgressionUIManager] Could not find a ProgressionManager. XP UI will not work.");
+            }
+        }
+    }
+
     public void Initialize(ProgressionManager manager)
     {
+        // Avoid double-subscribing if called more than once.
+        if (progressionManager != null)
+        {
+            progressionManager.onLevelUp.RemoveListener(OnLevelUp);
+            progressionManager.onXPGained.RemoveListener(OnXPGained);
+            progressionManager.onSkillPointGained.RemoveListener(OnSkillPointGained);
+        }
+
         progressionManager = manager;
-        
+
         if (progressionManager != null)
         {
             progressionManager.onLevelUp.AddListener(OnLevelUp);
