@@ -20,6 +20,10 @@ public static class LoadingScreenSetup
             CanvasScaler.ScaleMode.ScaleWithScreenSize;
         canvasGo.GetComponent<CanvasScaler>().referenceResolution = new Vector2(1920, 1080);
         canvasGo.AddComponent<GraphicRaycaster>();
+        var cueSource = canvasGo.AddComponent<AudioSource>();
+        cueSource.playOnAwake = false;
+        cueSource.loop = false;
+        cueSource.spatialBlend = 0f;
 
         var canvasGroup = canvasGo.AddComponent<CanvasGroup>();
 
@@ -47,6 +51,18 @@ public static class LoadingScreenSetup
         var phaseLabel = CreateTMPLabel(content, "PhaseLabel", "Loading...", 28, TextAlignmentOptions.Center);
         phaseLabel.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 50);
         phaseLabel.color = new Color(0.85f, 0.85f, 0.85f);
+
+        // ── Optional phase artwork ──────────────────────────────────────────
+        var art = CreateUIImage(content, "PhaseArtwork", new Color(1f, 1f, 1f, 0.15f));
+        var artRect = art.GetComponent<RectTransform>();
+        artRect.sizeDelta = new Vector2(0f, 140f);
+        var artImage = art.GetComponent<Image>();
+        artImage.preserveAspect = true;
+
+        // ── Tip label ───────────────────────────────────────────────────────
+        var tipLabel = CreateTMPLabel(content, "TipLabel", "Preparing world...", 20, TextAlignmentOptions.Center);
+        tipLabel.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 56);
+        tipLabel.color = new Color(0.72f, 0.72f, 0.72f);
 
         // ── Progress bar container ──────────────────────────────────────────
         var barContainer = new GameObject("ProgressBarContainer");
@@ -85,6 +101,21 @@ public static class LoadingScreenSetup
         so.FindProperty("progressBarFill").objectReferenceValue = fillImage;
         so.FindProperty("phaseLabel").objectReferenceValue      = phaseLabel;
         so.FindProperty("percentageLabel").objectReferenceValue = pctLabel;
+        so.FindProperty("tipLabel").objectReferenceValue        = tipLabel;
+        so.FindProperty("phaseArtwork").objectReferenceValue    = artImage;
+        so.FindProperty("cueAudioSource").objectReferenceValue  = cueSource;
+
+        SerializedProperty phaseContent = so.FindProperty("phaseContent");
+        if (phaseContent != null)
+        {
+            phaseContent.arraySize = 5;
+            SetPhaseContentEntry(phaseContent, 0, "Loading Scene", "Initializing loading systems...");
+            SetPhaseContentEntry(phaseContent, 1, "Environment Scene", "Streaming world geometry and terrain...");
+            SetPhaseContentEntry(phaseContent, 2, "Environmental Effects Scene", "Applying atmosphere, lighting, and weather...");
+            SetPhaseContentEntry(phaseContent, 3, "Gameplay Objects Scene", "Spawning gameplay systems and actors...");
+            SetPhaseContentEntry(phaseContent, 4, "Complete", "Ready. Entering game...");
+        }
+
         so.ApplyModifiedProperties();
 
         // ── Finish ──────────────────────────────────────────────────────────
@@ -102,6 +133,7 @@ public static class LoadingScreenSetup
         go.AddComponent<RectTransform>();
         var img  = go.AddComponent<Image>();
         img.color = color;
+        img.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
         return go;
     }
 
@@ -126,5 +158,19 @@ public static class LoadingScreenSetup
         rt.anchorMax = Vector2.one;
         rt.offsetMin = Vector2.zero;
         rt.offsetMax = Vector2.zero;
+    }
+
+    private static void SetPhaseContentEntry(SerializedProperty arrayProp, int index, string phaseName, string tip)
+    {
+        SerializedProperty entry = arrayProp.GetArrayElementAtIndex(index);
+        if (entry == null)
+        {
+            return;
+        }
+
+        SerializedProperty nameProp = entry.FindPropertyRelative("phaseName");
+        SerializedProperty tipProp = entry.FindPropertyRelative("tipText");
+        if (nameProp != null) nameProp.stringValue = phaseName;
+        if (tipProp != null) tipProp.stringValue = tip;
     }
 }

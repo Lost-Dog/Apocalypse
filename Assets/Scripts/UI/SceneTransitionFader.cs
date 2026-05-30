@@ -4,7 +4,10 @@ using UnityEngine.UI;
 
 public class SceneTransitionFader : MonoBehaviour
 {
+    private static SceneTransitionFader _instance;
+
     [Header("References")]
+    [SerializeField] private Canvas canvas;
     [SerializeField] private CanvasGroup canvasGroup;
     [SerializeField] private Image fadeImage;
 
@@ -15,11 +18,32 @@ public class SceneTransitionFader : MonoBehaviour
 
     [Header("Behavior")]
     [SerializeField] private bool blockRaycastsDuringFade = true;
+    [SerializeField] private int sortingOrder = 50;
 
     private Coroutine _fadeRoutine;
 
     private void Awake()
     {
+        if (_instance != null && _instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        _instance = this;
+        DontDestroyOnLoad(gameObject);
+
+        if (canvas == null)
+        {
+            canvas = GetComponent<Canvas>();
+        }
+
+        if (canvas != null)
+        {
+            canvas.overrideSorting = true;
+            canvas.sortingOrder = sortingOrder;
+        }
+
         if (fadeImage != null)
         {
             var color = fadeImage.color;
@@ -44,6 +68,11 @@ public class SceneTransitionFader : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (_instance == this)
+        {
+            _instance = null;
+        }
+
         if (SceneFlowManager.Instance != null)
             SceneFlowManager.Instance.StateChanged -= OnStateChanged;
     }
@@ -61,8 +90,11 @@ public class SceneTransitionFader : MonoBehaviour
     {
         switch (state)
         {
-            case SceneFlowManager.FlowState.Loading:
             case SceneFlowManager.FlowState.Transitioning:
+                FadeTo(1f, fadeToBlackDuration, interactableWhenDone: blockRaycastsDuringFade);
+                break;
+
+            case SceneFlowManager.FlowState.Loading:
                 FadeTo(1f, fadeToBlackDuration, interactableWhenDone: blockRaycastsDuringFade);
                 break;
 

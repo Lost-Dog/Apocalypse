@@ -29,6 +29,7 @@ public class SceneFlowSetupWizard : EditorWindow
         var w = GetWindow<SceneFlowSetupWizard>(title: "Scene Flow Setup Wizard");
         w.minSize = new Vector2(430, 560);
         w.Scan();
+        w.TryAutoFillSceneSlots();
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -77,6 +78,24 @@ public class SceneFlowSetupWizard : EditorWindow
 
     private void DrawSceneSlots()
     {
+        using (new EditorGUILayout.HorizontalScope())
+        {
+            if (GUILayout.Button("Auto-Fill Scene Slots"))
+            {
+                TryAutoFillSceneSlots();
+            }
+
+            if (GUILayout.Button("Clear"))
+            {
+                _mainMenuScene = null;
+                _loadingScene = null;
+                _environmentScene = null;
+                _environmentEffectsScene = null;
+                _gameplayObjectsScene = null;
+                SetStatus("Cleared scene slot assignments.", error: false);
+            }
+        }
+
         _mainMenuScene           = SceneField("Main Menu Scene",        _mainMenuScene,
             "Your main menu .unity scene.");
         _loadingScene            = SceneField("Loading Scene",          _loadingScene,
@@ -190,6 +209,13 @@ public class SceneFlowSetupWizard : EditorWindow
         WriteSceneRef(so, "environmentScene",         _environmentScene);
         WriteSceneRef(so, "environmentEffectsScene",  _environmentEffectsScene);
         WriteSceneRef(so, "gameplayObjectsScene",     _gameplayObjectsScene);
+
+        SerializedProperty lightingOverride = so.FindProperty("setEnvironmentEffectsSceneActiveForLighting");
+        if (lightingOverride != null)
+        {
+            lightingOverride.boolValue = true;
+        }
+
         so.ApplyModifiedProperties();
         target.SendMessage("OnValidate", null, SendMessageOptions.DontRequireReceiver);
     }
@@ -264,6 +290,65 @@ public class SceneFlowSetupWizard : EditorWindow
         _status      = msg;
         _statusError = error;
         Repaint();
+    }
+
+    private void TryAutoFillSceneSlots()
+    {
+        if (_mainMenuScene == null)
+            _mainMenuScene = FindSceneAssetByNames("Main Menu Scene", "MainMenu", "Main Menu");
+
+        if (_loadingScene == null)
+            _loadingScene = FindSceneAssetByNames("Loading Scene", "Loading");
+
+        if (_environmentScene == null)
+            _environmentScene = FindSceneAssetByNames("Apocalypse_GC2", "Environment");
+
+        if (_environmentEffectsScene == null)
+            _environmentEffectsScene = FindSceneAssetByNames("OasisScene", "Oasis");
+
+        if (_gameplayObjectsScene == null)
+            _gameplayObjectsScene = FindSceneAssetByNames("Gameplay Scene", "GameplayObjects", "Gameplay");
+
+        SetStatus("Attempted auto-fill for scene slots using common names.", error: false);
+    }
+
+    private static SceneAsset FindSceneAssetByNames(params string[] preferredNames)
+    {
+        string[] guids = AssetDatabase.FindAssets("t:Scene");
+        if (guids == null || guids.Length == 0)
+        {
+            return null;
+        }
+
+        for (int i = 0; i < preferredNames.Length; i++)
+        {
+            string wanted = preferredNames[i];
+            for (int g = 0; g < guids.Length; g++)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guids[g]);
+                string name = System.IO.Path.GetFileNameWithoutExtension(path);
+                if (string.Equals(name, wanted, System.StringComparison.OrdinalIgnoreCase))
+                {
+                    return AssetDatabase.LoadAssetAtPath<SceneAsset>(path);
+                }
+            }
+        }
+
+        for (int i = 0; i < preferredNames.Length; i++)
+        {
+            string wanted = preferredNames[i];
+            for (int g = 0; g < guids.Length; g++)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guids[g]);
+                string name = System.IO.Path.GetFileNameWithoutExtension(path);
+                if (name.IndexOf(wanted, System.StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return AssetDatabase.LoadAssetAtPath<SceneAsset>(path);
+                }
+            }
+        }
+
+        return null;
     }
 }
 
