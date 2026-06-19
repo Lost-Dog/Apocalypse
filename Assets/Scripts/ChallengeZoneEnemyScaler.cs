@@ -49,26 +49,39 @@ public class ChallengeZoneEnemyScaler : MonoBehaviour
     
     public void ScaleEnemy(GameObject enemy)
     {
-        DifficultyScaler scaler = enemy.GetComponent<DifficultyScaler>();
-        
-        if (scaler == null)
-        {
-            scaler = enemy.AddComponent<DifficultyScaler>();
-        }
-        
         int effectiveLevel = GetEffectiveLevel();
-        scaler.ApplyScaling(effectiveLevel);
+
+        // Convert zone level into a lightweight multiplier so this works
+        // across any enemy framework without hard dependencies.
+        float levelDelta = Mathf.Max(0f, effectiveLevel - 1f);
+        float healthMultiplier = 1f + (levelDelta * 0.12f);
+        float damageMultiplier = 1f + (levelDelta * 0.08f);
+
+        DifficultyHealthMultiplier health = enemy.GetComponent<DifficultyHealthMultiplier>();
+        if (health == null)
+        {
+            health = enemy.AddComponent<DifficultyHealthMultiplier>();
+        }
+
+        health.multiplier = Mathf.Max(0.01f, healthMultiplier);
+        health.TryApplyToCommonHealthFields(enemy);
+
+        DifficultyDamageMultiplier damage = enemy.GetComponent<DifficultyDamageMultiplier>();
+        if (damage == null)
+        {
+            damage = enemy.AddComponent<DifficultyDamageMultiplier>();
+        }
+
+        damage.multiplier = Mathf.Max(0.01f, damageMultiplier);
         
         if (showDebugLogs)
         {
-            Debug.Log($"Zone {gameObject.name}: Scaled {enemy.name} to level {effectiveLevel}");
+            Debug.Log($"Zone {gameObject.name}: Scaled {enemy.name} to level {effectiveLevel} (HP x{health.multiplier:F2}, DMG x{damage.multiplier:F2})");
         }
     }
     
     public void ScaleEnemiesInZone(List<GameObject> enemies)
     {
-        int effectiveLevel = GetEffectiveLevel();
-        
         foreach (GameObject enemy in enemies)
         {
             if (enemy != null)

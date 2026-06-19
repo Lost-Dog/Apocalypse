@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 6644542968754978832}
   - component: {fileID: 7295386485597263155}
   - component: {fileID: 2850553884369348187}
-  - component: {fileID: 5179019171545760471}
   - component: {fileID: 837481503679999513}
   - component: {fileID: 867153844595803932}
   - component: {fileID: 2743052401955209853}
@@ -154,44 +153,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &5179019171545760471
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4205684847056148902}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ccd78a3a879bdf24da8361aad9571162, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ExplosionDamage
-  fireBaseDamage: 5
-  burnDamagePerSecond: 2
-  burnDuration: 3
-  damageTickInterval: 0.5
-  damageRadius: 5
-  playerTag: Player
-  burnVFXPrefab: {fileID: 2318868883230936566, guid: a4b4a0f4c32a91448991232b38675d70,
-    type: 3}
-  vfxOffset: {x: 0, y: 0.8, z: 0}
-  attachVFXToPlayer: 1
-  fireEnterSound: {fileID: 0}
-  burnLoopSound: {fileID: 0}
-  soundVolume: 0.7
-  onPlayerEnterFire:
-    m_PersistentCalls:
-      m_Calls: []
-  onPlayerExitFire:
-    m_PersistentCalls:
-      m_Calls: []
-  onBurnStart:
-    m_PersistentCalls:
-      m_Calls: []
-  onBurnEnd:
-    m_PersistentCalls:
-      m_Calls: []
-  showDebugInfo: 0
 --- !u!114 &837481503679999513
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -204,7 +165,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9c053f719a5761419d74bac0e18db28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FireExtinguisher
-  InteractionEnabled: 1
   fireObject: {fileID: 6294313680476474394}
   autoFindFire: 1
   confirmationUI: {fileID: 0}
@@ -212,8 +172,6 @@ MonoBehaviour:
   confirmButton: {fileID: 0}
   cancelButton: {fileID: 0}
   promptMessage: Extinguish this fire?
-  interactionPrompt: Press E to Extinguish Fire
-  interactionRange: 5
   fadeOutDuration: 4
   disableAfterExtinguish: 1
   extinguishSound: {fileID: 0}
@@ -265,6 +223,7 @@ MonoBehaviour:
   infectionDamagePerSecond: 5
   warningSound: {fileID: 8300000, guid: 9ddd7e6b169143741943d3bbf6a5b276, type: 3}
   ambientLoopSound: {fileID: 0}
+  explosionLifetime: 120
 --- !u!1001 &2990519156058971123
 PrefabInstance:
   m_ObjectHideFlags: 0

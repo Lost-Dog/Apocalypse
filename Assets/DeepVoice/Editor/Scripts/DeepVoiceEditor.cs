@@ -151,7 +151,7 @@ namespace AiKodexDeepVoice
             Texture2D disabledWaveForm = (Texture2D)AssetDatabase.LoadAssetAtPath("Assets/DeepVoice/Editor/Resources/DisabledWaveform.png", typeof(Texture));
             EditorGUILayout.BeginVertical("Box");
             EditorGUILayout.LabelField("            DeepVoice   ", headStyle);
-            EditorGUILayout.LabelField("                Version 2.1.4", subStyle);
+            EditorGUILayout.LabelField("                Version 2.1.5", subStyle);
             EditorGUILayout.EndVertical();
             GUI.DrawTexture(new Rect(10, 3, 45, 45), logo, ScaleMode.StretchToFill, true, 10.0F);
             EditorGUILayout.EndHorizontal();

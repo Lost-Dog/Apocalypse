@@ -353,6 +353,7 @@ namespace HierarchyDesigner
         private bool tempEnableTooltipOnComponentIconHovered;
         private bool tempEnableActiveStateEffectForComponentIcons;
         private bool tempDisableComponentIconsForInactiveGameObjects;
+        private bool tempUseHierarchyTreeColorForInactiveGameObjects;
         private bool tempEnableCustomInspectorUI;
         private bool tempEnableEditorUtilities;
         private bool tempIncludeBackgroundImageForGradientBackground;
@@ -2985,6 +2986,7 @@ namespace HierarchyDesigner
             DrawAdvancedCoreFeatures();
             DrawAdvancedMainIconFeatures();
             DrawAdvancedComponentIconsFeatures();
+            DrawAdvancedHierarchyTreeFeatures();
             DrawAdvancedFolderFeatures();
             DrawAdvancedSeparatorFeatures();
             DrawAdvancedHierarchyToolsFeatures();
@@ -3053,6 +3055,18 @@ namespace HierarchyDesigner
             EditorGUILayout.EndVertical();
         }
 
+        private void DrawAdvancedHierarchyTreeFeatures()
+        {
+            EditorGUILayout.BeginVertical(HD_GUI.SecondaryPanelStyle);
+            EditorGUILayout.LabelField("Hierarchy Tree", HD_GUI.FieldsCategoryLabelStyle);
+
+            EditorGUI.BeginChangeCheck();
+            tempUseHierarchyTreeColorForInactiveGameObjects = HD_GUI.DrawToggle("Use Hierarchy Tree Color For Inactive GameObjects", advancedSettingsToggleLabelWidth, tempUseHierarchyTreeColorForInactiveGameObjects, false, true, "Uses a darker faded version of the Hierarchy Tree color for inactive GameObjects instead of the default faded gray color.");
+            if (EditorGUI.EndChangeCheck()) { advancedSettingsHasModifiedChanges = true; }
+
+            EditorGUILayout.EndVertical();
+        }
+
         private void DrawAdvancedFolderFeatures()
         {
             EditorGUILayout.BeginVertical(HD_GUI.SecondaryPanelStyle);
@@ -3111,6 +3125,7 @@ namespace HierarchyDesigner
             HD_Settings.EnableTooltipOnComponentIconHovered = tempEnableTooltipOnComponentIconHovered;
             HD_Settings.EnableActiveStateEffectForComponentIcons = tempEnableActiveStateEffectForComponentIcons;
             HD_Settings.DisableComponentIconsForInactiveGameObjects = tempDisableComponentIconsForInactiveGameObjects;
+            HD_Settings.UseHierarchyTreeColorForInactiveGameObjects = tempUseHierarchyTreeColorForInactiveGameObjects;
             HD_Settings.EnableCustomInspectorGUI = tempEnableCustomInspectorUI;
             HD_Settings.IncludeEditorUtilitiesForHierarchyDesignerRuntimeFolder = tempEnableEditorUtilities;
             HD_Settings.IncludeBackgroundImageForGradientBackground = tempIncludeBackgroundImageForGradientBackground;
@@ -3141,6 +3156,7 @@ namespace HierarchyDesigner
             tempEnableTooltipOnComponentIconHovered = HD_Settings.EnableTooltipOnComponentIconHovered;
             tempEnableActiveStateEffectForComponentIcons = HD_Settings.EnableActiveStateEffectForComponentIcons;
             tempDisableComponentIconsForInactiveGameObjects = HD_Settings.DisableComponentIconsForInactiveGameObjects;
+            tempUseHierarchyTreeColorForInactiveGameObjects = HD_Settings.UseHierarchyTreeColorForInactiveGameObjects;
             tempEnableCustomInspectorUI = HD_Settings.EnableCustomInspectorGUI;
             tempEnableEditorUtilities = HD_Settings.IncludeEditorUtilitiesForHierarchyDesignerRuntimeFolder;
             tempIncludeBackgroundImageForGradientBackground = HD_Settings.IncludeBackgroundImageForGradientBackground;
@@ -3158,6 +3174,7 @@ namespace HierarchyDesigner
             tempEnableTooltipOnComponentIconHovered = enable;
             tempEnableActiveStateEffectForComponentIcons = enable;
             tempDisableComponentIconsForInactiveGameObjects = enable;
+            tempUseHierarchyTreeColorForInactiveGameObjects = enable;
             tempEnableCustomInspectorUI = enable;
             tempEnableEditorUtilities = enable;
             tempIncludeBackgroundImageForGradientBackground = enable;

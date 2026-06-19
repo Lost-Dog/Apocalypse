@@ -4,14 +4,15 @@ using TMPro;
 
 /// <summary>
 /// Aggregates all player stat displays.
-/// Health and shield are read through IPlayerProvider; survival stats come from SurvivalManager.
+/// Uses GC2-backed provider traits for health, armour/shield and survival stats.
 /// </summary>
 public class PlayerStatsDisplay : MonoBehaviour
 {
     [Header("Manager References")]
-    public SurvivalManager   survivalManager;
+    [Tooltip("Legacy reference; UI values are now sourced from provider traits.")]
+    public SurvivalManager survivalManager;
     public ProgressionManager progressionManager;
-    [Tooltip("Assign any IPlayerProvider implementation.")]
+    [Tooltip("Assign GC2PlayerProvider (or any IPlayerProvider). Auto-finds GC2 first.")]
     public MonoBehaviour playerProviderObject;
 
     [Header("UI Text Elements")]
@@ -45,7 +46,17 @@ public class PlayerStatsDisplay : MonoBehaviour
     [Header("Auto-Find References")]
     public bool autoFindReferences = true;
 
+    [Header("Hunger/Thirst Color Thresholds (%)")]
+    [Range(0f, 100f)] public float hungryThreshold = 40f;
+    [Range(0f, 100f)] public float starvingThreshold = 20f;
+    [Range(0f, 100f)] public float thirstyThreshold = 40f;
+    [Range(0f, 100f)] public float dehydratedThreshold = 20f;
+
+    private const float BindRetryInterval = 1f;
+
     private IPlayerProvider playerProvider;
+    private ISurvivalStatsProvider survivalStatsProvider;
+    private float bindRetryTimer;
 
     private void Start()
     {
@@ -53,6 +64,24 @@ public class PlayerStatsDisplay : MonoBehaviour
             FindReferences();
 
         InitializeSliders();
+        SubscribeToEvents();
+        RefreshAll();
+    }
+
+    private void OnEnable()
+    {
+        SubscribeToEvents();
+        RefreshAll();
+    }
+
+    private void OnDisable()
+    {
+        UnsubscribeFromEvents();
+    }
+
+    private void OnDestroy()
+    {
+        UnsubscribeFromEvents();
     }
 
     private void FindReferences()
@@ -61,15 +90,24 @@ public class PlayerStatsDisplay : MonoBehaviour
             survivalManager = SurvivalManager.Instance ?? FindFirstObjectByType<SurvivalManager>();
 
         if (progressionManager == null)
-            progressionManager = FindFirstObjectByType<ProgressionManager>();
+            progressionManager = ProgressionManager.Instance ?? FindFirstObjectByType<ProgressionManager>();
 
         playerProvider = playerProviderObject as IPlayerProvider;
+        if (playerProvider == null)
+            playerProvider = FindBestPlayerProvider();
 
         if (playerProvider == null)
             playerProvider = FindAnyPlayerProvider();
 
         if (playerProvider == null)
             Debug.LogWarning("[PlayerStatsDisplay] No IPlayerProvider found — health and shield will not update.");
+
+        survivalStatsProvider = playerProvider as ISurvivalStatsProvider;
+        if (survivalStatsProvider == null)
+            survivalStatsProvider = FindAnySurvivalProvider();
+
+        if (survivalStatsProvider == null)
+            Debug.LogWarning("[PlayerStatsDisplay] No ISurvivalStatsProvider found — survival trait UI will not update.");
     }
 
     private void InitializeSliders()
@@ -77,26 +115,117 @@ public class PlayerStatsDisplay : MonoBehaviour
         if (playerProvider != null)
         {
             SetSlider(healthSlider, 0f, playerProvider.MaxHealth, playerProvider.Health);
-            SetSlider(shieldSlider, 0f, playerProvider.MaxShield, playerProvider.Shield);
+            SetSlider(shieldSlider, 0f, 100f, playerProvider.MaxShield > 0f
+                ? playerProvider.Shield / playerProvider.MaxShield * 100f : 0f);
         }
 
         if (xpSlider != null)
         {
             xpSlider.minValue = 0f;
             xpSlider.maxValue = 1f;
+            xpSlider.value = progressionManager != null ? Mathf.Clamp01(progressionManager.GetXPProgress()) : 0f;
+        }
+
+        if (survivalStatsProvider != null)
+        {
+            SetSlider(temperatureSlider, 0f, survivalStatsProvider.MaxTemperature, survivalStatsProvider.Temperature);
+            SetSlider(staminaSlider, 0f, survivalStatsProvider.MaxStamina, survivalStatsProvider.Stamina);
+            SetSlider(infectionSlider, 0f, survivalStatsProvider.MaxInfection, survivalStatsProvider.Infection);
+            SetSlider(hungerSlider, 0f, survivalStatsProvider.MaxHunger, survivalStatsProvider.Hunger);
+            SetSlider(thirstSlider, 0f, survivalStatsProvider.MaxThirst, survivalStatsProvider.Thirst);
+            return;
         }
 
         if (survivalManager != null)
         {
             SetSlider(temperatureSlider, 0f, survivalManager.maxTemperature, survivalManager.currentTemperature);
-            SetSlider(staminaSlider,     0f, survivalManager.maxStamina,      survivalManager.currentStamina);
-            SetSlider(infectionSlider,   0f, survivalManager.maxInfection,    survivalManager.currentInfection);
-            SetSlider(hungerSlider,      0f, survivalManager.maxHunger,       survivalManager.currentHunger);
-            SetSlider(thirstSlider,      0f, survivalManager.maxThirst,       survivalManager.currentThirst);
+            SetSlider(staminaSlider, 0f, survivalManager.maxStamina, survivalManager.currentStamina);
+            SetSlider(infectionSlider, 0f, survivalManager.maxInfection, survivalManager.currentInfection);
+            SetSlider(hungerSlider, 0f, survivalManager.maxHunger, survivalManager.currentHunger);
+            SetSlider(thirstSlider, 0f, survivalManager.maxThirst, survivalManager.currentThirst);
         }
     }
 
     private void Update()
+    {
+        // Retry late-bound manager/provider hookups without polling UI every frame.
+        bindRetryTimer += Time.deltaTime;
+        if (bindRetryTimer < BindRetryInterval) return;
+
+        bindRetryTimer = 0f;
+
+        bool wasMissingSource = playerProvider == null || progressionManager == null || survivalManager == null;
+        if (!wasMissingSource) return;
+
+        FindReferences();
+        SubscribeToEvents();
+        RefreshAll();
+    }
+
+    private void SubscribeToEvents()
+    {
+        if (playerProvider != null)
+        {
+            playerProvider.OnHealthChanged -= HandleHealthChanged;
+            playerProvider.OnHealthChanged += HandleHealthChanged;
+
+            playerProvider.OnArmourChanged -= HandleArmourChanged;
+            playerProvider.OnArmourChanged += HandleArmourChanged;
+        }
+
+        if (progressionManager != null)
+        {
+            progressionManager.onXPGained.RemoveListener(HandleXPGained);
+            progressionManager.onXPGained.AddListener(HandleXPGained);
+
+            progressionManager.onLevelUp.RemoveListener(HandleLevelUp);
+            progressionManager.onLevelUp.AddListener(HandleLevelUp);
+        }
+
+        if (survivalManager != null)
+        {
+            survivalManager.onTemperatureChanged.RemoveListener(HandleTemperatureChanged);
+            survivalManager.onTemperatureChanged.AddListener(HandleTemperatureChanged);
+
+            survivalManager.onStaminaChanged.RemoveListener(HandleStaminaChanged);
+            survivalManager.onStaminaChanged.AddListener(HandleStaminaChanged);
+
+            survivalManager.onInfectionChanged.RemoveListener(HandleInfectionChanged);
+            survivalManager.onInfectionChanged.AddListener(HandleInfectionChanged);
+
+            survivalManager.onHungerChanged.RemoveListener(HandleHungerChanged);
+            survivalManager.onHungerChanged.AddListener(HandleHungerChanged);
+
+            survivalManager.onThirstChanged.RemoveListener(HandleThirstChanged);
+            survivalManager.onThirstChanged.AddListener(HandleThirstChanged);
+        }
+    }
+
+    private void UnsubscribeFromEvents()
+    {
+        if (playerProvider != null)
+        {
+            playerProvider.OnHealthChanged -= HandleHealthChanged;
+            playerProvider.OnArmourChanged -= HandleArmourChanged;
+        }
+
+        if (progressionManager != null)
+        {
+            progressionManager.onXPGained.RemoveListener(HandleXPGained);
+            progressionManager.onLevelUp.RemoveListener(HandleLevelUp);
+        }
+
+        if (survivalManager != null)
+        {
+            survivalManager.onTemperatureChanged.RemoveListener(HandleTemperatureChanged);
+            survivalManager.onStaminaChanged.RemoveListener(HandleStaminaChanged);
+            survivalManager.onInfectionChanged.RemoveListener(HandleInfectionChanged);
+            survivalManager.onHungerChanged.RemoveListener(HandleHungerChanged);
+            survivalManager.onThirstChanged.RemoveListener(HandleThirstChanged);
+        }
+    }
+
+    private void RefreshAll()
     {
         UpdateHealthDisplay();
         UpdateShieldDisplay();
@@ -108,20 +237,68 @@ public class PlayerStatsDisplay : MonoBehaviour
         UpdateThirstDisplay();
     }
 
+    private void HandleHealthChanged(float current, float max)
+    {
+        UpdateHealthDisplay();
+    }
+
+    private void HandleArmourChanged(float current, float max)
+    {
+        UpdateShieldDisplay();
+    }
+
+    private void HandleXPGained(int amount)
+    {
+        UpdateXPDisplay();
+    }
+
+    private void HandleLevelUp(int level)
+    {
+        UpdateXPDisplay();
+    }
+
+    private void HandleTemperatureChanged(float value)
+    {
+        UpdateTemperatureDisplay();
+    }
+
+    private void HandleStaminaChanged(float value)
+    {
+        UpdateStaminaDisplay();
+    }
+
+    private void HandleInfectionChanged(float value)
+    {
+        UpdateInfectionDisplay();
+    }
+
+    private void HandleHungerChanged(float value)
+    {
+        UpdateHungerDisplay();
+    }
+
+    private void HandleThirstChanged(float value)
+    {
+        UpdateThirstDisplay();
+    }
+
     private void UpdateHealthDisplay()
     {
         if (playerProvider == null) return;
 
-        float value    = playerProvider.Health;
+        float value = playerProvider.Health;
         float maxValue = playerProvider.MaxHealth;
 
         if (healthText != null)
-            healthText.text = $"{Mathf.RoundToInt(value)}/{Mathf.RoundToInt(maxValue)}";
+        {
+            float pct = maxValue > 0f ? value / maxValue * 100f : 0f;
+            healthText.text = $"{Mathf.RoundToInt(pct)}%";
+        }
 
         if (healthSlider != null)
         {
             healthSlider.maxValue = maxValue;
-            healthSlider.value    = value;
+            healthSlider.value = value;
         }
     }
 
@@ -129,16 +306,20 @@ public class PlayerStatsDisplay : MonoBehaviour
     {
         if (playerProvider == null) return;
 
-        float value    = playerProvider.Shield;
+        float value = playerProvider.Shield;
         float maxValue = playerProvider.MaxShield;
 
         if (shieldText != null)
-            shieldText.text = $"{Mathf.RoundToInt(value)}/{Mathf.RoundToInt(maxValue)}";
+        {
+            float pct = maxValue > 0f ? value / maxValue * 100f : 0f;
+            shieldText.text = $"{Mathf.RoundToInt(pct)}%";
+        }
 
         if (shieldSlider != null)
         {
-            shieldSlider.maxValue = maxValue;
-            shieldSlider.value    = value;
+            shieldSlider.minValue = 0f;
+            shieldSlider.maxValue = 100f;
+            shieldSlider.value = maxValue > 0f ? value / maxValue * 100f : 0f;
         }
     }
 
@@ -147,92 +328,199 @@ public class PlayerStatsDisplay : MonoBehaviour
         if (progressionManager == null) return;
 
         if (levelText != null) levelText.text = $"{progressionManager.currentLevel}";
-        if (xpText != null)    xpText.text    = $"{progressionManager.currentXP}";
-        if (xpSlider != null)  xpSlider.value = progressionManager.GetXPProgress();
+        if (xpText != null) xpText.text = $"{progressionManager.currentXP}";
+        if (xpSlider != null) xpSlider.value = Mathf.Clamp01(progressionManager.GetXPProgress());
     }
 
     private void UpdateTemperatureDisplay()
     {
-        if (survivalManager == null) return;
+        float current;
+        float max;
+
+        if (survivalStatsProvider != null)
+        {
+            current = survivalStatsProvider.Temperature;
+            max = Mathf.Max(1f, survivalStatsProvider.MaxTemperature);
+        }
+        else if (survivalManager != null)
+        {
+            current = survivalManager.currentTemperature;
+            max = Mathf.Max(1f, survivalManager.maxTemperature);
+        }
+        else
+        {
+            return;
+        }
 
         if (temperatureText != null)
         {
-            string display = showTemperaturePrefix
-                ? $"Temp: {survivalManager.currentTemperature:F1}°C"
-                : $"{survivalManager.currentTemperature:F1}°C";
+            string display = showTemperaturePrefix ? $"Temp: {current:F1}°C" : $"{current:F1}°C";
             temperatureText.text = display;
         }
 
-        if (temperatureSlider != null) temperatureSlider.value = survivalManager.currentTemperature;
+        if (temperatureSlider != null)
+        {
+            temperatureSlider.maxValue = max;
+            temperatureSlider.value = current;
+        }
     }
 
     private void UpdateStaminaDisplay()
     {
-        if (survivalManager == null) return;
+        float current;
+        float max;
+
+        if (survivalStatsProvider != null)
+        {
+            current = survivalStatsProvider.Stamina;
+            max = Mathf.Max(1f, survivalStatsProvider.MaxStamina);
+        }
+        else if (survivalManager != null)
+        {
+            current = survivalManager.currentStamina;
+            max = Mathf.Max(1f, survivalManager.maxStamina);
+        }
+        else
+        {
+            return;
+        }
 
         if (staminaText != null)
         {
             string display = showStaminaPrefix
-                ? $"Stamina: {Mathf.RoundToInt(survivalManager.currentStamina)}/{Mathf.RoundToInt(survivalManager.maxStamina)}"
-                : $"{Mathf.RoundToInt(survivalManager.currentStamina)}/{Mathf.RoundToInt(survivalManager.maxStamina)}";
+                ? $"Stamina: {Mathf.RoundToInt(current)}/{Mathf.RoundToInt(max)}"
+                : $"{Mathf.RoundToInt(current)}/{Mathf.RoundToInt(max)}";
             staminaText.text = display;
         }
 
-        if (staminaSlider != null) staminaSlider.value = survivalManager.currentStamina;
+        if (staminaSlider != null)
+        {
+            staminaSlider.maxValue = max;
+            staminaSlider.value = current;
+        }
     }
 
     private void UpdateInfectionDisplay()
     {
-        if (survivalManager == null) return;
+        float current;
+        float max;
+
+        if (survivalStatsProvider != null)
+        {
+            current = survivalStatsProvider.Infection;
+            max = Mathf.Max(1f, survivalStatsProvider.MaxInfection);
+        }
+        else if (survivalManager != null)
+        {
+            current = survivalManager.currentInfection;
+            max = Mathf.Max(1f, survivalManager.maxInfection);
+        }
+        else
+        {
+            return;
+        }
+
+        float pct = current / max * 100f;
 
         if (infectionText != null)
         {
             string display = showInfectionPrefix
-                ? $"Infection: {Mathf.RoundToInt(survivalManager.currentInfection)}%"
-                : $"{Mathf.RoundToInt(survivalManager.currentInfection)}%";
+                ? $"Immunity: {Mathf.RoundToInt(pct)}%"
+                : $"{Mathf.RoundToInt(pct)}%";
             infectionText.text = display;
         }
 
-        if (infectionSlider != null) infectionSlider.value = survivalManager.currentInfection;
+        if (infectionSlider != null)
+        {
+            infectionSlider.maxValue = max;
+            infectionSlider.value = current;
+        }
     }
 
     private void UpdateHungerDisplay()
     {
-        if (survivalManager == null) return;
+        float current;
+        float max;
+
+        if (survivalStatsProvider != null)
+        {
+            current = survivalStatsProvider.Hunger;
+            max = Mathf.Max(1f, survivalStatsProvider.MaxHunger);
+        }
+        else if (survivalManager != null)
+        {
+            current = survivalManager.currentHunger;
+            max = Mathf.Max(1f, survivalManager.maxHunger);
+        }
+        else
+        {
+            return;
+        }
+
+        float pct = current / max * 100f;
 
         if (hungerText != null)
         {
-            string display = showHungerPrefix
-                ? $"Hunger: {Mathf.RoundToInt(survivalManager.currentHunger)}%"
-                : $"{Mathf.RoundToInt(survivalManager.currentHunger)}%";
-            hungerText.text  = display;
-            hungerText.color = survivalManager.IsStarving ? Color.red
-                             : survivalManager.IsHungry   ? Color.yellow
-                             : Color.white;
+            string display = showHungerPrefix ? $"Hunger: {Mathf.RoundToInt(pct)}%" : $"{Mathf.RoundToInt(pct)}%";
+            hungerText.text = display;
+            hungerText.color = pct <= starvingThreshold ? Color.red
+                : pct <= hungryThreshold ? Color.yellow
+                : Color.white;
         }
 
-        if (hungerSlider != null) hungerSlider.value = survivalManager.currentHunger;
+        if (hungerSlider != null)
+        {
+            hungerSlider.maxValue = max;
+            hungerSlider.value = current;
+        }
     }
 
     private void UpdateThirstDisplay()
     {
-        if (survivalManager == null) return;
+        float current;
+        float max;
+
+        if (survivalStatsProvider != null)
+        {
+            current = survivalStatsProvider.Thirst;
+            max = Mathf.Max(1f, survivalStatsProvider.MaxThirst);
+        }
+        else if (survivalManager != null)
+        {
+            current = survivalManager.currentThirst;
+            max = Mathf.Max(1f, survivalManager.maxThirst);
+        }
+        else
+        {
+            return;
+        }
+
+        float pct = current / max * 100f;
 
         if (thirstText != null)
         {
-            string display = showThirstPrefix
-                ? $"Thirst: {Mathf.RoundToInt(survivalManager.currentThirst)}%"
-                : $"{Mathf.RoundToInt(survivalManager.currentThirst)}%";
-            thirstText.text  = display;
-            thirstText.color = survivalManager.IsDehydrated ? Color.red
-                             : survivalManager.IsThirsty    ? new Color(0.3f, 0.7f, 1f)
-                             : Color.white;
+            string display = showThirstPrefix ? $"Thirst: {Mathf.RoundToInt(pct)}%" : $"{Mathf.RoundToInt(pct)}%";
+            thirstText.text = display;
+            thirstText.color = pct <= dehydratedThreshold ? Color.red
+                : pct <= thirstyThreshold ? new Color(0.3f, 0.7f, 1f)
+                : Color.white;
         }
 
-        if (thirstSlider != null) thirstSlider.value = survivalManager.currentThirst;
+        if (thirstSlider != null)
+        {
+            thirstSlider.maxValue = max;
+            thirstSlider.value = current;
+        }
     }
 
-    // HELPERS -------------------------------------------------------------------------------------
+    private static IPlayerProvider FindBestPlayerProvider()
+    {
+        GC2PlayerProvider gc2Provider = FindFirstObjectByType<GC2PlayerProvider>();
+        if (gc2Provider != null)
+            return gc2Provider;
+
+        return FindAnyPlayerProvider();
+    }
 
     private static IPlayerProvider FindAnyPlayerProvider()
     {
@@ -244,11 +532,21 @@ public class PlayerStatsDisplay : MonoBehaviour
         return null;
     }
 
+    private static ISurvivalStatsProvider FindAnySurvivalProvider()
+    {
+        foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+        {
+            if (mb is ISurvivalStatsProvider provider)
+                return provider;
+        }
+        return null;
+    }
+
     private static void SetSlider(Slider slider, float min, float max, float value)
     {
         if (slider == null) return;
         slider.minValue = min;
         slider.maxValue = max;
-        slider.value    = value;
+        slider.value = value;
     }
 }

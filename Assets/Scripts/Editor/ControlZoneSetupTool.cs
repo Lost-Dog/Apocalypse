@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
+using System;
 
 public class ControlZoneSetupTool : EditorWindow
 {
@@ -76,6 +77,13 @@ public class ControlZoneSetupTool : EditorWindow
 
     private void CreateControlZones()
     {
+        Type controlZoneType = ResolveControlZoneType();
+        if (controlZoneType == null)
+        {
+            EditorUtility.DisplayDialog("Missing Type", "ControlZone type was not found. Recreate or migrate the zone runtime before using this setup tool.", "OK");
+            return;
+        }
+
         GameObject controlZonesParent = GameObject.Find("ControlZones");
         if (controlZonesParent == null)
         {
@@ -91,12 +99,8 @@ public class ControlZoneSetupTool : EditorWindow
             zoneObj.transform.parent = controlZonesParent.transform;
             zoneObj.transform.position = Vector3.zero + Vector3.right * i * (captureRadius * 3f);
             
-            ControlZone zone = Undo.AddComponent<ControlZone>(zoneObj);
-            zone.zoneName = $"Control Point {i + 1}";
-            zone.captureRadius = captureRadius;
-            zone.captureTime = captureTime;
-            zone.enemyCount = enemiesPerZone;
-            zone.enemyPrefab = enemyPrefab;
+            Component zone = Undo.AddComponent(zoneObj, controlZoneType);
+            ApplyZoneDefaults(zone, $"Control Point {i + 1}");
             
             SphereCollider trigger = Undo.AddComponent<SphereCollider>(zoneObj);
             trigger.isTrigger = true;
@@ -113,8 +117,8 @@ public class ControlZoneSetupTool : EditorWindow
                 DestroyImmediate(indicator.GetComponent<Collider>());
                 
                 MeshRenderer renderer = indicator.GetComponent<MeshRenderer>();
-                zone.zoneRenderer = renderer;
-                zone.visualIndicator = indicator;
+                SetObjectReference(zone, "zoneRenderer", renderer);
+                SetObjectReference(zone, "visualIndicator", indicator);
                 
                 if (zoneMaterial != null)
                 {
@@ -129,7 +133,7 @@ public class ControlZoneSetupTool : EditorWindow
         EditorUtility.DisplayDialog("Success", $"Created {numberOfZones} control zones!\n\nPosition them in your scene and configure enemy spawn points.", "OK");
     }
 
-    private void CreateSpawnPoints(GameObject zoneObj, ControlZone zone)
+    private void CreateSpawnPoints(GameObject zoneObj, Component zone)
     {
         if (enemiesPerZone <= 0)
             return;
@@ -156,7 +160,7 @@ public class ControlZoneSetupTool : EditorWindow
             spawnPoints.Add(spawnPoint.transform);
         }
         
-        zone.enemySpawnPoints = spawnPoints.ToArray();
+        SetTransformArray(zone, "enemySpawnPoints", spawnPoints);
     }
 
     private void AddSpawnPointsToSelected()
@@ -167,7 +171,7 @@ public class ControlZoneSetupTool : EditorWindow
             return;
         }
         
-        ControlZone zone = Selection.activeGameObject.GetComponent<ControlZone>();
+        Component zone = GetControlZoneComponent(Selection.activeGameObject);
         if (zone == null)
         {
             EditorUtility.DisplayDialog("Error", "Selected GameObject doesn't have a ControlZone component!", "OK");
@@ -187,18 +191,21 @@ public class ControlZoneSetupTool : EditorWindow
         }
         
         GameObject obj = Selection.activeGameObject;
-        
-        ControlZone zone = obj.GetComponent<ControlZone>();
+
+        Component zone = GetControlZoneComponent(obj);
         if (zone == null)
         {
-            zone = Undo.AddComponent<ControlZone>(obj);
+            Type controlZoneType = ResolveControlZoneType();
+            if (controlZoneType == null)
+            {
+                EditorUtility.DisplayDialog("Missing Type", "ControlZone type was not found. Recreate or migrate the zone runtime before using this setup tool.", "OK");
+                return;
+            }
+
+            zone = Undo.AddComponent(obj, controlZoneType);
         }
-        
-        zone.zoneName = obj.name;
-        zone.captureRadius = captureRadius;
-        zone.captureTime = captureTime;
-        zone.enemyCount = enemiesPerZone;
-        zone.enemyPrefab = enemyPrefab;
+
+        ApplyZoneDefaults(zone, obj.name);
         
         SphereCollider trigger = obj.GetComponent<SphereCollider>();
         if (trigger == null)
@@ -210,5 +217,101 @@ public class ControlZoneSetupTool : EditorWindow
         
         Debug.Log($"Setup {obj.name} as Control Zone");
         EditorUtility.DisplayDialog("Success", $"{obj.name} is now a Control Zone!\n\nAdd enemy spawn points if needed.", "OK");
+    }
+
+    private Component GetControlZoneComponent(GameObject obj)
+    {
+        if (obj == null) return null;
+        Type controlZoneType = ResolveControlZoneType();
+        return controlZoneType != null ? obj.GetComponent(controlZoneType) : null;
+    }
+
+    private static Type ResolveControlZoneType()
+    {
+        Type direct = Type.GetType("ControlZone, Assembly-CSharp");
+        if (direct != null) return direct;
+
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        for (int i = 0; i < assemblies.Length; i++)
+        {
+            Type found = assemblies[i].GetType("ControlZone");
+            if (found != null) return found;
+        }
+
+        return null;
+    }
+
+    private void ApplyZoneDefaults(Component zone, string zoneName)
+    {
+        if (zone == null) return;
+
+        SerializedObject so = new SerializedObject(zone);
+        SetString(so, "zoneName", zoneName);
+        SetFloat(so, "captureRadius", captureRadius);
+        SetFloat(so, "captureTime", captureTime);
+        SetInt(so, "enemyCount", enemiesPerZone);
+        SetObject(so, "enemyPrefab", enemyPrefab);
+        so.ApplyModifiedPropertiesWithoutUndo();
+        EditorUtility.SetDirty(zone);
+    }
+
+    private static void SetObjectReference(Component zone, string propertyName, UnityEngine.Object value)
+    {
+        if (zone == null) return;
+        SerializedObject so = new SerializedObject(zone);
+        SetObject(so, propertyName, value);
+        so.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    private static void SetTransformArray(Component zone, string propertyName, List<Transform> values)
+    {
+        if (zone == null) return;
+        SerializedObject so = new SerializedObject(zone);
+        SerializedProperty property = so.FindProperty(propertyName);
+        if (property != null && property.isArray)
+        {
+            property.arraySize = values.Count;
+            for (int i = 0; i < values.Count; i++)
+            {
+                property.GetArrayElementAtIndex(i).objectReferenceValue = values[i];
+            }
+        }
+        so.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    private static void SetString(SerializedObject so, string propertyName, string value)
+    {
+        SerializedProperty property = so.FindProperty(propertyName);
+        if (property != null && property.propertyType == SerializedPropertyType.String)
+        {
+            property.stringValue = value;
+        }
+    }
+
+    private static void SetFloat(SerializedObject so, string propertyName, float value)
+    {
+        SerializedProperty property = so.FindProperty(propertyName);
+        if (property != null && property.propertyType == SerializedPropertyType.Float)
+        {
+            property.floatValue = value;
+        }
+    }
+
+    private static void SetInt(SerializedObject so, string propertyName, int value)
+    {
+        SerializedProperty property = so.FindProperty(propertyName);
+        if (property != null && property.propertyType == SerializedPropertyType.Integer)
+        {
+            property.intValue = value;
+        }
+    }
+
+    private static void SetObject(SerializedObject so, string propertyName, UnityEngine.Object value)
+    {
+        SerializedProperty property = so.FindProperty(propertyName);
+        if (property != null && property.propertyType == SerializedPropertyType.ObjectReference)
+        {
+            property.objectReferenceValue = value;
+        }
     }
 }

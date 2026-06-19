@@ -30,12 +30,23 @@ public class ExplosionManager : MonoBehaviour
     public AudioClip explosionSound;
     [Range(0f, 1f)] public float soundVolume = 0.7f;
     public float soundMaxDistance = 50f;
+
+    [Header("Damage")]
+    [Tooltip("Apply radial damage to the player when an explosion is triggered")]
+    public bool applyExplosionDamage = true;
+    [Tooltip("Maximum damage at the explosion center")]
+    public float explosionDamage = 35f;
+    [Tooltip("Radius within which explosion damage is applied")]
+    public float explosionDamageRadius = 12f;
+    [Tooltip("If true, damage scales down with distance to the explosion")]
+    public bool useDamageFalloff = true;
     
     [Header("Debug")]
     public bool showDebugInfo = false;
     
     private bool isRunning = false;
     private List<GameObject> availableTargets = new List<GameObject>();
+    private IPlayerProvider cachedPlayerProvider;
     
     private void Start()
     {
@@ -171,6 +182,8 @@ public class ExplosionManager : MonoBehaviour
         {
             PlayExplosionSound(target.transform.position);
         }
+
+        ApplyExplosionDamage(target.transform.position);
         
         StartCoroutine(DeactivateAfterDuration(explosionObj, explosionDuration));
         
@@ -201,6 +214,51 @@ public class ExplosionManager : MonoBehaviour
     private void PlayExplosionSound(Vector3 position)
     {
         AudioSource.PlayClipAtPoint(explosionSound, position, soundVolume);
+    }
+
+    private void ApplyExplosionDamage(Vector3 explosionPosition)
+    {
+        if (!applyExplosionDamage || explosionDamage <= 0f || explosionDamageRadius <= 0f) return;
+
+        IPlayerProvider provider = ResolvePlayerProvider();
+        if (provider == null || provider.PlayerObject == null || !provider.IsAlive) return;
+
+        float distance = Vector3.Distance(explosionPosition, provider.PlayerObject.transform.position);
+        if (distance > explosionDamageRadius) return;
+
+        float damageAmount = explosionDamage;
+        if (useDamageFalloff)
+        {
+            float normalized = Mathf.Clamp01(distance / explosionDamageRadius);
+            damageAmount *= 1f - normalized;
+        }
+
+        if (damageAmount <= 0f) return;
+
+        provider.ApplyDamage(damageAmount);
+
+        if (showDebugInfo)
+        {
+            Debug.Log($"Explosion hit player for {damageAmount:F1} damage at distance {distance:F1}m");
+        }
+    }
+
+    private IPlayerProvider ResolvePlayerProvider()
+    {
+        if (cachedPlayerProvider != null)
+            return cachedPlayerProvider;
+
+        MonoBehaviour[] allMonoBehaviours = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+        for (int i = 0; i < allMonoBehaviours.Length; i++)
+        {
+            if (allMonoBehaviours[i] is IPlayerProvider provider)
+            {
+                cachedPlayerProvider = provider;
+                return cachedPlayerProvider;
+            }
+        }
+
+        return null;
     }
     
     public void TriggerSingleExplosion()

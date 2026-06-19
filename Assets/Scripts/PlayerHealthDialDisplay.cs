@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 /// <summary>
 /// Reads the player's health from IPlayerProvider and drives a stat-dial
@@ -13,6 +14,7 @@ public class PlayerHealthDialDisplay : MonoBehaviour
     [Header("References")]
     public TextMeshProUGUI healthText;
     public Animator        dialAnimator;
+    public Image           fillImage;
     [Tooltip("Assign any IPlayerProvider implementation. Auto-found if left empty.")]
     public MonoBehaviour   playerProviderObject;
 
@@ -54,13 +56,30 @@ public class PlayerHealthDialDisplay : MonoBehaviour
         playerProvider = playerProviderObject as IPlayerProvider;
 
         if (playerProvider == null)
-            playerProvider = FindAnyPlayerProvider();
+            playerProvider = FindBestPlayerProvider();
 
         if (playerProvider == null)
             Debug.LogWarning("[PlayerHealthDialDisplay] No IPlayerProvider found.");
 
         if (healthText   == null) healthText   = GetComponentInChildren<TextMeshProUGUI>();
         if (dialAnimator == null) dialAnimator = GetComponentInParent<Animator>();
+
+        if (fillImage == null)
+            fillImage = GetComponent<Image>();
+
+        if (fillImage == null)
+        {
+            Transform hudPlayer = transform.Find("HUD_Player");
+            if (hudPlayer != null)
+                fillImage = hudPlayer.GetComponent<Image>();
+        }
+
+        if (fillImage == null)
+        {
+            GameObject namedHudPlayer = GameObject.Find("HUD_Player");
+            if (namedHudPlayer != null)
+                fillImage = namedHudPlayer.GetComponent<Image>();
+        }
     }
 
     // ── Event handler ─────────────────────────────────────────────────────────
@@ -78,6 +97,9 @@ public class PlayerHealthDialDisplay : MonoBehaviour
     {
         if (dialAnimator != null)
             dialAnimator.SetFloat(DialParameter, normalized);
+
+        if (fillImage != null)
+            fillImage.fillAmount = normalized;
     }
 
     private void UpdateLabel(float normalized)
@@ -104,8 +126,12 @@ public class PlayerHealthDialDisplay : MonoBehaviour
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    private static IPlayerProvider FindAnyPlayerProvider()
+    private static IPlayerProvider FindBestPlayerProvider()
     {
+        GC2PlayerProvider gc2Provider = Object.FindFirstObjectByType<GC2PlayerProvider>();
+        if (gc2Provider != null)
+            return gc2Provider;
+
         foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
         {
             if (mb is IPlayerProvider provider)

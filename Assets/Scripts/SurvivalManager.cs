@@ -22,6 +22,9 @@ public class SurvivalManager : MonoBehaviour
     public float sprintSpeedThreshold = 3f;
 
     private IPlayerProvider playerProvider;
+    private ISurvivalStatsProvider survivalStatsProvider;
+    private bool providerEventsBound;
+    private bool progressionEventsBound;
 
     [Header("Temperature Settings")]
     [Tooltip("Maximum temperature value (100% = optimal)")]
@@ -48,22 +51,27 @@ public class SurvivalManager : MonoBehaviour
     public float staminaDrainRateRunning = 10f;
     public float staminaDrainRateCold = 0.5f;
 
-    [Header("Infection Settings")]
+    [Header("Immunity Settings")]
     [Range(0f, 100f)] public float maxInfection = 100f;
-    [Range(0f, 100f)] public float currentInfection = 0f;
+    [Tooltip("Current immunity level (100 = fully immune, 0 = no immunity)")]
+    [Range(0f, 100f)] public float currentInfection = 100f;
+    [Tooltip("Rate at which immunity drains per second when infected")]
     public float infectionGrowthRate = 0.5f;
+    [Tooltip("Rate at which immunity recovers per second in safe zones")]
     public float infectionDecayRate = 1f;
-    [Tooltip("Infection threshold for health damage (percentage)")]
+    [Tooltip("Immunity threshold below which health damage is applied (e.g. 10 = damage when immunity ≤ 10%)")]
     public float infectionDamageThreshold = 10f;
     public float infectionDamagePerSecond = 1f;
+    [Tooltip("When disabled, immunity does not passively damage health at low values.")]
+    public bool enablePassiveInfectionDamage = false;
 
-    [Tooltip("Is player currently infected (infection will grow over time)")]
+    [Tooltip("Is player currently infected (immunity will drain over time)")]
     private bool isInfected = false;
 
-    [Tooltip("Infection level cured by consumables - growth paused at this level")]
+    [Tooltip("Immunity level at which drain is paused by a consumable cure")]
     private float curedInfectionLevel = 0f;
 
-    [Tooltip("Is infection growth paused by consumable cure")]
+    [Tooltip("Is immunity drain paused by consumable cure")]
     private bool infectionGrowthPaused = false;
 
     [Header("Hunger Settings")]
@@ -144,13 +152,19 @@ public class SurvivalManager : MonoBehaviour
     public bool enableHungerSystem = true;
     public bool enableThirstSystem = true;
     public bool showDebugInfo = false;
+    [Tooltip("When enabled, prints the periodic '[Survival] Temp...Stamina...Infection...' status line")]
+    public bool logPeriodicSurvivalStatus = false;
+
+    [Header("Initialization")]
+    [Tooltip("When enabled, survival stats are initialized to 100% (max values) at runtime start.")]
+    public bool initializeStatsAtFullOnStart = true;
 
     [Header("Armour Settings")]
     [Tooltip("Enable the armour system. When enabled, damage depletes armour before health.")]
     public bool enableArmourSystem = true;
-    [Tooltip("Current armour value. Initialised from PlayerTraitsRuntime on Start.")]
+    [Tooltip("Current armour value. Initialised from ProgressionManager on Start.")]
     [Range(0f, 100000f)] public float currentArmour = 100f;
-    [Tooltip("Maximum armour. Driven by PlayerTraitsRuntime based on level — do not set manually.")]
+    [Tooltip("Maximum armour. Driven by ProgressionManager based on level — do not set manually.")]
     public float maxArmour = 100f;
     [Tooltip("Armour regenerates passively at this rate (points per second) when out of combat.")]
     public float armourRegenRate = 5f;
@@ -168,6 +182,14 @@ public class SurvivalManager : MonoBehaviour
     [Tooltip("Show performance metrics in console")]
     public bool showPerformanceMetrics = false;
 
+    [Header("Runtime Debug Panel")]
+    [Tooltip("Shows a small runtime panel with survival and player stats as percentages.")]
+    public bool showRuntimeDebugPanel = false;
+    [Tooltip("Top-left panel offset in pixels.")]
+    public Vector2 runtimePanelPosition = new Vector2(16f, 16f);
+    [Tooltip("Panel size in pixels.")]
+    public Vector2 runtimePanelSize = new Vector2(260f, 210f);
+
     [Header("Safe Zone Interaction")]
     public bool isInSafeZone = false;
     public bool pauseTemperatureNormalizationInSafeZone = true;
@@ -183,6 +205,8 @@ public class SurvivalManager : MonoBehaviour
     private bool isIndoors = false;
     private bool isNearFire = false;
     private bool isInColdZone = false;
+    private bool didInitializeFullStats;
+    private bool hasHandledPlayerDeath;
 
     // Armour regen cooldown — reset to armourRegenDelay each time damage is taken.
     private float _armourRegenTimer = 0f;
@@ -192,6 +216,8 @@ public class SurvivalManager : MonoBehaviour
     private float updateInterval;
     private float lastUpdateTime;
     private int framesSinceLastUpdate = 0;
+    private GUIStyle runtimePanelStyle;
+    private GUIStyle runtimeLabelStyle;
 
     public float TemperaturePercentage => currentTemperature / maxTemperature;
     public bool IsCriticalCold => currentTemperature <= criticalTemperature;
@@ -227,6 +253,11 @@ public class SurvivalManager : MonoBehaviour
         hungerDamageTimer = damageTickInterval;
         thirstDamageTimer = damageTickInterval;
 
+        if (initializeStatsAtFullOnStart)
+        {
+            InitializeStatsToFull();
+        }
+
         // OPTIMIZATION: Calculate update interval
         updateInterval = 1f / Mathf.Max(1, updatesPerSecond);
         lastUpdateTime = Time.time;
@@ -239,41 +270,90 @@ public class SurvivalManager : MonoBehaviour
 
     private void FindPlayerReferences()
     {
-        playerProvider = playerProviderObject as IPlayerProvider;
-
-        if (playerProvider == null)
-            playerProvider = FindAnyPlayerProvider();
-
-        if (playerProvider == null)
-            Debug.LogWarning("SurvivalManager: No IPlayerProvider found — health damage will not be applied.");
-        else
-        {
-            playerProvider.OnHealthChanged += HandleHealthChanged;
-            playerProvider.OnArmourChanged += HandleArmourChanged;
-        }
-
-        if (progressionManager == null)
-            progressionManager = FindFirstObjectByType<ProgressionManager>();
-
-        if (progressionManager == null)
-            Debug.LogWarning("SurvivalManager: Could not find ProgressionManager!");
-        else
-            progressionManager.onLevelUp.AddListener(OnLevelUp);
+        EnsurePlayerProviderBinding();
+        EnsureProgressionBinding();
 
         // Initialise armour cap from current level.
         SyncArmourCapFromTraits();
     }
 
+    public void EnsurePlayerProviderBinding()
+    {
+        if (playerProvider == null)
+        {
+            playerProvider = playerProviderObject as IPlayerProvider;
+
+            if (playerProvider == null)
+            {
+                GC2PlayerProvider gc2Provider = FindFirstObjectByType<GC2PlayerProvider>();
+                if (gc2Provider != null)
+                {
+                    playerProviderObject = gc2Provider;
+                    playerProvider = gc2Provider;
+                }
+            }
+
+            if (playerProvider == null)
+                playerProvider = FindAnyPlayerProvider();
+        }
+
+        if (playerProvider == null)
+        {
+            if (showDebugInfo)
+                Debug.LogWarning("SurvivalManager: No IPlayerProvider found — health damage will not be applied.");
+            return;
+        }
+
+        survivalStatsProvider = playerProvider as ISurvivalStatsProvider;
+
+        if (providerEventsBound) return;
+
+        playerProvider.OnHealthChanged += HandleHealthChanged;
+        playerProvider.OnArmourChanged += HandleArmourChanged;
+        playerProvider.OnDeath += HandlePlayerDeath;
+        providerEventsBound = true;
+
+        PullSurvivalValuesFromProvider();
+
+        if (initializeStatsAtFullOnStart && !didInitializeFullStats)
+        {
+            InitializeStatsToFull();
+        }
+    }
+
+    private void EnsureProgressionBinding()
+    {
+        if (progressionManager == null)
+            progressionManager = FindFirstObjectByType<ProgressionManager>();
+
+        if (progressionManager == null)
+        {
+            if (showDebugInfo)
+                Debug.LogWarning("SurvivalManager: Could not find ProgressionManager!");
+            return;
+        }
+
+        if (progressionEventsBound) return;
+
+        progressionManager.onLevelUp.AddListener(OnLevelUp);
+        progressionEventsBound = true;
+    }
+
     private void OnDestroy()
     {
-        if (playerProvider != null)
+        if (playerProvider != null && providerEventsBound)
         {
             playerProvider.OnHealthChanged -= HandleHealthChanged;
             playerProvider.OnArmourChanged -= HandleArmourChanged;
+            playerProvider.OnDeath -= HandlePlayerDeath;
+            providerEventsBound = false;
         }
 
-        if (progressionManager != null)
+        if (progressionManager != null && progressionEventsBound)
+        {
             progressionManager.onLevelUp.RemoveListener(OnLevelUp);
+            progressionEventsBound = false;
+        }
     }
 
     private static IPlayerProvider FindAnyPlayerProvider()
@@ -307,6 +387,20 @@ public class SurvivalManager : MonoBehaviour
             _armourRegenTimer = armourRegenDelay;
     }
 
+    private void HandlePlayerDeath()
+    {
+        if (hasHandledPlayerDeath) return;
+
+        hasHandledPlayerDeath = true;
+        isInCriticalCold = false;
+        isInCriticalInfection = false;
+        isInCriticalHunger = false;
+        isInCriticalThirst = false;
+
+        if (showDebugInfo)
+            Debug.Log("[SurvivalManager] Player death detected. Survival updates paused until respawn.");
+    }
+
     // ── Armour helpers ────────────────────────────────────────────────────────
 
     private void OnLevelUp(int newLevel)
@@ -316,20 +410,26 @@ public class SurvivalManager : MonoBehaviour
 
     private void SyncArmourCapFromTraits()
     {
-        if (PlayerTraitsRuntime.Instance == null) return;
+        ProgressionManager source = progressionManager != null
+            ? progressionManager
+            : ProgressionManager.Instance;
+        if (source == null) return;
 
-        int cap = PlayerTraitsRuntime.Instance.CurrentMaxArmour;
+        int cap = source.CurrentMaxArmour;
         if (cap <= 0) return;
 
         maxArmour = cap;
 
-        // Propagate to InvectorPlayerProvider so the interception layer knows
-        // the updated cap. Do not refill — player keeps current armour.
-        if (playerProvider is InvectorPlayerProvider ipp)
-            ipp.SetMaxArmour(cap, refillToMax: false);
-
         if (currentArmour > maxArmour)
             currentArmour = maxArmour;
+
+        // Keep provider armour aligned with the new cap without framework-specific calls.
+        if (playerProvider != null)
+        {
+            float providerArmour = Mathf.Min(playerProvider.Armour, maxArmour);
+            playerProvider.SetArmour(providerArmour);
+            currentArmour = providerArmour;
+        }
 
         onArmourChanged?.Invoke(currentArmour, maxArmour);
     }
@@ -381,14 +481,93 @@ public class SurvivalManager : MonoBehaviour
             PerformSurvivalUpdates(Time.deltaTime);
         }
 
-        if (showDebugInfo)
+        if (showDebugInfo && logPeriodicSurvivalStatus)
         {
             DisplayDebugInfo();
         }
     }
 
+    private void OnGUI()
+    {
+        if (!showRuntimeDebugPanel) return;
+        if (!Application.isPlaying) return;
+
+        EnsureRuntimePanelStyles();
+
+        Rect panelRect = new Rect(
+            runtimePanelPosition.x,
+            runtimePanelPosition.y,
+            runtimePanelSize.x,
+            runtimePanelSize.y
+        );
+
+        GUILayout.BeginArea(panelRect, GUIContent.none, runtimePanelStyle);
+        GUILayout.Label("Survival Debug (%)", runtimeLabelStyle);
+
+        DrawPercentLine("Health", GetHealthPercent());
+        DrawPercentLine("Armour", GetSafePercent(currentArmour, maxArmour));
+        DrawPercentLine("Temperature", GetSafePercent(currentTemperature, maxTemperature));
+        DrawPercentLine("Stamina", GetSafePercent(currentStamina, maxStamina));
+        DrawPercentLine("Immunity", GetSafePercent(currentInfection, maxInfection));
+        DrawPercentLine("Hunger", GetSafePercent(currentHunger, maxHunger));
+        DrawPercentLine("Thirst", GetSafePercent(currentThirst, maxThirst));
+
+        GUILayout.EndArea();
+    }
+
+    private void EnsureRuntimePanelStyles()
+    {
+        if (runtimePanelStyle != null && runtimeLabelStyle != null) return;
+
+        runtimePanelStyle = new GUIStyle(GUI.skin.box)
+        {
+            alignment = TextAnchor.UpperLeft,
+            padding = new RectOffset(10, 10, 8, 8),
+            fontSize = 12
+        };
+
+        runtimeLabelStyle = new GUIStyle(GUI.skin.label)
+        {
+            fontStyle = FontStyle.Bold,
+            fontSize = 12
+        };
+    }
+
+    private void DrawPercentLine(string label, float percent)
+    {
+        float clamped = Mathf.Clamp(percent, 0f, 1f);
+        GUILayout.Label($"{label,-12} {clamped * 100f,6:0.0}%");
+    }
+
+    private float GetHealthPercent()
+    {
+        if (playerProvider == null) return 0f;
+        return GetSafePercent(playerProvider.Health, playerProvider.MaxHealth);
+    }
+
+    private static float GetSafePercent(float current, float max)
+    {
+        if (max <= 0f) return 0f;
+        return current / max;
+    }
+
     private void PerformSurvivalUpdates(float deltaTime)
     {
+        if (playerProvider == null)
+            EnsurePlayerProviderBinding();
+
+        if (playerProvider != null && !playerProvider.IsAlive)
+        {
+            if (!hasHandledPlayerDeath)
+                HandlePlayerDeath();
+            return;
+        }
+
+        if (hasHandledPlayerDeath)
+            hasHandledPlayerDeath = false;
+
+        PullSurvivalValuesFromProvider();
+
         if (enableTemperatureSystem)
         {
             UpdateTemperature();
@@ -457,7 +636,7 @@ public class SurvivalManager : MonoBehaviour
             if (Mathf.Abs(currentTemperature - targetTemp) > 0.5f)
             {
                 float normalizeAmount = temperatureNormalizeRate * Time.deltaTime;
-                currentTemperature = Mathf.MoveTowards(currentTemperature, targetTemp, normalizeAmount);
+                SetTemperature(Mathf.MoveTowards(currentTemperature, targetTemp, normalizeAmount));
             }
         }
 
@@ -497,11 +676,13 @@ public class SurvivalManager : MonoBehaviour
 
     private void UpdateInfection()
     {
+        // Immunity drains while infected and outside a safe zone.
         if (isInfected && !isInSafeZone)
         {
             if (infectionGrowthPaused)
             {
-                if (currentInfection > curedInfectionLevel)
+                // Resume drain if immunity has fallen below the pause level (medicine wore off).
+                if (currentInfection < curedInfectionLevel)
                 {
                     infectionGrowthPaused = false;
                 }
@@ -509,25 +690,24 @@ public class SurvivalManager : MonoBehaviour
 
             if (!infectionGrowthPaused)
             {
-                float infectionChange = infectionGrowthRate * Time.deltaTime;
-                SetInfection(currentInfection + infectionChange);
+                SetInfection(currentInfection - infectionGrowthRate * Time.deltaTime);
             }
         }
-        else if (isInSafeZone && currentInfection > 0f)
+        else if (isInSafeZone && currentInfection < maxInfection)
         {
-            float infectionChange = -infectionDecayRate * Time.deltaTime;
-            SetInfection(currentInfection + infectionChange);
+            // Immunity recovers in safe zones.
+            SetInfection(currentInfection + infectionDecayRate * Time.deltaTime);
 
-            if (currentInfection <= 0f)
+            if (currentInfection >= maxInfection)
             {
                 isInfected = false;
                 infectionGrowthPaused = false;
-                curedInfectionLevel = 0f;
+                curedInfectionLevel = maxInfection;
             }
         }
 
         bool wasCritical = isInCriticalInfection;
-        isInCriticalInfection = currentInfection >= (maxInfection - infectionDamageThreshold);
+        isInCriticalInfection = currentInfection <= infectionDamageThreshold;
 
         if (isInCriticalInfection && !wasCritical)
         {
@@ -589,6 +769,9 @@ public class SurvivalManager : MonoBehaviour
         if (!isInCriticalInfection || playerProvider == null)
             return;
 
+        if (!enablePassiveInfectionDamage)
+            return;
+
         infectionDamageTimer -= Time.deltaTime;
 
         if (infectionDamageTimer <= 0f)
@@ -610,14 +793,22 @@ public class SurvivalManager : MonoBehaviour
 
         playerProvider.ApplyDamage(damage);
 
-        if (showDebugInfo)
+        if (showDebugInfo && !string.Equals(source, "infection", System.StringComparison.OrdinalIgnoreCase))
             Debug.Log($"{source} damage: {damage:F1} HP (remaining: {playerProvider.Health:F1})");
     }
 
     public void SetTemperature(float value)
     {
         float oldTemperature = currentTemperature;
-        currentTemperature = Mathf.Clamp(value, 0f, maxTemperature);
+        float clamped = Mathf.Clamp(value, 0f, maxTemperature);
+
+        if (survivalStatsProvider != null)
+        {
+            survivalStatsProvider.SetTemperature(clamped);
+            clamped = Mathf.Clamp(survivalStatsProvider.Temperature, 0f, maxTemperature);
+        }
+
+        currentTemperature = clamped;
 
         if (!Mathf.Approximately(oldTemperature, currentTemperature))
         {
@@ -638,7 +829,15 @@ public class SurvivalManager : MonoBehaviour
     public void SetStamina(float value)
     {
         float oldStamina = currentStamina;
-        currentStamina = Mathf.Clamp(value, 0f, maxStamina);
+        float clamped = Mathf.Clamp(value, 0f, maxStamina);
+
+        if (survivalStatsProvider != null)
+        {
+            survivalStatsProvider.SetStamina(clamped);
+            clamped = Mathf.Clamp(survivalStatsProvider.Stamina, 0f, maxStamina);
+        }
+
+        currentStamina = clamped;
 
         if (!Mathf.Approximately(oldStamina, currentStamina))
         {
@@ -674,7 +873,15 @@ public class SurvivalManager : MonoBehaviour
     public void SetInfection(float value)
     {
         float oldInfection = currentInfection;
-        currentInfection = Mathf.Clamp(value, 0f, maxInfection);
+        float clamped = Mathf.Clamp(value, 0f, maxInfection);
+
+        if (survivalStatsProvider != null)
+        {
+            survivalStatsProvider.SetInfection(clamped);
+            clamped = Mathf.Clamp(survivalStatsProvider.Infection, 0f, maxInfection);
+        }
+
+        currentInfection = clamped;
 
         if (!Mathf.Approximately(oldInfection, currentInfection))
         {
@@ -682,46 +889,50 @@ public class SurvivalManager : MonoBehaviour
         }
     }
 
+    /// <summary>Adds infection exposure, reducing immunity by the given amount.</summary>
     public void AddInfection(float amount)
     {
-        SetInfection(currentInfection + amount);
+        SetInfection(currentInfection - amount);
 
-        if (amount > 0f && currentInfection > 0f)
+        if (amount > 0f && currentInfection < maxInfection)
         {
             isInfected = true;
 
-            if (currentInfection > curedInfectionLevel)
+            if (currentInfection < curedInfectionLevel)
             {
                 infectionGrowthPaused = false;
             }
         }
     }
 
+    /// <summary>Cures infection, restoring immunity by the given amount.</summary>
     public void CureInfection(float amount)
     {
-        SetInfection(currentInfection - amount);
+        SetInfection(currentInfection + amount);
 
-        if (currentInfection <= 0f)
+        if (currentInfection >= maxInfection)
         {
             isInfected = false;
             infectionGrowthPaused = false;
-            curedInfectionLevel = 0f;
+            curedInfectionLevel = maxInfection;
         }
     }
 
+    /// <summary>Restores immunity by a percentage of the current deficit, pausing further drain at the restored level.</summary>
     public void CureInfectionPartial(float percentage)
     {
-        if (currentInfection <= 0f) return;
+        if (currentInfection >= maxInfection) return;
 
-        float cureAmount = currentInfection * (percentage / 100f);
-        SetInfection(currentInfection - cureAmount);
+        float missingImmunity = maxInfection - currentInfection;
+        float restoreAmount = missingImmunity * (percentage / 100f);
+        SetInfection(currentInfection + restoreAmount);
 
         curedInfectionLevel = currentInfection;
         infectionGrowthPaused = true;
 
         if (showDebugInfo)
         {
-            Debug.Log($"<color=green>Infection partially cured by {percentage}%. Growth paused at {curedInfectionLevel:F1}</color>");
+            Debug.Log($"<color=green>Immunity partially restored by {percentage}%. Drain paused at {curedInfectionLevel:F1}</color>");
         }
     }
 
@@ -769,9 +980,13 @@ public class SurvivalManager : MonoBehaviour
         SetStamina(maxStamina);
     }
 
+    /// <summary>Resets immunity to full (100%).</summary>
     public void ResetInfection()
     {
-        SetInfection(0f);
+        SetInfection(maxInfection);
+        isInfected = false;
+        infectionGrowthPaused = false;
+        curedInfectionLevel = maxInfection;
     }
 
     public void ResetHunger()
@@ -795,6 +1010,40 @@ public class SurvivalManager : MonoBehaviour
         playerProvider?.SetHealth(playerProvider.MaxHealth);
     }
 
+    [ContextMenu("Initialize Stats To Full")]
+    public void InitializeStatsToFull()
+    {
+        EnsurePlayerProviderBinding();
+
+        // Ensure current values match max values, independent from inspector serialized values.
+        SetTemperature(maxTemperature);
+        SetStamina(maxStamina);
+        SetInfection(maxInfection);
+        SetHunger(maxHunger);
+        SetThirst(maxThirst);
+
+        if (enableArmourSystem)
+        {
+            SetArmour(maxArmour);
+        }
+
+        if (playerProvider != null)
+        {
+            playerProvider.SetHealth(playerProvider.MaxHealth);
+        }
+
+        isInfected = false;
+        infectionGrowthPaused = false;
+        curedInfectionLevel = maxInfection;
+
+        didInitializeFullStats = true;
+
+        if (showDebugInfo)
+        {
+            Debug.Log("[SurvivalManager] Initialized stats to full values.");
+        }
+    }
+
     public string GetTemperatureStatus()
     {
         float temp = currentTemperature;
@@ -809,10 +1058,10 @@ public class SurvivalManager : MonoBehaviour
 
     public string GetInfectionStatus()
     {
-        if (currentInfection == 0f) return "None";
-        if (currentInfection < 25f) return "Mild";
-        if (currentInfection < 50f) return "Moderate";
-        if (currentInfection < 75f) return "Severe";
+        if (currentInfection >= maxInfection) return "None";
+        if (currentInfection > 75f) return "Mild";
+        if (currentInfection > 50f) return "Moderate";
+        if (currentInfection > 25f) return "Severe";
         return "Critical";
     }
 
@@ -837,13 +1086,13 @@ public class SurvivalManager : MonoBehaviour
     private void DisplayDebugInfo()
     {
         string info = $"[Survival] Temp: {currentTemperature:F1}°C ({GetTemperatureStatus()}) | " +
-                      $"Stamina: {currentStamina:F0}/{maxStamina} | " +
-                      $"Infection: {currentInfection:F0}/{maxInfection} | " +
+                  $"Stamina: {currentStamina:F0}/{maxStamina} | " +
+                  $"Immunity: {currentInfection:F0}/{maxInfection} | " +
                       $"Hunger: {currentHunger:F0}/{maxHunger} ({GetHungerStatus()}) | " +
                       $"Thirst: {currentThirst:F0}/{maxThirst} ({GetThirstStatus()})";
 
         if (isInCriticalCold) info += " [COLD!]";
-        if (isInCriticalInfection) info += " [INFECTED!]";
+        if (isInCriticalInfection) info += " [LOW IMMUNITY!]";
         if (isInCriticalHunger) info += " [STARVING!]";
         if (isInCriticalThirst) info += " [DEHYDRATED!]";
         if (isInSafeZone) info += " [SAFE ZONE]";
@@ -864,10 +1113,7 @@ public class SurvivalManager : MonoBehaviour
         if (playerProvider != null && playerProvider.MoveSpeed > sprintSpeedThreshold)
             decreaseRate *= hungerRunningMultiplier;
 
-        currentHunger -= decreaseRate * Time.deltaTime;
-        currentHunger = Mathf.Clamp(currentHunger, 0f, maxHunger);
-
-        onHungerChanged?.Invoke(currentHunger);
+        SetHunger(currentHunger - decreaseRate * Time.deltaTime);
     }
 
     private void ApplyHungerEffects()
@@ -921,10 +1167,7 @@ public class SurvivalManager : MonoBehaviour
         if (currentTemperature > normalTemperature)
             decreaseRate *= thirstHotMultiplier;
 
-        currentThirst -= decreaseRate * Time.deltaTime;
-        currentThirst = Mathf.Clamp(currentThirst, 0f, maxThirst);
-
-        onThirstChanged?.Invoke(currentThirst);
+        SetThirst(currentThirst - decreaseRate * Time.deltaTime);
     }
 
     private void ApplyThirstEffects()
@@ -987,13 +1230,140 @@ public class SurvivalManager : MonoBehaviour
 
     public void SetHunger(float value)
     {
-        currentHunger = Mathf.Clamp(value, 0f, maxHunger);
-        onHungerChanged?.Invoke(currentHunger);
+        float clamped = Mathf.Clamp(value, 0f, maxHunger);
+
+        if (survivalStatsProvider != null)
+        {
+            survivalStatsProvider.SetHunger(clamped);
+            clamped = Mathf.Clamp(survivalStatsProvider.Hunger, 0f, maxHunger);
+        }
+
+        if (!Mathf.Approximately(currentHunger, clamped))
+        {
+            currentHunger = clamped;
+            onHungerChanged?.Invoke(currentHunger);
+        }
     }
 
     public void SetThirst(float value)
     {
-        currentThirst = Mathf.Clamp(value, 0f, maxThirst);
-        onThirstChanged?.Invoke(currentThirst);
+        float clamped = Mathf.Clamp(value, 0f, maxThirst);
+
+        if (survivalStatsProvider != null)
+        {
+            survivalStatsProvider.SetThirst(clamped);
+            clamped = Mathf.Clamp(survivalStatsProvider.Thirst, 0f, maxThirst);
+        }
+
+        if (!Mathf.Approximately(currentThirst, clamped))
+        {
+            currentThirst = clamped;
+            onThirstChanged?.Invoke(currentThirst);
+        }
     }
+
+    private void PullSurvivalValuesFromProvider()
+    {
+        if (survivalStatsProvider == null) return;
+
+        float oldTemperature = currentTemperature;
+        float oldStamina = currentStamina;
+        float oldInfection = currentInfection;
+        float oldHunger = currentHunger;
+        float oldThirst = currentThirst;
+
+        maxTemperature = Mathf.Max(1f, survivalStatsProvider.MaxTemperature);
+        maxStamina = Mathf.Max(1f, survivalStatsProvider.MaxStamina);
+        maxInfection = Mathf.Max(1f, survivalStatsProvider.MaxInfection);
+        maxHunger = Mathf.Max(1f, survivalStatsProvider.MaxHunger);
+        maxThirst = Mathf.Max(1f, survivalStatsProvider.MaxThirst);
+
+        currentTemperature = Mathf.Clamp(survivalStatsProvider.Temperature, 0f, maxTemperature);
+        currentStamina = Mathf.Clamp(survivalStatsProvider.Stamina, 0f, maxStamina);
+        currentInfection = Mathf.Clamp(survivalStatsProvider.Infection, 0f, maxInfection);
+        currentHunger = Mathf.Clamp(survivalStatsProvider.Hunger, 0f, maxHunger);
+        currentThirst = Mathf.Clamp(survivalStatsProvider.Thirst, 0f, maxThirst);
+
+        if (!Mathf.Approximately(oldTemperature, currentTemperature))
+            onTemperatureChanged?.Invoke(currentTemperature);
+
+        if (!Mathf.Approximately(oldStamina, currentStamina))
+            onStaminaChanged?.Invoke(currentStamina);
+
+        if (!Mathf.Approximately(oldInfection, currentInfection))
+            onInfectionChanged?.Invoke(currentInfection);
+
+        if (!Mathf.Approximately(oldHunger, currentHunger))
+            onHungerChanged?.Invoke(currentHunger);
+
+        if (!Mathf.Approximately(oldThirst, currentThirst))
+            onThirstChanged?.Invoke(currentThirst);
+    }
+
+    /// <summary>
+    /// Restores all player survival traits and health by the given percentage of their maximum values.
+    /// Infection is reduced (cured) by the same percentage instead of being increased.
+    /// </summary>
+    /// <param name="percentage">Percentage to restore, in the range 0–100.</param>
+    public void HealAllStats(float percentage)
+    {
+        if (percentage <= 0f) return;
+
+        float fraction = percentage / 100f;
+
+        // Health
+        if (playerProvider != null && playerProvider.IsAlive)
+        {
+            float healthGain = playerProvider.MaxHealth * fraction;
+            float newHealth  = Mathf.Clamp(playerProvider.Health + healthGain, 0f, playerProvider.MaxHealth);
+            playerProvider.SetHealth(newHealth);
+        }
+
+        // Hunger
+        if (enableHungerSystem)
+            AddHunger(maxHunger * fraction);
+
+        // Thirst
+        if (enableThirstSystem)
+            AddThirst(maxThirst * fraction);
+
+        // Temperature (warmth)
+        if (enableTemperatureSystem)
+            ModifyTemperature(maxTemperature * fraction);
+
+        // Stamina
+        if (enableStaminaSystem)
+            AddStamina(maxStamina * fraction);
+
+        // Armour
+        if (enableArmourSystem)
+            ModifyArmour(maxArmour * fraction);
+
+        // Immunity — restore by percentage of current deficit.
+        if (enableInfectionSystem && currentInfection < maxInfection)
+            CureInfectionPartial(percentage);
+
+        if (showDebugInfo)
+            Debug.Log($"[SurvivalManager] HealAllStats: restored {percentage}% of all traits.");
+    }
+
+#if UNITY_EDITOR
+    private const float TemperatureCelsiusMin =  -5f;
+    private const float TemperatureCelsiusMax =  37f;
+
+    private void OnDrawGizmosSelected()
+    {
+        Vector3 labelPos = GetLabelWorldPosition();
+        float celsius = Mathf.Lerp(TemperatureCelsiusMin, TemperatureCelsiusMax,
+            maxTemperature > 0f ? currentTemperature / maxTemperature : 0f);
+        UnityEditor.Handles.Label(labelPos, $"{Mathf.RoundToInt(celsius)}°C");
+    }
+
+    private Vector3 GetLabelWorldPosition()
+    {
+        if (playerProvider?.PlayerObject != null)
+            return playerProvider.PlayerObject.transform.position + Vector3.up * 2.4f;
+        return transform.position + Vector3.up * 2.4f;
+    }
+#endif
 }

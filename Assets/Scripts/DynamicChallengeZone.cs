@@ -54,7 +54,7 @@ public class DynamicChallengeZone : MonoBehaviour
             }
         }
         
-        Debug.Log($"<color=cyan>DynamicChallengeZone '{zoneName}': Detected {detectedSpawnPoints.Count} spawn points</color>");
+        // Intentionally quiet: spawn-point counting does not need to spam startup logs.
     }
     
     public bool IsAvailable()

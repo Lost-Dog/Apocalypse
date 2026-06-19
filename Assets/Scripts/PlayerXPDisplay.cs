@@ -8,7 +8,6 @@ using UnityEngine.UI;
 /// </summary>
 public class PlayerXPDisplay : MonoBehaviour
 {
-    private const float RefreshInterval  = 1f;
     private const string XpFormat        = "XP  {0:N0}  /  {1:N0}";
     private const string LevelFormat     = "{0}";
 
@@ -18,19 +17,60 @@ public class PlayerXPDisplay : MonoBehaviour
 
     private int   _lastXP    = -1;
     private int   _lastLevel = -1;
-    private float _refreshTimer;
+    private ProgressionManager _pm;
+
+    private void Start()
+    {
+        TrySubscribe();
+    }
+
+    private void OnEnable()
+    {
+        TrySubscribe();
+    }
 
     private void Update()
     {
-        _refreshTimer += Time.deltaTime;
-        if (_refreshTimer < RefreshInterval) return;
-        _refreshTimer = 0f;
+        // Lazy bind in case manager is created after this UI object.
+        if (_pm == null)
+            TrySubscribe();
+    }
+
+    private void OnDestroy()
+    {
+        if (_pm != null)
+        {
+            _pm.onXPGained.RemoveListener(OnXPGained);
+            _pm.onLevelUp.RemoveListener(OnLevelUp);
+        }
+    }
+
+    private void TrySubscribe()
+    {
+        if (_pm != null) return;
+
+        ProgressionManager pm = ProgressionManager.Instance;
+        if (pm == null) return;
+
+        _pm = pm;
+        _pm.onXPGained.AddListener(OnXPGained);
+        _pm.onLevelUp.AddListener(OnLevelUp);
+        Refresh();
+    }
+
+    private void OnXPGained(int amount)
+    {
+        Refresh();
+    }
+
+    private void OnLevelUp(int level)
+    {
         Refresh();
     }
 
     private void Refresh()
     {
-        ProgressionManager pm = ProgressionManager.Instance;
+        ProgressionManager pm = _pm ?? ProgressionManager.Instance;
         if (pm == null) return;
 
         int currentXP = pm.currentXP;

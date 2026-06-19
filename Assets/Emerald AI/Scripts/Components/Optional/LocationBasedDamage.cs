@@ -80,11 +80,6 @@ namespace EmeraldAI
                     DamageComponent.EmeraldComponent = EmeraldComponent;
                     DamageComponent.DamageMultiplier = ColliderList[i].DamageMultiplier;
 
-                    //Integrated support for Invector
-                    #if INVECTOR_MELEE || INVECTOR_SHOOTER
-                    ColliderList[i].ColliderObject.gameObject.AddComponent<Invector.vCharacterController.vDamageReceiver>();
-                    #endif
-
                     EmeraldComponent.DetectionComponent.IgnoredColliders.Add(ColliderList[i].ColliderObject);
                 }
 

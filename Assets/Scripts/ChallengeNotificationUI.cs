@@ -45,6 +45,7 @@ public class ChallengeNotificationUI : MonoBehaviour
     private bool isInitialized = false;
     private Transform playerTransform;
     private float distanceUpdateTimer;
+    private bool reportedBindingConflict = false;
 
     private void Awake()
     {
@@ -76,6 +77,8 @@ public class ChallengeNotificationUI : MonoBehaviour
 
         challengeManager = manager;
 
+        ValidateTextBindings();
+
         challengeManager.onChallengeSpawned.AddListener(OnChallengeSpawned);
         challengeManager.onChallengeProgress.AddListener(OnChallengeProgress);
         challengeManager.onChallengeCompleted.AddListener(OnChallengeCompleted);
@@ -84,6 +87,21 @@ public class ChallengeNotificationUI : MonoBehaviour
 
         FindPlayerTransform();
         isInitialized = true;
+    }
+
+    private void ValidateTextBindings()
+    {
+        // If both fields point to the same label, progress and distance updates will fight.
+        if (progressText != null && distanceText != null && progressText == distanceText)
+        {
+            showDistance = false;
+
+            if (!reportedBindingConflict)
+            {
+                reportedBindingConflict = true;
+                Debug.LogWarning("ChallengeNotificationUI: progressText and distanceText reference the same TMP object. Disabled distance updates to prevent UI flicker. Fix the scene bindings to use separate labels.");
+            }
+        }
     }
     
     private void FindPlayerTransform()
@@ -303,7 +321,7 @@ public class ChallengeNotificationUI : MonoBehaviour
                 ? currentDisplayedChallenge.enemiesKilled 
                 : currentDisplayedChallenge.currentProgress;
                 
-            progressText.text = $"{actualProgress} / {totalCount}";
+            progressText.text = $"Kills: {actualProgress} / {totalCount}";
             
             // Debug output
             if (actualProgress != currentDisplayedChallenge.currentProgress)
@@ -314,7 +332,9 @@ public class ChallengeNotificationUI : MonoBehaviour
 
         if (progressSlider != null)
         {
-            int totalCount = currentDisplayedChallenge.challengeData.GetEnemyCount();
+            int totalCount = currentDisplayedChallenge.totalEnemiesSpawned > 0
+                ? currentDisplayedChallenge.totalEnemiesSpawned
+                : currentDisplayedChallenge.challengeData.GetEnemyCount();
             if (totalCount == 0)
                 totalCount = currentDisplayedChallenge.challengeData.GetCivilianCount();
             
@@ -353,6 +373,10 @@ public class ChallengeNotificationUI : MonoBehaviour
     private void UpdateDistanceDisplay()
     {
         if (currentDisplayedChallenge == null || distanceText == null)
+            return;
+
+        // Defensive guard for bad scene bindings.
+        if (distanceText == progressText)
             return;
             
         if (playerTransform == null)

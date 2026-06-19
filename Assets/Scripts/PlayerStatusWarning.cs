@@ -11,35 +11,46 @@ public class PlayerStatusWarning : MonoBehaviour
 
     [Header("Auto-Find References")]
     public bool autoFindReferences = true;
+    [Tooltip("Legacy reference; warning checks now use provider traits.")]
     public SurvivalManager survivalManager;
+    [Tooltip("Legacy reference; warning checks now use provider traits.")]
     public PlayerInfectionDisplay infectionDisplay;
 
     [Header("Player Provider")]
-    [Tooltip("Assign any IPlayerProvider implementation (e.g. InvectorPlayerProvider). Auto-found if left empty.")]
+    [Tooltip("Assign GC2PlayerProvider (or any IPlayerProvider). Auto-finds GC2 first if left empty.")]
     [SerializeField] private MonoBehaviour playerProviderObject;
     private IPlayerProvider playerProvider;
+    private ISurvivalStatsProvider survivalStatsProvider;
 
     [Header("Threshold Settings")]
     [Range(0f, 1f)] public float healthLowThreshold = 0.3f;
     [Range(0f, 1f)] public float healthCriticalThreshold = 0.15f;
     [Range(0f, 1f)] public float temperatureLowThreshold = 0.4f;
     [Range(0f, 1f)] public float temperatureCriticalThreshold = 0.2f;
+    [Tooltip("Show warning when immunity drops at or below this value (0–100)")]
     public float infectionLowThreshold = 50f;
-    public float infectionCriticalThreshold = 75f;
+    [Tooltip("Show critical warning when immunity drops at or below this value (0–100)")]
+    public float infectionCriticalThreshold = 25f;
 
     [Header("Warning Messages")]
     public string healthLowMessage = "LOW HEALTH";
     public string healthCriticalMessage = "CRITICAL HEALTH";
     public string temperatureLowMessage = "GETTING COLD";
     public string temperatureCriticalMessage = "FREEZING";
-    public string infectionLowMessage = "INFECTED";
-    public string infectionCriticalMessage = "SEVERE INFECTION";
+    public string infectionLowMessage = "LOW IMMUNITY";
+    public string infectionCriticalMessage = "CRITICAL IMMUNITY";
 
     [Header("Display Settings")]
     public float warningDisplayDuration = 3f;
     public float warningCooldown = 5f;
     public Color lowWarningColor = new Color(1f, 0.8f, 0f, 1f);
     public Color criticalWarningColor = new Color(1f, 0f, 0f, 1f);
+
+    [Header("Initialization")]
+    [Tooltip("Suppress warnings briefly on startup to avoid false positives before survival stats finish initializing.")]
+    public bool suppressWarningsOnStartup = true;
+    [Tooltip("Seconds to wait before warning checks become active.")]
+    public float startupWarningDelay = 1f;
 
     [Header("Flashing Effect")]
     public bool enableFlashing = true;
@@ -57,6 +68,8 @@ public class PlayerStatusWarning : MonoBehaviour
     private bool wasTemperatureCritical = false;
     private bool wasInfectionLow = false;
     private bool wasInfectionCritical = false;
+    private bool baselineInitialized = false;
+    private float startupTimer = 0f;
 
     private void Start()
     {
@@ -64,6 +77,8 @@ public class PlayerStatusWarning : MonoBehaviour
         {
             FindReferences();
         }
+
+        startupTimer = Mathf.Max(0f, startupWarningDelay);
 
         if (warningPanel != null)
         {
@@ -100,12 +115,19 @@ public class PlayerStatusWarning : MonoBehaviour
 
         if (playerProvider == null)
         {
-            foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+            GC2PlayerProvider gc2Provider = FindFirstObjectByType<GC2PlayerProvider>();
+            if (gc2Provider != null)
+                playerProvider = gc2Provider;
+
+            if (playerProvider == null)
             {
-                if (mb is IPlayerProvider provider)
+                foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
                 {
-                    playerProvider = provider;
-                    break;
+                    if (mb is IPlayerProvider provider)
+                    {
+                        playerProvider = provider;
+                        break;
+                    }
                 }
             }
         }
@@ -114,6 +136,22 @@ public class PlayerStatusWarning : MonoBehaviour
         {
             Debug.LogWarning("[PlayerStatusWarning] No IPlayerProvider found — health warnings disabled.");
         }
+
+        survivalStatsProvider = playerProvider as ISurvivalStatsProvider;
+        if (survivalStatsProvider == null)
+        {
+            foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+            {
+                if (mb is ISurvivalStatsProvider provider)
+                {
+                    survivalStatsProvider = provider;
+                    break;
+                }
+            }
+        }
+
+        if (survivalStatsProvider == null)
+            Debug.LogWarning("[PlayerStatusWarning] No ISurvivalStatsProvider found — temperature/infection warnings disabled.");
 
         if (survivalManager == null)
             survivalManager = FindFirstObjectByType<SurvivalManager>();
@@ -124,6 +162,18 @@ public class PlayerStatusWarning : MonoBehaviour
 
     private void Update()
     {
+        if (!baselineInitialized)
+        {
+            if (suppressWarningsOnStartup && startupTimer > 0f)
+            {
+                startupTimer -= Time.deltaTime;
+                return;
+            }
+
+            InitializeWarningBaseline();
+            return;
+        }
+
         if (cooldownTimer > 0f)
         {
             cooldownTimer -= Time.deltaTime;
@@ -143,33 +193,13 @@ public class PlayerStatusWarning : MonoBehaviour
     {
         if (cooldownTimer > 0f) return;
 
-        bool healthLow = false;
-        bool healthCritical = false;
-        bool temperatureLow = false;
-        bool temperatureCritical = false;
-        bool infectionLow = false;
-        bool infectionCritical = false;
-
-        if (playerProvider != null && playerProvider.MaxHealth > 0f)
-        {
-            float healthPercentage = playerProvider.Health / playerProvider.MaxHealth;
-            healthCritical = healthPercentage <= healthCriticalThreshold;
-            healthLow      = !healthCritical && healthPercentage <= healthLowThreshold;
-        }
-
-        if (survivalManager != null && survivalManager.enableTemperatureSystem)
-        {
-            float tempPercentage = survivalManager.TemperaturePercentage;
-            temperatureCritical = tempPercentage <= temperatureCriticalThreshold;
-            temperatureLow = !temperatureCritical && tempPercentage <= temperatureLowThreshold;
-        }
-
-        if (infectionDisplay != null)
-        {
-            float infection = infectionDisplay.currentInfection;
-            infectionCritical = infection >= infectionCriticalThreshold;
-            infectionLow = !infectionCritical && infection >= infectionLowThreshold;
-        }
+        EvaluateWarningState(
+            out bool healthLow,
+            out bool healthCritical,
+            out bool temperatureLow,
+            out bool temperatureCritical,
+            out bool infectionLow,
+            out bool infectionCritical);
 
         if (healthCritical && !wasHealthCritical)
         {
@@ -202,6 +232,64 @@ public class PlayerStatusWarning : MonoBehaviour
         wasTemperatureCritical = temperatureCritical;
         wasInfectionLow = infectionLow;
         wasInfectionCritical = infectionCritical;
+    }
+
+    private void InitializeWarningBaseline()
+    {
+        EvaluateWarningState(
+            out bool healthLow,
+            out bool healthCritical,
+            out bool temperatureLow,
+            out bool temperatureCritical,
+            out bool infectionLow,
+            out bool infectionCritical);
+
+        // Seed previous state so we don't show warnings purely due to startup ordering.
+        wasHealthLow = healthLow;
+        wasHealthCritical = healthCritical;
+        wasTemperatureLow = temperatureLow;
+        wasTemperatureCritical = temperatureCritical;
+        wasInfectionLow = infectionLow;
+        wasInfectionCritical = infectionCritical;
+        baselineInitialized = true;
+    }
+
+    private void EvaluateWarningState(
+        out bool healthLow,
+        out bool healthCritical,
+        out bool temperatureLow,
+        out bool temperatureCritical,
+        out bool infectionLow,
+        out bool infectionCritical)
+    {
+        healthLow = false;
+        healthCritical = false;
+        temperatureLow = false;
+        temperatureCritical = false;
+        infectionLow = false;
+        infectionCritical = false;
+
+        if (playerProvider != null && playerProvider.MaxHealth > 0f)
+        {
+            float healthPercentage = playerProvider.Health / playerProvider.MaxHealth;
+            healthCritical = healthPercentage <= healthCriticalThreshold;
+            healthLow      = !healthCritical && healthPercentage <= healthLowThreshold;
+        }
+
+        if (survivalStatsProvider != null && survivalStatsProvider.MaxTemperature > 0f)
+        {
+            float tempPercentage = Mathf.Clamp01(survivalStatsProvider.Temperature / survivalStatsProvider.MaxTemperature);
+            temperatureCritical = tempPercentage <= temperatureCriticalThreshold;
+            temperatureLow = !temperatureCritical && tempPercentage <= temperatureLowThreshold;
+        }
+
+        if (survivalStatsProvider != null && survivalStatsProvider.MaxInfection > 0f)
+        {
+            // Infection value represents immunity (100 = fully immune, 0 = no immunity).
+            float immunity = survivalStatsProvider.Infection / survivalStatsProvider.MaxInfection * 100f;
+            infectionCritical = immunity <= infectionCriticalThreshold;
+            infectionLow = !infectionCritical && immunity <= infectionLowThreshold;
+        }
     }
 
     private void ShowWarning(string message, Color color)

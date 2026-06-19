@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEditor;
+using System;
+using System.Collections.Generic;
 
 public class DeactivateControlZonesWindow : EditorWindow
 {
@@ -23,12 +25,12 @@ public class DeactivateControlZonesWindow : EditorWindow
         
         EditorGUILayout.Space(10);
         
-        ControlZone[] allZones = FindObjectsByType<ControlZone>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        List<Component> allZones = FindAllControlZones();
         
         int activeCount = 0;
         int inactiveCount = 0;
         
-        foreach (ControlZone zone in allZones)
+        foreach (Component zone in allZones)
         {
             if (zone != null)
             {
@@ -41,7 +43,7 @@ public class DeactivateControlZonesWindow : EditorWindow
         
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         EditorGUILayout.LabelField("Current Status:", EditorStyles.boldLabel);
-        EditorGUILayout.LabelField($"Total Control Zones: {allZones.Length}");
+        EditorGUILayout.LabelField($"Total Control Zones: {allZones.Count}");
         EditorGUILayout.LabelField($"Active (spawning enemies): {activeCount}");
         EditorGUILayout.LabelField($"Inactive (managed): {inactiveCount}");
         EditorGUILayout.EndVertical();
@@ -70,11 +72,11 @@ public class DeactivateControlZonesWindow : EditorWindow
         
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         
-        if (allZones.Length > 0)
+        if (allZones.Count > 0)
         {
             EditorGUILayout.LabelField("Control Zones in Scene:", EditorStyles.miniLabel);
             
-            foreach (ControlZone zone in allZones)
+            foreach (Component zone in allZones)
             {
                 if (zone == null) continue;
                 
@@ -88,7 +90,7 @@ public class DeactivateControlZonesWindow : EditorWindow
                 statusStyle.normal.textColor = statusColor;
                 statusStyle.fontStyle = FontStyle.Bold;
                 
-                EditorGUILayout.LabelField($"{zone.zoneName}", GUILayout.Width(150));
+                EditorGUILayout.LabelField($"{GetZoneName(zone)}", GUILayout.Width(150));
                 EditorGUILayout.LabelField(status, statusStyle, GUILayout.Width(80));
                 
                 if (GUILayout.Button("Select", GUILayout.Width(60)))
@@ -129,11 +131,11 @@ public class DeactivateControlZonesWindow : EditorWindow
     
     private void DeactivateAllControlZones()
     {
-        ControlZone[] allZones = FindObjectsByType<ControlZone>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        List<Component> allZones = FindAllControlZones();
         
         int deactivatedCount = 0;
         
-        foreach (ControlZone zone in allZones)
+        foreach (Component zone in allZones)
         {
             if (zone != null && zone.gameObject.activeSelf)
             {
@@ -154,5 +156,53 @@ public class DeactivateControlZonesWindow : EditorWindow
         Debug.Log($"Deactivated {deactivatedCount} Control Zones - they are now manager-controlled");
         
         Repaint();
+    }
+
+    private static List<Component> FindAllControlZones()
+    {
+        Type controlZoneType = ResolveControlZoneType();
+        List<Component> results = new List<Component>();
+        if (controlZoneType == null) return results;
+
+        UnityEngine.Object[] objects = UnityEngine.Object.FindObjectsByType(controlZoneType, FindObjectsInactive.Include, FindObjectsSortMode.None);
+        for (int i = 0; i < objects.Length; i++)
+        {
+            if (objects[i] is Component component)
+            {
+                results.Add(component);
+            }
+        }
+
+        return results;
+    }
+
+    private static string GetZoneName(Component zone)
+    {
+        if (zone == null) return "<null>";
+
+        SerializedObject so = new SerializedObject(zone);
+        SerializedProperty zoneName = so.FindProperty("zoneName");
+        if (zoneName != null && zoneName.propertyType == SerializedPropertyType.String && !string.IsNullOrWhiteSpace(zoneName.stringValue))
+        {
+            return zoneName.stringValue;
+        }
+
+        return zone.gameObject.name;
+    }
+
+    private static Type ResolveControlZoneType()
+    {
+        Type direct = Type.GetType("ControlZone, Assembly-CSharp");
+        if (direct != null) return direct;
+
+        AppDomain domain = AppDomain.CurrentDomain;
+        var assemblies = domain.GetAssemblies();
+        for (int i = 0; i < assemblies.Length; i++)
+        {
+            Type found = assemblies[i].GetType("ControlZone");
+            if (found != null) return found;
+        }
+
+        return null;
     }
 }

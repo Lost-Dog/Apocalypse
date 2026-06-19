@@ -13,7 +13,7 @@ public class PlayerArmourDisplay : MonoBehaviour
     [Tooltip("Fill Image whose fillAmount is driven by armour (0 = empty, 1 = full).")]
     public Image           armourFill;
     public TextMeshProUGUI armourText;
-    [Tooltip("Assign any IPlayerProvider implementation. Auto-found if left empty.")]
+    [Tooltip("Assign a GC2PlayerProvider (or any IPlayerProvider). Auto-finds GC2 first if left empty.")]
     public MonoBehaviour   playerProviderObject;
 
     [Header("Display Settings")]
@@ -49,7 +49,7 @@ public class PlayerArmourDisplay : MonoBehaviour
         _playerProvider = playerProviderObject as IPlayerProvider;
 
         if (_playerProvider == null)
-            _playerProvider = FindAnyPlayerProvider();
+            _playerProvider = FindBestPlayerProvider();
 
         if (_playerProvider == null)
         {
@@ -112,8 +112,12 @@ public class PlayerArmourDisplay : MonoBehaviour
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    private static IPlayerProvider FindAnyPlayerProvider()
+    private static IPlayerProvider FindBestPlayerProvider()
     {
+        GC2PlayerProvider gc2Provider = FindFirstObjectByType<GC2PlayerProvider>();
+        if (gc2Provider != null)
+            return gc2Provider;
+
         foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
         {
             if (mb is IPlayerProvider provider)

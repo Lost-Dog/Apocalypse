@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 4304316608602965980}
   - component: {fileID: 2507234041296974430}
   - component: {fileID: 8875295525251132447}
-  - component: {fileID: 5502524013401050498}
   m_Layer: 0
   m_Name: lowerarm_r
   m_TagString: Untagged
@@ -133,42 +132,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &5502524013401050498
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 120456417941565904}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 065db88beeb95054185e2f6e1c8cee54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Invector.vCharacterController.vDamageReceiver
-  openCloseEvents: 0
-  openCloseWindow: 0
-  selectedToolbar: 0
-  targetReceiver: {fileID: 0}
-  damageMultiplier: 1
-  ragdoll: {fileID: 0}
-  overrideReactionID: 0
-  reactionID: 0
-  useRandomValues: 0
-  fixedValues: 0
-  minDamageMultiplier: 0
-  maxDamageMultiplier: 0
-  minReactionID: 0
-  maxReactionID: 0
-  changeToMaxValue: 0
-  OnGetMaxValue:
-    m_PersistentCalls:
-      m_Calls: []
-  _onStartReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &307046612888621623
 GameObject:
   m_ObjectHideFlags: 0
@@ -1482,7 +1445,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2099,7 +2062,6 @@ GameObject:
   - component: {fileID: 5427826607468141785}
   - component: {fileID: 3642831084458188315}
   - component: {fileID: 5402351420727949292}
-  - component: {fileID: 2299276100936349899}
   m_Layer: 0
   m_Name: upperarm_l
   m_TagString: Untagged
@@ -2219,42 +2181,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &2299276100936349899
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3493209609628703696}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 065db88beeb95054185e2f6e1c8cee54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Invector.vCharacterController.vDamageReceiver
-  openCloseEvents: 0
-  openCloseWindow: 0
-  selectedToolbar: 0
-  targetReceiver: {fileID: 0}
-  damageMultiplier: 1
-  ragdoll: {fileID: 0}
-  overrideReactionID: 0
-  reactionID: 0
-  useRandomValues: 0
-  fixedValues: 0
-  minDamageMultiplier: 0
-  maxDamageMultiplier: 0
-  minReactionID: 0
-  maxReactionID: 0
-  changeToMaxValue: 0
-  OnGetMaxValue:
-    m_PersistentCalls:
-      m_Calls: []
-  _onStartReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &3638547237751648056
 GameObject:
   m_ObjectHideFlags: 0
@@ -2367,7 +2293,6 @@ GameObject:
   - component: {fileID: 4244637764173113742}
   - component: {fileID: 1560053149783949165}
   - component: {fileID: 8838121423443125528}
-  - component: {fileID: 6738978881767612293}
   m_Layer: 0
   m_Name: head
   m_TagString: Untagged
@@ -2484,42 +2409,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &6738978881767612293
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3779629467441498786}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 065db88beeb95054185e2f6e1c8cee54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Invector.vCharacterController.vDamageReceiver
-  openCloseEvents: 0
-  openCloseWindow: 0
-  selectedToolbar: 0
-  targetReceiver: {fileID: 0}
-  damageMultiplier: 1
-  ragdoll: {fileID: 0}
-  overrideReactionID: 0
-  reactionID: 0
-  useRandomValues: 0
-  fixedValues: 0
-  minDamageMultiplier: 0
-  maxDamageMultiplier: 0
-  minReactionID: 0
-  maxReactionID: 0
-  changeToMaxValue: 0
-  OnGetMaxValue:
-    m_PersistentCalls:
-      m_Calls: []
-  _onStartReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &3860315813011505970
 GameObject:
   m_ObjectHideFlags: 0
@@ -2743,10 +2632,9 @@ GameObject:
   - component: {fileID: 3929330745666034576}
   - component: {fileID: 7695735138112099326}
   - component: {fileID: 1219690087917994362}
-  - component: {fileID: 8256871749564618087}
-  - component: {fileID: 5861808397308134578}
   - component: {fileID: 130147007563059748}
-  - component: {fileID: 1912736665578736552}
+  - component: {fileID: 3008621528086658872}
+  - component: {fileID: -557971714324974816}
   m_Layer: 9
   m_Name: Woman_03_01
   m_TagString: Enemy
@@ -3097,18 +2985,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CurrentBehaviorType: 2
   TargetToFollow: {fileID: 0}
-  CautiousSeconds: 0
+  CautiousSeconds: 2
   InfititeChase: 0
   ChaseSeconds: 5
   FleeSeconds: 5
   RequireObstruction: 0
-  PercentToFlee: 20
+  PercentToFlee: 40
   UpdateFleePositionSeconds: 1.5
-  MaxDistanceFromStartingArea: 30
+  MaxDistanceFromStartingArea: 10
   FollowingStoppingDistance: 2
   IsAiming: 0
-  FleeOnLowHealth: 0
-  StayNearStartingArea: 0
+  FleeOnLowHealth: 1
+  StayNearStartingArea: 1
   BehaviorState: Non Combat
   HideSettingsFoldout: 0
   BehaviorSettingsFoldout: 1
@@ -3142,7 +3030,7 @@ MonoBehaviour:
   StartingDetectionRadius: 0
   DetectionRadius: 30
   StartingChaseDistance: 0
-  FieldOfViewAngle: 360
+  FieldOfViewAngle: 135
   StartingFieldOfViewAngle: 0
   CurrentDetectionState: 1
   PickTargetType: 0
@@ -3163,7 +3051,7 @@ MonoBehaviour:
     RelationType: 0
   AIFactionsList: 
   HideSettingsFoldout: 0
-  DetectionFoldout: 1
+  DetectionFoldout: 0
   TagFoldout: 1
   FactionFoldout: 1
 --- !u!114 &5840300925532178502
@@ -3184,7 +3072,7 @@ MonoBehaviour:
   DefaultMovementPaused: 0
   WanderType: 0
   WaypointType: 1
-  MovementType: 1
+  MovementType: 0
   StartingMovementState: 1
   CurrentMovementState: 0
   UseRandomRotationOnStart: 1
@@ -3231,7 +3119,7 @@ MonoBehaviour:
   SingleDestination: {x: 0, y: 0, z: 0}
   StartingDestination: {x: 0, y: 0, z: 0}
   m_WaypointObject: {fileID: 0}
-  WanderRadius: 15
+  WanderRadius: 10
   DynamicWanderLayerMask:
     serializedVersion: 2
     m_Bits: 1
@@ -3262,15 +3150,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CurrentHealth: 300
-  StartingHealth: 300
-  HealRate: 0
-  AttachHitEffects: 1
+  StartingHealth: 50
+  HealRate: 2
+  AttachHitEffects: 0
   Immortal: 0
   CurrentActiveEffects: []
   HitEffectFoldout: 1
   UseHitEffect: 1
   HitEffectPosOffset: {x: 0, y: 0, z: 0}
-  HitEffectTimeoutSeconds: 1.5
+  HitEffectTimeoutSeconds: 0.2
   HitEffectsList:
   - {fileID: 8668342819897343366, guid: ac93b6d401a134a4d95542316b0841c6, type: 3}
   HideSettingsFoldout: 0
@@ -3292,7 +3180,7 @@ MonoBehaviour:
   MinResumeWander: 3
   MaxResumeWander: 6
   CurrentAttackCooldown: 0
-  Type1AttackCooldown: 0.35
+  Type1AttackCooldown: 1
   Type2AttackCooldown: 0.35
   SwitchWeaponTimer: 0
   SwitchWeaponTypeTriggered: 0
@@ -3331,7 +3219,7 @@ MonoBehaviour:
     Timer: 0
     TimesUsed: 0
   Type1CombatActions:
-  - emeraldAction: {fileID: 11400000, guid: e7b374ca0b9a9644aa99a72b98374e95, type: 2}
+  - emeraldAction: {fileID: 11400000, guid: 629b97adf4dbf9147af6cf85b511313d, type: 2}
     Enabled: 1
     IsActive: 0
     CooldownLengthTimer: 0
@@ -3339,7 +3227,7 @@ MonoBehaviour:
     ActionLengthTimer: 0
     Timer: 0
     TimesUsed: 0
-  - emeraldAction: {fileID: 11400000, guid: 629b97adf4dbf9147af6cf85b511313d, type: 2}
+  - emeraldAction: {fileID: 11400000, guid: e7b374ca0b9a9644aa99a72b98374e95, type: 2}
     Enabled: 1
     IsActive: 0
     CooldownLengthTimer: 0
@@ -3380,7 +3268,7 @@ MonoBehaviour:
     - AbilityObject: {fileID: 11400000, guid: 8d84b71dfe300ba4793543c42c8123cf, type: 2}
       AttackAnimation: 0
       AttackOdds: 0
-      AttackDistance: 20
+      AttackDistance: 15
       TooCloseDistance: 5
       CooldownIgnored: 0
       CooldownTimeStamp: 0
@@ -3505,7 +3393,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4784231016005941150}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 398e9e5be7a119e46aa1da605e4145d0, type: 3}
   m_Name: 
@@ -3641,8 +3529,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.510438, y: 2.5826128, z: 0.23822016}
-  m_Center: {x: 0, y: 1.291304, z: 0}
+  m_Size: {x: 0.6, y: 2, z: 0.6}
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!195 &3929330745666034576
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -3835,82 +3723,6 @@ MonoBehaviour:
   - {fileID: 6776041486626728330}
   - {fileID: 3415265683267871796}
   - {fileID: 2272462462860262917}
---- !u!114 &8256871749564618087
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4784231016005941150}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 19572c82f93c9c044b22055fa3b67dea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyKillRewardHandler
-  baseXPReward: 50
-  xpVariance: 10
-  lootDropChance: 0.5
-  enemyLevel: 1
-  isElite: 0
-  isBoss: 0
-  eliteXPMultiplier: 2
-  bossXPMultiplier: 5
-  eliteLootChance: 0.75
-  bossLootChance: 1
-  restoreHealthOnKill: 1
-  healthRestoreAmount: 100
-  healthRestorePercentage: 0.1
-  restoreStaminaOnKill: 1
---- !u!114 &5861808397308134578
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4784231016005941150}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6be3bf20af42de47a28857f2ca6409c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EmeraldAI.InvectorAIBridge
-  openCloseEvents: 0
-  openCloseWindow: 1
-  selectedToolbar: 1
-  _isDead: 1
-  _currentHealth: 0
-  isImmortal: 0
-  fillHealthOnStart: 1
-  _maxHealth: 100
-  _healthRecovery: 0
-  _healthRecoveryDelay: 0
-  checkHealthEvents: []
-  _onStartReceiveDamage:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 4095556980520242076}
-        m_TargetAssemblyTypeName: EmeraldAI.EmeraldAnimation, Assembly-CSharp
-        m_MethodName: PlayWarningAnimation
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  _onReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onDead:
-    m_PersistentCalls:
-      m_Calls: []
-  onChangeHealth:
-    m_PersistentCalls:
-      m_Calls: []
-  onResetHealth:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!114 &130147007563059748
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3933,7 +3745,7 @@ MonoBehaviour:
   HideSettingsFoldout: 0
   DecalsFoldout: 0
   MessageDismissed: 0
---- !u!114 &1912736665578736552
+--- !u!114 &3008621528086658872
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -3942,32 +3754,54 @@ MonoBehaviour:
   m_GameObject: {fileID: 4784231016005941150}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f131dd35d296fca4e90efc4ed717e48b, type: 3}
+  m_Script: {fileID: 11500000, guid: dd511344c8eb9884ba222ce2feccb5ad, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::bl_MiniMapEntity
-  Target: {fileID: 7641351790740324054}
-  OffSet: {x: 0, y: 0, z: 0}
-  iconData: {fileID: 11400000, guid: 44a9a005006fac54c8333e0f70f69f37, type: 2}
-  ShowCircleArea: 0
-  CircleAreaRadius: 10
-  CircleAreaColor: {r: 1, g: 1, b: 1, a: 0.9}
-  isInteractable: 1
-  interacableAction: 0
-  InfoItem: Info Icon here
-  keepTextAlwaysFacingUp: 0
-  onClick:
-    m_PersistentCalls:
-      m_Calls: []
-  OffScreen: 1
-  opacityBasedDistance: 0
-  maxDistance: 250
-  iconFaceDirection: 0
-  enableDisableWithTarget: 1
-  DestroyWithObject: 1
-  BorderOffScreen: 0.01
-  RenderDelay: 0.3
-  m_Effect: 2
-  CustomIconPrefab: {fileID: 0}
+  m_EditorClassIdentifier: Assembly-CSharp::SceneActorCullingTarget
+  overrideDistances: 0
+  activeDistance: 45
+  cullDistance: 65
+  distanceBias: 0
+  animator: {fileID: 7862982665335607518}
+  navMeshAgent: {fileID: 3929330745666034576}
+  aiBehaviours: []
+  renderers: []
+  colliders: []
+  manageAnimator: 1
+  manageNavMeshAgent: 1
+  manageAIBehaviours: 1
+  manageRenderers: 0
+  manageColliders: 0
+  ignoreIfTaggedPlayer: 1
+  isCulled: 0
+  lastDistance: 0
+--- !u!114 &-557971714324974816
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4784231016005941150}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36cd5a6bb14115641b36d836a9d4a176, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyKillRewardHandler
+  baseXPReward: 50
+  xpVariance: 10
+  lootDropChance: 0.5
+  enemyLevel: 1
+  isElite: 0
+  isBoss: 0
+  eliteXPMultiplier: 2
+  bossXPMultiplier: 5
+  eliteLootChance: 0.75
+  bossLootChance: 1
+  restoreHealthOnKill: 1
+  healthRestoreAmount: 20
+  healthRestorePercentage: 0.1
+  restoreStaminaOnKill: 1
+  staminaRestoreAmount: 20
+  staminaRestorePercentage: 0.1
 --- !u!1 &4847404631849718789
 GameObject:
   m_ObjectHideFlags: 0
@@ -4538,7 +4372,6 @@ GameObject:
   - component: {fileID: 3315197911111201230}
   - component: {fileID: 1962450394766940879}
   - component: {fileID: 3197440318463015747}
-  - component: {fileID: 1569852708814130881}
   m_Layer: 0
   m_Name: thigh_r
   m_TagString: Untagged
@@ -4658,42 +4491,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &1569852708814130881
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6046254475707944457}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 065db88beeb95054185e2f6e1c8cee54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Invector.vCharacterController.vDamageReceiver
-  openCloseEvents: 0
-  openCloseWindow: 0
-  selectedToolbar: 0
-  targetReceiver: {fileID: 0}
-  damageMultiplier: 1
-  ragdoll: {fileID: 0}
-  overrideReactionID: 0
-  reactionID: 0
-  useRandomValues: 0
-  fixedValues: 0
-  minDamageMultiplier: 0
-  maxDamageMultiplier: 0
-  minReactionID: 0
-  maxReactionID: 0
-  changeToMaxValue: 0
-  OnGetMaxValue:
-    m_PersistentCalls:
-      m_Calls: []
-  _onStartReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &6052578533911108996
 GameObject:
   m_ObjectHideFlags: 0
@@ -4770,7 +4567,6 @@ GameObject:
   - component: {fileID: 1186919731822214848}
   - component: {fileID: 6974265848710600946}
   - component: {fileID: 5147573242101379204}
-  - component: {fileID: 4020289388120103683}
   m_Layer: 0
   m_Name: thigh_l
   m_TagString: Untagged
@@ -4890,42 +4686,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &4020289388120103683
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6095838213594407589}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 065db88beeb95054185e2f6e1c8cee54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Invector.vCharacterController.vDamageReceiver
-  openCloseEvents: 0
-  openCloseWindow: 0
-  selectedToolbar: 0
-  targetReceiver: {fileID: 0}
-  damageMultiplier: 1
-  ragdoll: {fileID: 0}
-  overrideReactionID: 0
-  reactionID: 0
-  useRandomValues: 0
-  fixedValues: 0
-  minDamageMultiplier: 0
-  maxDamageMultiplier: 0
-  minReactionID: 0
-  maxReactionID: 0
-  changeToMaxValue: 0
-  OnGetMaxValue:
-    m_PersistentCalls:
-      m_Calls: []
-  _onStartReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &6106111107397529487
 GameObject:
   m_ObjectHideFlags: 0
@@ -5228,7 +4988,6 @@ GameObject:
   - component: {fileID: 6721724581779680204}
   - component: {fileID: 4290886672311140075}
   - component: {fileID: 6710632970668738050}
-  - component: {fileID: 4513783011537602500}
   m_Layer: 0
   m_Name: upperarm_r
   m_TagString: Untagged
@@ -5348,42 +5107,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &4513783011537602500
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6505855185462575477}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 065db88beeb95054185e2f6e1c8cee54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Invector.vCharacterController.vDamageReceiver
-  openCloseEvents: 0
-  openCloseWindow: 0
-  selectedToolbar: 0
-  targetReceiver: {fileID: 0}
-  damageMultiplier: 1
-  ragdoll: {fileID: 0}
-  overrideReactionID: 0
-  reactionID: 0
-  useRandomValues: 0
-  fixedValues: 0
-  minDamageMultiplier: 0
-  maxDamageMultiplier: 0
-  minReactionID: 0
-  maxReactionID: 0
-  changeToMaxValue: 0
-  OnGetMaxValue:
-    m_PersistentCalls:
-      m_Calls: []
-  _onStartReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &6573640100774070062
 GameObject:
   m_ObjectHideFlags: 0
@@ -6556,7 +6279,6 @@ GameObject:
   - component: {fileID: 2236349574379619290}
   - component: {fileID: 452912743615780820}
   - component: {fileID: 5388840357273136080}
-  - component: {fileID: 3144466262032741154}
   m_Layer: 0
   m_Name: calf_r
   m_TagString: Untagged
@@ -6676,42 +6398,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &3144466262032741154
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8430749554252845794}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 065db88beeb95054185e2f6e1c8cee54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Invector.vCharacterController.vDamageReceiver
-  openCloseEvents: 0
-  openCloseWindow: 0
-  selectedToolbar: 0
-  targetReceiver: {fileID: 0}
-  damageMultiplier: 1
-  ragdoll: {fileID: 0}
-  overrideReactionID: 0
-  reactionID: 0
-  useRandomValues: 0
-  fixedValues: 0
-  minDamageMultiplier: 0
-  maxDamageMultiplier: 0
-  minReactionID: 0
-  maxReactionID: 0
-  changeToMaxValue: 0
-  OnGetMaxValue:
-    m_PersistentCalls:
-      m_Calls: []
-  _onStartReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &8482569948729752450
 GameObject:
   m_ObjectHideFlags: 0
@@ -7016,7 +6702,6 @@ GameObject:
   - component: {fileID: 6159912787938915833}
   - component: {fileID: 5046347677221542595}
   - component: {fileID: 9178986701720415789}
-  - component: {fileID: 2959094750508829079}
   m_Layer: 0
   m_Name: lowerarm_l
   m_TagString: Untagged
@@ -7137,42 +6822,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &2959094750508829079
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8589468182558410272}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 065db88beeb95054185e2f6e1c8cee54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Invector.vCharacterController.vDamageReceiver
-  openCloseEvents: 0
-  openCloseWindow: 0
-  selectedToolbar: 0
-  targetReceiver: {fileID: 0}
-  damageMultiplier: 1
-  ragdoll: {fileID: 0}
-  overrideReactionID: 0
-  reactionID: 0
-  useRandomValues: 0
-  fixedValues: 0
-  minDamageMultiplier: 0
-  maxDamageMultiplier: 0
-  minReactionID: 0
-  maxReactionID: 0
-  changeToMaxValue: 0
-  OnGetMaxValue:
-    m_PersistentCalls:
-      m_Calls: []
-  _onStartReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &8761565133062442114
 GameObject:
   m_ObjectHideFlags: 0
@@ -7371,7 +7020,6 @@ GameObject:
   - component: {fileID: 1885126615738024980}
   - component: {fileID: 8516821566947888197}
   - component: {fileID: 84480754031527257}
-  - component: {fileID: 1842560116773900329}
   m_Layer: 0
   m_Name: calf_l
   m_TagString: Untagged
@@ -7491,42 +7139,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &1842560116773900329
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9011233956735884868}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 065db88beeb95054185e2f6e1c8cee54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Invector.vCharacterController.vDamageReceiver
-  openCloseEvents: 0
-  openCloseWindow: 0
-  selectedToolbar: 0
-  targetReceiver: {fileID: 0}
-  damageMultiplier: 1
-  ragdoll: {fileID: 0}
-  overrideReactionID: 0
-  reactionID: 0
-  useRandomValues: 0
-  fixedValues: 0
-  minDamageMultiplier: 0
-  maxDamageMultiplier: 0
-  minReactionID: 0
-  maxReactionID: 0
-  changeToMaxValue: 0
-  OnGetMaxValue:
-    m_PersistentCalls:
-      m_Calls: []
-  _onStartReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &9053942429781653578
 GameObject:
   m_ObjectHideFlags: 0

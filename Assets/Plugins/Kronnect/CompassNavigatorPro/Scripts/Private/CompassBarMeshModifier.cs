@@ -19,6 +19,9 @@ namespace CompassNavigatorPro {
             List<Vector2> uv = new List<Vector2>();
 
             m.GetVertices(positions);
+            if (m.subMeshCount < 1) {
+                return;
+            }
             m.GetTriangles(tris, 0);
             m.GetUVs(0, uv);
 

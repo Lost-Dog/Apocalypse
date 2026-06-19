@@ -6,13 +6,12 @@ using UnityEngine.SceneManagement;
 public static class SceneFlowLightingBakeTool
 {
     private const string EnvironmentScenePath = "Assets/Scenes/Apocalypse_GC2.unity";
-    private const string EffectsScenePath = "Assets/Scenes/Oasis/OasisScene.unity";
     private const string GameplayScenePath = "Assets/Scenes/Gameplay Scene.unity";
 
-    [MenuItem("Tools/Scene Flow/Bake Lighting (Environment + Oasis)")]
-    public static void BakeEnvironmentAndOasis()
+    [MenuItem("Tools/Scene Flow/Bake Lighting (Environment)")]
+    public static void BakeEnvironment()
     {
-        if (!EnsureSceneExists(EnvironmentScenePath) || !EnsureSceneExists(EffectsScenePath))
+        if (!EnsureSceneExists(EnvironmentScenePath))
         {
             return;
         }
@@ -24,7 +23,6 @@ public static class SceneFlowLightingBakeTool
         }
 
         EditorSceneManager.OpenScene(EnvironmentScenePath, OpenSceneMode.Single);
-        EditorSceneManager.OpenScene(EffectsScenePath, OpenSceneMode.Additive);
 
         // Optional: include gameplay scene if it contains static geometry you want baked.
         if (EnsureSceneExists(GameplayScenePath))
@@ -39,7 +37,7 @@ public static class SceneFlowLightingBakeTool
         }
 
         Lightmapping.BakeAsync();
-        Debug.Log("[SceneFlowLightingBakeTool] Started async bake with Environment active and Oasis loaded additively.");
+        Debug.Log("[SceneFlowLightingBakeTool] Started async bake with Environment active.");
     }
 
     private static bool EnsureSceneExists(string scenePath)

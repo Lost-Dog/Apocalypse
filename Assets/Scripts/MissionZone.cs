@@ -1,5 +1,6 @@
-using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 public class MissionZone : MonoBehaviour
 {
@@ -7,6 +8,14 @@ public class MissionZone : MonoBehaviour
     public string zoneName = "Mission Zone";
     public ChallengeData.ChallengeType missionType;
     public float zoneRadius = 30f;
+
+    [Header("Mission Visibility")]
+    public MissionData linkedMissionData;
+    public bool autoMatchMissionByName = true;
+    [Tooltip("Deactivate legacy hotspot objects/components under this zone at runtime")]
+    public bool disableLegacyHotspots = true;
+    [Tooltip("Logs why this zone becomes visible during play mode")]
+    public bool debugVisibilityTransitions = false;
     
     [Header("Spawn Points")]
     public List<SpawnPoint> spawnPoints = new List<SpawnPoint>();
@@ -21,6 +30,10 @@ public class MissionZone : MonoBehaviour
     public bool autoGenerateSpawnItems = true;
     
     private GameObject markerInstance;
+    private MissionManager missionManager;
+    private ChallengeManager challengeManager;
+    private bool previousVisibilityState;
+    private bool hasVisibilityState;
     
     [System.Serializable]
     public class SpawnPoint
@@ -40,10 +53,264 @@ public class MissionZone : MonoBehaviour
     
     private void Start()
     {
+        BindMissionManager();
+        BindChallengeManager();
+        DisableLegacyHotspotObjects();
+        RefreshZoneVisibilityState();
+
         if (zoneMarkerPrefab != null && markerInstance == null)
         {
             markerInstance = Instantiate(zoneMarkerPrefab, transform.position, Quaternion.identity, transform);
         }
+    }
+
+    private void OnEnable()
+    {
+        BindMissionManager();
+        BindChallengeManager();
+        DisableLegacyHotspotObjects();
+
+        if (missionManager != null)
+        {
+            missionManager.onMissionStart.AddListener(HandleMissionChanged);
+            missionManager.onMissionComplete.AddListener(HandleMissionChanged);
+            missionManager.onMissionFail.AddListener(HandleMissionChanged);
+        }
+
+        if (challengeManager != null)
+        {
+            challengeManager.onChallengeStarted.AddListener(HandleChallengeChanged);
+            challengeManager.onChallengeCompleted.AddListener(HandleChallengeChanged);
+            challengeManager.onChallengeFailed.AddListener(HandleChallengeChanged);
+            challengeManager.onChallengeExpired.AddListener(HandleChallengeChanged);
+        }
+
+        RefreshZoneVisibilityState();
+    }
+
+    private void OnDisable()
+    {
+        if (missionManager != null)
+        {
+            missionManager.onMissionStart.RemoveListener(HandleMissionChanged);
+            missionManager.onMissionComplete.RemoveListener(HandleMissionChanged);
+            missionManager.onMissionFail.RemoveListener(HandleMissionChanged);
+        }
+
+        if (challengeManager != null)
+        {
+            challengeManager.onChallengeStarted.RemoveListener(HandleChallengeChanged);
+            challengeManager.onChallengeCompleted.RemoveListener(HandleChallengeChanged);
+            challengeManager.onChallengeFailed.RemoveListener(HandleChallengeChanged);
+            challengeManager.onChallengeExpired.RemoveListener(HandleChallengeChanged);
+        }
+    }
+
+    private void HandleMissionChanged(MissionData mission)
+    {
+        RefreshZoneVisibilityState();
+    }
+
+    private void HandleChallengeChanged(ActiveChallenge challenge)
+    {
+        RefreshZoneVisibilityState();
+    }
+
+    private void BindMissionManager()
+    {
+        if (missionManager != null) return;
+
+        missionManager = FindObjectOfType<MissionManager>();
+    }
+
+    private void BindChallengeManager()
+    {
+        if (challengeManager != null) return;
+
+        challengeManager = ChallengeManager.Instance;
+        if (challengeManager == null)
+        {
+            challengeManager = FindObjectOfType<ChallengeManager>();
+        }
+    }
+
+    private void RefreshZoneVisibilityState()
+    {
+        bool visible = EvaluateZoneVisibility(out string visibilityReason);
+
+        if (debugVisibilityTransitions)
+        {
+            if (!hasVisibilityState)
+            {
+                previousVisibilityState = visible;
+                hasVisibilityState = true;
+            }
+            else if (!previousVisibilityState && visible)
+            {
+                string reasonText = string.IsNullOrEmpty(visibilityReason) ? "unknown reason" : visibilityReason;
+                Debug.Log($"[MissionZone] '{zoneName}' became visible: {reasonText}", this);
+                previousVisibilityState = visible;
+            }
+            else if (previousVisibilityState != visible)
+            {
+                previousVisibilityState = visible;
+            }
+        }
+
+        if (markerInstance != null && markerInstance.activeSelf != visible)
+        {
+            markerInstance.SetActive(visible);
+        }
+    }
+
+    private void DisableLegacyHotspotObjects()
+    {
+        if (!disableLegacyHotspots)
+            return;
+
+        Transform[] transforms = GetComponentsInChildren<Transform>(true);
+        foreach (Transform child in transforms)
+        {
+            if (child == null || child == transform)
+                continue;
+
+            string childName = child.name;
+            if (string.IsNullOrEmpty(childName))
+                continue;
+
+            if (childName.IndexOf("hotspot", System.StringComparison.OrdinalIgnoreCase) < 0)
+                continue;
+
+            GameObject hotspotObject = child.gameObject;
+            if (hotspotObject.activeSelf)
+            {
+                hotspotObject.SetActive(false);
+            }
+        }
+    }
+
+    private bool IsActiveMissionZone()
+    {
+        return EvaluateZoneVisibility(out _);
+    }
+
+    private bool EvaluateZoneVisibility(out string reason)
+    {
+        if (IsLinkedMissionActive())
+        {
+            reason = linkedMissionData != null
+                ? "mission match (linked MissionData)"
+                : "mission match (name auto-match)";
+            return true;
+        }
+
+        if (IsLinkedChallengeActive(out reason))
+        {
+            return true;
+        }
+
+        reason = string.Empty;
+        return false;
+    }
+
+    private bool IsLinkedMissionActive()
+    {
+        if (missionManager == null) return false;
+
+        MissionData activeMission = missionManager.activeMission;
+        if (activeMission == null) return false;
+
+        if (linkedMissionData != null)
+        {
+            return linkedMissionData == activeMission;
+        }
+
+        if (!autoMatchMissionByName) return false;
+
+        string activeName = NormalizeName(activeMission.missionName);
+        if (string.IsNullOrEmpty(activeName)) return false;
+
+        string zoneKey = NormalizeName(zoneName);
+        if (string.IsNullOrEmpty(zoneKey))
+        {
+            zoneKey = NormalizeName(gameObject.name);
+        }
+
+        if (activeName == zoneKey)
+        {
+            linkedMissionData = activeMission;
+            return true;
+        }
+
+        if (linkedChallengeData != null)
+        {
+            string challengeKey = NormalizeName(linkedChallengeData.challengeName);
+            if (!string.IsNullOrEmpty(challengeKey) && activeName == challengeKey)
+            {
+                linkedMissionData = activeMission;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool IsLinkedChallengeActive(out string reason)
+    {
+        reason = string.Empty;
+
+        if (challengeManager == null)
+        {
+            BindChallengeManager();
+        }
+
+        if (challengeManager == null || challengeManager.activeChallenges == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < challengeManager.activeChallenges.Count; i++)
+        {
+            ActiveChallenge activeChallenge = challengeManager.activeChallenges[i];
+            if (activeChallenge == null || activeChallenge.challengeData == null) continue;
+            if (activeChallenge.state != ActiveChallenge.ChallengeState.Active) continue;
+
+            if (linkedChallengeData != null)
+            {
+                if (activeChallenge.challengeData == linkedChallengeData)
+                {
+                    reason = "challenge match (linked ChallengeData)";
+                    return true;
+                }
+
+                string linkedKey = NormalizeName(linkedChallengeData.challengeName);
+                string activeKey = NormalizeName(activeChallenge.challengeData.challengeName);
+                if (!string.IsNullOrEmpty(linkedKey) && linkedKey == activeKey)
+                {
+                    reason = "challenge match (linked challenge name)";
+                    return true;
+                }
+
+                continue;
+            }
+        }
+
+        return false;
+    }
+
+    private static string NormalizeName(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return string.Empty;
+
+        string normalized = value.Trim().ToLowerInvariant();
+        char[] separators = { ' ', '_', '-', '.', '/' };
+
+        foreach (char separator in separators)
+        {
+            normalized = normalized.Replace(separator.ToString(), string.Empty);
+        }
+
+        return normalized;
     }
     
     public void GenerateSpawnItemsForChallenge()

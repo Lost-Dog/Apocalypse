@@ -1,0 +1,128 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!221 &-6992758289119546505
+AnimatorOverrideController:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: TraversalOverrideXZ
+  m_Controller: {fileID: 9100000, guid: 5bcbb8b715927496ea83eb725bca3cbc, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: de1f7e22cc918406ebbbf596cc2aeddd, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: e156e8fc474414795ae820138f419030, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 4eb2c1ec5dea6410c83028698895f868, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 22c37a2f23f2744fba7f62cd5efe3635, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: bca6064337ca64097aa439c6b362ca97, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 3ab5975f4a39b4b068d9adfc2ef415d4, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 1a2d516ad289d44baa073f27eccce342, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 22c37a2f23f2744fba7f62cd5efe3635, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 5423468ca00ca4b14ab2295d42964784, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 22c37a2f23f2744fba7f62cd5efe3635, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 934329f3e4457405eb2c9da5c44d93f8, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: bc2c7a9b757e34df5b623348367feb53, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: f4a570fe69e9242c3a04c6d0cc608fba, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 602171c13c4c34c2e9f5daf0ea5307f4, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: a6f0c77c70d724b0e9eb91f8cedc1152, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: b375eda5de74343d49919c53061e25ec, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: ba3b3b1c9bbee4748a3606cba76e9115, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: bdaabe239afd24eb1b1f5553481b4a71, type: 2}
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dac09353943545378c0781189c88d9d6, type: 3}
+  m_Name: Balance
+  m_EditorClassIdentifier: 
+  m_StateMask: {fileID: 0}
+  m_Entry:
+    m_EntryClip: {fileID: 0}
+    m_EntryMask: {fileID: 0}
+    m_RootMotion: 0
+  m_Exit:
+    m_ExitClip: {fileID: 0}
+    m_ExitMask: {fileID: 0}
+    m_RootMotion: 0
+  m_Properties:
+    m_IsControllable:
+      m_IsEnabled: 0
+      m_Value: 1
+    m_Speed:
+      m_IsEnabled: 1
+      m_Value: 1
+    m_Rotation:
+      m_IsEnabled: 1
+      m_Value: 360
+    m_Mass:
+      m_IsEnabled: 0
+      m_Value: 80
+    m_Height:
+      m_IsEnabled: 0
+      m_Value: 2
+    m_Radius:
+      m_IsEnabled: 0
+      m_Value: 0.2
+    m_GravityUpwards:
+      m_IsEnabled: 0
+      m_Value: -9.81
+    m_GravityDownwards:
+      m_IsEnabled: 0
+      m_Value: -9.81
+    m_TerminalVelocity:
+      m_IsEnabled: 0
+      m_Value: -53
+    m_UseAcceleration:
+      m_IsEnabled: 0
+      m_Value: 1
+    m_Acceleration:
+      m_IsEnabled: 0
+      m_Value: 10
+    m_Deceleration:
+      m_IsEnabled: 0
+      m_Value: 4
+    m_CanJump:
+      m_IsEnabled: 0
+      m_Value: 1
+    m_AirJumps:
+      m_IsEnabled: 0
+      m_Value: 0
+    m_JumpForce:
+      m_IsEnabled: 0
+      m_Value: 5
+    m_JumpCooldown:
+      m_IsEnabled: 0
+      m_Value: 0.5
+    m_DashInSuccession:
+      m_IsEnabled: 0
+      m_Value: 0
+    m_DashInAir:
+      m_IsEnabled: 0
+      m_Value: 0
+    m_DashCooldown:
+      m_IsEnabled: 0
+      m_Value: 1
+  m_OnChange:
+    m_Instructions:
+      m_Instructions: []
+  m_Controller: {fileID: -6992758289119546505}
+  m_Idle: {fileID: 7400000, guid: e156e8fc474414795ae820138f419030, type: 2}
+  m_MoveForward: {fileID: 7400000, guid: 22c37a2f23f2744fba7f62cd5efe3635, type: 2}
+  m_MoveBackward: {fileID: 7400000, guid: 3ab5975f4a39b4b068d9adfc2ef415d4, type: 2}
+  m_MoveRight: {fileID: 7400000, guid: 22c37a2f23f2744fba7f62cd5efe3635, type: 2}
+  m_MoveLeft: {fileID: 7400000, guid: 22c37a2f23f2744fba7f62cd5efe3635, type: 2}
+  m_MoveForwardRight: {fileID: 7400000, guid: 22c37a2f23f2744fba7f62cd5efe3635, type: 2}
+  m_MoveForwardLeft: {fileID: 7400000, guid: 22c37a2f23f2744fba7f62cd5efe3635, type: 2}
+  m_MoveBackwardRight: {fileID: 7400000, guid: 3ab5975f4a39b4b068d9adfc2ef415d4, type: 2}
+  m_MoveBackwardLeft: {fileID: 7400000, guid: 3ab5975f4a39b4b068d9adfc2ef415d4, type: 2}
+  m_EdgeForward: {fileID: 7400000, guid: bc2c7a9b757e34df5b623348367feb53, type: 2}
+  m_EdgeBackward: {fileID: 7400000, guid: 602171c13c4c34c2e9f5daf0ea5307f4, type: 2}
+  m_EdgeRight: {fileID: 7400000, guid: b375eda5de74343d49919c53061e25ec, type: 2}
+  m_EdgeLeft: {fileID: 7400000, guid: bdaabe239afd24eb1b1f5553481b4a71, type: 2}
+  references:
+    version: 2
+    RefIds: []

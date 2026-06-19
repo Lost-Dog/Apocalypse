@@ -448,8 +448,8 @@ public class CharacterSpawner : MonoBehaviour
     }
 
     /// <summary>
-    /// Ensures <paramref name="character"/> has a <see cref="DifficultyScaler"/> and applies
-    /// flat health scaling: <c>baseCharacterHealth + healthPerLevel × playerLevel</c>.
+    /// Applies framework-agnostic scaling components to the spawned character.
+    /// Health scaling remains flat: <c>baseCharacterHealth + healthPerLevel × playerLevel</c>.
     /// </summary>
     private void ApplyHealthScaling(GameObject character)
     {
@@ -460,20 +460,23 @@ public class CharacterSpawner : MonoBehaviour
         // Convert to 0-based so level 1 → base health only, level 2 → base + 1× per-level, etc.
         int zeroBasedLevel = Mathf.Max(0, playerLevel - 1);
 
-        DifficultyScaler scaler = character.GetComponent<DifficultyScaler>();
-        if (scaler == null)
-            scaler = character.AddComponent<DifficultyScaler>();
-
         // Flat formula: health = baseCharacterHealth + healthPerLevel * zeroBasedLevel
-        // DifficultyScaler uses: scaledHealth = baseHealth * (1 + (level - 1) * multiplierPerLevel)
-        // Passing level = zeroBasedLevel + 1 and baseHealth = baseCharacterHealth:
-        //   scaledHealth = baseCharacterHealth * (1 + zeroBasedLevel * multiplierPerLevel)
-        // For a flat +healthPerLevel increase we need:
-        //   multiplierPerLevel = healthPerLevel / baseCharacterHealth  (when baseCharacterHealth > 0)
-        float multiplier = baseCharacterHealth > 0f ? healthPerLevel / baseCharacterHealth : 1f;
-        scaler.SetBaseStats(baseCharacterHealth, scaler.baseDamage);
-        scaler.healthMultiplierPerLevel = multiplier;
-        scaler.ApplyScaling(zeroBasedLevel + 1);
+        float scaledHealth = baseCharacterHealth + (healthPerLevel * zeroBasedLevel);
+        float healthMultiplier = baseCharacterHealth > 0f ? (scaledHealth / baseCharacterHealth) : 1f;
+
+        DifficultyHealthMultiplier health = character.GetComponent<DifficultyHealthMultiplier>();
+        if (health == null)
+            health = character.AddComponent<DifficultyHealthMultiplier>();
+
+        health.multiplier = Mathf.Max(0.01f, healthMultiplier);
+        health.TryApplyToCommonHealthFields(character);
+
+        // Keep damage neutral for civilian ambient spawns unless another system overrides it.
+        DifficultyDamageMultiplier damage = character.GetComponent<DifficultyDamageMultiplier>();
+        if (damage == null)
+            damage = character.AddComponent<DifficultyDamageMultiplier>();
+
+        damage.multiplier = 1f;
     }
 
     public void SetMaxActiveCharacters(int count)

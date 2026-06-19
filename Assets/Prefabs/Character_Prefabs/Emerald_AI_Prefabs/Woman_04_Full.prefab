@@ -3333,7 +3333,6 @@ GameObject:
   - component: {fileID: 1254851899370322543}
   - component: {fileID: 3147768257352229133}
   - component: {fileID: 9015671218953891867}
-  - component: {fileID: 4697421092193247947}
   m_Layer: 0
   m_Name: pelvis
   m_TagString: Untagged
@@ -3407,42 +3406,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &4697421092193247947
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1067286217637495128}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 065db88beeb95054185e2f6e1c8cee54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Invector.vCharacterController.vDamageReceiver
-  openCloseEvents: 0
-  openCloseWindow: 0
-  selectedToolbar: 0
-  targetReceiver: {fileID: 0}
-  damageMultiplier: 1
-  ragdoll: {fileID: 0}
-  overrideReactionID: 0
-  reactionID: 0
-  useRandomValues: 0
-  fixedValues: 0
-  minDamageMultiplier: 0
-  maxDamageMultiplier: 0
-  minReactionID: 0
-  maxReactionID: 0
-  changeToMaxValue: 0
-  OnGetMaxValue:
-    m_PersistentCalls:
-      m_Calls: []
-  _onStartReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &1094214304882526730
 GameObject:
   m_ObjectHideFlags: 0
@@ -3875,7 +3838,6 @@ GameObject:
   - component: {fileID: 6935155494267397395}
   - component: {fileID: 5268067426907658617}
   - component: {fileID: 5003555910000334487}
-  - component: {fileID: 2588592903971533887}
   m_Layer: 0
   m_Name: thigh_l
   m_TagString: Untagged
@@ -3995,42 +3957,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &2588592903971533887
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1591413770376606980}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 065db88beeb95054185e2f6e1c8cee54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Invector.vCharacterController.vDamageReceiver
-  openCloseEvents: 0
-  openCloseWindow: 0
-  selectedToolbar: 0
-  targetReceiver: {fileID: 0}
-  damageMultiplier: 1
-  ragdoll: {fileID: 0}
-  overrideReactionID: 0
-  reactionID: 0
-  useRandomValues: 0
-  fixedValues: 0
-  minDamageMultiplier: 0
-  maxDamageMultiplier: 0
-  minReactionID: 0
-  maxReactionID: 0
-  changeToMaxValue: 0
-  OnGetMaxValue:
-    m_PersistentCalls:
-      m_Calls: []
-  _onStartReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &1614167296053570595
 GameObject:
   m_ObjectHideFlags: 0
@@ -5016,7 +4942,6 @@ GameObject:
   - component: {fileID: 7594873347840885372}
   - component: {fileID: 748685412399837519}
   - component: {fileID: 3201822354775322404}
-  - component: {fileID: 5896233237749914984}
   m_Layer: 0
   m_Name: lowerarm_l
   m_TagString: Untagged
@@ -5137,42 +5062,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &5896233237749914984
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3843257848052287403}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 065db88beeb95054185e2f6e1c8cee54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Invector.vCharacterController.vDamageReceiver
-  openCloseEvents: 0
-  openCloseWindow: 0
-  selectedToolbar: 0
-  targetReceiver: {fileID: 0}
-  damageMultiplier: 1
-  ragdoll: {fileID: 0}
-  overrideReactionID: 0
-  reactionID: 0
-  useRandomValues: 0
-  fixedValues: 0
-  minDamageMultiplier: 0
-  maxDamageMultiplier: 0
-  minReactionID: 0
-  maxReactionID: 0
-  changeToMaxValue: 0
-  OnGetMaxValue:
-    m_PersistentCalls:
-      m_Calls: []
-  _onStartReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &3977447048513781965
 GameObject:
   m_ObjectHideFlags: 0
@@ -5337,26 +5226,19 @@ GameObject:
   - component: {fileID: 1115614463964744643}
   - component: {fileID: 3895881392863458420}
   - component: {fileID: 1777251065149433512}
-  - component: {fileID: 6904074419327512832}
-  - component: {fileID: 3026977815332765767}
   - component: {fileID: 5761064358230407629}
-  - component: {fileID: 989379319155586359}
-  - component: {fileID: 7352449099082648157}
-  - component: {fileID: 8200825260222818140}
-  - component: {fileID: 8911424565185783015}
-  - component: {fileID: 7649865884272105763}
-  - component: {fileID: 1553067831135548732}
-  - component: {fileID: 7396572208143554762}
-  - component: {fileID: 8416992046938730587}
   - component: {fileID: 2470143041634209928}
   - component: {fileID: 4651491578738055760}
   - component: {fileID: 2706466256316276305}
   - component: {fileID: 6314382936285517037}
   - component: {fileID: 766588835403222504}
-  - component: {fileID: -955764481207943629}
-  - component: {fileID: 8430550584486755896}
   - component: {fileID: 8994647883362860772}
-  - component: {fileID: -4255795419005923305}
+  - component: {fileID: 4789903267265855122}
+  - component: {fileID: 6596612866864984107}
+  - component: {fileID: -2063834283681566960}
+  - component: {fileID: -1741224978170066512}
+  - component: {fileID: 2067666311980257755}
+  - component: {fileID: -7054408424446024162}
   m_Layer: 30
   m_Name: Woman_04_Full
   m_TagString: Friendly
@@ -5481,15 +5363,15 @@ MonoBehaviour:
     m_Bits: 1073742592
   ObstructionDetectionLayerMask:
     serializedVersion: 2
-    m_Bits: 4
+    m_Bits: 1
   PlayerTag: Player
   ObstructionDetectionFrequency: 0.1
   ObstructionDetectionUpdateTimer: 0
   ObstructionSeconds: 1.5
   StartingDetectionRadius: 0
-  DetectionRadius: 25
+  DetectionRadius: 30
   StartingChaseDistance: 0
-  FieldOfViewAngle: 270
+  FieldOfViewAngle: 135
   StartingFieldOfViewAngle: 0
   CurrentDetectionState: 1
   PickTargetType: 0
@@ -5510,7 +5392,7 @@ MonoBehaviour:
     RelationType: 2
   AIFactionsList: 
   HideSettingsFoldout: 0
-  DetectionFoldout: 1
+  DetectionFoldout: 0
   TagFoldout: 1
   FactionFoldout: 1
 --- !u!114 &1115614463964744643
@@ -5547,7 +5429,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EmeraldAI.EmeraldCombat
   WeaponColliders: []
   CurrentWeaponCollision: {fileID: 0}
-  MinResumeWander: 4
+  MinResumeWander: 3
   MaxResumeWander: 6
   CurrentAttackCooldown: 0
   Type1AttackCooldown: 1
@@ -5601,13 +5483,13 @@ MonoBehaviour:
   WeaponTypeAmount: 0
   Type1Attacks:
     AttackListIndex: 0
-    AttackPickType: 1
+    AttackPickType: 2
     AttackDataList:
     - AbilityObject: {fileID: 11400000, guid: 8d84b71dfe300ba4793543c42c8123cf, type: 2}
       AttackAnimation: 0
       AttackOdds: 0
-      AttackDistance: 20
-      TooCloseDistance: 15
+      AttackDistance: 15
+      TooCloseDistance: 5
       CooldownIgnored: 0
       CooldownTimeStamp: 0
   Type2Attacks:
@@ -5669,14 +5551,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EmeraldAI.EmeraldBehaviors
   CurrentBehaviorType: 2
   TargetToFollow: {fileID: 0}
-  CautiousSeconds: 0
+  CautiousSeconds: 2
   InfititeChase: 0
   ChaseSeconds: 5
   FleeSeconds: 5
   RequireObstruction: 0
   PercentToFlee: 40
   UpdateFleePositionSeconds: 1.5
-  MaxDistanceFromStartingArea: 30
+  MaxDistanceFromStartingArea: 10
   FollowingStoppingDistance: 8
   IsAiming: 0
   FleeOnLowHealth: 1
@@ -5685,113 +5567,6 @@ MonoBehaviour:
   HideSettingsFoldout: 0
   BehaviorSettingsFoldout: 1
   CustomSettingsFoldout: 0
---- !u!114 &6904074419327512832
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4334512239106084312}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6a91628e3b6f5c0418d73c9a0ccf4df1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EmeraldAI.EmeraldMovement
-  CanReachTarget: 0
-  DistanceFromFollower: 0
-  CalculatePathSeconds: 1
-  DefaultMovementPaused: 0
-  WanderType: 0
-  WaypointType: 2
-  MovementType: 1
-  StartingMovementState: 1
-  CurrentMovementState: 0
-  UseRandomRotationOnStart: 0
-  AlignAIOnStart: 0
-  AlignAIWithGround: 0
-  AlignmentQuality: 1
-  WalkBackwardsSpeed: 1
-  WalkSpeed: 2
-  RunSpeed: 5
-  ForceWalkDistance: 2.5
-  StoppingDistance: 2
-  NonCombatAngleToTurn: 20
-  CombatAngleToTurn: 30
-  StationaryTurningSpeedNonCombat: 30
-  StationaryTurningSpeedCombat: 30
-  MovingTurnSpeedNonCombat: 200
-  MovingTurnSpeedCombat: 200
-  BackupTurningSpeed: 150
-  MaxNormalAngle: 20
-  MaxSlopeLimit: 30
-  NonCombatAlignmentSpeed: 15
-  CombatAlignmentSpeed: 25
-  MovementTurningSensitivity: 2
-  MinimumWaitTime: 3
-  MaximumWaitTime: 6
-  AlignmentLayerMask:
-    serializedVersion: 2
-    m_Bits: 1
-  AngleToTurn: 0
-  DecelerationDampTime: 0.15
-  WaypointTimer: 0
-  WaypointIndex: 0
-  WaypointsList: []
-  DestinationAdjustedAngle: 0
-  DestinationDirection: {x: 0, y: 0, z: 0}
-  RotateTowardsTarget: 0
-  StationaryIdleSecondsMin: 3
-  StationaryIdleSecondsMax: 6
-  GeneratedBackupOdds: 0
-  StartingWanderingType: 0
-  ReturnToStationaryPosition: 0
-  SingleDestination: {x: 0, y: 0, z: 0}
-  StartingDestination: {x: 0, y: 0, z: 0}
-  m_WaypointObject: {fileID: 0}
-  WanderRadius: 25
-  DynamicWanderLayerMask:
-    serializedVersion: 2
-    m_Bits: 1
-  BackupLayerMask:
-    serializedVersion: 2
-    m_Bits: 1
-  LockTurning: 0
-  ReturningToStartInProgress: 0
-  AIAgentActive: 0
-  HideSettingsFoldout: 0
-  WanderFoldout: 1
-  WaypointsFoldout: 0
-  WaypointsListFoldout: 0
-  BackupFoldout: 0
-  MovementFoldout: 1
-  AlignmentFoldout: 0
-  TurnFoldout: 0
---- !u!114 &3026977815332765767
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4334512239106084312}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4435fe59ad515fd4d94c2dd09006f199, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EmeraldAI.EmeraldHealth
-  CurrentHealth: 300
-  StartingHealth: 300
-  HealRate: 0
-  AttachHitEffects: 1
-  Immortal: 0
-  CurrentActiveEffects: []
-  HitEffectFoldout: 1
-  UseHitEffect: 1
-  HitEffectPosOffset: {x: 0, y: 0, z: 0}
-  HitEffectTimeoutSeconds: 1.5
-  HitEffectsList:
-  - {fileID: 8668342819897343366, guid: ac93b6d401a134a4d95542316b0841c6, type: 3}
-  HideSettingsFoldout: 0
-  HealthFoldout: 1
 --- !u!114 &5761064358230407629
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5861,274 +5636,6 @@ MonoBehaviour:
   HideSettingsFoldout: 0
   GeneralEventsFoldout: 0
   CombatEventsFoldout: 0
---- !u!114 &989379319155586359
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4334512239106084312}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 47eaa6fcdf0a9a64a9cbfd56d640ab33, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EmeraldAI.EmeraldItems
-  UseDroppableWeapon: 0
-  Type1EquippableWeapons:
-  - HeldToggle: 0
-    HeldObject: {fileID: 1408449184792688165}
-    HolsteredToggle: 0
-    HolsteredObject: {fileID: 0}
-    DroppableToggle: 0
-    DroppableObject: {fileID: 0}
-  Type2EquippableWeapons: []
-  ItemList: []
-  HideSettingsFoldout: 0
-  WeaponsFoldout: 1
-  ItemsFoldout: 1
---- !u!114 &7352449099082648157
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4334512239106084312}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 398e9e5be7a119e46aa1da605e4145d0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EmeraldAI.EmeraldInverseKinematics
-  WanderingLookAtLimit: 75
-  WanderingLookSpeed: 4
-  WanderingLookDistance: 12
-  WanderingLookHeightOffset: 0
-  CombatLookAtLimit: 75
-  CombatLookSpeed: 6
-  CombatLookDistance: 12
-  CombatLookHeightOffset: 0
-  UpperBodyRigsList:
-  - {fileID: 6221621449807790955}
-  m_AimSource: {fileID: 0}
-  HideSettingsFoldout: 0
-  GeneralIKSettingsFoldout: 0
-  RigSettingsFoldout: 1
---- !u!114 &8200825260222818140
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4334512239106084312}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f964d14d2a406284fad2ef0b03a2e4d5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EmeraldAI.EmeraldUI
-  AIName: Ellen Thomas
-  AITitle: AI Title
-  AILevel: 1
-  HideSettingsFoldout: 0
-  UISettingsFoldout: 1
-  HealthBarsFoldout: 1
-  CombatTextFoldout: 0
-  NameTextFoldout: 1
-  LevelTextFoldout: 0
-  UseCustomHealthBar: 0
-  DisplayAIName: 1
-  DisplayAITitle: 0
-  DisplayAILevel: 0
-  UseAINameUIOutlineEffect: 1
-  UseAILevelUIOutlineEffect: 1
-  UseCustomFontAIName: 0
-  UseCustomFontAILevel: 0
-  AutoCreateHealthBars: 1
-  HealthBarCanvasRef: {fileID: 0}
-  HealthBar: {fileID: 0}
-  HealthBarCanvas: {fileID: 0}
-  CameraTag: MainCamera
-  m_HealthBarComponent: {fileID: 0}
-  UITag: Player
-  UILayerMask:
-    serializedVersion: 2
-    m_Bits: 256
-  MaxUIScaleSize: 5
-  AINameUI: {fileID: 0}
-  AINameFont: {fileID: 0}
-  AINameLineSpacing: 0.75
-  AINameUIOutlineSize: {x: 0.35, y: -0.35}
-  AINameUIOutlineColor: {r: 0, g: 0, b: 0, a: 1}
-  AILevelUI: {fileID: 0}
-  AILevelFont: {fileID: 0}
-  AILevelUIOutlineSize: {x: 0.35, y: -0.35}
-  AILevelUIOutlineColor: {r: 0, g: 0, b: 0, a: 1}
-  HealthBarImage: {fileID: 0}
-  HealthBarBackgroundImage: {fileID: 0}
-  HealthBarPos: {x: 0, y: 2.2, z: 0}
-  HealthBarColor: {r: 0, g: 0, b: 1, a: 1}
-  HealthBarDamageColor: {r: 0.972549, g: 0.8509804, b: 0.015686275, a: 1}
-  HealthBarBackgroundColor: {r: 0.14117648, g: 0.14117648, b: 0.14117648, a: 1}
-  NameTextColor: {r: 1, g: 1, b: 1, a: 1}
-  LevelTextColor: {r: 1, g: 1, b: 1, a: 1}
-  HealthBarScale: {x: 0.5, y: 1, z: 1}
-  NameTextFontSize: 5
-  WaypointParent: {fileID: 0}
-  WaypointOrigin: 
-  AINamePos: {x: 0, y: 2.4, z: 0}
-  AILevelPos: {x: 1.5, y: 0, z: 0}
---- !u!114 &8911424565185783015
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4334512239106084312}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2ed4a775d9ab2ce40b00c0c4f9665db7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EmeraldAI.EmeraldFootsteps
-  DetectableLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  IgnoreLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  FeetTransforms:
-  - {fileID: 1265861639390709748}
-  - {fileID: 4852405573174635619}
-  FootstepSurfaces:
-  - {fileID: 11400000, guid: 3513ddaab1b8eac4f8df48b4e49b6d2a, type: 2}
-  HideSettingsFoldout: 0
-  FootstepsFoldout: 1
-  SurfaceFoldout: 1
---- !u!114 &7649865884272105763
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4334512239106084312}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d813b5e51839b2945ae81518686daa6f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EmeraldAI.SoundDetection.EmeraldSoundDetector
-  DetectedAttractModifier: {fileID: 0}
-  CurrentThreatLevel: 0
-  CurrentThreatAmount: 0
-  AttentionRate: 0.1
-  MinVelocityThreshold: 0.5
-  TargetVelocityFactor: 0.3
-  DistanceFactor: 0.1
-  AttentionFalloff: 0.05
-  FalloffDealy: 3
-  DelayUnawareSeconds: 5
-  AttractModifierCooldown: 5
-  MovingTargetDetected: 0
-  UnawareThreatLevel: 0.05
-  UnawareReaction: {fileID: 0}
-  UnawareEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  SuspiciousThreatLevel: 0.5
-  SuspiciousReaction: {fileID: 0}
-  SuspiciousEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  AwareThreatLevel: 1
-  AwareReaction: {fileID: 0}
-  AwareEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  CurrentTargetData: []
-  HideSettingsFoldout: 0
-  SoundDetectorFoldout: 0
-  UnawareFoldout: 0
-  SuspiciousFoldout: 0
-  AwareFoldout: 0
---- !u!114 &1553067831135548732
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4334512239106084312}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8ad554582c3102645807bc20652b7fbf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EmeraldAI.EmeraldDebugger
-  EnableDebuggingTools: 1
-  DrawLineOfSightLines: 0
-  DrawNavMeshPath: 1
-  NavMeshPathColor: {r: 0, g: 0, b: 1, a: 1}
-  DrawNavMeshDestination: 1
-  NavMeshDestinationColor: {r: 1, g: 0, b: 0, a: 1}
-  DrawLookAtPoints: 0
-  DrawUndetectedTargetsLine: 0
-  DebugLogTargets: 0
-  DebugLogObstructions: 0
-  DrawFootstepPositions: 0
-  DebugLogFootsteps: 0
-  DrawDetectedCoverNodes: 0
-  HideSettingsFoldout: 0
-  SettingsFoldout: 1
---- !u!114 &7396572208143554762
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4334512239106084312}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8baf1386c3b869a498388fe85639e4f4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EmeraldAI.Utility.TargetPositionModifier
-  HideSettingsFoldout: 0
-  TPMSettingsFoldout: 1
-  TransformSource: {fileID: 4218596334222532292}
-  PositionModifier: 0.3
-  GizmoRadius: 0.25
-  GizmoColor: {r: 1, g: 0, b: 0, a: 0.8}
---- !u!114 &8416992046938730587
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4334512239106084312}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0827074d85bacde4485f082ac0820a93, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EmeraldAI.EmeraldSystem
-  CombatTarget: {fileID: 0}
-  TargetToFollow: {fileID: 0}
-  LookAtTarget: {fileID: 0}
-  CurrentTargetInfo:
-    TargetSource: {fileID: 0}
-  m_NavMeshAgent: {fileID: 0}
-  AIBoxCollider: {fileID: 0}
-  AIAnimator: {fileID: 0}
-  TimeSinceEnabled: 0
-  DetectionComponent: {fileID: 0}
-  BehaviorsComponent: {fileID: 0}
-  MovementComponent: {fileID: 0}
-  AnimationComponent: {fileID: 0}
-  CombatComponent: {fileID: 0}
-  SoundComponent: {fileID: 0}
-  HealthComponent: {fileID: 0}
-  OptimizationComponent: {fileID: 0}
-  InverseKinematicsComponent: {fileID: 0}
-  EventsComponent: {fileID: 0}
-  DebuggerComponent: {fileID: 0}
-  UIComponent: {fileID: 0}
-  ItemsComponent: {fileID: 0}
-  SoundDetectorComponent: {fileID: 0}
-  TPMComponent: {fileID: 0}
-  LBDComponent: {fileID: 0}
-  CoverComponent: {fileID: 0}
 --- !u!95 &2470143041634209928
 Animator:
   serializedVersion: 7
@@ -6170,8 +5677,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.6485804, y: 0.34469992, z: 0.19061567}
-  m_Center: {x: 0, y: 0.17234996, z: 0}
+  m_Size: {x: 0.6, y: 2, z: 0.6}
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!195 &2706466256316276305
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -6307,70 +5814,6 @@ MonoBehaviour:
   - m_Rig: {fileID: 6221621449807790955}
     m_Active: 1
   m_Effectors: []
---- !u!114 &-955764481207943629
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4334512239106084312}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 19572c82f93c9c044b22055fa3b67dea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyKillRewardHandler
-  baseXPReward: 50
-  xpVariance: 10
-  lootDropChance: 0.5
-  enemyLevel: 1
-  isElite: 0
-  isBoss: 0
-  eliteXPMultiplier: 2
-  bossXPMultiplier: 5
-  eliteLootChance: 0.75
-  bossLootChance: 1
-  restoreHealthOnKill: 1
-  healthRestoreAmount: 100
-  healthRestorePercentage: 0.1
-  restoreStaminaOnKill: 1
---- !u!114 &8430550584486755896
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4334512239106084312}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6be3bf20af42de47a28857f2ca6409c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EmeraldAI.InvectorAIBridge
-  openCloseEvents: 0
-  openCloseWindow: 0
-  selectedToolbar: 0
-  _isDead: 1
-  _currentHealth: 0
-  isImmortal: 0
-  fillHealthOnStart: 1
-  _maxHealth: 100
-  _healthRecovery: 0
-  _healthRecoveryDelay: 0
-  checkHealthEvents: []
-  _onStartReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onDead:
-    m_PersistentCalls:
-      m_Calls: []
-  onChangeHealth:
-    m_PersistentCalls:
-      m_Calls: []
-  onResetHealth:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!114 &8994647883362860772
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6393,7 +5836,7 @@ MonoBehaviour:
   HideSettingsFoldout: 0
   DecalsFoldout: 0
   MessageDismissed: 0
---- !u!114 &-4255795419005923305
+--- !u!114 &4789903267265855122
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -6402,32 +5845,223 @@ MonoBehaviour:
   m_GameObject: {fileID: 4334512239106084312}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f131dd35d296fca4e90efc4ed717e48b, type: 3}
+  m_Script: {fileID: 11500000, guid: dd511344c8eb9884ba222ce2feccb5ad, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::bl_MiniMapEntity
-  Target: {fileID: 4648299648862026083}
-  OffSet: {x: 0, y: 0, z: 0}
-  iconData: {fileID: 11400000, guid: 4cc3427ac54e653468647b0f07341199, type: 2}
-  ShowCircleArea: 0
-  CircleAreaRadius: 10
-  CircleAreaColor: {r: 1, g: 1, b: 1, a: 0.9}
-  isInteractable: 1
-  interacableAction: 0
-  InfoItem: Info Icon here
-  keepTextAlwaysFacingUp: 0
-  onClick:
-    m_PersistentCalls:
-      m_Calls: []
-  OffScreen: 1
-  opacityBasedDistance: 0
-  maxDistance: 250
-  iconFaceDirection: 0
-  enableDisableWithTarget: 1
-  DestroyWithObject: 1
-  BorderOffScreen: 0.01
-  RenderDelay: 0.3
-  m_Effect: 2
-  CustomIconPrefab: {fileID: 0}
+  m_EditorClassIdentifier: Assembly-CSharp::SceneActorCullingTarget
+  overrideDistances: 0
+  activeDistance: 45
+  cullDistance: 65
+  distanceBias: 0
+  animator: {fileID: 2470143041634209928}
+  navMeshAgent: {fileID: 2706466256316276305}
+  aiBehaviours: []
+  renderers: []
+  colliders: []
+  manageAnimator: 1
+  manageNavMeshAgent: 1
+  manageAIBehaviours: 1
+  manageRenderers: 0
+  manageColliders: 0
+  ignoreIfTaggedPlayer: 1
+  isCulled: 0
+  lastDistance: 0
+--- !u!114 &6596612866864984107
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4334512239106084312}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a91628e3b6f5c0418d73c9a0ccf4df1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EmeraldAI.EmeraldMovement
+  CanReachTarget: 0
+  DistanceFromFollower: 0
+  CalculatePathSeconds: 1
+  DefaultMovementPaused: 0
+  WanderType: 0
+  WaypointType: 2
+  MovementType: 0
+  StartingMovementState: 1
+  CurrentMovementState: 0
+  UseRandomRotationOnStart: 0
+  AlignAIOnStart: 0
+  AlignAIWithGround: 0
+  AlignmentQuality: 1
+  WalkBackwardsSpeed: 1
+  WalkSpeed: 2
+  RunSpeed: 5
+  ForceWalkDistance: 2.5
+  StoppingDistance: 2
+  NonCombatAngleToTurn: 20
+  CombatAngleToTurn: 30
+  StationaryTurningSpeedNonCombat: 10
+  StationaryTurningSpeedCombat: 10
+  MovingTurnSpeedNonCombat: 200
+  MovingTurnSpeedCombat: 200
+  BackupTurningSpeed: 150
+  MaxNormalAngle: 20
+  MaxSlopeLimit: 30
+  NonCombatAlignmentSpeed: 15
+  CombatAlignmentSpeed: 25
+  MovementTurningSensitivity: 2
+  MinimumWaitTime: 3
+  MaximumWaitTime: 6
+  AlignmentLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  AngleToTurn: 0
+  DecelerationDampTime: 0.15
+  WaypointTimer: 0
+  WaypointIndex: 0
+  WaypointsList: []
+  DestinationAdjustedAngle: 0
+  DestinationDirection: {x: 0, y: 0, z: 0}
+  RotateTowardsTarget: 0
+  StationaryIdleSecondsMin: 3
+  StationaryIdleSecondsMax: 6
+  GeneratedBackupOdds: 0
+  StartingWanderingType: 0
+  ReturnToStationaryPosition: 0
+  SingleDestination: {x: 0, y: 0, z: 0}
+  StartingDestination: {x: 0, y: 0, z: 0}
+  m_WaypointObject: {fileID: 0}
+  WanderRadius: 10
+  DynamicWanderLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  BackupLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  LockTurning: 0
+  ReturningToStartInProgress: 0
+  AIAgentActive: 0
+  HideSettingsFoldout: 0
+  WanderFoldout: 1
+  WaypointsFoldout: 0
+  WaypointsListFoldout: 0
+  BackupFoldout: 0
+  MovementFoldout: 1
+  AlignmentFoldout: 0
+  TurnFoldout: 0
+--- !u!114 &-2063834283681566960
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4334512239106084312}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4435fe59ad515fd4d94c2dd09006f199, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EmeraldAI.EmeraldHealth
+  CurrentHealth: 100
+  StartingHealth: 50
+  HealRate: 2
+  AttachHitEffects: 0
+  Immortal: 0
+  CurrentActiveEffects: []
+  HitEffectFoldout: 1
+  UseHitEffect: 1
+  HitEffectPosOffset: {x: 0, y: 0, z: 0}
+  HitEffectTimeoutSeconds: 0.2
+  HitEffectsList: []
+  HideSettingsFoldout: 0
+  HealthFoldout: 1
+--- !u!114 &-1741224978170066512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4334512239106084312}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0827074d85bacde4485f082ac0820a93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EmeraldAI.EmeraldSystem
+  CombatTarget: {fileID: 0}
+  TargetToFollow: {fileID: 0}
+  LookAtTarget: {fileID: 0}
+  CurrentTargetInfo:
+    TargetSource: {fileID: 0}
+  m_NavMeshAgent: {fileID: 0}
+  AIBoxCollider: {fileID: 0}
+  AIAnimator: {fileID: 0}
+  TimeSinceEnabled: 0
+  DetectionComponent: {fileID: 0}
+  BehaviorsComponent: {fileID: 0}
+  MovementComponent: {fileID: 0}
+  AnimationComponent: {fileID: 0}
+  CombatComponent: {fileID: 0}
+  SoundComponent: {fileID: 0}
+  HealthComponent: {fileID: 0}
+  OptimizationComponent: {fileID: 0}
+  InverseKinematicsComponent: {fileID: 0}
+  EventsComponent: {fileID: 0}
+  DebuggerComponent: {fileID: 0}
+  UIComponent: {fileID: 0}
+  ItemsComponent: {fileID: 0}
+  SoundDetectorComponent: {fileID: 0}
+  TPMComponent: {fileID: 0}
+  LBDComponent: {fileID: 0}
+  CoverComponent: {fileID: 0}
+--- !u!114 &2067666311980257755
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4334512239106084312}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 398e9e5be7a119e46aa1da605e4145d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EmeraldAI.EmeraldInverseKinematics
+  WanderingLookAtLimit: 75
+  WanderingLookSpeed: 4
+  WanderingLookDistance: 12
+  WanderingLookHeightOffset: 0
+  CombatLookAtLimit: 75
+  CombatLookSpeed: 6
+  CombatLookDistance: 12
+  CombatLookHeightOffset: 0
+  UpperBodyRigsList: []
+  m_AimSource: {fileID: 0}
+  HideSettingsFoldout: 0
+  GeneralIKSettingsFoldout: 0
+  RigSettingsFoldout: 0
+--- !u!114 &-7054408424446024162
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4334512239106084312}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36cd5a6bb14115641b36d836a9d4a176, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyKillRewardHandler
+  baseXPReward: 50
+  xpVariance: 10
+  lootDropChance: 0.5
+  enemyLevel: 1
+  isElite: 0
+  isBoss: 0
+  eliteXPMultiplier: 2
+  bossXPMultiplier: 5
+  eliteLootChance: 0.75
+  bossLootChance: 1
+  restoreHealthOnKill: 1
+  healthRestoreAmount: 20
+  healthRestorePercentage: 0.1
+  restoreStaminaOnKill: 1
+  staminaRestoreAmount: 20
+  staminaRestorePercentage: 0.1
 --- !u!1 &4542626018835597869
 GameObject:
   m_ObjectHideFlags: 0
@@ -6762,7 +6396,6 @@ GameObject:
   - component: {fileID: 930195353441586953}
   - component: {fileID: 2450230884892066104}
   - component: {fileID: 5634798307405180796}
-  - component: {fileID: 3214807689597476720}
   m_Layer: 0
   m_Name: head
   m_TagString: Untagged
@@ -6879,42 +6512,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &3214807689597476720
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5387310496563592125}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 065db88beeb95054185e2f6e1c8cee54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Invector.vCharacterController.vDamageReceiver
-  openCloseEvents: 0
-  openCloseWindow: 0
-  selectedToolbar: 0
-  targetReceiver: {fileID: 0}
-  damageMultiplier: 1
-  ragdoll: {fileID: 0}
-  overrideReactionID: 0
-  reactionID: 0
-  useRandomValues: 0
-  fixedValues: 0
-  minDamageMultiplier: 0
-  maxDamageMultiplier: 0
-  minReactionID: 0
-  maxReactionID: 0
-  changeToMaxValue: 0
-  OnGetMaxValue:
-    m_PersistentCalls:
-      m_Calls: []
-  _onStartReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &5412624687847789358
 GameObject:
   m_ObjectHideFlags: 0
@@ -6959,7 +6556,6 @@ GameObject:
   - component: {fileID: 4439043420224840771}
   - component: {fileID: 4253801089487191847}
   - component: {fileID: 5497879989679372814}
-  - component: {fileID: 7251802672685147158}
   m_Layer: 0
   m_Name: calf_r
   m_TagString: Untagged
@@ -7079,42 +6675,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &7251802672685147158
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5416344165814881837}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 065db88beeb95054185e2f6e1c8cee54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Invector.vCharacterController.vDamageReceiver
-  openCloseEvents: 0
-  openCloseWindow: 0
-  selectedToolbar: 0
-  targetReceiver: {fileID: 0}
-  damageMultiplier: 1
-  ragdoll: {fileID: 0}
-  overrideReactionID: 0
-  reactionID: 0
-  useRandomValues: 0
-  fixedValues: 0
-  minDamageMultiplier: 0
-  maxDamageMultiplier: 0
-  minReactionID: 0
-  maxReactionID: 0
-  changeToMaxValue: 0
-  OnGetMaxValue:
-    m_PersistentCalls:
-      m_Calls: []
-  _onStartReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &5447592267379911224
 GameObject:
   m_ObjectHideFlags: 0
@@ -7768,7 +7328,6 @@ GameObject:
   - component: {fileID: 4496986125097504551}
   - component: {fileID: 7999821203066866272}
   - component: {fileID: 2984410947327481548}
-  - component: {fileID: 5197026664244153409}
   m_Layer: 0
   m_Name: lowerarm_r
   m_TagString: Untagged
@@ -7889,42 +7448,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &5197026664244153409
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6743601878689568385}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 065db88beeb95054185e2f6e1c8cee54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Invector.vCharacterController.vDamageReceiver
-  openCloseEvents: 0
-  openCloseWindow: 0
-  selectedToolbar: 0
-  targetReceiver: {fileID: 0}
-  damageMultiplier: 1
-  ragdoll: {fileID: 0}
-  overrideReactionID: 0
-  reactionID: 0
-  useRandomValues: 0
-  fixedValues: 0
-  minDamageMultiplier: 0
-  maxDamageMultiplier: 0
-  minReactionID: 0
-  maxReactionID: 0
-  changeToMaxValue: 0
-  OnGetMaxValue:
-    m_PersistentCalls:
-      m_Calls: []
-  _onStartReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &6872087942186550567
 GameObject:
   m_ObjectHideFlags: 0
@@ -8132,7 +7655,6 @@ GameObject:
   - component: {fileID: 5387168185781104810}
   - component: {fileID: 8936154801949259476}
   - component: {fileID: 468384027234974032}
-  - component: {fileID: 5061127827023882687}
   m_Layer: 0
   m_Name: upperarm_l
   m_TagString: Untagged
@@ -8252,42 +7774,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &5061127827023882687
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7440344240170148150}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 065db88beeb95054185e2f6e1c8cee54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Invector.vCharacterController.vDamageReceiver
-  openCloseEvents: 0
-  openCloseWindow: 0
-  selectedToolbar: 0
-  targetReceiver: {fileID: 0}
-  damageMultiplier: 1
-  ragdoll: {fileID: 0}
-  overrideReactionID: 0
-  reactionID: 0
-  useRandomValues: 0
-  fixedValues: 0
-  minDamageMultiplier: 0
-  maxDamageMultiplier: 0
-  minReactionID: 0
-  maxReactionID: 0
-  changeToMaxValue: 0
-  OnGetMaxValue:
-    m_PersistentCalls:
-      m_Calls: []
-  _onStartReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &7698380748212362990
 GameObject:
   m_ObjectHideFlags: 0
@@ -8300,7 +7786,6 @@ GameObject:
   - component: {fileID: 3008303586399978707}
   - component: {fileID: 7767745753537128030}
   - component: {fileID: 6731594542719810544}
-  - component: {fileID: 6716389870961921685}
   m_Layer: 0
   m_Name: thigh_r
   m_TagString: Untagged
@@ -8420,42 +7905,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &6716389870961921685
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7698380748212362990}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 065db88beeb95054185e2f6e1c8cee54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Invector.vCharacterController.vDamageReceiver
-  openCloseEvents: 0
-  openCloseWindow: 0
-  selectedToolbar: 0
-  targetReceiver: {fileID: 0}
-  damageMultiplier: 1
-  ragdoll: {fileID: 0}
-  overrideReactionID: 0
-  reactionID: 0
-  useRandomValues: 0
-  fixedValues: 0
-  minDamageMultiplier: 0
-  maxDamageMultiplier: 0
-  minReactionID: 0
-  maxReactionID: 0
-  changeToMaxValue: 0
-  OnGetMaxValue:
-    m_PersistentCalls:
-      m_Calls: []
-  _onStartReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &7717922690018244770
 GameObject:
   m_ObjectHideFlags: 0
@@ -8594,7 +8043,6 @@ GameObject:
   - component: {fileID: 222527915478690367}
   - component: {fileID: 1017624904878292943}
   - component: {fileID: 3378507012738903819}
-  - component: {fileID: 4313903257490687356}
   m_Layer: 0
   m_Name: calf_l
   m_TagString: Untagged
@@ -8714,42 +8162,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &4313903257490687356
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8017949504541532883}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 065db88beeb95054185e2f6e1c8cee54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Invector.vCharacterController.vDamageReceiver
-  openCloseEvents: 0
-  openCloseWindow: 0
-  selectedToolbar: 0
-  targetReceiver: {fileID: 0}
-  damageMultiplier: 1
-  ragdoll: {fileID: 0}
-  overrideReactionID: 0
-  reactionID: 0
-  useRandomValues: 0
-  fixedValues: 0
-  minDamageMultiplier: 0
-  maxDamageMultiplier: 0
-  minReactionID: 0
-  maxReactionID: 0
-  changeToMaxValue: 0
-  OnGetMaxValue:
-    m_PersistentCalls:
-      m_Calls: []
-  _onStartReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &8603907347457005807
 GameObject:
   m_ObjectHideFlags: 0
@@ -9199,7 +8611,6 @@ GameObject:
   - component: {fileID: 3338783101448691846}
   - component: {fileID: 5914506815069174133}
   - component: {fileID: 2803906008847385827}
-  - component: {fileID: 4870553593029583084}
   m_Layer: 0
   m_Name: upperarm_r
   m_TagString: Untagged
@@ -9319,42 +8730,6 @@ CharacterJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
---- !u!114 &4870553593029583084
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8893106395117047577}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 065db88beeb95054185e2f6e1c8cee54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Invector.vCharacterController.vDamageReceiver
-  openCloseEvents: 0
-  openCloseWindow: 0
-  selectedToolbar: 0
-  targetReceiver: {fileID: 0}
-  damageMultiplier: 1
-  ragdoll: {fileID: 0}
-  overrideReactionID: 0
-  reactionID: 0
-  useRandomValues: 0
-  fixedValues: 0
-  minDamageMultiplier: 0
-  maxDamageMultiplier: 0
-  minReactionID: 0
-  maxReactionID: 0
-  changeToMaxValue: 0
-  OnGetMaxValue:
-    m_PersistentCalls:
-      m_Calls: []
-  _onStartReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
-  _onReceiveDamage:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &9057463852213228943
 GameObject:
   m_ObjectHideFlags: 0
@@ -9630,12 +9005,6 @@ PrefabInstance:
       addedObject: {fileID: 6711731347408258341}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: aa206096627771b439d7b7af87de62c2, type: 3}
---- !u!1 &1408449184792688165 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5073903049677680545, guid: aa206096627771b439d7b7af87de62c2,
-    type: 3}
-  m_PrefabInstance: {fileID: 6188454836716870020}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1783427370769837215 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5557951411318125851, guid: aa206096627771b439d7b7af87de62c2,

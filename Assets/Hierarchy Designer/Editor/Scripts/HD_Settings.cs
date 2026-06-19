@@ -127,6 +127,7 @@ namespace HierarchyDesigner
             public bool EnableTooltipOnComponentIconHovered = true;
             public bool EnableActiveStateEffectForComponentIcons = true;
             public bool DisableComponentIconsForInactiveGameObjects = true;
+            public bool UseHierarchyTreeColorForInactiveGameObjects = false;
             public bool EnableCustomInspectorUI = true;
             public bool EnableEditorUtilities = true;
             public bool IncludeBackgroundImageForGradientBackground = true;
@@ -224,6 +225,7 @@ namespace HierarchyDesigner
             HD_Manager.EnableDynamicBackgroundForGameObjectMainIconCache = EnableDynamicBackgroundForGameObjectMainIcon;
             HD_Manager.EnablePreciseRectForDynamicBackgroundForGameObjectMainIconCache = EnablePreciseRectForDynamicBackgroundForGameObjectMainIcon;
             HD_Manager.DisableComponentIconsForInactiveGameObjectsCache = DisableComponentIconsForInactiveGameObjects;
+            HD_Manager.UseHierarchyTreeColorForInactiveGameObjectsCache = UseHierarchyTreeColorForInactiveGameObjects;
             HD_Manager.EnableCustomizationForGameObjectComponentIconsCache = EnableCustomizationForGameObjectComponentIcons;
             HD_Manager.EnableTooltipOnComponentIconHoveredCache = EnableTooltipOnComponentIconHovered;
             HD_Manager.EnableActiveStateEffectForComponentIconsCache = EnableActiveStateEffectForComponentIcons;
@@ -1466,6 +1468,19 @@ namespace HierarchyDesigner
             }
         }
 
+        public static bool UseHierarchyTreeColorForInactiveGameObjects
+        {
+            get => advancedSettings.UseHierarchyTreeColorForInactiveGameObjects;
+            set
+            {
+                if (advancedSettings.UseHierarchyTreeColorForInactiveGameObjects != value)
+                {
+                    advancedSettings.UseHierarchyTreeColorForInactiveGameObjects = value;
+                    HD_Manager.UseHierarchyTreeColorForInactiveGameObjectsCache = value;
+                }
+            }
+        }
+
         public static bool EnableCustomInspectorGUI
         {
             get => advancedSettings.EnableCustomInspectorUI;
@@ -1752,6 +1767,7 @@ namespace HierarchyDesigner
                 EnableTooltipOnComponentIconHovered = true,
                 EnableActiveStateEffectForComponentIcons = true,
                 DisableComponentIconsForInactiveGameObjects = true,
+                UseHierarchyTreeColorForInactiveGameObjects = false,
                 EnableCustomInspectorUI = true,
                 EnableEditorUtilities = true,
                 IncludeBackgroundImageForGradientBackground = true,

@@ -49,6 +49,7 @@ TagManager:
   - ABC/LeftWeaponSheath
   - ABC/WeaponInitiation
   - Civilian
+  - MainLight
   layers:
   - Default
   - TransparentFX
@@ -60,8 +61,8 @@ TagManager:
   - 
   - Player
   - Enemy
-  - CompanionAI
-  - Triggers
+  - GrounderOnly
+  - GrounderIgnore
   - StopMove
   - 
   - HeadTrack
@@ -76,8 +77,8 @@ TagManager:
   - 
   - 
   - 
-  - 
-  - 
+  - Triggers
+  - CompanionAI
   - NotWalkable
   - WalkThrough
   - Friendly
@@ -88,4 +89,12 @@ TagManager:
     locked: 0
   m_RenderingLayers:
   - Default
-  m_MigratedRenderPipelines: []
+  - Light Layer 1
+  - Light Layer 2
+  - Light Layer 3
+  - Light Layer 4
+  - Light Layer 5
+  - Light Layer 6
+  - Light Layer 7
+  m_MigratedRenderPipelines:
+  - UnityEngine.Rendering.Universal.UniversalRenderPipeline

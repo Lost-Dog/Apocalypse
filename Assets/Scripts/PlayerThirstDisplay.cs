@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 /// <summary>
 /// Reads the player's thirst from SurvivalManager and drives a stat-dial
@@ -12,6 +13,7 @@ public class PlayerThirstDisplay : MonoBehaviour
     [Header("References")]
     public TextMeshProUGUI thirstText;
     public Animator        dialAnimator;
+    public Slider          thirstSlider;
 
     [Header("Display Settings")]
     public string suffix = "%";
@@ -44,6 +46,7 @@ public class PlayerThirstDisplay : MonoBehaviour
 
         if (thirstText   == null) thirstText   = GetComponentInChildren<TextMeshProUGUI>();
         if (dialAnimator == null) dialAnimator = GetComponentInParent<Animator>();
+        if (thirstSlider == null) thirstSlider = GetComponentInChildren<Slider>(true);
     }
 
     private void SubscribeEvents()
@@ -68,6 +71,7 @@ public class PlayerThirstDisplay : MonoBehaviour
 
         UpdateDial(normalized);
         UpdateLabel(normalized);
+        UpdateSlider(normalized);
     }
 
     // ── Display ───────────────────────────────────────────────────────────────
@@ -82,6 +86,15 @@ public class PlayerThirstDisplay : MonoBehaviour
     {
         if (thirstText == null) return;
         thirstText.text = $"{Mathf.RoundToInt(normalized * 100f)}{suffix}";
+    }
+
+    private void UpdateSlider(float normalized)
+    {
+        if (thirstSlider == null) return;
+
+        thirstSlider.minValue = 0f;
+        thirstSlider.maxValue = 1f;
+        thirstSlider.value = normalized;
     }
 
     /// <summary>Forces an immediate refresh from SurvivalManager's current state.</summary>

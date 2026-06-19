@@ -1,9 +1,10 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 /// <summary>
-/// Reads the player's hunger from SurvivalManager and drives the stat-dial Animator and label text.
-/// Subscribes to SurvivalManager.onHungerChanged for event-driven updates.
+/// Reads the player's hunger from provider traits (ISurvivalStatsProvider) and falls back to SurvivalManager.
+/// Drives text, dial animator, and optional slider.
 /// </summary>
 public class PlayerHungerDisplay : MonoBehaviour
 {
@@ -12,11 +13,20 @@ public class PlayerHungerDisplay : MonoBehaviour
     [Header("References")]
     public TextMeshProUGUI hungerText;
     public Animator        dialAnimator;
+    public Slider          hungerSlider;
+    [Tooltip("Optional SurvivalManager reference. Auto-found if left empty.")]
+    public SurvivalManager survivalManager;
+    [Tooltip("Optional provider reference. If assigned, should implement IPlayerProvider/ISurvivalStatsProvider.")]
+    public MonoBehaviour   playerProviderObject;
+
+    [Header("Auto-Find")]
+    public bool autoFindReferences = true;
 
     [Header("Display Settings")]
     public string suffix = "%";
 
-    private SurvivalManager survivalManager;
+    private IPlayerProvider playerProvider;
+    private ISurvivalStatsProvider survivalStatsProvider;
 
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -36,17 +46,57 @@ public class PlayerHungerDisplay : MonoBehaviour
 
     private void FindReferences()
     {
-        if (survivalManager == null)
-            survivalManager = SurvivalManager.Instance;
+        if (autoFindReferences)
+        {
+            if (survivalManager == null)
+                survivalManager = SurvivalManager.Instance ?? FindFirstObjectByType<SurvivalManager>();
+
+            if (survivalManager != null)
+            {
+                survivalManager.EnsurePlayerProviderBinding();
+                if (playerProviderObject == null && survivalManager.playerProviderObject != null)
+                    playerProviderObject = survivalManager.playerProviderObject;
+            }
+
+            playerProvider = playerProviderObject as IPlayerProvider;
+            if (playerProvider == null)
+                playerProvider = FindBestPlayerProvider();
+
+            if (playerProviderObject == null && playerProvider is MonoBehaviour providerBehaviour)
+                playerProviderObject = providerBehaviour;
+
+            survivalStatsProvider = playerProvider as ISurvivalStatsProvider;
+
+            if (hungerText == null)
+                hungerText = GetComponentInChildren<TextMeshProUGUI>();
+
+            if (dialAnimator == null)
+                dialAnimator = GetComponentInParent<Animator>();
+
+            if (hungerSlider == null)
+            {
+                Slider[] sliders = GetComponentsInChildren<Slider>(true);
+                for (int i = 0; i < sliders.Length; i++)
+                {
+                    if (sliders[i] != null)
+                    {
+                        hungerSlider = sliders[i];
+                        break;
+                    }
+                }
+            }
+        }
+        else
+        {
+            playerProvider = playerProviderObject as IPlayerProvider;
+            survivalStatsProvider = playerProvider as ISurvivalStatsProvider;
+        }
 
         if (survivalManager == null)
             Debug.LogWarning("[PlayerHungerDisplay] SurvivalManager not found.");
 
-        if (hungerText == null)
-            hungerText = GetComponentInChildren<TextMeshProUGUI>();
-
-        if (dialAnimator == null)
-            dialAnimator = GetComponentInParent<Animator>();
+        if (survivalStatsProvider == null && playerProvider == null)
+            Debug.LogWarning("[PlayerHungerDisplay] No player provider found. Falling back to SurvivalManager values only.");
     }
 
     private void SubscribeEvents()
@@ -65,12 +115,23 @@ public class PlayerHungerDisplay : MonoBehaviour
 
     private void OnHungerChanged(float newHunger)
     {
-        float normalized = survivalManager != null && survivalManager.maxHunger > 0f
-            ? Mathf.Clamp01(newHunger / survivalManager.maxHunger)
-            : 0f;
+        float maxHunger = 100f;
+
+        if (survivalStatsProvider != null)
+            maxHunger = Mathf.Max(1f, survivalStatsProvider.MaxHunger);
+        else if (survivalManager != null)
+            maxHunger = Mathf.Max(1f, survivalManager.maxHunger);
+
+        float normalized = Mathf.Clamp01(newHunger / maxHunger);
 
         UpdateDial(normalized);
         UpdateLabel(normalized);
+
+        if (hungerSlider != null)
+        {
+            hungerSlider.maxValue = maxHunger;
+            hungerSlider.value = Mathf.Clamp(newHunger, 0f, maxHunger);
+        }
     }
 
     // ── Display ───────────────────────────────────────────────────────────────
@@ -90,6 +151,12 @@ public class PlayerHungerDisplay : MonoBehaviour
     /// <summary>Forces an immediate refresh from SurvivalManager's current state.</summary>
     public void Refresh()
     {
+        if (survivalStatsProvider != null)
+        {
+            OnHungerChanged(survivalStatsProvider.Hunger);
+            return;
+        }
+
         if (survivalManager == null)
         {
             FindReferences();
@@ -97,5 +164,20 @@ public class PlayerHungerDisplay : MonoBehaviour
         }
 
         OnHungerChanged(survivalManager.currentHunger);
+    }
+
+    private static IPlayerProvider FindBestPlayerProvider()
+    {
+        GC2PlayerProvider gc2Provider = FindFirstObjectByType<GC2PlayerProvider>();
+        if (gc2Provider != null)
+            return gc2Provider;
+
+        foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+        {
+            if (mb is IPlayerProvider provider)
+                return provider;
+        }
+
+        return null;
     }
 }

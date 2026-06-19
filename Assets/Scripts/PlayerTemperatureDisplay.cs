@@ -26,9 +26,16 @@ public class PlayerTemperatureDisplay : MonoBehaviour
         {
             FindReferences();
         }
+
+        Subscribe();
         
         InitializeSlider();
         UpdateDisplay();
+    }
+
+    private void OnDestroy()
+    {
+        Unsubscribe();
     }
     
     private void FindReferences()
@@ -63,7 +70,35 @@ public class PlayerTemperatureDisplay : MonoBehaviour
         }
     }
     
-    private void Update()
+    private void OnEnable()
+    {
+        Subscribe();
+    }
+
+    private void OnDisable()
+    {
+        Unsubscribe();
+    }
+
+    private void Subscribe()
+    {
+        if (survivalManager == null)
+            FindReferences();
+
+        if (survivalManager == null)
+            return;
+
+        survivalManager.onTemperatureChanged.RemoveListener(OnTemperatureChanged);
+        survivalManager.onTemperatureChanged.AddListener(OnTemperatureChanged);
+    }
+
+    private void Unsubscribe()
+    {
+        if (survivalManager != null)
+            survivalManager.onTemperatureChanged.RemoveListener(OnTemperatureChanged);
+    }
+
+    private void OnTemperatureChanged(float value)
     {
         UpdateDisplay();
     }

@@ -1,5 +1,4 @@
-using Invector;
-using Invector.vCharacterController;
+using EmeraldAI;
 using UnityEngine;
 
 public class EnemyKillRewardHandler : MonoBehaviour
@@ -27,21 +26,25 @@ public class EnemyKillRewardHandler : MonoBehaviour
     [Tooltip("Percentage of max health to restore (0.1 = 10%)")]
     [SerializeField] private float healthRestorePercentage = 0.1f;
     [SerializeField] private bool restoreStaminaOnKill = true;
+    [Tooltip("Flat stamina amount to restore")]
+    [SerializeField] private float staminaRestoreAmount = 0f;
+    [Tooltip("Percentage of max stamina to restore (0.1 = 10%)")]
+    [SerializeField] private float staminaRestorePercentage = 0.1f;
 
-    private vHealthController enemyHealth;
+    private EmeraldHealth enemyHealth;
     private bool hasRewardedPlayer = false;
 
     private void Start()
     {
-        enemyHealth = GetComponent<vHealthController>();
+        enemyHealth = GetComponent<EmeraldHealth>();
 
         if (enemyHealth != null)
         {
-            enemyHealth.onDead.AddListener(OnEnemyDeath);
+            enemyHealth.OnDeath += OnEnemyDeath;
         }
         else
         {
-            Debug.LogWarning($"EnemyKillRewardHandler on {gameObject.name}: vHealthController component not found!");
+            Debug.LogWarning($"EnemyKillRewardHandler on {gameObject.name}: EmeraldHealth component not found!");
         }
     }
 
@@ -49,11 +52,11 @@ public class EnemyKillRewardHandler : MonoBehaviour
     {
         if (enemyHealth != null)
         {
-            enemyHealth.onDead.RemoveListener(OnEnemyDeath);
+            enemyHealth.OnDeath -= OnEnemyDeath;
         }
     }
 
-    private void OnEnemyDeath(GameObject deadObject)
+    private void OnEnemyDeath()
     {
         if (hasRewardedPlayer) return;
 
@@ -63,34 +66,36 @@ public class EnemyKillRewardHandler : MonoBehaviour
 
     private void RewardPlayer()
     {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        GameObject player = FindPlayerObject();
         if (player == null)
         {
             Debug.LogWarning($"EnemyKillRewardHandler on {gameObject.name}: Player not found.");
             return;
         }
 
-        PlayerSystemBridge playerBridge = player.GetComponent<PlayerSystemBridge>();
-        if (playerBridge == null)
+        GC2PlayerProvider gc2Provider = FindGC2Provider(player);
+        if (gc2Provider == null)
         {
-            Debug.LogWarning($"EnemyKillRewardHandler on {gameObject.name}: PlayerSystemBridge not found on player.");
+            Debug.LogWarning($"EnemyKillRewardHandler on {gameObject.name}: GC2PlayerProvider not found on player.");
             return;
         }
 
-        GiveXPReward(playerBridge);
-        TryDropLoot(playerBridge);
-        RestoreHealthOnKill(player);
-        RestoreAmmoOnKill(player);
-        RestoreTemperatureOnKill(player);
-        TriggerHealthOnKillSkill(player);
+        GiveXPReward();
+        TryDropLoot();
+        RestoreHealthOnKill(gc2Provider);
+        RestoreStaminaOnKill();
     }
 
     // XP -----------------------------------------------------------------------------------------
 
-    private void GiveXPReward(PlayerSystemBridge playerBridge)
+    private void GiveXPReward()
     {
         int xpReward = CalculateXPReward();
-        playerBridge.GainExperience(xpReward);
+        if (GameManager.Instance != null && GameManager.Instance.progressionManager != null)
+        {
+            GameManager.Instance.progressionManager.AddExperience(xpReward);
+        }
+
         Debug.Log($"{gameObject.name} killed! Player gained {xpReward} XP");
     }
 
@@ -106,13 +111,17 @@ public class EnemyKillRewardHandler : MonoBehaviour
 
     // LOOT ---------------------------------------------------------------------------------------
 
-    private void TryDropLoot(PlayerSystemBridge playerBridge)
+    private void TryDropLoot()
     {
         float dropChance = isBoss ? bossLootChance : isElite ? eliteLootChance : lootDropChance;
 
         if (Random.value <= dropChance)
         {
-            DropLoot(playerBridge.GetPlayerLevel());
+            int playerLevel = 1;
+            if (GameManager.Instance != null && GameManager.Instance.progressionManager != null)
+                playerLevel = Mathf.Max(1, GameManager.Instance.progressionManager.currentLevel);
+
+            DropLoot(playerLevel);
         }
     }
 
@@ -139,13 +148,11 @@ public class EnemyKillRewardHandler : MonoBehaviour
     // HEALTH RESTORE -----------------------------------------------------------------------------
 
     /// <summary>
-    /// Restores health to the player via IPlayerProvider on kill.
+    /// Restores health to the GC2 player through trait-backed provider data.
     /// </summary>
-    private void RestoreHealthOnKill(GameObject player)
+    private void RestoreHealthOnKill(GC2PlayerProvider provider)
     {
         if (!restoreHealthOnKill) return;
-
-        IPlayerProvider provider = FindPlayerProvider(player);
         if (provider == null || !provider.IsAlive) return;
 
         float restoreAmount = healthRestoreAmount + provider.MaxHealth * healthRestorePercentage;
@@ -158,25 +165,18 @@ public class EnemyKillRewardHandler : MonoBehaviour
 
     // SKILL DELEGATES ----------------------------------------------------------------------------
 
-    private void RestoreAmmoOnKill(GameObject player)
+    private void RestoreStaminaOnKill()
     {
-        InvectorAmmoOnKillSkill ammoSkill = player.GetComponent<InvectorAmmoOnKillSkill>();
-        if (ammoSkill != null && ammoSkill.skillActive)
-            ammoSkill.OnEnemyKilled(gameObject);
-    }
+        if (!restoreStaminaOnKill) return;
 
-    private void RestoreTemperatureOnKill(GameObject player)
-    {
-        TemperatureRestoreOnKill tempSkill = player.GetComponent<TemperatureRestoreOnKill>();
-        if (tempSkill != null && tempSkill.skillActive)
-            tempSkill.OnEnemyKilled(gameObject);
-    }
+        SurvivalManager survival = SurvivalManager.Instance;
+        if (survival == null || !survival.enableStaminaSystem) return;
 
-    private void TriggerHealthOnKillSkill(GameObject player)
-    {
-        HealthOnKillSkill healthSkill = player.GetComponent<HealthOnKillSkill>();
-        if (healthSkill != null && healthSkill.skillActive)
-            healthSkill.OnEnemyKilled(gameObject);
+        float restoreAmount = staminaRestoreAmount + (survival.maxStamina * staminaRestorePercentage);
+        if (restoreAmount > 0f)
+        {
+            survival.AddStamina(restoreAmount);
+        }
     }
 
     // SETTERS ------------------------------------------------------------------------------------
@@ -191,6 +191,31 @@ public class EnemyKillRewardHandler : MonoBehaviour
     public void SetAsBoss(bool boss)   { isBoss = boss;   if (boss)  isElite = false; }
 
     // HELPERS ------------------------------------------------------------------------------------
+
+    private static GameObject FindPlayerObject()
+    {
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null) return player;
+
+        GC2PlayerProvider provider = FindFirstObjectByType<GC2PlayerProvider>();
+        return provider != null ? provider.gameObject : null;
+    }
+
+    private static GC2PlayerProvider FindGC2Provider(GameObject player)
+    {
+        if (player == null) return null;
+
+        GC2PlayerProvider provider = player.GetComponent<GC2PlayerProvider>();
+        if (provider != null) return provider;
+
+        provider = player.GetComponentInChildren<GC2PlayerProvider>(true);
+        if (provider != null) return provider;
+
+        provider = player.GetComponentInParent<GC2PlayerProvider>();
+        if (provider != null) return provider;
+
+        return FindFirstObjectByType<GC2PlayerProvider>();
+    }
 
     private static IPlayerProvider FindPlayerProvider(GameObject player)
     {

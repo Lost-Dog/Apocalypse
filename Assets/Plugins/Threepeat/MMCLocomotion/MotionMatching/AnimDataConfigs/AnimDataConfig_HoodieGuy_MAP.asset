@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21c95a4a1ad5e124a836fd9a9d1d4c43, type: 3}
+  m_Name: AnimDataConfig_HoodieGuy_MAP
+  m_EditorClassIdentifier: 
+  guiName: Movement Animset Pro (Standard MMLC Config)
+  description: Uses Movement Animset Pro + MMLC-developed Gap-fillers to provide
+    idle, walk, run, sprint, strafe, crouch, and crouch strafe
+  animData: {fileID: 11400000, guid: a21c31c0a5aabc548b5065c1477e3007, type: 2}
+  config: {fileID: 11400000, guid: 0334f842a69ee9647850e57313c27205, type: 2}
+  calibrationModule: {fileID: 0}
+  supportedCharacterStates:
+  - Locomotion
+  - JumpingFalling
+  - Sprint
+  - Crouch
+  - Strafe
+  - CrouchStrafe
+  - Landing
+  hasParkour: 0

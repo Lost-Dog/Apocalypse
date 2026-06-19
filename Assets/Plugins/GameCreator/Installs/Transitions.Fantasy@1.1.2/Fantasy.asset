@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!221 &-8917505110643684994
+AnimatorOverrideController:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Transition
+  m_Controller: {fileID: 9100000, guid: 8e468f7bdb1784c65ac78351d7eb5964, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: ffc4183ef135843ceafbceab25f09ec6, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: d0b94433318cb49bca5d1d5543e9825d, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 91bcc092c7a7041c3913bbf82f6c25b4, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 3bad942d8cfb24a64beef82ff575a64d, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 38276b770f63b4238a71e8ff4d16387b, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 88e82cd96c0e34a31bf07c3d0a87a71f, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 3ca726f12ce6149cebfe719bf55034d7, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: ccfb2c892eebc44ea91c4a797849c5c8, type: 2}
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2bf65542291f541f8a244956d3157240, type: 3}
+  m_Name: Fantasy
+  m_EditorClassIdentifier: 
+  m_Value: {fileID: 3215017256723707628, guid: 36b44b9884c7d401c8055e39804b05ec, type: 3}
+  m_Controller: {fileID: -8917505110643684994}
+  m_Open: {fileID: 7400000, guid: d0b94433318cb49bca5d1d5543e9825d, type: 2}
+  m_Loading: {fileID: 7400000, guid: 3bad942d8cfb24a64beef82ff575a64d, type: 2}
+  m_Ready: {fileID: 7400000, guid: 88e82cd96c0e34a31bf07c3d0a87a71f, type: 2}
+  m_Close: {fileID: 7400000, guid: ccfb2c892eebc44ea91c4a797849c5c8, type: 2}

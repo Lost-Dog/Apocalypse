@@ -14,6 +14,8 @@ public class PlayerHealthDisplay : MonoBehaviour
     [Header("References")]
     public TextMeshProUGUI healthText;
     public Slider          healthSlider;
+    [Tooltip("Optional SurvivalManager reference. If assigned, its provider binding is used first.")]
+    public SurvivalManager survivalManager;
     [Tooltip("Assign any IPlayerProvider implementation.")]
     public MonoBehaviour playerProviderObject;
 
@@ -32,7 +34,7 @@ public class PlayerHealthDisplay : MonoBehaviour
     {
         ResolveProvider();
         // Defer the first read by one frame so all Start() methods — including
-        // InvectorPlayerProvider.BindController() — have completed first.
+        // player-provider initialization — have completed first.
         StartCoroutine(LateStart());
     }
 
@@ -51,10 +53,35 @@ public class PlayerHealthDisplay : MonoBehaviour
     /// <summary>Resolves the IPlayerProvider and subscribes to its health event.</summary>
     private void ResolveProvider()
     {
+        if (survivalManager == null)
+            survivalManager = SurvivalManager.Instance ?? FindFirstObjectByType<SurvivalManager>();
+
+        if (survivalManager != null)
+        {
+            survivalManager.EnsurePlayerProviderBinding();
+
+            if (playerProvider == null)
+                playerProvider = survivalManager.playerProviderObject as IPlayerProvider;
+
+            if (playerProviderObject == null && survivalManager.playerProviderObject != null)
+                playerProviderObject = survivalManager.playerProviderObject;
+        }
+
         if (autoFindReferences)
         {
             // Try the explicitly assigned object first.
-            playerProvider = playerProviderObject as IPlayerProvider;
+            if (playerProvider == null)
+                playerProvider = playerProviderObject as IPlayerProvider;
+
+            if (playerProvider == null)
+            {
+                GC2PlayerProvider gc2Provider = FindFirstObjectByType<GC2PlayerProvider>();
+                if (gc2Provider != null)
+                {
+                    playerProvider = gc2Provider;
+                    playerProviderObject = gc2Provider;
+                }
+            }
 
             // Fall back to any MonoBehaviour in the scene that implements the interface.
             if (playerProvider == null)
@@ -70,7 +97,7 @@ public class PlayerHealthDisplay : MonoBehaviour
 
         if (playerProvider == null)
         {
-            Debug.LogWarning("[PlayerHealthDisplay] No IPlayerProvider found.");
+            Debug.LogWarning("[PlayerHealthDisplay] No IPlayerProvider found. HP display is not linked to traits.");
             return;
         }
 

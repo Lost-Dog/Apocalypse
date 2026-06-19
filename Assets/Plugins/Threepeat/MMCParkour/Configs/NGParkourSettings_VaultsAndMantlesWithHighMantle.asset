@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9bce4d4eed6a1940b9880bf5b5bd1c3, type: 3}
+  m_Name: NGParkourSettings_VaultsAndMantlesWithHighMantle
+  m_EditorClassIdentifier: 
+  description: 
+  capabilities:
+  - eventType: 4
+    eventTypeName: 
+    standingEvent: {fileID: 11400000, guid: 34c8d956b3c9cfb4fae3a8e81a32ceb4, type: 2}
+    runningEvent: {fileID: 11400000, guid: 34c8d956b3c9cfb4fae3a8e81a32ceb4, type: 2}
+    activeByDefault: 1
+  - eventType: 6
+    eventTypeName: 
+    standingEvent: {fileID: 11400000, guid: 9082a6b7f82c18242a35a015e7c4ccbb, type: 2}
+    runningEvent: {fileID: 11400000, guid: 9082a6b7f82c18242a35a015e7c4ccbb, type: 2}
+    activeByDefault: 1
+  - eventType: 5
+    eventTypeName: 
+    standingEvent: {fileID: 11400000, guid: df3718f580a68fa45a9d043e7387208b, type: 2}
+    runningEvent: {fileID: 11400000, guid: df3718f580a68fa45a9d043e7387208b, type: 2}
+    activeByDefault: 1
+  - eventType: 7
+    eventTypeName: 
+    standingEvent: {fileID: 11400000, guid: 680e42d4195926d43bd86e8ed18bd166, type: 2}
+    runningEvent: {fileID: 11400000, guid: 680e42d4195926d43bd86e8ed18bd166, type: 2}
+    activeByDefault: 1
+  - eventType: 1
+    eventTypeName: 
+    standingEvent: {fileID: 11400000, guid: 29e1718f4c5159744b81234e48bc7b36, type: 2}
+    runningEvent: {fileID: 11400000, guid: e938324acc37d524891f4133f7e6c608, type: 2}
+    activeByDefault: 1
+  - eventType: 2
+    eventTypeName: 
+    standingEvent: {fileID: 11400000, guid: bdcd57f8ef150864bb13b251654d8598, type: 2}
+    runningEvent: {fileID: 11400000, guid: 645cb507725ad114d897b5ca4e8cdfc8, type: 2}
+    activeByDefault: 1
+  mantleCheckCharacterHeightFactor: 2.2
+  mantleReallyHighThreshold: 3.25
+  parkourCheckMaxDistToKneeCollision: 0.6
+  kneeLevelObstacleCheckHeightFactor: 0.25
+  headLevelObstacleCheckHeightFactor: 0.85
+  inclineCheckMaxDist: 4.5
+  inclineCheckOriginHeightFactor: 0.3
+  inclineCheckRadius: 0.15
+  applyModelSpecificMultipliers: 0
+  gaitMultiplier: 1
+  heightMultiplier: 1
+  apeIndexMultiplier: 1

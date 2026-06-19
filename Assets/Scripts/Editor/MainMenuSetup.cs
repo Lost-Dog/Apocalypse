@@ -69,7 +69,7 @@ public static class MainMenuSetup
         var csf = buttonPanel.AddComponent<ContentSizeFitter>();
         csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-        Button playBtn     = CreateButton(buttonPanel, "PlayButton",     "PLAY",     new Color(0.15f, 0.55f, 0.95f));
+        CreateButton(buttonPanel, "PlayButton",     "PLAY",     new Color(0.15f, 0.55f, 0.95f));
         Button settingsBtn = CreateButton(buttonPanel, "SettingsButton", "SETTINGS", new Color(0.25f, 0.25f, 0.28f));
         Button quitBtn     = CreateButton(buttonPanel, "QuitButton",     "QUIT",     new Color(0.55f, 0.12f, 0.12f));
 
@@ -95,21 +95,8 @@ public static class MainMenuSetup
 
         settingsPanel.SetActive(false);
 
-        // ── Wire controller ──────────────────────────────────────────────────
-        var controller = canvasGo.AddComponent<MainMenuController>();
-
-        var so = new SerializedObject(controller);
-        so.FindProperty("canvasGroup").objectReferenceValue    = canvasGroup;
-        so.FindProperty("playButton").objectReferenceValue     = playBtn;
-        so.FindProperty("settingsButton").objectReferenceValue = settingsBtn;
-        so.FindProperty("quitButton").objectReferenceValue     = quitBtn;
-        so.FindProperty("titleLabel").objectReferenceValue     = title;
-        so.FindProperty("versionLabel").objectReferenceValue   = version;
-        so.FindProperty("settingsPanel").objectReferenceValue  = settingsPanel;
-        so.ApplyModifiedProperties();
-
         Selection.activeGameObject = canvasGo;
-        Debug.Log("[MainMenuSetup] Main Menu Canvas created and wired. Place this in your Main Menu scene.");
+        Debug.Log("[MainMenuSetup] Main Menu Canvas created. Configure your own menu manager as needed.");
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

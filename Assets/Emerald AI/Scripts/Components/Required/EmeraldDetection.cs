@@ -107,9 +107,25 @@ namespace EmeraldAI
         void InitializeDetection ()
         {
             EmeraldComponent = GetComponent<EmeraldSystem>();
-            EmeraldComponent.CombatComponent.OnExitCombat += ReturnToDefaultState; //Subscribe the ReturnToDefaultState function to the OnExitCombat delegate 
-            EmeraldComponent.HealthComponent.OnDeath += ClearTargetToFollow; //Subscribe the RemoveTargetToFollow function to the OnDeath delegate 
-            EmeraldComponent.HealthComponent.OnDeath += NearbyAllyDeathHandler; //Subscribe the NearbyAllyDeathHandler function to the OnDeath delegate 
+
+            if (EmeraldComponent == null)
+            {
+                Debug.LogError($"[{nameof(EmeraldDetection)}] Missing EmeraldSystem on '{gameObject.name}'. Detection has been disabled.", gameObject);
+                enabled = false;
+                return;
+            }
+
+            if (EmeraldComponent.CombatComponent != null)
+            {
+                EmeraldComponent.CombatComponent.OnExitCombat += ReturnToDefaultState; //Subscribe the ReturnToDefaultState function to the OnExitCombat delegate
+            }
+
+            if (EmeraldComponent.HealthComponent != null)
+            {
+                EmeraldComponent.HealthComponent.OnDeath += ClearTargetToFollow; //Subscribe the RemoveTargetToFollow function to the OnDeath delegate
+                EmeraldComponent.HealthComponent.OnDeath += NearbyAllyDeathHandler; //Subscribe the NearbyAllyDeathHandler function to the OnDeath delegate
+            }
+
             OnNullTarget += NullNonCombatTarget; //Subscribe the NullNonCombatTarget function to the OnNullTarget delegate 
 
             if (FactionData == null) FactionData = Resources.Load("Faction Data") as EmeraldFactionData;
@@ -160,6 +176,17 @@ namespace EmeraldAI
 
         void FixedUpdate()
         {
+            if (EmeraldComponent == null)
+            {
+                EmeraldComponent = GetComponent<EmeraldSystem>();
+                if (EmeraldComponent == null) return;
+            }
+
+            if (EmeraldComponent.BehaviorsComponent == null || EmeraldComponent.CombatComponent == null)
+            {
+                return;
+            }
+
             if (EmeraldComponent.BehaviorsComponent.CurrentBehaviorType == EmeraldBehaviors.BehaviorTypes.Passive) return; //Don't allow passive AI to use line of sight
 
             if (!EmeraldComponent.CombatComponent.CombatState || EmeraldComponent.CombatComponent.DeathDelayActive)
@@ -173,6 +200,11 @@ namespace EmeraldAI
         /// </summary>
         public void DetectionUpdate()
         {
+            if (EmeraldComponent == null || EmeraldComponent.CombatComponent == null || EmeraldComponent.MovementComponent == null)
+            {
+                return;
+            }
+
             if (EmeraldComponent.CombatComponent.CombatState) CheckForObstructions(EmeraldComponent.CombatTarget); //When in combat, check for obstructions by casting a ray from the AI's Head Transform to its target.
             else if (!EmeraldComponent.CombatComponent.CombatState) CheckForObstructions(EmeraldComponent.LookAtTarget); //When in not in combat, check for obstructions by casting a ray from the AI's Head Transform to its look at target.
 

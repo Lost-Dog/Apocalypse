@@ -1,0 +1,1973 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e36bb2d8a7b7778489afd5c3f2654c14, type: 3}
+  m_Name: FBXAnimationInfo_MovementAnimsetPro2
+  m_EditorClassIdentifier: 
+  guiName: MovementAnimsetPro
+  description: Add NGFootstepEvents, adjust root motion settings, and clear the Root
+    Motion Reference node to ensure proper function of MMLC locomotion, strafe, and
+    TIP behaviors.
+  addAnimationEvents: 1
+  addPerAnimationSettings: 1
+  clearRootMotionNode: 1
+  disableAnimationCompression: 1
+  fbxPrefabs:
+  - fbxGuid: 6844dcb6a866ab34fa96c67e39eab693
+    fbxOriginalPath: Assets/MovementAnimsetPro/Animations/MovementAnimsetPro.fbx
+    clips:
+    - clipName: BindPose
+      clipEvents: []
+      keepOriginalOrientation: 0
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Idle
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 1
+      lockRootRotation: 1
+    - clipName: TurnRt90_Loop
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.5
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.9099265
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: TurnLt90_Loop
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.375
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.9338235
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: TurnRt180
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.50735295
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.8897059
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: scuff
+        time: 0.9025735
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: TurnLt180
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.36764708
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.73345584
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.9025735
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: WalkFwdLoop
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.29411766
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.8253676
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: WalkFwdStart
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.6397059
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: WalkFwdStart180_R
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.43382353
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.8511029
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: WalkFwdStart180_L
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.66544116
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: WalkFwdStart90_L
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.72610295
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: WalkFwdStart90_R
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.4319853
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.8566177
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: WalkFwdStop_LU
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.19301471
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.5349265
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: WalkFwdStop_RU
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.18014705
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.43566176
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.7058823
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: WalkFwdLoop_LeanR
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: WalkArchLoop_R
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.31066176
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.7849265
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: WalkFwdLoop_LeanL
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: WalkArchLoop_L
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.31433824
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.8161765
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: RunFwdLoop
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.290163
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0.025
+        stringParameter: 
+        time: 0.8253677
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: SprintFwdLoop
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: RunFwdStart
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.7591912
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: RunFwdStart180_R
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.5183823
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.88235295
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: RunFwdStart180_L
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.79044116
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: RunFwdStart90_R
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.45588234
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.9044118
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: RunFwdStart90_L
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.71139705
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: RunFwdStop_RU
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.14338236
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.3602941
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.6617647
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: RunFwdStop_LU
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.14705883
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.46507356
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.8860295
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: RunFwdTurn180_R_LU
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.14705884
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.67647064
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.93566173
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: RunFwdTurn180_R_RU
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.14889705
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.26838234
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.6305147
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.9172794
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: RunFwdTurn180_L_RU
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.26654413
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.86764705
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: RunFwdTurn180_L_LU
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.19301473
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.4375
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.7941177
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: RunArchLoop_L
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.32536766
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.8419118
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: RunFwdLoop_LeanL
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: RunArchLoop_R
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.2867647
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.85294116
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: RunFwdLoop_LeanR
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: Jump_place_ALL
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: Jump_place_ALL_short
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Jump_walk_ru_ALL
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: Jump_walk_lu_ALL
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: Jump_run_ru_ALL
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: Jump_run_lu_ALL
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: JumpIdleStart
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: JumpIdleLand
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: JumpIdleLand2Walk
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: JumpIdleLandHard
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: JumpWalkStart_RU
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: JumpWalk_RU_Land
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: JumpWalk_RU_Land2Walk
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: JumpWalkStart_LU
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: JumpWalk_LU_Land
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: JumpWalk_LU_Land2Walk
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: JumpRunStart_RU
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: JumpRun_RU_Land
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: JumpRun_RU_Land2Run
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: JumpRunStart_LU
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: JumpRun_LU_Land
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: JumpRun_LU_Land2Run
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: FallingLoop
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 1
+      lockRootRotation: 1
+    - clipName: FallingLoop_RootMotion
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: Idle2Crouch
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: Crouch_Idle
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: Crouch2Idle
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: Crouch_WalkFwdLoop
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.27941176
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.7150735
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: Crouch_WalkFwdStart
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: Crouch_WalkFwdStop_LU
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: Crouch_WalkFwdStop_RU
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: Crouch_WalkFwdStart180_R
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.40441176
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.8088235
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Crouch_WalkFwdStart180_L
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.5661765
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Crouch_WalkFwdStart90_R
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Crouch_WalkFwdStart90_L
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: ButtonPush_RH
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 1
+      lockRootRotation: 1
+    - clipName: ButtonPush_RH_90
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 1
+      lockRootRotation: 1
+    - clipName: ButtonPush_LH
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 1
+      lockRootRotation: 1
+    - clipName: ButtonPush_LH_90
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 1
+      lockRootRotation: 1
+    - clipName: KeypadUse_RH
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 1
+      lockRootRotation: 1
+    - clipName: KeypadUse_RH_90
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 1
+      lockRootRotation: 1
+    - clipName: KeypadUse_LH
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 1
+      lockRootRotation: 1
+    - clipName: KeypadUse_LH_90
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 1
+      lockRootRotation: 1
+    - clipName: PickUp_RH
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 1
+      lockRootRotation: 1
+    - clipName: PickUp_RH_90
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 1
+      lockRootRotation: 1
+    - clipName: PickUp_LH
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 1
+      lockRootRotation: 1
+    - clipName: PickUp_LH_90
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 1
+      lockRootRotation: 1
+    - clipName: PullLever_RH
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 1
+      lockRootRotation: 1
+    - clipName: PullLever_RH_90
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 1
+      lockRootRotation: 1
+    - clipName: PullLever_LH
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 1
+      lockRootRotation: 1
+    - clipName: PullLever_LH_90
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 1
+      lockRootRotation: 1
+    - clipName: DontKnow
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 1
+      lockRootRotation: 1
+    - clipName: ThrowAway_RH
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 1
+      lockRootRotation: 1
+    - clipName: ThrowAway_LH
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 1
+      lockRootRotation: 1
+    - clipName: WalkThroughDoor_RH
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: WalkThroughDoor_LH
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 1
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    RMNodeIsNone: 1
+  - fbxGuid: 72bc559d4b44eb14bb687cefb4d1c638
+    fbxOriginalPath: Assets/MovementAnimsetPro/Animations/MovementAnimsetPro_Additionals.fbx
+    clips:
+    - clipName: WalkFwdStart135_R
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.4227941
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.8419118
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: WalkFwdStart135_L
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.74999994
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: RunFwdStart135_R
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.5
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.88235295
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: RunFwdStart135_L
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.85110295
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: WalkBwdStart
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.6305147
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: WalkBwdLoop
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.24080883
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.7352941
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: WalkBwdStop_LU
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.15073529
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.5110294
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.9595588
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: WalkBwdStop_RU
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.14338236
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.6470588
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: StrafeRightStart
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.38235295
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.8621324
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: StrafeRightLoop
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.31066176
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.81985295
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: StrafeRightStop_RU
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.27941176
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.8492647
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: StrafeRightStop_LU
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.25
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.62683827
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: scuff
+        time: 0.7922794
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: StrafeLeftStart
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.5900735
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: StrafeLeftLoop
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.2077206
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.7334559
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: StrafeLeftStop_LU
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.22794117
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: scuff
+        time: 0.22794117
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: StrafeLeftStop_RU
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.12132353
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.4209559
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.6985294
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: StrafeRight135Loop
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: StrafeLeft45Loop
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    RMNodeIsNone: 1
+  - fbxGuid: 87e6bba8b3ae86e4da9c84f6d832e37d
+    fbxOriginalPath: Assets/MovementAnimsetPro/Animations/MovementAnimsetPro_RunStrafeUpdate.fbx
+    clips:
+    - clipName: Crouch_WalkLt135_new
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Crouch_WalkLt45_new
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Crouch_WalkRt135_new
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Crouch_WalkRt45_new
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Idle2Crouch_new
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: scuff
+        time: 0
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.5165441
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: scuff
+        time: 0.52941173
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: Crouch2Idle_new
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.6047794
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.90625
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: CrouchLoop_new
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    - clipName: Crouch_Turn90R_new
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.15808824
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.52389705
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.7334559
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Crouch_Turn90L_new
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: scuff
+        time: 0.04963235
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: scuff
+        time: 0.6139706
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: scuff
+        time: 0.6985294
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Crouch_WalkFwdStart_new
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Crouch_WalkFwd_new
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.30330884
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.75551474
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Crouch_WalkFwdStop_LU_new
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.26654413
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.5514706
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Crouch_WalkFwdStop_RU_new
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.2977941
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: scuff
+        time: 0.6746324
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Crouch_WalkBwdStart_new
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Crouch_WalkBwd_new
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Crouch_WalkBwdStop_LU_new
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Crouch_WalkBwdStop_RU_new
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Crouch_WalkRtStart_new
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Crouch_WalkRt_new
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Crouch_WalkRtStop_LU_new
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Crouch_WalkRtStop_RU_new
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Crouch_WalkLtStart_new
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Crouch_WalkLt_new
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Crouch_WalkLtStop_LU_new
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Crouch_WalkLtStop_RU_new
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: RunBwdLoop
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.3694853
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.88419116
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: RunLtLoop
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.20955881
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.7426471
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: RunRtLoop
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: RunStrafeLeft45Loop
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.3584559
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.8474265
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: RunStrafeRight135Loop
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.3694853
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.8860294
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: RunStrafeRight45Loop
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.32352942
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.83639705
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: RunStrafeLeft135Loop
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.35294116
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.8860294
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: HiddenButton
+      clipEvents: []
+      keepOriginalOrientation: 0
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: KickTrashcan
+      clipEvents: []
+      keepOriginalOrientation: 0
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Turn180Surprised
+      clipEvents: []
+      keepOriginalOrientation: 0
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: PatrolFullCycleLoop
+      clipEvents: []
+      keepOriginalOrientation: 0
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: PatrolLoop
+      clipEvents: []
+      keepOriginalOrientation: 0
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Throw_Start
+      clipEvents: []
+      keepOriginalOrientation: 0
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: ThrowLoop
+      clipEvents: []
+      keepOriginalOrientation: 0
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: ThrowEndFar
+      clipEvents: []
+      keepOriginalOrientation: 0
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: ThrowEndClose
+      clipEvents: []
+      keepOriginalOrientation: 0
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: ThrowCancel
+      clipEvents: []
+      keepOriginalOrientation: 0
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: ThrowSingle1
+      clipEvents: []
+      keepOriginalOrientation: 0
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: ThrowSingle2
+      clipEvents: []
+      keepOriginalOrientation: 0
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: StrafeRight45Loop
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: StrafeLeft135Loop
+      clipEvents: []
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: Climb1m
+      clipEvents: []
+      keepOriginalOrientation: 0
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: SitChairStart
+      clipEvents: []
+      keepOriginalOrientation: 0
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: SitChairLoop
+      clipEvents: []
+      keepOriginalOrientation: 0
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: SitChairEnd
+      clipEvents: []
+      keepOriginalOrientation: 0
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: GetUpFromBack
+      clipEvents: []
+      keepOriginalOrientation: 0
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: GetUpFromFace
+      clipEvents: []
+      keepOriginalOrientation: 0
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    RMNodeIsNone: 1
+  - fbxGuid: e1a10e208460bd04ba003bff821cac3f
+    fbxOriginalPath: Assets/MovementAnimsetPro/Animations/MovementAnimsetPro_SprintFixed.fbx
+    clips:
+    - clipName: BindPose
+      clipEvents: []
+      keepOriginalOrientation: 0
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 0
+      lockRootPositionXZ: 0
+      lockRootRotation: 0
+    - clipName: SprintFwdLoop
+      clipEvents:
+      - functionName: NGFootstepEvent
+        intParameter: 1
+        floatParameter: 0
+        stringParameter: 
+        time: 0.32536766
+      - functionName: NGFootstepEvent
+        intParameter: 2
+        floatParameter: 0
+        stringParameter: 
+        time: 0.8253677
+      keepOriginalOrientation: 1
+      keepOriginalPositionXZ: 0
+      keepOriginalPositionY: 1
+      lockRootHeightY: 1
+      lockRootPositionXZ: 0
+      lockRootRotation: 1
+    RMNodeIsNone: 1

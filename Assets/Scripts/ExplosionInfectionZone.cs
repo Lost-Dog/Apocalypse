@@ -22,6 +22,12 @@ public class ExplosionInfectionZone : MonoBehaviour
     
     [Tooltip("How often to apply infection damage")]
     public float damageTickRate = 0.5f;
+
+    [Header("Blast Damage")]
+    [Tooltip("Apply a one-time blast hit when the player enters the zone")]
+    public bool applyEntryBlastDamage = true;
+    [Tooltip("Immediate blast damage applied on entry")]
+    public float entryBlastDamage = 20f;
     
     [Header("Audio")]
     [Tooltip("Warning sound played when explosion starts")]
@@ -43,6 +49,7 @@ public class ExplosionInfectionZone : MonoBehaviour
     private bool isActive = false;
     private GameObject playerInZone = null;
     private float damageTimer = 0f;
+    private IPlayerProvider cachedPlayerProvider;
     
     private void Awake()
     {
@@ -172,6 +179,7 @@ public class ExplosionInfectionZone : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerInZone = other.gameObject;
+            ApplyEntryBlastDamage(other.gameObject);
             Debug.Log("<color=orange>Player entered explosion infection zone!</color>");
         }
     }
@@ -195,5 +203,41 @@ public class ExplosionInfectionZone : MonoBehaviour
         // Draw max radius for reference
         Gizmos.color = new Color(1, 0, 0, 0.2f);
         Gizmos.DrawWireSphere(transform.position, maxRadius);
+    }
+
+    private void ApplyEntryBlastDamage(GameObject playerObject)
+    {
+        if (!applyEntryBlastDamage || entryBlastDamage <= 0f || playerObject == null) return;
+
+        IPlayerProvider provider = ResolvePlayerProvider(playerObject);
+        if (provider == null || !provider.IsAlive) return;
+
+        provider.ApplyDamage(entryBlastDamage);
+    }
+
+    private IPlayerProvider ResolvePlayerProvider(GameObject playerObject)
+    {
+        if (cachedPlayerProvider != null)
+            return cachedPlayerProvider;
+
+        cachedPlayerProvider = playerObject.GetComponent<IPlayerProvider>();
+        if (cachedPlayerProvider != null)
+            return cachedPlayerProvider;
+
+        cachedPlayerProvider = playerObject.GetComponentInParent<IPlayerProvider>();
+        if (cachedPlayerProvider != null)
+            return cachedPlayerProvider;
+
+        MonoBehaviour[] allMonoBehaviours = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+        for (int i = 0; i < allMonoBehaviours.Length; i++)
+        {
+            if (allMonoBehaviours[i] is IPlayerProvider provider)
+            {
+                cachedPlayerProvider = provider;
+                return cachedPlayerProvider;
+            }
+        }
+
+        return null;
     }
 }

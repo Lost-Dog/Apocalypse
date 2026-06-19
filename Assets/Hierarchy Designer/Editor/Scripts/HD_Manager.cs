@@ -143,6 +143,7 @@ namespace HierarchyDesigner
         private static bool enableTooltipOnComponentIconHovered;
         private static bool enableActiveStateEffectForComponentIcons;
         private static bool disableComponentIconsForInactiveGameObjects;
+        private static bool useHierarchyTreeColorForInactiveGameObjects;
         private static bool includeBackgroundImageForGradientBackground;
         private static float componentIconsSize;
         private static int componentIconsOffset;
@@ -843,13 +844,29 @@ bool isSelected = Array.IndexOf(Selection.entityIds, instanceID) >= 0;
         private static void DrawHierarchyTree(GameObject gameObject, Rect selectionRect, int instanceID)
         {
             if (gameObject.transform.parent == null) return;
+
             Transform transform = gameObject.transform;
             float selectionRectX = selectionRect.x - hierarchyTreeOffset;
 
-            GUI.color = gameObject.activeInHierarchy ? hierarchyTreeColor : inactiveColor;
+            GUI.color = GetHierarchyTreeColor(gameObject.activeInHierarchy);
             GUI.DrawTexture(new(selectionRectX, selectionRect.y, selectionRect.height, selectionRect.height), DecideHierarchyTreeIcon(transform, instanceID), ScaleMode.ScaleToFit);
             DrawParentTreeFillLines(transform, selectionRectX, hierarchyTreeFillLinesOffset, selectionRect.height, selectionRect.y);
             GUI.color = activeColor;
+        }
+
+        private static Color GetHierarchyTreeColor(bool isActive)
+        {
+            if (isActive)
+            {
+                return hierarchyTreeColor;
+            }
+
+            if (!useHierarchyTreeColorForInactiveGameObjects)
+            {
+                return inactiveColor;
+            }
+
+            return HD_Color.GetDarkenedInactiveColor(hierarchyTreeColor, alphaValueForInactiveGameObjects);
         }
 
         private static Texture2D DecideHierarchyTreeIcon(Transform transform, int instanceID)
@@ -1841,6 +1858,14 @@ bool isSelected = Array.IndexOf(Selection.entityIds, instanceID) >= 0;
             set
             {
                 disableComponentIconsForInactiveGameObjects = value;
+            }
+        }
+
+        public static bool UseHierarchyTreeColorForInactiveGameObjectsCache
+        {
+            set
+            {
+                useHierarchyTreeColorForInactiveGameObjects = value;
             }
         }
 

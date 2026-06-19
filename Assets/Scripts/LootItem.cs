@@ -107,6 +107,9 @@ public class LootItem : MonoBehaviour
         if (LootManager.Instance != null && itemData != null)
             LootManager.Instance.AddItemToPlayerInventory(itemData, gearScore, rarity, player);
 
+        if (itemData != null && itemData.healOnPickup && SurvivalManager.Instance != null)
+            SurvivalManager.Instance.HealAllStats(itemData.healPercentage);
+
         ReturnToPool();
     }
 

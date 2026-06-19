@@ -6,6 +6,9 @@ public class ChallengeCompassMarker : MonoBehaviour
     [Header("References")]
     [SerializeField] private RectTransform markerRectTransform;
     [SerializeField] private Image markerImage;
+
+    [Header("Icon")]
+    [SerializeField] private Sprite markerIcon;
     
     [Header("Settings")]
     [SerializeField] private float compassWidth = 1000f;
@@ -39,6 +42,11 @@ public class ChallengeCompassMarker : MonoBehaviour
         if (markerImage == null)
         {
             markerImage = GetComponent<Image>();
+        }
+
+        if (markerImage != null && markerIcon != null)
+        {
+            markerImage.sprite = markerIcon;
         }
         
         // If no marker image found and we're on the compass itself, disable this component
@@ -81,6 +89,11 @@ public class ChallengeCompassMarker : MonoBehaviour
         UpdateMarkerPosition();
         if (markerImage != null)
         {
+            if (markerIcon != null)
+            {
+                markerImage.sprite = markerIcon;
+            }
+
             markerImage.color = linkedChallenge.challengeData.GetDifficultyColor();
         }
     }
@@ -106,6 +119,11 @@ public class ChallengeCompassMarker : MonoBehaviour
     public void SetChallenge(ActiveChallenge challenge)
     {
         linkedChallenge = challenge;
+
+        if (markerImage != null && markerIcon == null && challenge?.challengeData?.challengeIcon != null)
+        {
+            markerImage.sprite = challenge.challengeData.challengeIcon;
+        }
 
         // Set the difficulty color once here rather than every Update tick.
         if (markerImage != null && challenge?.challengeData != null)

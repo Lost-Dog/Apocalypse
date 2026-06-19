@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEngine.SceneManagement;
 using UnityEditor.SceneManagement;
+using System;
 
 [InitializeOnLoad]
 public class ControlPointAutoSetup
@@ -92,15 +93,25 @@ public class ControlPointAutoSetup
     {
         int zonesConfigured = 0;
         int controlPointsDisabled = 0;
-        
-        ControlZone[] allZones = Object.FindObjectsByType<ControlZone>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-        foreach (ControlZone zone in allZones)
+
+        Type controlZoneType = ResolveControlZoneType();
+        UnityEngine.Object[] allZones = controlZoneType != null
+            ? UnityEngine.Object.FindObjectsByType(controlZoneType, FindObjectsInactive.Include, FindObjectsSortMode.None)
+            : Array.Empty<UnityEngine.Object>();
+
+        foreach (UnityEngine.Object zoneObj in allZones)
         {
-            SerializedObject so = new SerializedObject(zone);
-            so.FindProperty("spawnOnStart").boolValue = false;
-            so.FindProperty("requiresManagerActivation").boolValue = true;
+            if (zoneObj == null) continue;
+
+            SerializedObject so = new SerializedObject(zoneObj);
+            SerializedProperty spawnOnStart = so.FindProperty("spawnOnStart");
+            SerializedProperty managerActivation = so.FindProperty("requiresManagerActivation");
+            if (spawnOnStart == null || managerActivation == null) continue;
+
+            spawnOnStart.boolValue = false;
+            managerActivation.boolValue = true;
             so.ApplyModifiedProperties();
-            EditorUtility.SetDirty(zone);
+            EditorUtility.SetDirty(zoneObj);
             zonesConfigured++;
         }
         
@@ -137,5 +148,20 @@ public class ControlPointAutoSetup
             "Zones will now only spawn when ChallengeManager activates them.\n\n" +
             "Test by entering Play mode - no enemies should spawn at start!",
             "OK");
+    }
+
+    private static Type ResolveControlZoneType()
+    {
+        Type direct = Type.GetType("ControlZone, Assembly-CSharp");
+        if (direct != null) return direct;
+
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        for (int i = 0; i < assemblies.Length; i++)
+        {
+            Type found = assemblies[i].GetType("ControlZone");
+            if (found != null) return found;
+        }
+
+        return null;
     }
 }

@@ -141,7 +141,7 @@ namespace EmeraldAI
                 yield return null;
             }
 
-            //Finish traveling the last bit so the bullet’s trail can get to the collision point
+            //Finish traveling the last bit so the bulletï¿½s trail can get to the collision point
             Vector3 startingPosition = transform.position;
             float t = 0f;
             bool complete = false;
@@ -271,7 +271,9 @@ namespace EmeraldAI
 
             if (m_LocationBasedDamageArea == null)
             {
-                var m_IDamageable = Target.GetComponent<IDamageable>();
+                // Player and character rigs often keep hit colliders on child objects while the damage bridge
+                // exists on the root, so check parent hierarchy as a fallback.
+                var m_IDamageable = Target.GetComponent<IDamageable>() ?? Target.GetComponentInParent<IDamageable>();
                 if (m_IDamageable != null)
                 {
                     bool IsCritHit = CurrentAbilityData.DamageSettings.GenerateCritHit();

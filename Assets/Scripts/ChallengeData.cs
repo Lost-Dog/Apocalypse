@@ -59,9 +59,6 @@ public class ChallengeData : ScriptableObject
     public ChallengeFrequency frequency = ChallengeFrequency.WorldEvent;
     public ChallengeDifficulty difficulty = ChallengeDifficulty.Medium;
     
-    [Header("Minimap Icon")]
-    public Lovatto.MiniMap.bl_MiniMapIconData iconData;
-    
     [Header("Requirements")]
     public int recommendedLevel = 1;
     public int requiredPlayerLevel = 1;
@@ -277,12 +274,30 @@ public class ChallengeData : ScriptableObject
         int count = 0;
         foreach (var item in spawnItems)
         {
-            if (item.category == SpawnableCategory.Enemy || item.category == SpawnableCategory.Boss)
+            bool enemyLike = item.category == SpawnableCategory.Enemy
+                || item.category == SpawnableCategory.Boss
+                || (item.category == SpawnableCategory.Other && IsLikelyEnemyName(item.itemName));
+
+            if (enemyLike)
             {
                 count += item.maxCount;
             }
         }
         return count;
+    }
+
+    private static bool IsLikelyEnemyName(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return false;
+
+        string key = value.ToLowerInvariant();
+        return key.Contains("enemy")
+            || key.Contains("zombie")
+            || key.Contains("soldier")
+            || key.Contains("hostile")
+            || key.Contains("boss")
+            || key.Contains("elite")
+            || key.Contains("patrol");
     }
     
     public int GetCivilianCount()

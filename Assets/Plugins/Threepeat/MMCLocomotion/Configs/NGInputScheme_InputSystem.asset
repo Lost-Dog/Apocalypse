@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32b8b50aba87dcb4eb07a330a5cac930, type: 3}
+  m_Name: NGInputScheme_InputSystem
+  m_EditorClassIdentifier: 
+  doEnvironmentAwareTrajectories: 1
+  envAwareMinimumDistToObstacle: 0.5
+  inputVectorChangeInterval: 0.05
+  jumpMaxKeyHoldTimeBeforeJump: 0.35
+  jumpInstantBigJumpWhenSprinting: 1
+  postProcessors: []
+  inputActionAsset: {fileID: -944628639613478452, guid: 4524c3a5606ac934e829415601270a5b,
+    type: 3}
+  inputActionMapActive: Player
+  actionNameMovement: move
+  actionNameJump: jump_mmlc
+  actionNameSprint: sprint_mmlc
+  actionNameCrouch: crouchToggle_mmlc
+  actionNameStrafe: strafeToggle_mmlc

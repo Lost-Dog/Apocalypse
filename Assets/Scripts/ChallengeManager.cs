@@ -39,6 +39,8 @@ public class ChallengeManager : MonoBehaviour
     [Header("Director Debug (Runtime)")]
     [Tooltip("Shows live director values in the inspector while playing.")]
     public bool showDirectorDebugInInspector = true;
+    [Tooltip("Enables verbose challenge progress/stat logs in the Console")]
+    public bool logChallengeStats = false;
     [SerializeField, Range(0f, 1f)] private float debugPerformanceScore = 0.5f;
     [SerializeField] private float debugSpawnInterval;
     [SerializeField] private int debugWorldEventLimit;
@@ -52,7 +54,6 @@ public class ChallengeManager : MonoBehaviour
     public Transform worldspaceUIContainer;
     public bool spawnWorldMarkers = true;
     public bool spawnCompassMarkers = true;
-    public bool spawnMinimapPointers = true;
     
     [Header("Active Challenges")]
     public List<ActiveChallenge> activeChallenges = new List<ActiveChallenge>();
@@ -77,6 +78,12 @@ public class ChallengeManager : MonoBehaviour
     private int dynamicMaxActiveWorldEvents;
     private float smoothedPerformance = 0.5f;
 
+    private void LogChallengeStat(string message)
+    {
+        if (!logChallengeStats) return;
+        Debug.Log(message);
+    }
+
     private void Awake()
     {
         if (Instance == null)
@@ -95,7 +102,7 @@ public class ChallengeManager : MonoBehaviour
             audioSource = gameObject.AddComponent<AudioSource>();
             audioSource.playOnAwake = false;
             audioSource.spatialBlend = 0f; // 2D sound for UI
-            Debug.Log("Added AudioSource to ChallengeManager for playing challenge sounds");
+            LogChallengeStat("Added AudioSource to ChallengeManager for playing challenge sounds");
         }
     }
     
@@ -148,7 +155,7 @@ public class ChallengeManager : MonoBehaviour
                     }
                 }
                 
-                Debug.Log($"Auto-populated {spawnZones.Count} challenge spawn zones");
+                // Intentionally quiet: spawn-zone auto-population does not need startup logging.
             }
             else
             {
@@ -185,7 +192,7 @@ public class ChallengeManager : MonoBehaviour
             dailyChallengePool = new List<ChallengeData>(loadedChallenges.Where(c => c.frequency == ChallengeData.ChallengeFrequency.Daily));
             weeklyChallengePool = new List<ChallengeData>(loadedChallenges.Where(c => c.frequency == ChallengeData.ChallengeFrequency.Weekly));
             
-            Debug.Log($"Loaded {worldEventChallenges.Count} world events, {dailyChallengePool.Count} daily challenges, {weeklyChallengePool.Count} weekly challenges");
+            // Intentionally quiet: loading challenge pools is startup bookkeeping.
         }
     }
 
@@ -203,7 +210,7 @@ public class ChallengeManager : MonoBehaviour
             dailyChallenges.Add(dailyChallenge);
         }
 
-        Debug.Log($"Generated {dailyChallenges.Count} daily challenges");
+        // Intentionally quiet: daily challenge generation is not noisy enough to log every startup.
     }
 
     public void GenerateWeeklyChallenges()
@@ -220,7 +227,7 @@ public class ChallengeManager : MonoBehaviour
             weeklyChallenges.Add(weeklyChallenge);
         }
 
-        Debug.Log($"Generated {weeklyChallenges.Count} weekly challenges");
+        // Intentionally quiet: weekly challenge generation is not noisy enough to log every startup.
     }
     
     public void SpawnRandomWorldEvent()
@@ -234,7 +241,7 @@ public class ChallengeManager : MonoBehaviour
         // OPTIMIZED: Use cached count instead of LINQ
         if (cachedActiveWorldEventsCount >= GetActiveWorldEventLimit())
         {
-            Debug.Log($"Max active challenges reached ({GetActiveWorldEventLimit()}). Waiting for current challenge to complete.");
+            LogChallengeStat($"Max active challenges reached ({GetActiveWorldEventLimit()}). Waiting for current challenge to complete.");
             return;
         }
 
@@ -271,7 +278,7 @@ public class ChallengeManager : MonoBehaviour
             }
             
             // Don't spawn content yet - wait for player to manually start
-            Debug.Log($"Challenge discovered: {challenge.challengeName} (Manual start required)");
+            LogChallengeStat($"Challenge discovered: {challenge.challengeName} (Manual start required)");
         }
         else
         {
@@ -319,8 +326,7 @@ public class ChallengeManager : MonoBehaviour
                 worldPrefab,
                 compassPrefab,
                 compassContainer,
-                uiContainer,
-                spawnMinimapPointers
+                uiContainer
             );
         }
         else
@@ -330,7 +336,7 @@ public class ChallengeManager : MonoBehaviour
         
         onChallengeSpawned?.Invoke(activeChallenge);
         
-        Debug.Log($"Challenge spawned: {challenge.challengeName} at {activeChallenge.position}");
+        LogChallengeStat($"Challenge spawned: {challenge.challengeName} at {activeChallenge.position}");
     }
 
     private void UpdateActiveChallenges()
@@ -352,7 +358,7 @@ public class ChallengeManager : MonoBehaviour
                 {
                     challenge.FailChallenge();
                     RecordChallengeOutcome(challenge, false);
-                    Debug.Log($"Challenge failed (time expired): {challenge.challengeData.challengeName} - Retry available in {challenge.retryCooldown}s");
+                    LogChallengeStat($"Challenge failed (time expired): {challenge.challengeData.challengeName} - Retry available in {challenge.retryCooldown}s");
                     onChallengeExpired?.Invoke(challenge);
                 }
                 else
@@ -369,7 +375,7 @@ public class ChallengeManager : MonoBehaviour
                     }
 
                     activeChallenges.RemoveAt(i);
-                    Debug.Log($"Challenge expired: {challenge.challengeData.challengeName}");
+                    LogChallengeStat($"Challenge expired: {challenge.challengeData.challengeName}");
                 }
             }
             else if (challenge.IsCompleted())
@@ -402,7 +408,7 @@ public class ChallengeManager : MonoBehaviour
         onChallengeCompleted?.Invoke(challenge);
         CleanupChallenge(challenge);
         
-        Debug.Log($"Challenge completed: {challenge.challengeData.challengeName} " +
+        LogChallengeStat($"Challenge completed: {challenge.challengeData.challengeName} " +
                   $"(Difficulty: {challenge.actualDifficulty}, Level: {challenge.playerLevelAtSpawn}) " +
                   $"- Rewards: {challenge.GetXPReward()} XP, {challenge.GetCurrencyReward()} Credits");
     }
@@ -419,7 +425,7 @@ public class ChallengeManager : MonoBehaviour
 
         onChallengeFailed?.Invoke(challenge);
         CleanupChallenge(challenge);
-        Debug.Log($"Challenge failed: {challenge.challengeData.challengeName}");
+        LogChallengeStat($"Challenge failed: {challenge.challengeData.challengeName}");
     }
     
     private void GrantChallengeRewards(ActiveChallenge challenge)
@@ -435,13 +441,13 @@ public class ChallengeManager : MonoBehaviour
         if (ProgressionManager.Instance != null)
         {
             ProgressionManager.Instance.AddExperience(xpReward);
-            Debug.Log($"Granted {xpReward} XP for completing challenge (with bonuses)");
+            LogChallengeStat($"Granted {xpReward} XP for completing challenge (with bonuses)");
         }
         
         // Grant currency with modifiers
         int currencyReward = Mathf.RoundToInt(challenge.GetTotalCurrencyReward() * struggleBonusMultiplier);
         // TODO: Integrate with your currency system when available
-        Debug.Log($"Currency reward: {currencyReward} (Director bonus x{struggleBonusMultiplier:F2})");
+        LogChallengeStat($"Currency reward: {currencyReward} (Director bonus x{struggleBonusMultiplier:F2})");
         
         // Spawn loot with scaled rarity and count
         if (LootManager.Instance != null)
@@ -453,14 +459,14 @@ public class ChallengeManager : MonoBehaviour
             {
                 LootManager.Instance.DropLootWithRarity(challenge.position, challenge.playerLevelAtSpawn, lootRarity);
             }
-            Debug.Log($"Spawned {lootCount}x {lootRarity} loot");
+            LogChallengeStat($"Spawned {lootCount}x {lootRarity} loot");
         }
         
         // Log bonus achievements
         string bonusSummary = challenge.GetBonusSummary();
         if (!string.IsNullOrEmpty(bonusSummary))
         {
-            Debug.Log($"Bonus Achievements:\n{bonusSummary}");
+            LogChallengeStat($"Bonus Achievements:\n{bonusSummary}");
         }
     }
 
@@ -485,11 +491,11 @@ public class ChallengeManager : MonoBehaviour
             ? challenge.totalEnemiesSpawned
             : challenge.challengeData.GetEnemyCount();
 
-        Debug.Log($"Enemy killed! Progress: {challenge.enemiesKilled}/{totalEnemies}");
+        LogChallengeStat($"Enemy killed! Progress: {challenge.enemiesKilled}/{totalEnemies}");
 
         if (challenge.enemiesKilled >= totalEnemies)
         {
-            Debug.Log($"All enemies killed! Completing challenge...");
+            LogChallengeStat("All enemies killed! Completing challenge...");
             challenge.MarkCompleted();
         }
     }
@@ -820,8 +826,7 @@ public class ChallengeManager : MonoBehaviour
                 worldPrefab,
                 compassPrefab,
                 compassContainer,
-                uiContainer,
-                spawnMinimapPointers
+                uiContainer
             );
         }
         
@@ -832,7 +837,7 @@ public class ChallengeManager : MonoBehaviour
         }
         
         onChallengeStarted?.Invoke(challenge);
-        Debug.Log($"Challenge started: {challenge.challengeData.challengeName} (Attempt {challenge.attemptCount})");
+        LogChallengeStat($"Challenge started: {challenge.challengeData.challengeName} (Attempt {challenge.attemptCount})");
         
         return true;
     }
@@ -865,7 +870,7 @@ public class ChallengeManager : MonoBehaviour
         // Retry the challenge
         challenge.RetryChallenge();
         
-        Debug.Log($"Challenge ready for retry: {challenge.challengeData.challengeName}");
+        LogChallengeStat($"Challenge ready for retry: {challenge.challengeData.challengeName}");
         return true;
     }
     
@@ -909,9 +914,9 @@ public class ChallengeManager : MonoBehaviour
         if (challenge == null || !challenge.challengeData.showDiscoveryNotification)
             return;
         
-        Debug.Log($"[DISCOVERY] {challenge.challengeData.challengeName}");
-        Debug.Log($"Difficulty: {challenge.actualDifficulty} | Recommended Level: {challenge.challengeData.recommendedLevel}");
-        Debug.Log($"Rewards: {challenge.GetXPReward()} XP (up to {challenge.GetTotalXPReward()} with bonuses)");
+        LogChallengeStat($"[DISCOVERY] {challenge.challengeData.challengeName}");
+        LogChallengeStat($"Difficulty: {challenge.actualDifficulty} | Recommended Level: {challenge.challengeData.recommendedLevel}");
+        LogChallengeStat($"Rewards: {challenge.GetXPReward()} XP (up to {challenge.GetTotalXPReward()} with bonuses)");
         
         // You can hook this up to your UI system
         // For example: UIManager.ShowChallengeDiscovery(challenge.GetPreviewData());

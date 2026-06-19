@@ -26,20 +26,37 @@ public class FixStatsWarningsReferences
         bool madeChanges = false;
         SerializedObject serializedObject = new SerializedObject(indicators);
         
-        if (indicators.infectionDisplay == null)
+        SerializedProperty providerProp = serializedObject.FindProperty("playerProviderObject");
+        if (providerProp != null && providerProp.objectReferenceValue == null)
         {
-            PlayerInfectionDisplay infectionDisplay = Object.FindFirstObjectByType<PlayerInfectionDisplay>();
-            
-            if (infectionDisplay != null)
+            MonoBehaviour providerObject = null;
+            GC2PlayerProvider gc2Provider = Object.FindFirstObjectByType<GC2PlayerProvider>();
+            if (gc2Provider != null)
             {
-                SerializedProperty infectionProp = serializedObject.FindProperty("infectionDisplay");
-                infectionProp.objectReferenceValue = infectionDisplay;
-                Debug.Log($"Fixed infectionDisplay reference: {infectionDisplay.gameObject.name}");
+                providerObject = gc2Provider;
+            }
+            else
+            {
+                MonoBehaviour[] behaviours = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+                foreach (MonoBehaviour mb in behaviours)
+                {
+                    if (mb is IPlayerProvider)
+                    {
+                        providerObject = mb;
+                        break;
+                    }
+                }
+            }
+            
+            if (providerObject != null)
+            {
+                providerProp.objectReferenceValue = providerObject;
+                Debug.Log($"Fixed playerProviderObject reference: {providerObject.gameObject.name}");
                 madeChanges = true;
             }
             else
             {
-                Debug.LogWarning("PlayerInfectionDisplay component not found in scene!");
+                Debug.LogWarning("No IPlayerProvider implementation found in scene!");
             }
         }
         
@@ -81,7 +98,7 @@ public class FixStatsWarningsReferences
             serializedObject.ApplyModifiedProperties();
             EditorUtility.SetDirty(statsWarnings);
             EditorSceneManager.MarkSceneDirty(statsWarnings.scene);
-            Debug.Log("<color=green>✓ Stats_Warnings panel fixed! Temperature now uses Celsius scale (36.9°C normal, 15°C warning, 5°C critical)</color>");
+            Debug.Log("<color=green>✓ Stats_Warnings panel fixed! Indicator sources are now wired for provider-based GC2 traits.</color>");
         }
         else
         {

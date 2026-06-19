@@ -3,48 +3,35 @@ using UnityEditor;
 
 public class HealthOnKillSetup : EditorWindow
 {
-    [MenuItem("Division Game/Setup Health on Kill")]
+    [MenuItem("Division Game/Setup Temperature Restore On Kill")]
     public static void ShowWindow()
     {
-        GetWindow<HealthOnKillSetup>("Health on Kill Setup").Show();
+        GetWindow<HealthOnKillSetup>("Temperature On Kill Setup").Show();
     }
 
-    private float healthPercentage = 0.1f;
-    private float staminaPercentage = 0.1f;
+    private float temperaturePercentage = 0.1f;
     private bool applyToAllEnemies = true;
 
     private void OnGUI()
     {
-        GUILayout.Label("Health/Stamina on Kill Setup", EditorStyles.boldLabel);
+        GUILayout.Label("Temperature On Kill Setup", EditorStyles.boldLabel);
         EditorGUILayout.Space();
 
         EditorGUILayout.HelpBox(
-            "This adds the EnemyKillRewardHandler to enemy prefabs.\n\n" +
-            "On kill, player will restore:\n" +
-            "• Health based on percentage of max HP\n" +
-            "• Stamina based on percentage of max stamina",
+            "This adds the TemperatureRestoreOnKill component to enemy prefabs.\n\n" +
+            "On kill, player will restore a percentage of max temperature.",
             MessageType.Info
         );
 
         EditorGUILayout.Space();
 
-        healthPercentage = EditorGUILayout.Slider(
-            "Health Restore %", 
-            healthPercentage, 
+        temperaturePercentage = EditorGUILayout.Slider(
+            "Temperature Restore %", 
+            temperaturePercentage, 
             0f, 
             1f
         );
-        EditorGUILayout.LabelField($"  = {healthPercentage * 100f:F0}% of max health");
-
-        EditorGUILayout.Space();
-
-        staminaPercentage = EditorGUILayout.Slider(
-            "Stamina Restore %", 
-            staminaPercentage, 
-            0f, 
-            1f
-        );
-        EditorGUILayout.LabelField($"  = {staminaPercentage * 100f:F0}% of max stamina");
+        EditorGUILayout.LabelField($"  = {temperaturePercentage * 100f:F0}% of max temperature");
 
         EditorGUILayout.Space();
         EditorGUILayout.Space();
@@ -106,40 +93,36 @@ public class HealthOnKillSetup : EditorWindow
         
         EditorUtility.DisplayDialog(
             "Success!",
-            $"Health on Kill setup complete!\n\n" +
+            $"Temperature on Kill setup complete!\n\n" +
             $"Processed: {processedCount} prefabs\n" +
             $"Updated: {updatedCount} prefabs\n\n" +
-            $"Players will now restore {healthPercentage * 100f:F0}% health and {staminaPercentage * 100f:F0}% stamina on kill!",
+            $"Players will now restore {temperaturePercentage * 100f:F0}% temperature on kill!",
             "OK"
         );
     }
 
     private bool ApplyToGameObject(GameObject obj)
     {
-        EnemyKillRewardHandler rewardHandler = obj.GetComponent<EnemyKillRewardHandler>();
+        TemperatureRestoreOnKill rewardHandler = obj.GetComponent<TemperatureRestoreOnKill>();
         
         if (rewardHandler == null)
         {
-            rewardHandler = obj.AddComponent<EnemyKillRewardHandler>();
-            Debug.Log($"Added EnemyKillRewardHandler to {obj.name}");
+            rewardHandler = obj.AddComponent<TemperatureRestoreOnKill>();
+            Debug.Log($"Added TemperatureRestoreOnKill to {obj.name}");
         }
 
         SerializedObject so = new SerializedObject(rewardHandler);
-        
-        so.FindProperty("restoreHealthOnKill").boolValue = true;
-        so.FindProperty("healthRestoreAmount").floatValue = 0f;
-        so.FindProperty("healthRestorePercentage").floatValue = healthPercentage;
-        
-        so.FindProperty("restoreStaminaOnKill").boolValue = true;
-        so.FindProperty("staminaRestoreAmount").floatValue = 0f;
-        so.FindProperty("staminaRestorePercentage").floatValue = staminaPercentage;
+
+        so.FindProperty("skillActive").boolValue = true;
+        so.FindProperty("activateOnStart").boolValue = true;
+        so.FindProperty("temperatureRestorePercentage").floatValue = temperaturePercentage;
         
         so.ApplyModifiedProperties();
         
         return true;
     }
 
-    [MenuItem("Division Game/Quick Setup 10% Health on Kill")]
+    [MenuItem("Division Game/Quick Setup 10% Temperature On Kill")]
     public static void QuickSetup10Percent()
     {
         string[] prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { "Assets/Prefabs/Character_Prefabs/Enemies" });
@@ -153,22 +136,18 @@ public class HealthOnKillSetup : EditorWindow
 
             if (prefab != null)
             {
-                EnemyKillRewardHandler rewardHandler = prefab.GetComponent<EnemyKillRewardHandler>();
+                TemperatureRestoreOnKill rewardHandler = prefab.GetComponent<TemperatureRestoreOnKill>();
                 
                 if (rewardHandler == null)
                 {
-                    rewardHandler = prefab.AddComponent<EnemyKillRewardHandler>();
+                    rewardHandler = prefab.AddComponent<TemperatureRestoreOnKill>();
                 }
 
                 SerializedObject so = new SerializedObject(rewardHandler);
-                
-                so.FindProperty("restoreHealthOnKill").boolValue = true;
-                so.FindProperty("healthRestoreAmount").floatValue = 0f;
-                so.FindProperty("healthRestorePercentage").floatValue = 0.1f;
-                
-                so.FindProperty("restoreStaminaOnKill").boolValue = true;
-                so.FindProperty("staminaRestoreAmount").floatValue = 0f;
-                so.FindProperty("staminaRestorePercentage").floatValue = 0.1f;
+
+                so.FindProperty("skillActive").boolValue = true;
+                so.FindProperty("activateOnStart").boolValue = true;
+                so.FindProperty("temperatureRestorePercentage").floatValue = 0.1f;
                 
                 so.ApplyModifiedProperties();
                 EditorUtility.SetDirty(prefab);
@@ -183,7 +162,7 @@ public class HealthOnKillSetup : EditorWindow
         
         EditorUtility.DisplayDialog(
             "Quick Setup Complete!",
-            $"Applied 10% health & stamina restore on kill to {updatedCount} enemy prefabs!\n\n" +
+            $"Applied 10% temperature restore on kill to {updatedCount} enemy prefabs!\n\n" +
             "Test by killing enemies in Play Mode.",
             "OK"
         );

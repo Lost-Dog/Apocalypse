@@ -42,21 +42,8 @@ public class BootstrapSceneSetupGuide : EditorWindow
         EditorGUILayout.LabelField("Checklist (Active Scene)", EditorStyles.boldLabel);
 
         _scroll = EditorGUILayout.BeginScrollView(_scroll);
-        DrawChecklistRow("SceneFlowManager", FindFirstObjectByType<SceneFlowManager>() != null,
-            "Core state machine for MainMenu/Loading/Playing/Paused transitions.");
         DrawChecklistRow("MultiSceneBootstrapper", FindFirstObjectByType<MultiSceneBootstrapper>() != null,
-            "Loads Loading -> Environment -> Effects -> Gameplay scenes.");
-        DrawChecklistRow("LoadingScreenController", FindFirstObjectByType<LoadingScreenController>() != null,
-            "Global loading progress UI subscribed to SceneFlowManager.");
-        DrawChecklistRow("SceneTransitionFader", FindFirstObjectByType<SceneTransitionFader>() != null,
-            "Top-layer blackout fade to hide hard scene transitions.");
-
-        EditorGUILayout.Space(8f);
-        EditorGUILayout.LabelField("Gameplay Scene Items (not bootstrap)", EditorStyles.boldLabel);
-        DrawChecklistRow("PauseMenuController", FindFirstObjectByType<PauseMenuController>() != null,
-            "Place in gameplay scene so it only appears while in-game.");
-        DrawChecklistRow("PauseInputHandler", FindFirstObjectByType<PauseInputHandler>() != null,
-            "Place in gameplay scene to toggle pause on Escape/Start.");
+            "Loads startup/menu flow and optional additional scenes.");
 
         EditorGUILayout.EndScrollView();
 
@@ -67,32 +54,11 @@ public class BootstrapSceneSetupGuide : EditorWindow
     private void DrawActions()
     {
         EditorGUILayout.LabelField("Quick Actions", EditorStyles.boldLabel);
-
-        if (GUILayout.Button("Open Scene Flow Setup Wizard"))
-        {
-            EditorApplication.ExecuteMenuItem("Tools/Scene Flow/Setup Wizard");
-        }
-
-        using (new EditorGUILayout.HorizontalScope())
-        {
-            if (GUILayout.Button("Create Loading Screen Canvas"))
-                EditorApplication.ExecuteMenuItem("Tools/Scene Flow/Create Loading Screen Canvas");
-
-            if (GUILayout.Button("Create Transition Fader"))
-                EditorApplication.ExecuteMenuItem("Tools/Scene Flow/Create Scene Transition Fader");
-        }
-
-        using (new EditorGUILayout.HorizontalScope())
-        {
-            if (GUILayout.Button("Create Main Menu Canvas"))
-                EditorApplication.ExecuteMenuItem("Tools/Scene Flow/Create Main Menu Canvas");
-
-            if (GUILayout.Button("Create Pause Menu Canvas"))
-                EditorApplication.ExecuteMenuItem("Tools/Scene Flow/Create Pause Menu Canvas");
-        }
+        if (GUILayout.Button("Create Main Menu Canvas"))
+            EditorApplication.ExecuteMenuItem("Tools/Scene Flow/Create Main Menu Canvas");
 
         EditorGUILayout.HelpBox(
-            "Main Menu can be in bootstrap or in a dedicated main-menu scene. Pause Menu should be in gameplay scenes.",
+            "Main Menu can be in bootstrap or in a dedicated main-menu scene.",
             MessageType.None);
     }
 

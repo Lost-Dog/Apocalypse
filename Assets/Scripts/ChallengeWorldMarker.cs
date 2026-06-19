@@ -12,6 +12,9 @@ public class ChallengeWorldMarker : MonoBehaviour
     [SerializeField] private Image iconImage;
     [SerializeField] private TextMeshProUGUI distanceText;
     [SerializeField] private CanvasGroup canvasGroup;
+
+    [Header("Icon")]
+    [SerializeField] private Sprite markerIcon;
     
     [Header("Settings")]
     [SerializeField] private float maxVisibleDistance = 500f;
@@ -75,6 +78,11 @@ public class ChallengeWorldMarker : MonoBehaviour
             {
                 canvasGroup = gameObject.AddComponent<CanvasGroup>();
             }
+        }
+
+        if (iconImage != null && markerIcon != null)
+        {
+            iconImage.sprite = markerIcon;
         }
 
         UpdateMarkerAppearance();
@@ -284,6 +292,11 @@ public class ChallengeWorldMarker : MonoBehaviour
 
         if (iconImage != null)
         {
+            if (markerIcon != null)
+            {
+                iconImage.sprite = markerIcon;
+            }
+
             iconImage.color = difficultyColor;
         }
 
@@ -313,6 +326,12 @@ public class ChallengeWorldMarker : MonoBehaviour
     public void SetChallenge(ActiveChallenge challenge)
     {
         linkedChallenge = challenge;
+
+        if (iconImage != null && markerIcon == null && challenge?.challengeData?.challengeIcon != null)
+        {
+            iconImage.sprite = challenge.challengeData.challengeIcon;
+        }
+
         UpdateMarkerAppearance();
     }
 }

@@ -145,3 +145,16 @@ $RECYCLE.BIN/
 
 # Unity package manager lock file
 /Packages/packages-lock.json
+
+# Local recovery/archive artifacts and profiler captures (do not commit)
+/_Recovery_Archive/
+/Recovery_Quarantine/
+/ProfilerCaptures/
+/Assets/_Recovery/
+
+# Unity scene backup snapshots and temporary restore copies
+/Assets/Scenes/*.unity.before_*
+/Assets/Scenes/*.unity.pre_restore_*
+
+# Generated baked lighting data
+/Assets/**/LightingData.asset

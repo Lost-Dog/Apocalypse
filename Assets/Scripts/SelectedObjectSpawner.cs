@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using Invector.vCharacterController.vActions;
 
 /// <summary>
 /// Spawns a single selected prefab (by index) at NavMesh positions within a radius ring
@@ -47,7 +46,7 @@ public class SelectedObjectSpawner : MonoBehaviour
 
     [Header("Player Reference")]
     [Tooltip("Assign the player's root Transform here. If left empty the spawner searches " +
-             "for the first GameObject tagged 'Player' that has a vThirdPersonController.")]
+             "for the first GameObject tagged 'Player'.")]
     public Transform playerOverride;
 
     [Header("Debug")]
@@ -111,11 +110,8 @@ public class SelectedObjectSpawner : MonoBehaviour
         GameObject[] candidates = GameObject.FindGameObjectsWithTag(PlayerTag);
         foreach (GameObject candidate in candidates)
         {
-            if (candidate.GetComponent<Invector.vCharacterController.vThirdPersonController>() != null)
-            {
-                _playerTransform = candidate.transform;
-                return;
-            }
+            _playerTransform = candidate.transform;
+            return;
         }
 
         if (candidates.Length > 0)
@@ -304,11 +300,6 @@ public class SelectedObjectSpawner : MonoBehaviour
 
         instance.SetActive(false);
 
-        // Reset Invector trigger state so re-pooled collectables are interactable again.
-        var trigger = instance.GetComponent<vTriggerGenericAction>();
-        if (trigger != null)
-            trigger.CanDoAction = true;
-
         _activeInstanceToPrefab.Remove(instance);
 
         if (_pools.TryGetValue(sourcePrefab, out PrefabPool pool))
@@ -365,4 +356,5 @@ public class SelectedObjectSpawner : MonoBehaviour
 
     /// <summary>Returns the prefab currently selected for spawning, or null if the list is empty.</summary>
     public GameObject SelectedPrefab => GetSelectedPrefab();
+
 }

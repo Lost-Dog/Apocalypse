@@ -30,8 +30,6 @@ public class SceneMetaData : MonoBehaviour
 
     void Start()
     {
-        NotifyEnvironmentEffectsReadyIfNeeded();
-
         if(SceneTransitionManager.IsAvailable())
         {
             try
@@ -60,14 +58,5 @@ public class SceneMetaData : MonoBehaviour
 
         //Register scene
         SceneTransitionManager.RegisterScene(Scene.name, this);
-    }
-
-    private void NotifyEnvironmentEffectsReadyIfNeeded()
-    {
-        MultiSceneBootstrapper bootstrapper = FindFirstObjectByType<MultiSceneBootstrapper>();
-        if (bootstrapper != null)
-        {
-            bootstrapper.NotifyEnvironmentEffectsReady(gameObject.scene.name);
-        }
     }
 }

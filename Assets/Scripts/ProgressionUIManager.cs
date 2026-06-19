@@ -22,33 +22,77 @@ public class ProgressionUIManager : MonoBehaviour
     [SerializeField] private GameObject xpGainPanel;
     [SerializeField] private TextMeshProUGUI xpGainText;
     [SerializeField] private float xpGainDisplayDuration = 2f;
+
+    [Header("Inspector Wiring")]
+    [SerializeField] private bool autoWireMissingReferences = true;
+    [SerializeField] private PlayerLevelDisplay levelDisplaySource;
+    [SerializeField] private PlayerXPDisplay xpDisplaySource;
     
     private ProgressionManager progressionManager;
     private float levelUpTimer = 0f;
     private float xpGainTimer = 0f;
+    private Coroutine delayedInitRoutine;
 
     private void Start()
     {
+        TryAutoWireMissingReferences();
+
         // Self-initialize as a fallback if HUDManager didn't call Initialize() in time.
         if (progressionManager == null)
+        {
+            delayedInitRoutine = StartCoroutine(TryInitializeWithDelay());
+        }
+    }
+
+    private void OnValidate()
+    {
+        TextMeshProUGUI prevXpText = xpText;
+        TextMeshProUGUI prevLevelText = levelText;
+        Slider prevSlider = xpSlider;
+
+        TryAutoWireMissingReferences();
+
+#if UNITY_EDITOR
+        if (prevXpText != xpText || prevLevelText != levelText || prevSlider != xpSlider)
+        {
+            UnityEditor.EditorUtility.SetDirty(this);
+        }
+#endif
+    }
+
+    private System.Collections.IEnumerator TryInitializeWithDelay()
+    {
+        const float maxWaitSeconds = 5f;
+        float timeoutAt = Time.unscaledTime + maxWaitSeconds;
+
+        while (progressionManager == null && Time.unscaledTime < timeoutAt)
         {
             ProgressionManager found = ProgressionManager.Instance
                 ?? FindFirstObjectByType<ProgressionManager>();
 
             if (found != null)
             {
-                Debug.LogWarning("[ProgressionUIManager] HUDManager did not initialize this component — self-initializing via ProgressionManager.Instance.");
+                Debug.LogWarning("[ProgressionUIManager] HUDManager did not initialize this component. Self-initializing via ProgressionManager.");
                 Initialize(found);
+                delayedInitRoutine = null;
+                yield break;
             }
-            else
-            {
-                Debug.LogError("[ProgressionUIManager] Could not find a ProgressionManager. XP UI will not work.");
-            }
+
+            yield return null;
         }
+
+        if (progressionManager == null)
+        {
+            Debug.LogError("[ProgressionUIManager] Could not find a ProgressionManager after waiting. XP UI will not work.");
+        }
+
+        delayedInitRoutine = null;
     }
 
     public void Initialize(ProgressionManager manager)
     {
+        TryAutoWireMissingReferences();
+
         // Avoid double-subscribing if called more than once.
         if (progressionManager != null)
         {
@@ -78,9 +122,61 @@ public class ProgressionUIManager : MonoBehaviour
         
         UpdateUI();
     }
+
+    private void TryAutoWireMissingReferences()
+    {
+        if (!autoWireMissingReferences)
+            return;
+
+        if (levelDisplaySource == null)
+            levelDisplaySource = FindFirstObjectByType<PlayerLevelDisplay>();
+
+        if (xpDisplaySource == null)
+            xpDisplaySource = FindFirstObjectByType<PlayerXPDisplay>();
+
+        if (levelText == null)
+            levelText = FindTextInChildren(levelDisplaySource != null ? levelDisplaySource.transform : null);
+
+        if (xpText == null)
+            xpText = FindTextInChildren(xpDisplaySource != null ? xpDisplaySource.transform : null);
+
+        if (xpSlider == null && xpDisplaySource != null)
+            xpSlider = xpDisplaySource.GetComponentInChildren<Slider>(true);
+
+        if (xpSlider == null && xpText != null)
+            xpSlider = xpText.GetComponentInParent<Slider>(true);
+
+        if (levelText == null)
+            Debug.LogWarning("[ProgressionUIManager] Could not auto-wire level text from PlayerLevelDisplay source.");
+
+        if (xpText == null)
+            Debug.LogWarning("[ProgressionUIManager] Could not auto-wire XP text from PlayerXPDisplay source.");
+    }
+
+    private static TextMeshProUGUI FindTextInChildren(Transform root)
+    {
+        if (root == null)
+            return null;
+
+        TextMeshProUGUI[] all = root.GetComponentsInChildren<TextMeshProUGUI>(true);
+        for (int i = 0; i < all.Length; i++)
+        {
+            TextMeshProUGUI component = all[i];
+            if (component == null) continue;
+            return component;
+        }
+
+        return null;
+    }
     
     private void OnDestroy()
     {
+        if (delayedInitRoutine != null)
+        {
+            StopCoroutine(delayedInitRoutine);
+            delayedInitRoutine = null;
+        }
+
         if (progressionManager != null)
         {
             progressionManager.onLevelUp.RemoveListener(OnLevelUp);

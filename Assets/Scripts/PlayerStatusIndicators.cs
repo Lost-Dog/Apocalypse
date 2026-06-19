@@ -15,6 +15,8 @@ public class PlayerStatusIndicators : MonoBehaviour
         public Color warningColor = Color.yellow;
         public Color criticalColor = Color.red;
         [HideInInspector] public bool isActive = false;
+        [HideInInspector] public Color activeColor = Color.white;
+        [HideInInspector] public float activePulseSpeed = 0f;
     }
     
     [Header("Indicator Objects")]
@@ -27,13 +29,16 @@ public class PlayerStatusIndicators : MonoBehaviour
     
     [Header("Auto-Find References")]
     public bool autoFindReferences = true;
+    [Tooltip("Legacy reference; indicator checks now use provider traits.")]
     public SurvivalManager survivalManager;
+    [Tooltip("Legacy reference; indicator checks now use provider traits.")]
     public PlayerInfectionDisplay infectionDisplay;
 
     [Header("Player Provider")]
-    [Tooltip("Assign any IPlayerProvider implementation (e.g. InvectorPlayerProvider). Auto-found if left empty.")]
+    [Tooltip("Assign GC2PlayerProvider (or any IPlayerProvider). Auto-finds GC2 first if left empty.")]
     [SerializeField] private MonoBehaviour playerProviderObject;
     private IPlayerProvider playerProvider;
+    private ISurvivalStatsProvider survivalStatsProvider;
     
     [Header("Health Thresholds")]
     [Range(0f, 1f)] public float healthWarningThreshold = 0.5f;
@@ -46,8 +51,10 @@ public class PlayerStatusIndicators : MonoBehaviour
     public float temperatureCriticalThreshold = 5f;
     
     [Header("Infection Thresholds")]
+    [Tooltip("Show warning when immunity drops at or below this value (0–100)")]
     public float infectionWarningThreshold = 50f;
-    public float infectionCriticalThreshold = 75f;
+    [Tooltip("Show critical indicator when immunity drops at or below this value (0–100)")]
+    public float infectionCriticalThreshold = 25f;
     
     [Header("Stamina Thresholds")]
     [Range(0f, 1f)] public float staminaWarningThreshold = 0.3f;
@@ -82,6 +89,8 @@ public class PlayerStatusIndicators : MonoBehaviour
     public AudioClip warningSound;
     
     private bool hasActiveWarnings = false;
+    private float bindRetryTimer = 0f;
+    private const float BindRetryInterval = 1f;
     
     private void Start()
     {
@@ -96,6 +105,8 @@ public class PlayerStatusIndicators : MonoBehaviour
         }
         
         InitializeIndicators();
+        SubscribeToEvents();
+        RefreshIndicators();
         
         if (startDisabled)
         {
@@ -106,6 +117,22 @@ public class PlayerStatusIndicators : MonoBehaviour
             gameObject.SetActive(true);
         }
     }
+
+    private void OnEnable()
+    {
+        SubscribeToEvents();
+        RefreshIndicators();
+    }
+
+    private void OnDisable()
+    {
+        UnsubscribeFromEvents();
+    }
+
+    private void OnDestroy()
+    {
+        UnsubscribeFromEvents();
+    }
     
     private void FindReferences()
     {
@@ -115,18 +142,41 @@ public class PlayerStatusIndicators : MonoBehaviour
 
         if (playerProvider == null)
         {
-            foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+            GC2PlayerProvider gc2Provider = FindFirstObjectByType<GC2PlayerProvider>();
+            if (gc2Provider != null)
+                playerProvider = gc2Provider;
+
+            if (playerProvider == null)
             {
-                if (mb is IPlayerProvider provider)
+                foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
                 {
-                    playerProvider = provider;
-                    break;
+                    if (mb is IPlayerProvider provider)
+                    {
+                        playerProvider = provider;
+                        break;
+                    }
                 }
             }
         }
 
         if (playerProvider == null)
             Debug.LogWarning("[PlayerStatusIndicators] No IPlayerProvider found — health indicator disabled.");
+
+        survivalStatsProvider = playerProvider as ISurvivalStatsProvider;
+        if (survivalStatsProvider == null)
+        {
+            foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+            {
+                if (mb is ISurvivalStatsProvider provider)
+                {
+                    survivalStatsProvider = provider;
+                    break;
+                }
+            }
+        }
+
+        if (survivalStatsProvider == null)
+            Debug.LogWarning("[PlayerStatusIndicators] No ISurvivalStatsProvider found — survival indicators disabled.");
 
         if (survivalManager == null)
             survivalManager = FindFirstObjectByType<SurvivalManager>();
@@ -147,13 +197,115 @@ public class PlayerStatusIndicators : MonoBehaviour
     
     private void Update()
     {
+        if (enablePulseEffect && hasActiveWarnings)
+        {
+            UpdatePulse(healthIndicator);
+            UpdatePulse(temperatureIndicator);
+            UpdatePulse(infectionIndicator);
+            UpdatePulse(staminaIndicator);
+            UpdatePulse(hungerIndicator);
+            UpdatePulse(thirstIndicator);
+        }
+
+        bindRetryTimer += Time.deltaTime;
+        if (bindRetryTimer < BindRetryInterval) return;
+
+        bindRetryTimer = 0f;
+
+        bool missingSource = playerProvider == null || survivalManager == null;
+        if (!missingSource) return;
+
+        FindReferences();
+        SubscribeToEvents();
+        RefreshIndicators();
+    }
+
+    private void SubscribeToEvents()
+    {
+        if (playerProvider != null)
+        {
+            playerProvider.OnHealthChanged -= OnHealthChanged;
+            playerProvider.OnHealthChanged += OnHealthChanged;
+        }
+
+        if (survivalManager != null)
+        {
+            survivalManager.onTemperatureChanged.RemoveListener(OnTemperatureChanged);
+            survivalManager.onTemperatureChanged.AddListener(OnTemperatureChanged);
+
+            survivalManager.onInfectionChanged.RemoveListener(OnInfectionChanged);
+            survivalManager.onInfectionChanged.AddListener(OnInfectionChanged);
+
+            survivalManager.onStaminaChanged.RemoveListener(OnStaminaChanged);
+            survivalManager.onStaminaChanged.AddListener(OnStaminaChanged);
+
+            survivalManager.onHungerChanged.RemoveListener(OnHungerChanged);
+            survivalManager.onHungerChanged.AddListener(OnHungerChanged);
+
+            survivalManager.onThirstChanged.RemoveListener(OnThirstChanged);
+            survivalManager.onThirstChanged.AddListener(OnThirstChanged);
+        }
+    }
+
+    private void UnsubscribeFromEvents()
+    {
+        if (playerProvider != null)
+            playerProvider.OnHealthChanged -= OnHealthChanged;
+
+        if (survivalManager != null)
+        {
+            survivalManager.onTemperatureChanged.RemoveListener(OnTemperatureChanged);
+            survivalManager.onInfectionChanged.RemoveListener(OnInfectionChanged);
+            survivalManager.onStaminaChanged.RemoveListener(OnStaminaChanged);
+            survivalManager.onHungerChanged.RemoveListener(OnHungerChanged);
+            survivalManager.onThirstChanged.RemoveListener(OnThirstChanged);
+        }
+    }
+
+    private void RefreshIndicators()
+    {
         UpdateHealthIndicator();
         UpdateTemperatureIndicator();
         UpdateInfectionIndicator();
         UpdateStaminaIndicator();
         UpdateHungerIndicator();
         UpdateThirstIndicator();
-        
+        UpdatePanelVisibility();
+    }
+
+    private void OnHealthChanged(float current, float max)
+    {
+        UpdateHealthIndicator();
+        UpdatePanelVisibility();
+    }
+
+    private void OnTemperatureChanged(float value)
+    {
+        UpdateTemperatureIndicator();
+        UpdatePanelVisibility();
+    }
+
+    private void OnInfectionChanged(float value)
+    {
+        UpdateInfectionIndicator();
+        UpdatePanelVisibility();
+    }
+
+    private void OnStaminaChanged(float value)
+    {
+        UpdateStaminaIndicator();
+        UpdatePanelVisibility();
+    }
+
+    private void OnHungerChanged(float value)
+    {
+        UpdateHungerIndicator();
+        UpdatePanelVisibility();
+    }
+
+    private void OnThirstChanged(float value)
+    {
+        UpdateThirstIndicator();
         UpdatePanelVisibility();
     }
     
@@ -206,10 +358,10 @@ public class PlayerStatusIndicators : MonoBehaviour
     
     private void UpdateTemperatureIndicator()
     {
-        if (survivalManager == null || temperatureIndicator.indicatorObject == null) return;
-        if (!survivalManager.enableTemperatureSystem) return;
+        if (survivalStatsProvider == null || temperatureIndicator.indicatorObject == null) return;
+        if (survivalStatsProvider.MaxTemperature <= 0f) return;
         
-        float currentTemp = survivalManager.currentTemperature;
+        float currentTemp = survivalStatsProvider.Temperature;
         
         if (currentTemp <= temperatureCriticalThreshold)
         {
@@ -229,19 +381,21 @@ public class PlayerStatusIndicators : MonoBehaviour
     
     private void UpdateInfectionIndicator()
     {
-        if (infectionDisplay == null || infectionIndicator.indicatorObject == null) return;
+        if (survivalStatsProvider == null || infectionIndicator.indicatorObject == null) return;
+        if (survivalStatsProvider.MaxInfection <= 0f) return;
         
-        float infection = infectionDisplay.currentInfection;
+        // Infection value is treated as immunity (max = fully immune, 0 = no immunity).
+        float immunity = survivalStatsProvider.Infection / survivalStatsProvider.MaxInfection * 100f;
         
-        if (infection >= infectionCriticalThreshold)
+        if (immunity <= infectionCriticalThreshold)
         {
             SetIndicatorState(infectionIndicator, true, infectionIndicator.criticalColor, criticalPulseSpeed);
-            UpdateLabel(infectionIndicator.labelText, "SEVERE");
+            UpdateLabel(infectionIndicator.labelText, "CRITICAL IMMUNITY");
         }
-        else if (infection >= infectionWarningThreshold)
+        else if (immunity <= infectionWarningThreshold)
         {
             SetIndicatorState(infectionIndicator, true, infectionIndicator.warningColor, warningPulseSpeed);
-            UpdateLabel(infectionIndicator.labelText, "INFECTED");
+            UpdateLabel(infectionIndicator.labelText, "LOW IMMUNITY");
         }
         else
         {
@@ -251,10 +405,10 @@ public class PlayerStatusIndicators : MonoBehaviour
     
     private void UpdateStaminaIndicator()
     {
-        if (survivalManager == null || staminaIndicator.indicatorObject == null) return;
-        if (!survivalManager.enableStaminaSystem) return;
+        if (survivalStatsProvider == null || staminaIndicator.indicatorObject == null) return;
+        if (survivalStatsProvider.MaxStamina <= 0f) return;
         
-        float staminaPercentage = survivalManager.currentStamina / survivalManager.maxStamina;
+        float staminaPercentage = Mathf.Clamp01(survivalStatsProvider.Stamina / survivalStatsProvider.MaxStamina);
         
         if (staminaPercentage <= staminaCriticalThreshold)
         {
@@ -274,10 +428,10 @@ public class PlayerStatusIndicators : MonoBehaviour
     
     private void UpdateHungerIndicator()
     {
-        if (survivalManager == null || hungerIndicator.indicatorObject == null) return;
-        if (!survivalManager.enableHungerSystem) return;
+        if (survivalStatsProvider == null || hungerIndicator.indicatorObject == null) return;
+        if (survivalStatsProvider.MaxHunger <= 0f) return;
         
-        float hungerPercentage = survivalManager.currentHunger / survivalManager.maxHunger;
+        float hungerPercentage = Mathf.Clamp01(survivalStatsProvider.Hunger / survivalStatsProvider.MaxHunger);
         
         if (hungerPercentage <= hungerCriticalThreshold)
         {
@@ -297,10 +451,10 @@ public class PlayerStatusIndicators : MonoBehaviour
     
     private void UpdateThirstIndicator()
     {
-        if (survivalManager == null || thirstIndicator.indicatorObject == null) return;
-        if (!survivalManager.enableThirstSystem) return;
+        if (survivalStatsProvider == null || thirstIndicator.indicatorObject == null) return;
+        if (survivalStatsProvider.MaxThirst <= 0f) return;
         
-        float thirstPercentage = survivalManager.currentThirst / survivalManager.maxThirst;
+        float thirstPercentage = Mathf.Clamp01(survivalStatsProvider.Thirst / survivalStatsProvider.MaxThirst);
         
         if (thirstPercentage <= thirstCriticalThreshold)
         {
@@ -340,11 +494,25 @@ public class PlayerStatusIndicators : MonoBehaviour
         
         if (enablePulseEffect && indicator.pulseImage != null)
         {
+            indicator.activeColor = color;
+            indicator.activePulseSpeed = pulseSpeed;
+
             float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * pulseSpeed * Mathf.PI);
             Color pulseColor = color;
             pulseColor.a = pulse * 0.8f;
             indicator.pulseImage.color = pulseColor;
         }
+    }
+
+    private void UpdatePulse(StatusIndicator indicator)
+    {
+        if (!indicator.isActive || indicator.pulseImage == null) return;
+
+        float speed = indicator.activePulseSpeed > 0f ? indicator.activePulseSpeed : normalPulseSpeed;
+        float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * speed * Mathf.PI);
+        Color pulseColor = indicator.activeColor;
+        pulseColor.a = pulse * 0.8f;
+        indicator.pulseImage.color = pulseColor;
     }
     
     private void SetIndicatorActive(StatusIndicator indicator, bool active)
@@ -353,6 +521,11 @@ public class PlayerStatusIndicators : MonoBehaviour
         {
             indicator.indicatorObject.SetActive(active);
             indicator.isActive = active;
+
+            if (!active)
+            {
+                indicator.activePulseSpeed = 0f;
+            }
         }
     }
     

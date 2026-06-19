@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEngine.SceneManagement;
 using UnityEditor.SceneManagement;
+using System;
 
 public class ControlPointSetup : EditorWindow
 {
@@ -47,15 +48,23 @@ public class ControlPointSetup : EditorWindow
         if (!Application.isPlaying)
         {
             int count = 0;
-            ControlZone[] allZones = FindObjectsByType<ControlZone>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            Type controlZoneType = ResolveControlZoneType();
+            UnityEngine.Object[] allZones = controlZoneType != null
+                ? FindObjectsByType(controlZoneType, FindObjectsInactive.Include, FindObjectsSortMode.None)
+                : Array.Empty<UnityEngine.Object>();
             
-            foreach (ControlZone zone in allZones)
+            foreach (UnityEngine.Object zoneObj in allZones)
             {
-                SerializedObject so = new SerializedObject(zone);
-                so.FindProperty("spawnOnStart").boolValue = false;
-                so.FindProperty("requiresManagerActivation").boolValue = true;
+                if (zoneObj == null) continue;
+                SerializedObject so = new SerializedObject(zoneObj);
+                SerializedProperty spawnOnStart = so.FindProperty("spawnOnStart");
+                SerializedProperty managerActivation = so.FindProperty("requiresManagerActivation");
+                if (spawnOnStart == null || managerActivation == null) continue;
+
+                spawnOnStart.boolValue = false;
+                managerActivation.boolValue = true;
                 so.ApplyModifiedProperties();
-                EditorUtility.SetDirty(zone);
+                EditorUtility.SetDirty(zoneObj);
                 count++;
             }
             
@@ -141,5 +150,20 @@ public class ControlPointSetup : EditorWindow
         }
         
         return count;
+    }
+
+    private static Type ResolveControlZoneType()
+    {
+        Type direct = Type.GetType("ControlZone, Assembly-CSharp");
+        if (direct != null) return direct;
+
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        for (int i = 0; i < assemblies.Length; i++)
+        {
+            Type found = assemblies[i].GetType("ControlZone");
+            if (found != null) return found;
+        }
+
+        return null;
     }
 }

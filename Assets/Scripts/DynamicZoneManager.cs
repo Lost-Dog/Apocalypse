@@ -50,7 +50,7 @@ public class DynamicZoneManager : MonoBehaviour
         {
             DynamicChallengeZone[] zones = zonesParent.GetComponentsInChildren<DynamicChallengeZone>(true);
             allZones.AddRange(zones);
-            Debug.Log($"<color=green>✓ Found {allZones.Count} DynamicChallengeZones under '{zoneParentName}'</color>");
+            // Intentionally quiet: zone discovery is not noisy enough to log every startup.
         }
         else
         {

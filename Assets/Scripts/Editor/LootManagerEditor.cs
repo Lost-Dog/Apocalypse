@@ -33,7 +33,7 @@ public class LootManagerEditor : Editor
         EditorGUILayout.LabelField("LOOT MANAGER", EditorStyles.boldLabel);
         EditorGUILayout.HelpBox(
             "Configure lootable items, drop chances, and gear score ranges.\n" +
-            "Items are added to the player's Invector vItemManager on pickup.",
+            "Items are added to the player's inventory on pickup.",
             MessageType.Info
         );
         

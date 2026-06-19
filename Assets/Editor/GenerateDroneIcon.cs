@@ -9,7 +9,7 @@ using System.IO;
 /// </summary>
 public static class GenerateDroneIcon
 {
-    private const string OutputPath = "Assets/Invector-3rdPersonController/Shooter/Scripts/ThrowSystem/UI/vDroneIcon.png";
+    private const string OutputPath = "Assets/UI/Icons/vDroneIcon.png";
     private const int Size = 512;
 
     [MenuItem("Tools/Generate Drone Icon")]

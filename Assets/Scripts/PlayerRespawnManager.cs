@@ -1,12 +1,10 @@
 using System.Collections;
-using Invector;
-using Invector.vCharacterController;
 using UnityEngine;
 
 /// <summary>
 /// Handles player respawn at the designated PlayerStartPoint after death.
 /// Attach to any persistent GameObject (e.g. GameSystems).
-/// Requires an InvectorPlayerProvider in the scene to receive death events.
+/// Requires an IPlayerProvider in the scene to receive death events.
 /// </summary>
 public class PlayerRespawnManager : MonoBehaviour
 {
@@ -23,11 +21,14 @@ public class PlayerRespawnManager : MonoBehaviour
     [Tooltip("Health percentage restored on respawn (0–1).")]
     [SerializeField, Range(0.01f, 1f)] private float respawnHealthFraction = 1f;
 
+    [Tooltip("Optional provider assignment. If left empty, the manager auto-discovers one.")]
+    [SerializeField] private MonoBehaviour playerProviderObject;
+
     [Header("Debug")]
     [SerializeField] private bool showDebugLogs = true;
 
-    private InvectorPlayerProvider _provider;
-    private vThirdPersonController _controller;
+    private IPlayerProvider _provider;
+    private GameObject _playerObject;
     private bool _isRespawning;
 
     // ── Unity lifecycle ───────────────────────────────────────────────────────
@@ -65,21 +66,32 @@ public class PlayerRespawnManager : MonoBehaviour
 
     private void ResolveProvider()
     {
-        _provider = FindFirstObjectByType<InvectorPlayerProvider>();
+        _provider = playerProviderObject as IPlayerProvider;
+        if (_provider == null)
+            _provider = FindAnyPlayerProvider();
+
         if (_provider == null)
         {
-            Debug.LogWarning($"{LogPrefix} InvectorPlayerProvider not found. Respawn disabled.");
+            Debug.LogWarning($"{LogPrefix} IPlayerProvider not found. Respawn disabled.");
             return;
         }
 
         _provider.OnDeath += OnPlayerDeath;
-
-        // Cache the controller reference immediately.
-        if (_provider.PlayerObject != null)
-            _controller = _provider.PlayerObject.GetComponent<vThirdPersonController>();
+        _playerObject = _provider.PlayerObject;
 
         if (showDebugLogs)
-            Debug.Log($"{LogPrefix} Bound to InvectorPlayerProvider.");
+            Debug.Log($"{LogPrefix} Bound to IPlayerProvider.");
+    }
+
+    private static IPlayerProvider FindAnyPlayerProvider()
+    {
+        MonoBehaviour[] allMonoBehaviours = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+        for (int i = 0; i < allMonoBehaviours.Length; i++)
+        {
+            if (allMonoBehaviours[i] is IPlayerProvider provider)
+                return provider;
+        }
+        return null;
     }
 
     // ── Death / Respawn ───────────────────────────────────────────────────────
@@ -105,13 +117,18 @@ public class PlayerRespawnManager : MonoBehaviour
 
         yield return new WaitForSeconds(respawnDelay);
 
-        // Refresh controller reference in case it was set after Start.
-        if (_controller == null && _provider?.PlayerObject != null)
-            _controller = _provider.PlayerObject.GetComponent<vThirdPersonController>();
-
-        if (_controller == null)
+        if (_provider == null)
         {
-            Debug.LogWarning($"{LogPrefix} Cannot respawn — vThirdPersonController not found.");
+            _isRespawning = false;
+            yield break;
+        }
+
+        if (_playerObject == null)
+            _playerObject = _provider.PlayerObject;
+
+        if (_playerObject == null)
+        {
+            Debug.LogWarning($"{LogPrefix} Cannot respawn — provider has no player object.");
             _isRespawning = false;
             yield break;
         }
@@ -122,30 +139,30 @@ public class PlayerRespawnManager : MonoBehaviour
 
     private void PerformRespawn()
     {
-        // ── 1. Exit ragdoll state ─────────────────────────────────────────────
-        if (_controller.ragdolled)
-            _controller.ResetRagdoll();
-
-        // ── 2. Teleport — disable physics so the warp is instant ─────────────
-        var rb = _controller.GetComponent<Rigidbody>();
+        // Reset physics velocity before warp to avoid post-respawn carry-over momentum.
+        var rb = _playerObject.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            rb.linearVelocity    = Vector3.zero;
+            rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
         }
 
-        _controller.transform.SetPositionAndRotation(respawnPoint.position, respawnPoint.rotation);
+        // Avoid CharacterController snapping against colliders while teleporting.
+        CharacterController characterController = _playerObject.GetComponent<CharacterController>();
+        bool hadCharacterController = characterController != null;
+        if (hadCharacterController)
+            characterController.enabled = false;
 
-        // ── 3. Restore health — this clears isDead via the property setter ────
-        int targetHealth = Mathf.RoundToInt(_controller.maxHealth * respawnHealthFraction);
-        _controller.ChangeHealth(targetHealth);
+        _playerObject.transform.SetPositionAndRotation(respawnPoint.position, respawnPoint.rotation);
 
-        // ── 4. Re-enable animator dead state ─────────────────────────────────
-        if (_controller.animator != null)
-            _controller.animator.SetBool(vAnimatorParameters.IsDead, false);
+        if (hadCharacterController)
+            characterController.enabled = true;
+
+        float targetHealth = _provider.MaxHealth * respawnHealthFraction;
+        _provider.SetHealth(targetHealth);
 
         if (showDebugLogs)
-            Debug.Log($"{LogPrefix} Player respawned at '{respawnPoint.name}' with {targetHealth} HP.");
+            Debug.Log($"{LogPrefix} Player respawned at '{respawnPoint.name}' with {targetHealth:F0} HP.");
     }
 
     // ── Public API ────────────────────────────────────────────────────────────
@@ -175,10 +192,19 @@ public class PlayerRespawnManager : MonoBehaviour
         StopAllCoroutines();
         _isRespawning = false;
 
-        if (_controller == null && _provider?.PlayerObject != null)
-            _controller = _provider.PlayerObject.GetComponent<vThirdPersonController>();
+        if (_provider == null)
+            ResolveProvider();
 
-        if (_controller != null)
+        if (_provider == null)
+        {
+            Debug.LogWarning($"{LogPrefix} Cannot force respawn — no player provider found.");
+            return;
+        }
+
+        if (_playerObject == null)
+            _playerObject = _provider.PlayerObject;
+
+        if (_playerObject != null)
             PerformRespawn();
     }
 }

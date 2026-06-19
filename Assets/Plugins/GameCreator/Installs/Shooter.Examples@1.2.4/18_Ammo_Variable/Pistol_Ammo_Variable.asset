@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 884ca14373194cf390e4803ac386abca, type: 3}
+  m_Name: Pistol_Ammo_Variable
+  m_EditorClassIdentifier: 
+  m_Id:
+    m_SerializedID:
+      m_String: 817e89ba-6c53-4afa-91c1-7f190dc19b2d
+  m_Title:
+    m_Property:
+      rid: 1820692375224975529
+  m_Description:
+    m_Property:
+      rid: 8814677138683200067
+  m_Icon:
+    m_Property:
+      rid: 1820692375224975531
+  m_Color:
+    m_Property:
+      rid: 1820692375224975532
+  m_Infinite: 0
+  m_Value:
+    m_Property:
+      rid: 2865212249879872494
+  references:
+    version: 2
+    RefIds:
+    - rid: 1820692375224975529
+      type: {class: GetStringString, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: Pistol Ammo
+    - rid: 1820692375224975531
+      type: {class: GetSpriteNone, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 1820692375224975532
+      type: {class: GetColorColorsWhite, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 2865212249879872494
+      type: {class: SetNumberGlobalName, ns: GameCreator.Runtime.Variables, asm: GameCreator.Runtime.Core}
+      data:
+        m_Variable:
+          m_TypeID:
+            m_String: number
+          m_Variable: {fileID: 11400000, guid: b49488edb59f64d8e95f778eb5f6b7ab, type: 2}
+          m_Name:
+            m_String: total-ammo
+            m_ID: 310730360
+    - rid: 8814677138683200067
+      type: {class: GetStringEmpty, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 

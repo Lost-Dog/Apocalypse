@@ -25,6 +25,31 @@ public class MissionManager : MonoBehaviour
     {
         LoadMissions();
         RefreshAvailableMissions();
+        ConsumePendingMissionRequest();
+    }
+
+    /// <summary>
+    /// Checks <see cref="MissionRequest"/> for a mission queued from the main menu
+    /// and starts it automatically. Clears the request whether or not a match is found.
+    /// </summary>
+    private void ConsumePendingMissionRequest()
+    {
+        string pending = MissionRequest.PendingMissionName;
+        MissionRequest.Clear();
+
+        if (string.IsNullOrWhiteSpace(pending))
+            return;
+
+        MissionData target = allMissions.Find(m => m.missionName == pending);
+
+        if (target == null)
+        {
+            Debug.LogWarning($"[MissionManager] Pending mission '{pending}' not found in loaded missions. Has the MissionData asset been created in Resources/Missions?", this);
+            return;
+        }
+
+        Debug.Log($"[MissionManager] Auto-starting queued mission: '{pending}'", this);
+        StartMission(target);
     }
     
     private void LoadMissions()

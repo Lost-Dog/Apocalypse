@@ -3164,8 +3164,6 @@ GameObject:
   - component: {fileID: 1648131773926286376}
   - component: {fileID: 1648131773926286379}
   - component: {fileID: 1648131773926286378}
-  - component: {fileID: 5903519155811977897}
-  - component: {fileID: 6776725709723126940}
   m_Layer: 4
   m_Name: Example Summoned AI
   m_TagString: Respawn
@@ -4053,38 +4051,6 @@ MonoBehaviour:
   - m_Rig: {fileID: 1648131774754137469}
     m_Active: 1
   m_Effectors: []
---- !u!114 &5903519155811977897
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1648131773926286381}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f0015fe61b56d26419a2733199b39842, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EmeraldAIInvectorDamageBridge
-  headshotMultiplier: 2
-  showDebugLogs: 1
-  verboseLogging: 1
---- !u!114 &6776725709723126940
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1648131773926286381}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8aeb01825b690d040b40a805ade6314d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EmeraldAIAttackBridge
-  damageMultiplier: 1
-  enableHitReaction: 1
-  damageCooldown: 0.5
-  showDebugLogs: 1
-  verboseLogging: 1
 --- !u!1 &1648131774098633606
 GameObject:
   m_ObjectHideFlags: 0

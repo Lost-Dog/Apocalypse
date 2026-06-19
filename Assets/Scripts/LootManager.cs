@@ -2,11 +2,11 @@ using UnityEngine;
 using UnityEngine.Events;
 using System.Collections.Generic;
 using System.Linq;
-using Invector.vItemManager;
+using GameCreator.Runtime.Inventory;
 
 /// <summary>
 /// Handles loot spawning, rarity rolling, gear score calculation and world-drop physics.
-/// Item collection is delegated to Invector's vItemManager via AddItem(ItemReference).
+/// Item collection is delegated to Game Creator 2 Inventory bags.
 /// </summary>
 public class LootManager : MonoBehaviour
 {
@@ -57,6 +57,17 @@ public class LootManager : MonoBehaviour
     public UnityEvent<LootRarity, int> onLootDropped;
     public UnityEvent<LootItemData, int, LootRarity> onItemCollected;
 
+    [Header("Progression")]
+    [Tooltip("XP granted per successfully collected GC2 pickable item.")]
+    [SerializeField] private int xpPerPickableInteraction = 1;
+
+    [Header("GC2 Inventory")]
+    [Tooltip("Optional fallback bag used when a player bag cannot be resolved from the collector object.")]
+    [SerializeField] private Bag fallbackPlayerBag;
+
+    [Tooltip("Warn when a LootItemData entry cannot be mapped to a GC2 Item.")]
+    [SerializeField] private bool warnIfItemMappingMissing = true;
+
     private const int GEAR_SCORE_BASE = 100;
     private const int GEAR_SCORE_PER_LEVEL = 40;
 
@@ -71,6 +82,8 @@ public class LootManager : MonoBehaviour
     public int lootPoolSize = 20;
 
     private Dictionary<GameObject, ObjectPool> lootObjectPools = new Dictionary<GameObject, ObjectPool>();
+    private readonly Dictionary<string, Item> gc2ItemsById = new Dictionary<string, Item>();
+    private readonly Dictionary<string, Item> gc2ItemsByName = new Dictionary<string, Item>();
 
     private void Awake()
     {
@@ -86,6 +99,7 @@ public class LootManager : MonoBehaviour
 
         // OPTIMIZATION: Build cache of loot items by rarity
         RebuildLootItemCache();
+        RebuildGc2ItemCache();
 
         // OPTIMIZATION: Initialize object pools for loot
         if (useObjectPooling)
@@ -214,28 +228,109 @@ public class LootManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Adds a loot item to the player's Invector vItemManager.
-    /// The player GameObject must have a vItemManager component attached.
+    /// Adds a loot item to the player's GC2 Bag component.
     /// </summary>
     public void AddItemToPlayerInventory(LootItemData itemData, int gearScore, LootRarity rarity, GameObject player)
     {
         if (itemData == null || player == null) return;
 
-        vItemManager itemManager = player.GetComponent<vItemManager>();
-        if (itemManager == null)
+        Bag bag = ResolvePlayerBag(player);
+        if (bag == null)
         {
-            Debug.LogWarning($"[LootManager] No vItemManager on {player.name}. Cannot add item.");
+            Debug.LogWarning($"[LootManager] No GC2 Bag found on {player.name}. Cannot add item.");
             return;
         }
 
-        ItemReference itemRef = new ItemReference(itemData.invectorItemID)
+        Item gc2Item = ResolveGc2Item(itemData);
+        if (gc2Item == null)
         {
-            amount = 1
-        };
+            if (warnIfItemMappingMissing)
+            {
+                Debug.LogWarning($"[LootManager] No GC2 Item mapping found for loot '{itemData.itemName}' (itemID={itemData.itemID}).");
+            }
+            return;
+        }
 
-        itemManager.AddItem(itemRef);
+        RuntimeItem runtimeItem = bag.Content.AddType(gc2Item, true);
+        if (runtimeItem == null)
+        {
+            Debug.LogWarning($"[LootManager] Failed to add '{gc2Item.name}' to bag on {player.name}. Bag may be full.");
+            return;
+        }
+
+        // Inform progression on successful GC2 pickable collection.
+        if (xpPerPickableInteraction > 0)
+        {
+            ProgressionManager progressionManager = ProgressionManager.Instance;
+            if (progressionManager == null && GameManager.Instance != null)
+            {
+                progressionManager = GameManager.Instance.progressionManager;
+            }
+
+            progressionManager?.AddExperience(xpPerPickableInteraction);
+        }
+
         onItemCollected?.Invoke(itemData, gearScore, rarity);
-        Debug.Log($"[LootManager] Added to Invector inventory: {itemData.itemName} (GS {gearScore}, {rarity})");
+        Debug.Log($"[LootManager] Added to GC2 inventory: {itemData.itemName} (GS {gearScore}, {rarity})");
+    }
+
+    private void RebuildGc2ItemCache()
+    {
+        gc2ItemsById.Clear();
+        gc2ItemsByName.Clear();
+
+        Item[] items = InventoryRepository.Get?.Items?.List;
+        if (items == null) return;
+
+        for (int i = 0; i < items.Length; i++)
+        {
+            Item item = items[i];
+            if (item == null) continue;
+
+            string id = item.ID.String;
+            if (!string.IsNullOrEmpty(id) && !gc2ItemsById.ContainsKey(id))
+            {
+                gc2ItemsById[id] = item;
+            }
+
+            if (!string.IsNullOrEmpty(item.name) && !gc2ItemsByName.ContainsKey(item.name))
+            {
+                gc2ItemsByName[item.name] = item;
+            }
+        }
+    }
+
+    private Item ResolveGc2Item(LootItemData lootItem)
+    {
+        if (lootItem == null) return null;
+        if (gc2ItemsById.Count == 0 && gc2ItemsByName.Count == 0) RebuildGc2ItemCache();
+
+        if (!string.IsNullOrEmpty(lootItem.itemID) && gc2ItemsById.TryGetValue(lootItem.itemID, out Item byId))
+        {
+            return byId;
+        }
+
+        if (!string.IsNullOrEmpty(lootItem.itemName) && gc2ItemsByName.TryGetValue(lootItem.itemName, out Item byName))
+        {
+            return byName;
+        }
+
+        return null;
+    }
+
+    private Bag ResolvePlayerBag(GameObject player)
+    {
+        if (player != null)
+        {
+            Bag bagOnRoot = player.GetComponent<Bag>();
+            if (bagOnRoot != null) return bagOnRoot;
+
+            Bag bagInChildren = player.GetComponentInChildren<Bag>(true);
+            if (bagInChildren != null) return bagInChildren;
+        }
+
+        if (fallbackPlayerBag != null) return fallbackPlayerBag;
+        return FindFirstObjectByType<Bag>();
     }
 
     /// <summary>

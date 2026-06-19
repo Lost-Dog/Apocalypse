@@ -1,11 +1,15 @@
 using UnityEditor;
 using UnityEngine;
+#if COMPASS_NAVIGATOR_PRO
 using CompassNavigatorPro;
+#endif
 
 /// <summary>
 /// Temporary editor window to tune CompassPro global indicator scales and per-POI scales live in the scene.
 /// Open via Tools > Compass Scale Tool.
+/// Requires the COMPASS_NAVIGATOR_PRO scripting define to be active.
 /// </summary>
+#if COMPASS_NAVIGATOR_PRO
 public class CompassScaleTool : EditorWindow
 {
     private CompassPro _compass;
@@ -119,3 +123,4 @@ public class CompassScaleTool : EditorWindow
         }
     }
 }
+#endif // COMPASS_NAVIGATOR_PRO

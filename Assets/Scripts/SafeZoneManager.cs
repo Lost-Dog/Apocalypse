@@ -1,12 +1,15 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Reflection;
+using UnityEngine.Events;
 
 public class SafeZoneManager : MonoBehaviour
 {
     public static SafeZoneManager Instance { get; private set; }
     
     [Header("Safe Zone Tracking")]
-    public List<SafeZone> allSafeZones = new List<SafeZone>();
+    [Tooltip("Any component with UnityEvents named onPlayerEnter and onPlayerExit is treated as a safe zone.")]
+    public List<MonoBehaviour> allSafeZones = new List<MonoBehaviour>();
     public bool autoFindSafeZones = true;
     
     [Header("Statistics")]
@@ -15,13 +18,22 @@ public class SafeZoneManager : MonoBehaviour
     public float totalHealthRestored = 0f;
     
     [Header("Current Status")]
-    public SafeZone currentSafeZone = null;
+    public MonoBehaviour currentSafeZone = null;
     public bool playerInSafeZone = false;
     
     [Header("Debug")]
     public bool showDebugInfo = true;
+
+    private sealed class ZoneBinding
+    {
+        public UnityEvent enterEvent;
+        public UnityEvent exitEvent;
+        public UnityAction onEnter;
+        public UnityAction onExit;
+    }
     
     private float sessionStartTime;
+    private readonly Dictionary<MonoBehaviour, ZoneBinding> zoneBindings = new Dictionary<MonoBehaviour, ZoneBinding>();
     
     private void Awake()
     {
@@ -49,9 +61,16 @@ public class SafeZoneManager : MonoBehaviour
     
     private void FindAllSafeZones()
     {
-        SafeZone[] foundZones = FindObjectsByType<SafeZone>(FindObjectsSortMode.None);
         allSafeZones.Clear();
-        allSafeZones.AddRange(foundZones);
+
+        MonoBehaviour[] candidates = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+        foreach (MonoBehaviour candidate in candidates)
+        {
+            if (candidate == null) continue;
+            if (!TryCreateZoneBinding(candidate, out _)) continue;
+
+            allSafeZones.Add(candidate);
+        }
         
         if (showDebugInfo)
         {
@@ -61,14 +80,16 @@ public class SafeZoneManager : MonoBehaviour
     
     private void RegisterEventListeners()
     {
-        foreach (SafeZone zone in allSafeZones)
+        zoneBindings.Clear();
+
+        foreach (MonoBehaviour zone in allSafeZones)
         {
-            zone.onPlayerEnter.AddListener(() => OnPlayerEnterAnyZone(zone));
-            zone.onPlayerExit.AddListener(() => OnPlayerExitAnyZone(zone));
+            if (zone == null) continue;
+            RegisterSafeZone(zone);
         }
     }
     
-    private void OnPlayerEnterAnyZone(SafeZone zone)
+    private void OnPlayerEnterAnyZone(MonoBehaviour zone)
     {
         currentSafeZone = zone;
         playerInSafeZone = true;
@@ -77,11 +98,11 @@ public class SafeZoneManager : MonoBehaviour
         
         if (showDebugInfo)
         {
-            Debug.Log($"<color=green>Player entered safe zone: {zone.safeZoneName}</color>");
+            Debug.Log($"<color=green>Player entered safe zone: {GetZoneName(zone)}</color>");
         }
     }
     
-    private void OnPlayerExitAnyZone(SafeZone zone)
+    private void OnPlayerExitAnyZone(MonoBehaviour zone)
     {
         if (currentSafeZone == zone)
         {
@@ -93,19 +114,19 @@ public class SafeZoneManager : MonoBehaviour
             
             if (showDebugInfo)
             {
-                Debug.Log($"<color=yellow>Player left safe zone: {zone.safeZoneName} (Duration: {sessionDuration:F1}s)</color>");
+                Debug.Log($"<color=yellow>Player left safe zone: {GetZoneName(zone)} (Duration: {sessionDuration:F1}s)</color>");
             }
         }
     }
     
-    public SafeZone GetNearestSafeZone(Vector3 position)
+    public MonoBehaviour GetNearestSafeZone(Vector3 position)
     {
         if (allSafeZones.Count == 0) return null;
         
-        SafeZone nearest = null;
+        MonoBehaviour nearest = null;
         float nearestDistance = float.MaxValue;
         
-        foreach (SafeZone zone in allSafeZones)
+        foreach (MonoBehaviour zone in allSafeZones)
         {
             if (zone == null) continue;
             
@@ -120,11 +141,11 @@ public class SafeZoneManager : MonoBehaviour
         return nearest;
     }
     
-    public List<SafeZone> GetSafeZonesInRadius(Vector3 position, float radius)
+    public List<MonoBehaviour> GetSafeZonesInRadius(Vector3 position, float radius)
     {
-        List<SafeZone> zonesInRange = new List<SafeZone>();
+        List<MonoBehaviour> zonesInRange = new List<MonoBehaviour>();
         
-        foreach (SafeZone zone in allSafeZones)
+        foreach (MonoBehaviour zone in allSafeZones)
         {
             if (zone == null) continue;
             
@@ -138,31 +159,61 @@ public class SafeZoneManager : MonoBehaviour
         return zonesInRange;
     }
     
-    public void RegisterSafeZone(SafeZone zone)
+    public void RegisterSafeZone(MonoBehaviour zone)
     {
+        if (zone == null) return;
+
+        if (!TryCreateZoneBinding(zone, out ZoneBinding binding))
+        {
+            if (showDebugInfo)
+            {
+                Debug.LogWarning($"SafeZoneManager: {zone.name} is missing onPlayerEnter/onPlayerExit UnityEvents and cannot be registered.");
+            }
+            return;
+        }
+
         if (!allSafeZones.Contains(zone))
         {
             allSafeZones.Add(zone);
-            
-            zone.onPlayerEnter.AddListener(() => OnPlayerEnterAnyZone(zone));
-            zone.onPlayerExit.AddListener(() => OnPlayerExitAnyZone(zone));
-            
-            if (showDebugInfo)
-            {
-                Debug.Log($"<color=cyan>Registered safe zone: {zone.safeZoneName}</color>");
-            }
+        }
+
+        if (zoneBindings.ContainsKey(zone)) return;
+
+        binding.onEnter = () => OnPlayerEnterAnyZone(zone);
+        binding.onExit = () => OnPlayerExitAnyZone(zone);
+
+        binding.enterEvent.AddListener(binding.onEnter);
+        binding.exitEvent.AddListener(binding.onExit);
+        zoneBindings[zone] = binding;
+
+        if (showDebugInfo)
+        {
+            Debug.Log($"<color=cyan>Registered safe zone: {GetZoneName(zone)}</color>");
         }
     }
     
-    public void UnregisterSafeZone(SafeZone zone)
+    public void UnregisterSafeZone(MonoBehaviour zone)
     {
+        if (zone == null) return;
+
+        if (zoneBindings.TryGetValue(zone, out ZoneBinding binding))
+        {
+            if (binding.enterEvent != null && binding.onEnter != null)
+                binding.enterEvent.RemoveListener(binding.onEnter);
+
+            if (binding.exitEvent != null && binding.onExit != null)
+                binding.exitEvent.RemoveListener(binding.onExit);
+
+            zoneBindings.Remove(zone);
+        }
+
         if (allSafeZones.Contains(zone))
         {
             allSafeZones.Remove(zone);
             
             if (showDebugInfo)
             {
-                Debug.Log($"<color=orange>Unregistered safe zone: {zone.safeZoneName}</color>");
+                Debug.Log($"<color=orange>Unregistered safe zone: {GetZoneName(zone)}</color>");
             }
         }
     }
@@ -176,7 +227,7 @@ public class SafeZoneManager : MonoBehaviour
         Debug.Log($"Currently In Zone: {playerInSafeZone}");
         if (currentSafeZone != null)
         {
-            Debug.Log($"Current Zone: {currentSafeZone.safeZoneName}");
+            Debug.Log($"Current Zone: {GetZoneName(currentSafeZone)}");
         }
     }
     
@@ -185,8 +236,75 @@ public class SafeZoneManager : MonoBehaviour
         if (showDebugInfo && playerInSafeZone && currentSafeZone != null)
         {
             GUI.color = Color.green;
-            GUI.Label(new Rect(10, 10, 300, 20), $"Safe Zone: {currentSafeZone.safeZoneName}");
+            GUI.Label(new Rect(10, 10, 300, 20), $"Safe Zone: {GetZoneName(currentSafeZone)}");
             GUI.color = Color.white;
         }
+    }
+
+    private void OnDestroy()
+    {
+        List<MonoBehaviour> zones = new List<MonoBehaviour>(zoneBindings.Keys);
+        foreach (MonoBehaviour zone in zones)
+        {
+            UnregisterSafeZone(zone);
+        }
+    }
+
+    private static bool TryCreateZoneBinding(MonoBehaviour zone, out ZoneBinding binding)
+    {
+        binding = null;
+        if (zone == null) return false;
+
+        if (!TryGetUnityEvent(zone, "onPlayerEnter", out UnityEvent enterEvent)) return false;
+        if (!TryGetUnityEvent(zone, "onPlayerExit", out UnityEvent exitEvent)) return false;
+
+        binding = new ZoneBinding
+        {
+            enterEvent = enterEvent,
+            exitEvent = exitEvent
+        };
+        return true;
+    }
+
+    private static bool TryGetUnityEvent(MonoBehaviour zone, string memberName, out UnityEvent unityEvent)
+    {
+        unityEvent = null;
+
+        FieldInfo field = zone.GetType().GetField(memberName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        if (field != null && typeof(UnityEvent).IsAssignableFrom(field.FieldType))
+        {
+            unityEvent = field.GetValue(zone) as UnityEvent;
+            return unityEvent != null;
+        }
+
+        PropertyInfo property = zone.GetType().GetProperty(memberName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        if (property != null && typeof(UnityEvent).IsAssignableFrom(property.PropertyType))
+        {
+            unityEvent = property.GetValue(zone) as UnityEvent;
+            return unityEvent != null;
+        }
+
+        return false;
+    }
+
+    private static string GetZoneName(MonoBehaviour zone)
+    {
+        if (zone == null) return "Unknown";
+
+        FieldInfo field = zone.GetType().GetField("safeZoneName", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        if (field != null && field.FieldType == typeof(string))
+        {
+            string value = field.GetValue(zone) as string;
+            if (!string.IsNullOrEmpty(value)) return value;
+        }
+
+        PropertyInfo property = zone.GetType().GetProperty("safeZoneName", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        if (property != null && property.PropertyType == typeof(string))
+        {
+            string value = property.GetValue(zone) as string;
+            if (!string.IsNullOrEmpty(value)) return value;
+        }
+
+        return zone.gameObject != null ? zone.gameObject.name : zone.name;
     }
 }

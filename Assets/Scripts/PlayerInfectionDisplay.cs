@@ -1,10 +1,11 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 /// <summary>
-/// Reads the player's infection level from SurvivalManager and drives the
+/// Reads the player's immunity level from SurvivalManager and drives the
 /// stat-dial Animator and label text. Also applies periodic health damage when
-/// infection is at maximum via IPlayerProvider.
+/// immunity is at zero via IPlayerProvider.
 /// </summary>
 public class PlayerInfectionDisplay : MonoBehaviour
 {
@@ -13,9 +14,11 @@ public class PlayerInfectionDisplay : MonoBehaviour
     [Header("References")]
     public TextMeshProUGUI infectionText;
     public Animator        dialAnimator;
+    public Slider          infectionSlider;
 
     [Header("Health Damage at Max Infection")]
-    public bool  enableHealthDamage    = true;
+    [Tooltip("Legacy fallback only. Keep disabled when SurvivalManager infection effects are enabled to avoid duplicate hidden health drain.")]
+    public bool  enableHealthDamage    = false;
     public float healthDamagePerSecond = 2f;
     public float damageTickInterval    = 1f;
 
@@ -31,7 +34,25 @@ public class PlayerInfectionDisplay : MonoBehaviour
     private void Start()
     {
         FindReferences();
+        Subscribe();
         damageTimer = damageTickInterval;
+        RefreshFromState();
+    }
+
+    private void OnEnable()
+    {
+        Subscribe();
+        RefreshFromState();
+    }
+
+    private void OnDisable()
+    {
+        Unsubscribe();
+    }
+
+    private void OnDestroy()
+    {
+        Unsubscribe();
     }
 
     private void FindReferences()
@@ -59,6 +80,9 @@ public class PlayerInfectionDisplay : MonoBehaviour
 
         if (dialAnimator == null)
             dialAnimator = GetComponentInParent<Animator>();
+
+        if (infectionSlider == null)
+            infectionSlider = GetComponentInChildren<Slider>(true);
     }
 
     private void Update()
@@ -66,13 +90,41 @@ public class PlayerInfectionDisplay : MonoBehaviour
         if (survivalManager == null)
         {
             FindReferences();
+            Subscribe();
             return;
         }
 
+        // Only tick fallback damage logic per-frame when that legacy path is active.
+        if (enableHealthDamage)
+            ApplyInfectionDamage(GetNormalizedInfection());
+    }
+
+    private void Subscribe()
+    {
+        if (survivalManager == null)
+            return;
+
+        survivalManager.onInfectionChanged.RemoveListener(OnInfectionChanged);
+        survivalManager.onInfectionChanged.AddListener(OnInfectionChanged);
+    }
+
+    private void Unsubscribe()
+    {
+        if (survivalManager != null)
+            survivalManager.onInfectionChanged.RemoveListener(OnInfectionChanged);
+    }
+
+    private void OnInfectionChanged(float value)
+    {
+        RefreshFromState();
+    }
+
+    private void RefreshFromState()
+    {
         float normalized = GetNormalizedInfection();
         UpdateDial(normalized);
         UpdateLabel(normalized);
-        ApplyInfectionDamage(normalized);
+        UpdateSlider(normalized);
     }
 
     // ── Read ──────────────────────────────────────────────────────────────────
@@ -100,11 +152,25 @@ public class PlayerInfectionDisplay : MonoBehaviour
         infectionText.text = $"{Mathf.RoundToInt(normalized * 100f)}{suffix}";
     }
 
+    private void UpdateSlider(float normalized)
+    {
+        if (infectionSlider == null) return;
+
+        infectionSlider.minValue = 0f;
+        infectionSlider.maxValue = 1f;
+        infectionSlider.value = normalized;
+    }
+
     // ── Damage ────────────────────────────────────────────────────────────────
 
     private void ApplyInfectionDamage(float normalized)
     {
-        if (!enableHealthDamage || normalized < 1f || playerProvider == null) return;
+        // SurvivalManager is the authoritative infection damage source.
+        // This fallback prevents hidden duplicate damage when both systems are active.
+        if (survivalManager != null && survivalManager.enableInfectionSystem)
+            return;
+
+        if (!enableHealthDamage || normalized > 0f || playerProvider == null) return;
 
         damageTimer -= Time.deltaTime;
         if (damageTimer > 0f) return;
@@ -115,30 +181,26 @@ public class PlayerInfectionDisplay : MonoBehaviour
 
     // ── Public API ────────────────────────────────────────────────────────────
 
-    /// <summary>Adds the given amount to the infection level in SurvivalManager.</summary>
+    /// <summary>Adds infection exposure, reducing immunity by the given amount in SurvivalManager.</summary>
     public void AddInfection(float amount)
     {
         if (survivalManager == null) return;
-        survivalManager.currentInfection = Mathf.Clamp(
-            survivalManager.currentInfection + amount,
-            0f,
-            survivalManager.maxInfection
-        );
+        survivalManager.AddInfection(amount);
     }
 
-    /// <summary>Removes the given amount from the infection level.</summary>
+    /// <summary>Removes infection exposure, restoring immunity by the given amount.</summary>
     public void RemoveInfection(float amount) => AddInfection(-amount);
 
-    /// <summary>Clears infection to zero in SurvivalManager.</summary>
+    /// <summary>Restores immunity to full in SurvivalManager.</summary>
     public void CureInfection()
     {
         if (survivalManager != null)
-            survivalManager.currentInfection = 0f;
+            survivalManager.CureInfection(survivalManager.maxInfection);
     }
 
-    /// <summary>Returns true if infection is above zero.</summary>
-    public bool IsInfected() => GetNormalizedInfection() > 0f;
+    /// <summary>Returns true if immunity is below maximum (player has some infection).</summary>
+    public bool IsInfected() => GetNormalizedInfection() < 1f;
 
-    /// <summary>Returns infection as a 0–1 normalised value.</summary>
+    /// <summary>Returns immunity as a 0–1 normalised value (1 = fully immune, 0 = no immunity).</summary>
     public float GetInfectionPercentage() => GetNormalizedInfection();
 }

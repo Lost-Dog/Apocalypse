@@ -152,12 +152,6 @@ namespace EmeraldAI.Utility
             Application.OpenURL("https://black-horizon-studios.gitbook.io/emerald-ai-wiki/integrations/integrations/fps-engine");
         }
 
-        [MenuItem("Window/Emerald AI/Integrations/Invector", false, 252)]
-        public static void InvectorIntegration()
-        {
-            Application.OpenURL("https://black-horizon-studios.gitbook.io/emerald-ai-wiki/integrations/invector");
-        }
-
         [MenuItem("Window/Emerald AI/Integrations/Final IK", false, 253)]
         public static void FinalIKIntegration()
         {

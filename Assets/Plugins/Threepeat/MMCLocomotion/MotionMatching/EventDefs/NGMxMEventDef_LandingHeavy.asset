@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b10556c0de742244900b26ed60d64dd, type: 3}
+  m_Name: NGMxMEventDef_LandingHeavy
+  m_EditorClassIdentifier: 
+  Id: 14
+  EventName: LandingHeavy
+  EventType: 0
+  Priority: -1
+  ContactCountToMatch: 0
+  ContactCountToWarp: 0
+  ExitWithMotion: 1
+  MatchPose: 0
+  MatchTrajectory: 0
+  MatchRequireTags: 0
+  FavourTagMethod: 0
+  PostEventTrajectoryMode: 1
+  MatchTiming: 0
+  ExactTimeMatch: 0
+  TimingWeight: 0
+  TimingWarpType: 0
+  MatchPosition: 1
+  PositionWeight: 10
+  MotionWarpType: 0
+  WarpTimeScaling: 0
+  ContactCountToTimeScale: 1
+  MinWarpTimeScale: 0.9
+  MaxWarpTimeScale: 1.2
+  MatchRotation: 0
+  RotationWeight: 10
+  RotationWarpType: 0
+  m_targetAnimData: {fileID: 11400000, guid: a82f80c6723800c43889ad44f58c2b49, type: 2}
+  NGEventType: 6
+  NGMovementType: 1
+  zRangeToContact: {x: 1, y: 2}
+  yRangeToContact: {x: 1.35, y: 3.4}
+  maxPlatformDepth: -1
+  speedRange: {x: 0, y: 50}
+  contactInfos:
+  - warpable: 1
+    relativePosition: {x: 0, y: 0, z: 2}
+  vaultObstacleLengthRange: {x: 0.1, y: 3}

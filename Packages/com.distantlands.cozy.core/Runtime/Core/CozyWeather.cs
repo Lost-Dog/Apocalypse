@@ -242,6 +242,7 @@ namespace DistantLands.Cozy
 
         public Light sunLight;
         public Transform sunTransform;
+        private bool warnedMissingSunLight;
         public bool centerAroundCustomObject;
         public Transform customPivot;
         public MeshRenderer cloudMesh;
@@ -921,18 +922,26 @@ namespace DistantLands.Cozy
                 sunLensFlare.useOcclusion = sunFlare.useOcclusion;
             }
 #endif
-            if (handleSceneLighting)
+            if (sunLight)
             {
-                sunLight.color = sunlightColor * sunFilter;
-                if (disableSunAtNight)
-                    sunLight.enabled = sunLight.color.r + sunLight.color.g + sunLight.color.b > 0;
-            }
-            else
-            {
-                sunLight.enabled = false;
-            }
+                if (handleSceneLighting)
+                {
+                    sunLight.color = sunlightColor * sunFilter;
+                    if (disableSunAtNight)
+                        sunLight.enabled = sunLight.color.r + sunLight.color.g + sunLight.color.b > 0;
+                }
+                else
+                {
+                    sunLight.enabled = false;
+                }
 
-            sunLight.shadows = sunLight.enabled ? sunlightShadows : LightShadows.None;
+                sunLight.shadows = sunLight.enabled ? sunlightShadows : LightShadows.None;
+            }
+            else if (!warnedMissingSunLight)
+            {
+                warnedMissingSunLight = true;
+                Debug.LogWarning("Cozy Weather is missing a Sun Light reference. Assign `sunLight` on CozyWeather or disable scene lighting handling.");
+            }
 
             if (climateModule)
             {

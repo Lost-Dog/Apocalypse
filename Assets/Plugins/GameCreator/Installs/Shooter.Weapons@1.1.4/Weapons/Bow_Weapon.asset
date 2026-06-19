@@ -1,0 +1,325 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7635ada77d9fe448ea6057df7e0d1972, type: 3}
+  m_Name: Bow_Weapon
+  m_EditorClassIdentifier: 
+  m_Id:
+    m_SerializedID:
+      m_String: c665f250-47d1-45b5-8b1b-cb2c0f4f44b3
+  m_Title:
+    m_Property:
+      rid: -2
+  m_Description:
+    m_Property:
+      rid: -2
+  m_Icon:
+    m_Property:
+      rid: -2
+  m_Color:
+    m_Property:
+      rid: -2
+  m_HitReaction: {fileID: 0}
+  m_ParriedReaction: {fileID: 0}
+  m_OnEquip:
+    m_Instructions:
+      m_Instructions: []
+  m_OnUnequip:
+    m_Instructions:
+      m_Instructions: []
+  m_OnDodge:
+    m_Instructions:
+      m_Instructions: []
+  m_State:
+    m_StateType: 2
+    m_AnimationClip:
+      m_Property:
+        rid: -2
+    m_RuntimeController: {fileID: 0}
+    m_State: {fileID: 11400000, guid: e51616817681546bcbe34d1c43f9497a, type: 2}
+    m_AvatarMask: {fileID: 0}
+  m_Layer:
+    m_Property:
+      rid: -2
+  m_Magazine:
+    m_Ammo: {fileID: 11400000, guid: 369e2c699724f4f7cb75181b7561225d, type: 2}
+    m_HasMagazine:
+      m_Property:
+        rid: -2
+    m_MagazineSize:
+      m_Property:
+        rid: -2
+    m_AutoReload:
+      m_Property:
+        rid: -2
+  m_Muzzle:
+    m_Position: {x: 0, y: 0, z: 0.10652992}
+    m_Rotation: {x: 0, y: 0, z: 0}
+  m_Fire:
+    m_ProjectilesPerShot:
+      m_Property:
+        rid: -2
+    m_CartridgesPerShot:
+      m_Property:
+        rid: -2
+    m_Mode: 3
+    m_AutoLoading: 0
+    m_AutoLoadDuration:
+      m_Property:
+        rid: -2
+    m_FireRate:
+      m_Property:
+        rid: -2
+    m_Burst:
+      m_Property:
+        rid: -2
+    m_MinChargeTime:
+      m_Property:
+        rid: -2
+    m_MaxChargeTime:
+      m_Property:
+        rid: -2
+    m_AutoRelease:
+      m_Property:
+        rid: -2
+    m_Duration:
+      m_Property:
+        rid: -2
+    m_FireAnimation:
+      m_Property:
+        rid: -2
+    m_FireAvatarMask: {fileID: 31900000, guid: a9a4646b99dc14b6ea4d6a98c1f91e08, type: 2}
+    m_TransitionIn: 0.1
+    m_TransitionOut: 0.25
+    m_RootMotion: 0
+    m_FireAudio:
+      m_Property:
+        rid: -2
+    m_EmptyAudio:
+      m_Property:
+        rid: -2
+    m_LoadStartAudio:
+      m_Property:
+        rid: -2
+    m_LoadLoopAudio:
+      m_Property:
+        rid: -2
+    m_LoadMinPitch:
+      m_Property:
+        rid: -2
+    m_LoadMaxPitch:
+      m_Property:
+        rid: -2
+    m_MuzzleEffect:
+      m_Property:
+        rid: -2
+      usePooling: 1
+      size: 5
+      hasDuration: 1
+      duration: 3
+    m_Force:
+      m_IsEnabled: 0
+      m_Value: 10
+    m_Power:
+      m_Property:
+        rid: -2
+    m_BlockedAudio:
+      m_Property:
+        rid: 2865212270576140804
+    m_ParriedAudio:
+      m_Property:
+        rid: 2865212270576140805
+  m_Projectile:
+    m_Shot:
+      m_Type:
+        rid: -2
+    m_ImpactSound: {fileID: 11400000, guid: e7ce827485f1d4ef1b1ffa4ee578f246, type: 2}
+    m_ImpactEffect:
+      m_Property:
+        rid: -2
+      usePooling: 0
+      size: 5
+      hasDuration: 0
+      duration: 10
+  m_Accuracy:
+    m_MaxSpreadX:
+      m_Property:
+        rid: -2
+    m_MaxSpreadY:
+      m_Property:
+        rid: -2
+    m_SpreadBias:
+      m_Property:
+        rid: -2
+    m_AccuracyRecover:
+      m_Property:
+        rid: -2
+    m_MotionAccuracy:
+      m_Property:
+        rid: -2
+    m_AirborneAccuracy:
+      m_Property:
+        rid: -2
+    m_AccuracyKick:
+      m_Property:
+        rid: -2
+  m_Recoil:
+    m_UseRecoil:
+      m_Property:
+        rid: -2
+    m_Camera:
+      m_Property:
+        rid: -2
+    m_RecoilX:
+      m_Property:
+        rid: -2
+    m_RecoilY:
+      m_Property:
+        rid: -2
+    m_RecoilDuration:
+      m_Property:
+        rid: -2
+  m_Shell:
+    m_Position: {x: 0, y: 0, z: 0}
+    m_Rotation: {x: 0, y: 0, z: 0}
+    m_Prefab:
+      m_Property:
+        rid: -2
+      usePooling: 0
+      size: 5
+      hasDuration: 0
+      duration: 10
+    m_Force:
+      m_Property:
+        rid: -2
+    m_Torque:
+      m_Property:
+        rid: -2
+  m_Jam:
+    m_Chance:
+      m_Property:
+        rid: -2
+    m_Animation:
+      m_Property:
+        rid: -2
+    m_Mask: {fileID: 0}
+    m_Speed:
+      m_Property:
+        rid: -2
+    m_TransitionIn: 0.1
+    m_TransitionOut: 0.25
+    m_Audio:
+      m_Property:
+        rid: -2
+  m_Sights:
+    m_Sights:
+    - rid: -2
+    - rid: -2
+    - rid: -2
+  m_Reloads:
+    m_State:
+      m_StateType: 2
+      m_AnimationClip:
+        m_Property:
+          rid: -2
+      m_RuntimeController: {fileID: 0}
+      m_State: {fileID: 0}
+      m_AvatarMask: {fileID: 0}
+    m_Layer:
+      m_Property:
+        rid: -2
+    m_Reloads:
+    - rid: -2
+  m_CanShoot:
+    m_Conditions:
+      m_Conditions: []
+  m_OnShoot:
+    m_Instructions:
+      m_Instructions:
+      - rid: -2
+  m_OnStartReload:
+    m_Instructions:
+      m_Instructions: []
+  m_OnFinishReload:
+    m_Instructions:
+      m_Instructions: []
+  m_CanBeBlocked:
+    m_Conditions:
+      m_Conditions: []
+  m_CanBeParried:
+    m_Conditions:
+      m_Conditions: []
+  m_CanHit:
+    m_Conditions:
+      m_Conditions: []
+  m_OnHit:
+    m_Instructions:
+      m_Instructions:
+      - rid: -2
+  m_Animations:
+    m_Idle: {fileID: 7400000, guid: fa02fed255f1e43a787ea84f42f6b359, type: 2}
+    m_Empty: {fileID: 7400000, guid: fa02fed255f1e43a787ea84f42f6b359, type: 2}
+    m_Shoot: {fileID: 7400000, guid: fa02fed255f1e43a787ea84f42f6b359, type: 2}
+    m_ReloadQuick: {fileID: 7400000, guid: fa02fed255f1e43a787ea84f42f6b359, type: 2}
+    m_ReloadDry: {fileID: 7400000, guid: fa02fed255f1e43a787ea84f42f6b359, type: 2}
+    m_JamEnter: {fileID: 7400000, guid: fa02fed255f1e43a787ea84f42f6b359, type: 2}
+    m_JamExit: {fileID: 7400000, guid: fa02fed255f1e43a787ea84f42f6b359, type: 2}
+    m_Jammed: {fileID: 7400000, guid: fa02fed255f1e43a787ea84f42f6b359, type: 2}
+    m_ChargeProgressMin: {fileID: 7400000, guid: fa02fed255f1e43a787ea84f42f6b359,
+      type: 2}
+    m_ChargeProgressMax: {fileID: 7400000, guid: 7083d602641f8448299588a7302aa193,
+      type: 2}
+  m_Controller: {fileID: 225541220088878242}
+  <EditorModelPath>k__BackingField: Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.0.1/Prefabs/Bow_Weapon.prefab
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 2865212270576140804
+      type: {class: GetAudioNone, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 2865212270576140805
+      type: {class: GetAudioNone, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+--- !u!221 &225541220088878242
+AnimatorOverrideController:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Weapon
+  m_Controller: {fileID: 9100000, guid: 13225967cfe9449fab4175586dd51f19, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: 8b99b8920e3c74bf38cc5b725b0504a9, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: fa02fed255f1e43a787ea84f42f6b359, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 4b4a5943d05cf42fcb907c9d78cfb6c2, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 7083d602641f8448299588a7302aa193, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 845473909ca5c41b5a26f2531d3d5268, type: 2}
+    m_OverrideClip: {fileID: 0}
+  - m_OriginalClip: {fileID: 7400000, guid: b3797c2b7554a4f4e976c24c4f4b6759, type: 2}
+    m_OverrideClip: {fileID: 0}
+  - m_OriginalClip: {fileID: 7400000, guid: 1efc8b256a180481f8755de61b201af5, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: fa02fed255f1e43a787ea84f42f6b359, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: b4de5b5bb6f88497c8d17dc41d7d60cf, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: fa02fed255f1e43a787ea84f42f6b359, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 79af51254fe5b45b39b2dfe59e487b95, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: fa02fed255f1e43a787ea84f42f6b359, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 3ffc1fd1243a34ffd90855e95468852b, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: fa02fed255f1e43a787ea84f42f6b359, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 97f666d52615f44bd9d76cf19c9d2c86, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: fa02fed255f1e43a787ea84f42f6b359, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 9f44dbe24364e4ece814a7ab9bab293b, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: fa02fed255f1e43a787ea84f42f6b359, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: b947eb4672e994a76a0d5e37f5c2dbdc, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: fa02fed255f1e43a787ea84f42f6b359, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: a032dcd01ac0e476b956b7ab2fe946d7, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: fa02fed255f1e43a787ea84f42f6b359, type: 2}

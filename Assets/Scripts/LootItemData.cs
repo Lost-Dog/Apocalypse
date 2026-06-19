@@ -8,9 +8,9 @@ public class LootItemData : ScriptableObject
     public string itemName;
     public LootRarity rarity;
 
-    /// <summary>Invector vItem id that corresponds to this loot entry in the vItemListData.</summary>
-    [Tooltip("Must match the id field of the vItem defined in your Invector Item List.")]
-    public int invectorItemID;
+    /// <summary>Inventory item id that corresponds to this loot entry in the item database.</summary>
+    [Tooltip("Must match the id field of the linked inventory item definition.")]
+    public int inventoryItemID;
 
     [Header("Item Properties")]
     public ItemType itemType;
@@ -48,6 +48,14 @@ public class LootItemData : ScriptableObject
 
     [Tooltip("Use cooldown in seconds.")]
     public float useCooldown = 0f;
+
+    [Header("Heal On Pickup")]
+    [Tooltip("When true, collecting this item instantly restores all survival traits and health.")]
+    public bool healOnPickup = false;
+
+    [Tooltip("Percentage of each stat's maximum to restore on pickup (0–100).")]
+    [Range(0f, 100f)]
+    public float healPercentage = 20f;
 
     public enum ItemType
     {

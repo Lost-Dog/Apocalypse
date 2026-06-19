@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using Invector.vCharacterController.vActions;
 
 /// <summary>
 /// Spawns random objects from a prefab list at NavMesh positions within a radius ring
@@ -58,7 +57,7 @@ public class ObjectSpawner : MonoBehaviour
 
     [Header("Player Reference")]
     [Tooltip("Assign the player's root Transform here. If left empty the spawner will search " +
-             "for the first GameObject tagged 'Player' that has a vThirdPersonController component.")]
+             "for the first GameObject tagged 'Player'.")]
     public Transform playerOverride;
 
     // ── State ─────────────────────────────────────────────────────────────────
@@ -103,16 +102,12 @@ public class ObjectSpawner : MonoBehaviour
             return;
         }
 
-        // Fall back: prefer a tagged Player that also has vThirdPersonController,
-        // which is the actual moving character rather than a wrapper object.
+        // Fall back to the first tagged player.
         GameObject[] candidates = GameObject.FindGameObjectsWithTag(PlayerTag);
         foreach (GameObject candidate in candidates)
         {
-            if (candidate.GetComponent<Invector.vCharacterController.vThirdPersonController>() != null)
-            {
-                playerTransform = candidate.transform;
-                return;
-            }
+            playerTransform = candidate.transform;
+            return;
         }
 
         // Last resort: just take the first tagged object.
@@ -250,11 +245,6 @@ public class ObjectSpawner : MonoBehaviour
 
         instance.SetActive(false);
 
-        // Reset Invector trigger state so re-pooled collectables are interactable again.
-        var trigger = instance.GetComponent<vTriggerGenericAction>();
-        if (trigger != null)
-            trigger.CanDoAction = true;
-
         activeInstanceToPrefab.Remove(instance);
 
         if (pools.TryGetValue(sourcePrefab, out PrefabPool pool))
@@ -330,4 +320,5 @@ public class ObjectSpawner : MonoBehaviour
 
     /// <summary>Returns the number of currently active spawned objects.</summary>
     public int ActiveCount => activeInstanceToPrefab.Count;
+
 }

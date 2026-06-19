@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6fdddeead0247d298e41a318ef3aea3, type: 3}
+  m_Name: Motion_SlideDown_Interactive
+  m_EditorClassIdentifier: 
+  m_CanUse:
+    m_Conditions:
+      m_Conditions: []
+  m_Anchor: 2
+  m_Gravity: 1
+  m_TransitionIn: 0.25
+  m_TransitionOut: 0.25
+  m_ApplyMomentum: 1
+  m_MomentumDuration: 0.1
+  m_MomentumTransition: 0.25
+  m_OnStart:
+    m_Instructions:
+      m_Instructions: []
+  m_OnFinish:
+    m_Instructions:
+      m_Instructions: []
+  m_AnimationState: {fileID: 11400000, guid: 5fd2de4b8381743319c001eb6056c49a, type: 2}
+  m_Layer:
+    m_Property:
+      rid: 6362048473708363844
+  m_AnimationSpeed:
+    m_Property:
+      rid: 6362048473708363845
+  m_InputDirection:
+    m_Property:
+      rid: 6362048655491596382
+  m_InputX: 1
+  m_InputY: 0
+  m_InputZ: 7
+  m_TransitionEase: 0
+  m_EnterAnimations:
+    m_Forward: {fileID: 0}
+    m_Backward: {fileID: 0}
+    m_Left: {fileID: 0}
+    m_Right: {fileID: 0}
+    m_Upward: {fileID: 0}
+    m_Downward: {fileID: 0}
+  m_ExitAnimations:
+    m_Forward: {fileID: 0}
+    m_Backward: {fileID: 0}
+    m_Left: {fileID: 0}
+    m_Right: {fileID: 0}
+    m_Upward: {fileID: 0}
+    m_Downward: {fileID: 0}
+  <EditorModelPath>k__BackingField: 
+  references:
+    version: 2
+    RefIds:
+    - rid: 6362048473708363844
+      type: {class: GetDecimalInteger, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 1
+    - rid: 6362048473708363845
+      type: {class: GetDecimalConstantOne, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 6362048655491596382
+      type: {class: GetDirectionCharactersLocalInput, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data:
+        m_Character:
+          m_Property:
+            rid: 6362048655491596391
+    - rid: 6362048655491596391
+      type: {class: GetGameObjectTarget, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 

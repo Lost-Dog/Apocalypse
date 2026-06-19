@@ -35,6 +35,8 @@ public class PlayerStaminaDisplay : MonoBehaviour
 
     [Header("Auto-Find")]
     public bool autoFindReferences = true;
+    [Tooltip("Assign any player provider that implements ISurvivalStatsProvider. Auto-found if left empty.")]
+    public MonoBehaviour playerProviderObject;
 
     // ── State ─────────────────────────────────────────────────────────────────
 
@@ -44,6 +46,7 @@ public class PlayerStaminaDisplay : MonoBehaviour
     private float _targetDialFill  = 1f;
 
     private SurvivalManager _survival;
+    private ISurvivalStatsProvider _survivalProvider;
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
@@ -65,6 +68,8 @@ public class PlayerStaminaDisplay : MonoBehaviour
 
     private void Update()
     {
+        PullFromProvider();
+
         if (enableDial && staminaDial != null)
             UpdateDialDisplay();
     }
@@ -79,6 +84,21 @@ public class PlayerStaminaDisplay : MonoBehaviour
         if (enableDial && staminaDial == null)
         {
             staminaDial = GetComponent<Image>() ?? GetComponentInChildren<Image>();
+
+            if (staminaDial == null)
+            {
+                Transform staminaTransform = transform.Find("stamina");
+                if (staminaTransform != null)
+                    staminaDial = staminaTransform.GetComponent<Image>();
+            }
+
+            if (staminaDial == null)
+            {
+                GameObject namedStamina = GameObject.Find("stamina");
+                if (namedStamina != null)
+                    staminaDial = namedStamina.GetComponent<Image>();
+            }
+
             if (staminaDial != null && staminaDial.type != Image.Type.Filled)
             {
                 staminaDial.type       = Image.Type.Filled;
@@ -93,6 +113,15 @@ public class PlayerStaminaDisplay : MonoBehaviour
     /// </summary>
     private void BindSurvivalManager()
     {
+        ResolveSurvivalProvider();
+
+        if (_survivalProvider != null)
+        {
+            _maxStamina = _survivalProvider.MaxStamina;
+            _currentStamina = _survivalProvider.Stamina;
+            return;
+        }
+
         _survival = SurvivalManager.Instance ?? FindFirstObjectByType<SurvivalManager>();
 
         if (_survival == null)
@@ -105,6 +134,43 @@ public class PlayerStaminaDisplay : MonoBehaviour
         _currentStamina = _survival.currentStamina;
 
         _survival.onStaminaChanged.AddListener(Refresh);
+    }
+
+    private void ResolveSurvivalProvider()
+    {
+        _survivalProvider = playerProviderObject as ISurvivalStatsProvider;
+        if (_survivalProvider != null) return;
+
+        GC2PlayerProvider gc2Provider = FindFirstObjectByType<GC2PlayerProvider>();
+        if (gc2Provider != null)
+        {
+            _survivalProvider = gc2Provider;
+            return;
+        }
+
+        MonoBehaviour[] allMonoBehaviours = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+        for (int i = 0; i < allMonoBehaviours.Length; i++)
+        {
+            if (allMonoBehaviours[i] is ISurvivalStatsProvider provider)
+            {
+                _survivalProvider = provider;
+                return;
+            }
+        }
+    }
+
+    private void PullFromProvider()
+    {
+        if (_survivalProvider == null) return;
+
+        float maxStamina = Mathf.Max(1f, _survivalProvider.MaxStamina);
+        float stamina = Mathf.Clamp(_survivalProvider.Stamina, 0f, maxStamina);
+
+        if (!Mathf.Approximately(maxStamina, _maxStamina) || !Mathf.Approximately(stamina, _currentStamina))
+        {
+            _maxStamina = maxStamina;
+            Refresh(stamina);
+        }
     }
 
     private void InitializeSlider()
@@ -131,7 +197,9 @@ public class PlayerStaminaDisplay : MonoBehaviour
     public void Refresh(float stamina)
     {
         // maxStamina can change at runtime (e.g. level-up bonuses), re-read it each call.
-        if (_survival != null)
+        if (_survivalProvider != null)
+            _maxStamina = Mathf.Max(1f, _survivalProvider.MaxStamina);
+        else if (_survival != null)
             _maxStamina = _survival.maxStamina;
 
         _currentStamina = stamina;

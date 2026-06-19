@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6fdddeead0247d298e41a318ef3aea3, type: 3}
+  m_Name: Motion_Ledge_Climb
+  m_EditorClassIdentifier: 
+  m_CanUse:
+    m_Conditions:
+      m_Conditions: []
+  m_Anchor: 1
+  m_Gravity: 0
+  m_TransitionIn: 0.25
+  m_TransitionOut: 0.25
+  m_ApplyMomentum: 0
+  m_MomentumDuration: 0.1
+  m_MomentumTransition: 0.25
+  m_OnStart:
+    m_Instructions:
+      m_Instructions: []
+  m_OnFinish:
+    m_Instructions:
+      m_Instructions: []
+  m_AnimationState: {fileID: 11400000, guid: 7e6208258aece4e3e981bec909a6b7e1, type: 2}
+  m_Layer:
+    m_Property:
+      rid: 4432301361663574427
+  m_AnimationSpeed:
+    m_Property:
+      rid: 4432301361663574428
+  m_InputDirection:
+    m_Property:
+      rid: 6362048655491596388
+  m_InputX: 0
+  m_InputY: 3
+  m_InputZ: 1
+  m_TransitionEase: 3
+  m_EnterAnimations:
+    m_Forward: {fileID: 7400000, guid: 004b8669d1a2c47198ba376bc745b482, type: 2}
+    m_Backward: {fileID: 7400000, guid: 52fa2dbaa9d8744e59c06d740c0e3930, type: 2}
+    m_Left: {fileID: 7400000, guid: 95ddbe5a8d8bb4a11b77fdb2b57c0b9f, type: 2}
+    m_Right: {fileID: 7400000, guid: 2c06eccd8a18d4ec2a7393e4094aa8e2, type: 2}
+    m_Upward: {fileID: 7400000, guid: 9443bfffb6ed24f948b47e620ffb4155, type: 2}
+    m_Downward: {fileID: 7400000, guid: e42f1b34e9ad9438fbbd30db67be93f5, type: 2}
+  m_ExitAnimations:
+    m_Forward: {fileID: 7400000, guid: 7c9c79257b7d04fc4a78d56a5e404a21, type: 2}
+    m_Backward: {fileID: 7400000, guid: 9a3147a777a364023a10d01fd9ef80bf, type: 2}
+    m_Left: {fileID: 7400000, guid: 9a2521a6aabad4e03b79eaa73bd6faea, type: 2}
+    m_Right: {fileID: 7400000, guid: 04493ba51f033400786bf23fa5e68fa0, type: 2}
+    m_Upward: {fileID: 7400000, guid: f33c8be4cd054418581eec08c69d3a9d, type: 2}
+    m_Downward: {fileID: 7400000, guid: b4810ebc9cff34919abf016b25aca478, type: 2}
+  <EditorModelPath>k__BackingField: 
+  references:
+    version: 2
+    RefIds:
+    - rid: 4432301361663574427
+      type: {class: GetDecimalInteger, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data:
+        m_Value: 1
+    - rid: 4432301361663574428
+      type: {class: GetDecimalConstantOne, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 
+    - rid: 6362048655491596388
+      type: {class: GetDirectionCharactersLocalInput, ns: GameCreator.Runtime.Characters, asm: GameCreator.Runtime.Core}
+      data:
+        m_Character:
+          m_Property:
+            rid: 6362048655491596390
+    - rid: 6362048655491596390
+      type: {class: GetGameObjectTarget, ns: GameCreator.Runtime.Common, asm: GameCreator.Runtime.Core}
+      data: 

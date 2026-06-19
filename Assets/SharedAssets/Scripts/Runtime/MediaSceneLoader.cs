@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// This class relegates signals dispatched from the camera flythrough timeline
@@ -7,7 +8,8 @@ public class MediaSceneLoader : MonoBehaviour
 {
     [SerializeField] private SceneLoader m_GardenSceneLoader;
     [SerializeField] private SceneLoader m_CockpitSceneLoader;
-    [SerializeField] private SceneLoader m_OasisSceneLoader;
+    [FormerlySerializedAs("m_OasisSceneLoader")]
+    [SerializeField] private SceneLoader m_EnvironmentSceneLoader;
 
     private SceneLoader TerminalSceneLoader;
 
@@ -40,14 +42,14 @@ public class MediaSceneLoader : MonoBehaviour
         TerminalSceneLoader.EnableScene();
     }
 
-    public void EnableOasis()
+    public void EnableEnvironment()
     {
-        m_OasisSceneLoader.EnableScene();
+        m_EnvironmentSceneLoader.EnableScene();
     }
 
-    public void DisableOasis()
+    public void DisableEnvironment()
     {
-        m_OasisSceneLoader.DisableScene();
+        m_EnvironmentSceneLoader.DisableScene();
     }
 
     public void Transition()
