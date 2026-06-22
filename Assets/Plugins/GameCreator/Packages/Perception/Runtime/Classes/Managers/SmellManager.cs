@@ -40,7 +40,7 @@ namespace GameCreator.Runtime.Perception
             public void Emit(GameObject source, float duration, float level)
             {
                 if (source == null) return;
-                int sourceId = source.GetInstanceID();
+                int sourceId = source.GetEntityId().GetHashCode();
                 
                 if (this.ReadyScents.Count <= 0)
                 {
@@ -54,7 +54,7 @@ namespace GameCreator.Runtime.Perception
                 }
 
                 Scent scent = this.ReadyScents.Dequeue();
-                int scentId = scent.GetInstanceID();
+                int scentId = scent.GetEntityId().GetHashCode();
                 
                 this.RunningScents.Add(scentId, scent);
 
@@ -70,7 +70,7 @@ namespace GameCreator.Runtime.Perception
 
             private void OnComplete(Scent scent)
             {
-                int scentId = scent.GetInstanceID();
+                int scentId = scent.GetEntityId().GetHashCode();
                 
                 this.RunningScents.Remove(scentId);
                 this.ReadyScents.Enqueue(scent);

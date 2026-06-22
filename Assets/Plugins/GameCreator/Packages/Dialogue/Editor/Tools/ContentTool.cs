@@ -70,7 +70,7 @@ namespace GameCreator.Editor.Dialogue
 
         private string SelectionKey => string.Format(
             KEY_LASTS_SELECTION,
-            this.Property.serializedObject.targetObject.GetInstanceID()
+            this.Property.serializedObject.targetObject.GetEntityId().GetHashCode()
         );
 
         private SerializedProperty PropertyData => 

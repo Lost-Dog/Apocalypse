@@ -53,6 +53,7 @@ public class RuntimeLootSpawner : MonoBehaviour
     private List<PooledLoot> activeLoot = new List<PooledLoot>();
     private Transform playerTransform;
     private float despawnCheckTimer;
+    private float despawnDistanceSqr;
     
     private class Pool
     {
@@ -86,6 +87,7 @@ public class RuntimeLootSpawner : MonoBehaviour
     {
         InitializePlayer();
         InitializePools();
+        despawnDistanceSqr = despawnDistance * despawnDistance;
     }
 
     private void Update()
@@ -301,11 +303,13 @@ public class RuntimeLootSpawner : MonoBehaviour
     /// </summary>
     public void DespawnLoot(GameObject lootObj)
     {
-        PooledLoot pooledLoot = activeLoot.Find(l => l.gameObject == lootObj);
-        if (pooledLoot != null)
+        for (int i = activeLoot.Count - 1; i >= 0; i--)
         {
-            ReturnToPool(lootObj, pooledLoot.originalPrefab);
-            activeLoot.Remove(pooledLoot);
+            if (activeLoot[i].gameObject == lootObj)
+            {
+                ReleasePooledLootAt(i);
+                return;
+            }
         }
     }
 
@@ -316,10 +320,30 @@ public class RuntimeLootSpawner : MonoBehaviour
     {
         for (int i = activeLoot.Count - 1; i >= 0; i--)
         {
-            PooledLoot pooledLoot = activeLoot[i];
+            ReleasePooledLootAt(i);
+        }
+    }
+
+    private void ReleasePooledLootAt(int index)
+    {
+        PooledLoot pooledLoot = activeLoot[index];
+
+        if (pooledLoot.fx1Instance != null)
+        {
+            Destroy(pooledLoot.fx1Instance);
+        }
+
+        if (pooledLoot.fx2Instance != null)
+        {
+            Destroy(pooledLoot.fx2Instance);
+        }
+
+        if (pooledLoot.gameObject != null)
+        {
             ReturnToPool(pooledLoot.gameObject, pooledLoot.originalPrefab);
         }
-        activeLoot.Clear();
+
+        activeLoot.RemoveAt(index);
     }
 
     private GameObject GetFromPool(GameObject prefab)
@@ -361,10 +385,9 @@ public class RuntimeLootSpawner : MonoBehaviour
     {
         for (int i = 0; i < maxSpawnAttempts; i++)
         {
-            // Generate random position in annulus (ring) around player
-            Vector2 randomCircle = Random.insideUnitCircle.normalized;
+            float angle = Random.Range(0f, Mathf.PI * 2f);
             float radius = Random.Range(minRadius, maxRadius);
-            Vector3 randomOffset = new Vector3(randomCircle.x, 0, randomCircle.y) * radius;
+            Vector3 randomOffset = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * radius;
             Vector3 testPosition = center + randomOffset;
 
             // Try to find valid NavMesh position
@@ -384,21 +407,32 @@ public class RuntimeLootSpawner : MonoBehaviour
     {
         if (playerTransform == null) return;
 
+        Vector3 playerPosition = playerTransform.position;
+
         for (int i = activeLoot.Count - 1; i >= 0; i--)
         {
             PooledLoot loot = activeLoot[i];
-            if (loot.gameObject == null) continue;
+            if (loot.gameObject == null)
+            {
+                activeLoot.RemoveAt(i);
+                continue;
+            }
 
-            float distance = Vector3.Distance(playerTransform.position, loot.transform.position);
-            if (distance > despawnDistance)
+            float distanceSqr = (playerPosition - loot.transform.position).sqrMagnitude;
+            if (distanceSqr > despawnDistanceSqr)
             {
                 if (logSpawnEvents)
                     Debug.Log($"Despawning distant loot at {loot.transform.position}");
-                
-                ReturnToPool(loot.gameObject, loot.originalPrefab);
-                activeLoot.RemoveAt(i);
+
+                ReleasePooledLootAt(i);
             }
         }
+    }
+
+    private void OnValidate()
+    {
+        despawnDistance = Mathf.Max(0f, despawnDistance);
+        despawnDistanceSqr = despawnDistance * despawnDistance;
     }
 
     private void OnDrawGizmos()

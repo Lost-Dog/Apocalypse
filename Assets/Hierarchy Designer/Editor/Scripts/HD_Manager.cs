@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR
+#if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
 using UnityEditor;
@@ -252,22 +252,19 @@ namespace HierarchyDesigner
             }
             #endregion
 
+#if UNITY_6000_4_OR_NEWER
+            int instanceIDInt = instanceID.GetHashCode();
+#else
+            int instanceIDInt = instanceID;
+#endif
+
             #region Events
             currentViewWidth = EditorGUIUtility.currentViewWidth;
             Event currentEvent = Event.current;
             if (currentEvent.type != EventType.Repaint && !(gameObject.CompareTag(HD_Constants.SeparatorTag) && gameObject.name.StartsWith(HD_Constants.SeparatorPrefix)))
             {
                 if (enableHierarchyButtons) { ProcessHierarchyButtons(gameObject, selectionRect); }
-#if UNITY_6000_4_OR_NEWER
-                if (enableGameObjectComponentIcons)
-                {
-#pragma warning disable CS0618
-                    ProcessComponentIconsClick(gameObject, selectionRect, instanceID, currentEvent);
-#pragma warning restore CS0618
-                }
-#else
-                if (enableGameObjectComponentIcons) { ProcessComponentIconsClick(gameObject, selectionRect, instanceID, currentEvent); }
-#endif
+                if (enableGameObjectComponentIcons) { ProcessComponentIconsClick(gameObject, selectionRect, instanceIDInt, currentEvent); }
 
                 if (enableMajorShortcuts)
                 {
@@ -295,16 +292,7 @@ namespace HierarchyDesigner
                             if (selectionRect.Contains(currentEvent.mousePosition)) { ProcessToggleGameObjectLockStateMajorShortcut(new GameObject[] { gameObject }); }
                         }
                     }
-#if UNITY_6000_4_OR_NEWER
-                    if (IsShortcutPressed(changeTagLayerKeyCode))
-                    {
-#pragma warning disable CS0618
-                        ProcessTagLayerMajorShortcut(gameObject, selectionRect, instanceID);
-#pragma warning restore CS0618
-                    }
-#else
-                    if (IsShortcutPressed(changeTagLayerKeyCode)) { ProcessTagLayerMajorShortcut(gameObject, selectionRect, instanceID); }
-#endif
+                    if (IsShortcutPressed(changeTagLayerKeyCode)) { ProcessTagLayerMajorShortcut(gameObject, selectionRect, instanceIDInt); }
                     if (IsShortcutPressed(renameSelectedGameObjectsKeyCode)) { ProcessRenameMajorShortcut(); }
                     if (IsShortcutPressed(openIconPickerKeyCode)) { ProcessOpenIconPickerMajorShortcut(gameObject, selectionRect, currentEvent); }
 
@@ -314,25 +302,19 @@ namespace HierarchyDesigner
             #endregion
 
             #region Features
-#if UNITY_6000_4_OR_NEWER
-#pragma warning disable CS0618
-#endif
-            if (separatorCache.TryGetValue(gameObject.GetInstanceID(), out _) || (gameObject.CompareTag(HD_Constants.SeparatorTag) && gameObject.name.StartsWith(HD_Constants.SeparatorPrefix))) { DrawSeparator(gameObject, selectionRect, instanceID); return; }
+            if (separatorCache.TryGetValue(gameObject.GetEntityId().GetHashCode(), out _) || (gameObject.CompareTag(HD_Constants.SeparatorTag) && gameObject.name.StartsWith(HD_Constants.SeparatorPrefix))) { DrawSeparator(gameObject, selectionRect, instanceIDInt); return; }
             if (enableHierarchyRows) { DrawHierarchyRows(selectionRect); }
-            if (enableGameObjectMainIcon) { DrawGameObjectMainIcon(gameObject, selectionRect, instanceID); }
-            bool isFolder = folderCache.TryGetValue(instanceID, out _) || gameObject.GetComponent<HierarchyDesignerFolder>();
-            if (isFolder) { DrawFolder(gameObject, selectionRect, instanceID); }
+            if (enableGameObjectMainIcon) { DrawGameObjectMainIcon(gameObject, selectionRect, instanceIDInt); }
+            bool isFolder = folderCache.TryGetValue(instanceIDInt, out _) || gameObject.GetComponent<HierarchyDesignerFolder>();
+            if (isFolder) { DrawFolder(gameObject, selectionRect, instanceIDInt); }
             if (enableHierarchyButtons) { DrawHierarchyButtons(gameObject, selectionRect); }
             if (enableHierarchyLines) { DrawHierarchyLines(gameObject, selectionRect); }
-            if (enableHierarchyTree) { DrawHierarchyTree(gameObject, selectionRect, instanceID); }
+            if (enableHierarchyTree) { DrawHierarchyTree(gameObject, selectionRect, instanceIDInt); }
             if ((gameObject.hideFlags & HideFlags.NotEditable) == HideFlags.NotEditable) { DrawGameObjectLock(gameObject, selectionRect); return; }
             if (isFolder && excludeFolderProperties) return;
-            if (enableGameObjectComponentIcons) { DrawGameObjectComponentIcons(gameObject, selectionRect, instanceID); }
-            if (enableGameObjectTag) { DrawGameObjectTag(gameObject, selectionRect, instanceID); }
-            if (enableGameObjectLayer) { DrawGameObjectLayer(gameObject, selectionRect, instanceID); }
-#if UNITY_6000_4_OR_NEWER
-#pragma warning restore CS0618
-#endif
+            if (enableGameObjectComponentIcons) { DrawGameObjectComponentIcons(gameObject, selectionRect, instanceIDInt); }
+            if (enableGameObjectTag) { DrawGameObjectTag(gameObject, selectionRect, instanceIDInt); }
+            if (enableGameObjectLayer) { DrawGameObjectLayer(gameObject, selectionRect, instanceIDInt); }
             #endregion
         }
 
@@ -386,13 +368,7 @@ namespace HierarchyDesigner
 
             #region Features
             if ((gameObject.hideFlags & HideFlags.NotEditable) != HideFlags.NotEditable) return;
-#if UNITY_6000_4_OR_NEWER
-#pragma warning disable CS0618
-#endif
-            if (separatorCache.TryGetValue(gameObject.GetInstanceID(), out _) || (gameObject.CompareTag(HD_Constants.SeparatorTag) && gameObject.name.StartsWith(HD_Constants.SeparatorPrefix))) { EditorGUILayout.HelpBox(separatorMessage, MessageType.Info, true); }
-#if UNITY_6000_4_OR_NEWER
-#pragma warning restore CS0618
-#endif
+            if (separatorCache.TryGetValue(gameObject.GetEntityId().GetHashCode(), out _) || (gameObject.CompareTag(HD_Constants.SeparatorTag) && gameObject.name.StartsWith(HD_Constants.SeparatorPrefix))) { EditorGUILayout.HelpBox(separatorMessage, MessageType.Info, true); }
             else { EditorGUILayout.HelpBox(lockedGameObjectMessage, MessageType.Info, true); }
             #endregion
         }
@@ -548,13 +524,7 @@ bool isSelected = Array.IndexOf(Selection.entityIds, instanceID) >= 0;
         {
             if (!enableGameObjectMainIcon) return;
             if ((gameObject.hideFlags & HideFlags.NotEditable) == HideFlags.NotEditable) return;
-#if UNITY_6000_4_OR_NEWER
-#pragma warning disable CS0618
-#endif
-            if (folderCache.TryGetValue(gameObject.GetInstanceID(), out _) || gameObject.GetComponent<HierarchyDesignerFolder>()) return;
-#if UNITY_6000_4_OR_NEWER
-#pragma warning restore CS0618
-#endif
+            if (folderCache.TryGetValue(gameObject.GetEntityId().GetHashCode(), out _) || gameObject.GetComponent<HierarchyDesignerFolder>()) return;
 
             Rect iconRect = GetMainIconRect(selectionRect);
             if (!iconRect.Contains(Event.current.mousePosition)) return;
@@ -1199,13 +1169,7 @@ bool isSelected = Array.IndexOf(Selection.entityIds, instanceID) >= 0;
                 case HD_Settings.HierarchyLayoutMode.Consecutive:
                     float offsetX = selectionRect.x + 8f;
                     float nameWidth = CalcWidthFast(GUI.skin.label, gameObject.name);
-#if UNITY_6000_4_OR_NEWER
-#pragma warning disable CS0618
-#endif
-                    if (folderCache.TryGetValue(gameObject.GetInstanceID(), out (Color textColor, int fontSize, FontStyle fontStyle, Color folderColor, HD_Folders.FolderImageType folderImageType) folderInfo))
-#if UNITY_6000_4_OR_NEWER
-#pragma warning restore CS0618
-#endif
+                    if (folderCache.TryGetValue(gameObject.GetEntityId().GetHashCode(), out (Color textColor, int fontSize, FontStyle fontStyle, Color folderColor, HD_Folders.FolderImageType folderImageType) folderInfo))
                     {
                         GUIStyle folderLabelStyle = FolderStyle;
                         folderLabelStyle.fontSize = folderInfo.fontSize;
@@ -1220,21 +1184,9 @@ bool isSelected = Array.IndexOf(Selection.entityIds, instanceID) >= 0;
                         return offsetX + layoutBaseOffset + lockLabelWidth + defaultXOffset;
                     }
 
-#if UNITY_6000_4_OR_NEWER
-#pragma warning disable CS0618
-#endif
-                    if ((folderCache.TryGetValue(gameObject.GetInstanceID(), out _) || gameObject.GetComponent<HierarchyDesignerFolder>()) && excludeFolderProperties) return offsetX += layoutBaseOffset;
-#if UNITY_6000_4_OR_NEWER
-#pragma warning restore CS0618
-#endif
+                    if ((folderCache.TryGetValue(gameObject.GetEntityId().GetHashCode(), out _) || gameObject.GetComponent<HierarchyDesignerFolder>()) && excludeFolderProperties) return offsetX += layoutBaseOffset;
 
-#if UNITY_6000_4_OR_NEWER
-#pragma warning disable CS0618
-#endif
-                    int id = gameObject.GetInstanceID();
-#if UNITY_6000_4_OR_NEWER
-#pragma warning restore CS0618
-#endif
+                    int id = gameObject.GetEntityId().GetHashCode();
                     bool hasData = gameObjectDataCache.TryGetValue(id, out GameObjectData data);
 
                     if (enableGameObjectComponentIcons)
@@ -1429,13 +1381,7 @@ bool isSelected = Array.IndexOf(Selection.entityIds, instanceID) >= 0;
                 default:
                     GUIContent nameContent = new(gameObject.name);
                     float nameWidth = CalcWidthFast(GUI.skin.label, gameObject.name);
-#if UNITY_6000_4_OR_NEWER
-#pragma warning disable CS0618
-#endif
-                    if (folderCache.TryGetValue(gameObject.GetInstanceID(), out (Color textColor, int fontSize, FontStyle fontStyle, Color folderColor, HD_Folders.FolderImageType folderImageType) folderInfo))
-#if UNITY_6000_4_OR_NEWER
-#pragma warning restore CS0618
-#endif
+                    if (folderCache.TryGetValue(gameObject.GetEntityId().GetHashCode(), out (Color textColor, int fontSize, FontStyle fontStyle, Color folderColor, HD_Folders.FolderImageType folderImageType) folderInfo))
                     {
                         GUIStyle folderLabelStyle = FolderStyle;
                         folderLabelStyle.fontSize = folderInfo.fontSize;

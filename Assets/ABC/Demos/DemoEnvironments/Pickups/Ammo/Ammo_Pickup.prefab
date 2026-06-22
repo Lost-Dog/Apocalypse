@@ -1,0 +1,1521 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1176312536287522455
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1179939538514095409}
+  - component: {fileID: 1280802364006770515}
+  m_Layer: 0
+  m_Name: Ammo_Pickup
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1179939538514095409
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1176312536287522455}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 77.78376, y: 0, z: 66.008415}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1280802364006770515
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1176312536287522455}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 943c411cf2aa2b340845e286ed47b42c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isChildInHierarchy: 0
+  enableTagConversions: 1
+  tagConversions:
+  - tagBefore: Ally
+    tagAfter: Friendly
+  Weapons: []
+  _currentWeapons: []
+  AbilityGroups: []
+  Abilities:
+  - globalAbilities: {fileID: 0}
+    globalElementSource: {fileID: 0}
+    globalAbilitiesEnableGameTypeModification: 0
+    globalAbilitiesGameTypeModification: 0
+    name: Ammo Pickup
+    abilityID: 111840375
+    autoCast: 1
+    abilityTags: []
+    allowAbilityGroupAssignment: 0
+    assignedAbilityGroupIDs: 
+    abilityGroupListChoice: 0
+    assignedAbilityGroupNames: []
+    inspectorParentAbilityListChoice: 0
+    parentAbilityID: 0
+    showChildrenInInspector: 1
+    description: Will restore health and mana to the player on touch
+    iconImage:
+      refVal: {fileID: 2800000, guid: b6da7ea60bf4bbf4b96233cf131f6aaa, type: 3}
+      refName: GreenOrbIcon
+      refUpdateDateTime: 
+    loggingEnabled: 0
+    globalAbilityOverrideEnableStatus: 0
+    abilityEnabled: 1
+    enableDuration: 0
+    enableAfterEvent: 0
+    enableAfterAbilityIDsActivated: 
+    enableAfterAbilityIDsCollide: 
+    enableAbilityActivationLinks: 0
+    activationLinkAbilityIDs: 
+    enableAbilityTriggerLinks: 0
+    triggerLinkAbilityIDs: 
+    enableCriticalHit: 0
+    potencyCriticalHitBaseChance: 1
+    potencyCriticalHitEnableChanceStatModification: 0
+    potencyCriticalHitChanceStatModification:
+      statIntegrationType: 0
+      arithmeticOperator: 0
+      percentageValue: 0
+      statSource: 0
+      statName: 
+    enableAbilityEffectLinks: 0
+    effectLinkAbilityIDs: 
+    abilityIgnoreTag: []
+    abilityRequiredTag:
+    - Gun Master
+    manaCost: 0
+    statCost: 0
+    statCostIntegrationType: 0
+    statCostName: Stamina
+    reduceManaWhenActive: 0
+    enableExport: 0
+    enableImport: 1
+    tempAbilityActivationIntervalAdjustment: 0
+    randomlySwapAbilityPosition: 0
+    abilityCombo: 0
+    comboNextActivateTime: 2
+    neverResetOtherCombos: 0
+    comboHitRequired: 0
+    LandOrAir: 0
+    airAbilityDistanceFromGround: 4
+    neverSleep: 0
+    isKinematic: 0
+    mass: 1
+    travelDelay: 0
+    requireCrossHairOverride: 0
+    abilityType: 0
+    rayCastLength: 100
+    rayCastSingleHit: 1
+    rayCastRadius: 1
+    raycastHitAmount: 1
+    raycastBlockable: 0
+    raycastIgnoreTerrain: 0
+    includeSurroundingObject: 0
+    surroundingObjectTarget: 0
+    surroundingObjectTargetRequired: 0
+    surroundingObjectTargetRestrict: 0
+    surroundingObjectTargetAffectTag: []
+    surroundingObjectAuxiliarySoftTarget: 0
+    surroundingObjectTargetRange: 50
+    surroundingObjectTags: 0
+    surroundingObjectTagRequired: 0
+    surroundingObjectTagAffectTag: []
+    surroundingObjectTagLimit: 2
+    surroundingObjectTagsRange: 15
+    destroySurroundingObject: 0
+    projectileAffectSurroundingObject: 0
+    lockSurroundingObject: 1
+    minimumScatterRange: 0
+    maximumScatterRange: 0
+    applyColliderToSurroundingObjects: 1
+    applyColliderWhenProjectileReached: 1
+    sendObjectToProjectile: 0
+    objectToProjectileDuration: 2
+    mainGraphic:
+      refVal: {fileID: 1419787588867734, guid: 39ce641e1cbb9ce4caa0b141fe2c52e4, type: 3}
+      refName: Ammo
+      refUpdateDateTime: 03/07/2021 18:40:02
+    subGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scaleAbilityGraphic: 0
+    abilityGraphicScale: 1
+    chooseLayer: 0
+    abLayer: 
+    useColliderTrigger: 1
+    applyGravity: 0
+    applyGravityDelay: 0
+    travelType: 5
+    castableDuringHitPrevention: 0
+    hitPreventionWontInterruptActivation: 0
+    forceActivation: 0
+    forceActivationInterruptCurrentActivation: 0
+    overrideIgnoreAbilityCollision: 1
+    overrideWeaponParrying: 0
+    overrideWeaponBlocking: 0
+    reduceWeaponBlockDurability: 0
+    activateAnimationFromHit: 0
+    activateAnimationFromHitDelay: 0
+    activateAnimationFromHitUseAirAnimation: 0
+    activateSpecificHitAnimation: 0
+    hitAnimationToActivate: 
+    activateSpecificHitAnimationUseClip: 0
+    hitAnimationClipToActivate:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    mouseForwardLockX: 0
+    mouseForwardLockY: 0
+    mouseForwardLockZ: 0
+    mouseFrontOnly: 0
+    travelWithCaster: 1
+    travelPhysics: 0
+    noTargetStillTravel: 1
+    auxiliarySoftTarget: 0
+    startingPositionAuxiliarySoftTarget: 0
+    targetTravel: 1
+    targetFacing: 0
+    continuouslyTurnToDestination: 1
+    abilityBeforeTarget: 0
+    loopTillTargetFound: 1
+    abilityRangeIndicatorImage:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    abilityWorldTargetIndicatorImage:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    abilityMouseTargetIndicatorImage:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    abilityBeforeTargetWorldIndicatorScaleToEffectRadius: 1
+    abilityBeforeTargetWorldIndicatorScale: 3
+    abilityBeforeTargetMouseTargetIndicatorLength: 3
+    seekTargetDelay: 0
+    selectedTargetRestrictTargets: 0
+    selectedTargetOnlyCastOnTag: []
+    affectOnlyTarget: 0
+    rotateToSelectedTarget: 0
+    meleeKeepRotatingToSelectedTarget: 0
+    noTargetRotateBehaviour: 0
+    hitsStopMeleeAttack: 1
+    customTravelScript:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    travelNearestTagList: []
+    travelNearestTagRange: 20
+    travelNearestTagIgnoreOriginator: 1
+    travelNearestTagRandomiseSearch: 1
+    crossHairRaycastRadius: 1
+    crossHairRaycastReturnDistancePointOnly: 0
+    crossHairRaycastReturnedDistance: 30
+    crossHairRecordTargetOnActivation: 0
+    limitActiveAtOnce: 0
+    abilityActivationRaiseEvent: 0
+    abilityActivationCompleteRaiseEvent: 0
+    abilityActivationCompleteEventType: 0
+    maxActiveAtOnce: 0
+    scrollAbility: 0
+    scrollSetUnsetRaiseEvent: 0
+    scrollQuickInputType: 0
+    scrollQuickButton: 
+    scrollQuickKey: 0
+    scrollSwapDuration: 1
+    triggerType: 0
+    keyInputCombo: 
+    keyInputType: 0
+    keyButton: 
+    globalAbilityOverrideKeyTrigger: 0
+    key: 0
+    onKeyPress: 0
+    onKeyDown: 0
+    enableMovementValidation: 0
+    movementValidation: 0
+    requireAdditionalKeyInput: 0
+    additionalKeyInputType: 0
+    additionalKeyButton: 
+    additionalKey: 0
+    additionalOnKeyPress: 1
+    additionalOnKeyDown: 0
+    UseAmmo: 0
+    useEquippedWeaponAmmo: 0
+    reduceAmmoWhilstActive: 0
+    ammoCount: 100
+    useReload: 1
+    clipSize: 50
+    reloadDuration: 2
+    reloadRestrictAbilityActivationDuration: 1
+    autoReloadWhenRequired: 1
+    reloadFillClip: 0
+    reloadFillClipRepeatGraphic: 1
+    abilityRecast: 10
+    startRecastAfterAbilityEnd: 1
+    travelSpeed: 0
+    duration: 0
+    abilityToggle: 0
+    canCastWhenToggled: 1
+    repeatInitiatingAnimationWhilstToggled: 1
+    bounceMode: 0
+    bounceAmount: 3
+    bounceRange: 20
+    bounceTarget: 0
+    bounceOnCaster: 0
+    enableRandomBounce: 1
+    startBounceTagRequired: 0
+    startBounceRequiredTags: []
+    bounceTag: []
+    bouncePositionOffset: {x: 0, y: 0, z: 0}
+    bouncePositionForwardOffset: 0
+    bouncePositionRightOffset: 0
+    boomerangMode: 0
+    boomerangDelay: 0
+    effects:
+    - effectPool: []
+      foldOut: 0
+      globalEffect: {fileID: 0}
+      effectAbilityID: 111840375
+      effectID: 111849364
+      effectName: AdjustWeaponAmmo
+      potency: 75
+      modifyPotencyUsingStats: 0
+      potencyStatModifications: []
+      enhancePotencyFromCriticalHit: 0
+      potencyCriticalHitBasePercentageEnhancement: 100
+      potencyCriticalHitEnablePercentageEnhancementStatModification: 0
+      potencyCriticalHitPercentageEnhancementStatModification:
+        statIntegrationType: 0
+        arithmeticOperator: 0
+        percentageValue: 0
+        statSource: 0
+        statName: 
+      potencyCriticalHitAudio:
+        refVal: {fileID: 0}
+        refName: 
+        refUpdateDateTime: 
+      potencyCriticalHitColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+      miscellaneousProperty: 111840910
+      miscellaneousAltProperty: 
+      activateOn: 0
+      eventType: 0
+      delay: 0
+      effectDuration: 0.1
+      allowDuplicateEffectActivation: 0
+      limitNoOfDuplicateEffectActivations: 0
+      maxNoDuplicateEffectActivations: 0
+      repeatEffect: 0
+      repeatDuration: 0
+      repeatInterval: 0
+      repeatCount: 0
+      repeatAesthetics: 0
+      enableEffectActivationRange: 0
+      effectActivationRange: 0
+      effectIgnoreTag: []
+      effectIgnoreTagCheckObject: 0
+      effectIgnoreTagCheckEntity: 0
+      effectRequiredTag: []
+      effectRequiredTagCheckObject: 0
+      effectRequiredTagCheckEntity: 0
+      useProjectileForActivationRange: 0
+      effectRandomChance: 0
+      effectRandomChanceProbabilityMin: 0
+      effectRandomChanceProbabilityMax: 0
+      hitStopsMovement: 0
+      hitStopsMovementRandomChance: 0
+      hitStopsMovementProbabilityMin: 0
+      hitStopsMovementProbabilityMax: 0
+      hitPreventsCasting: 0
+      hitPreventsCastingRandomChance: 0
+      hitPreventsCastingProbabilityMin: 0
+      hitPreventsCastingProbabilityMax: 0
+      hitInterruptsCasting: 0
+      hitInterruptsCastingRandomChance: 0
+      hitInterruptsCastingProbabilityMin: 0
+      hitInterruptsCastingProbabilityMax: 0
+      playEffect: 0
+      addToEffectText: 1
+      effectText: Ammo Acquired
+      effectTextDuration: 5
+      effectTextColour: {r: 1, g: 1, b: 1, a: 0}
+      addToEffectLog: 0
+      effectLogText: 
+      enableRemoveEffect: 0
+      dispellable: 0
+      specificPrepareTimeRequried: 0
+      specificPrepareTimeArithmeticComparison: 0
+      prepareTimeToActivate: 1
+      requireSplashToActivate: 0
+      requireCriticalHitToActivate: 0
+      removeEffectAddToEffectText: 0
+      removeEffectText: 
+      removeEffectTextDuration: 0
+      removeEffectTextColour: {r: 0, g: 0, b: 0, a: 0}
+      removeEffectAddToEffectLog: 0
+      removeEffectLogText: 
+      showNonActivationReason: 0
+      effectGraphic:
+        refVal: {fileID: 0}
+        refName: 
+        refUpdateDateTime: 
+      effectChildGraphic:
+        refVal: {fileID: 0}
+        refName: 
+        refUpdateDateTime: 
+      scaleEffectGraphic: 0
+      effectGraphicScale: 0
+      effectGraphicOffset: {x: 0, y: 0, z: 0}
+      effectGraphicForwardOffset: 0
+      effectGraphicRightOffset: 0
+      effectGraphicDelay: 0
+      effectGraphicDuration: 2
+      effectFollowTarget: 0
+      effectOnHitPosition: 0
+    - effectPool: []
+      foldOut: 0
+      globalEffect: {fileID: 0}
+      effectAbilityID: 111840375
+      effectID: 111845715
+      effectName: AdjustWeaponAmmo
+      potency: 75
+      modifyPotencyUsingStats: 0
+      potencyStatModifications: []
+      enhancePotencyFromCriticalHit: 0
+      potencyCriticalHitBasePercentageEnhancement: 100
+      potencyCriticalHitEnablePercentageEnhancementStatModification: 0
+      potencyCriticalHitPercentageEnhancementStatModification:
+        statIntegrationType: 0
+        arithmeticOperator: 0
+        percentageValue: 0
+        statSource: 0
+        statName: 
+      potencyCriticalHitAudio:
+        refVal: {fileID: 0}
+        refName: 
+        refUpdateDateTime: 
+      potencyCriticalHitColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+      miscellaneousProperty: 111011923
+      miscellaneousAltProperty: 
+      activateOn: 0
+      eventType: 0
+      delay: 0
+      effectDuration: 0.1
+      allowDuplicateEffectActivation: 0
+      limitNoOfDuplicateEffectActivations: 0
+      maxNoDuplicateEffectActivations: 0
+      repeatEffect: 0
+      repeatDuration: 0
+      repeatInterval: 0
+      repeatCount: 0
+      repeatAesthetics: 0
+      enableEffectActivationRange: 0
+      effectActivationRange: 0
+      effectIgnoreTag: []
+      effectIgnoreTagCheckObject: 0
+      effectIgnoreTagCheckEntity: 0
+      effectRequiredTag: []
+      effectRequiredTagCheckObject: 0
+      effectRequiredTagCheckEntity: 0
+      useProjectileForActivationRange: 0
+      effectRandomChance: 0
+      effectRandomChanceProbabilityMin: 0
+      effectRandomChanceProbabilityMax: 0
+      hitStopsMovement: 0
+      hitStopsMovementRandomChance: 0
+      hitStopsMovementProbabilityMin: 0
+      hitStopsMovementProbabilityMax: 0
+      hitPreventsCasting: 0
+      hitPreventsCastingRandomChance: 0
+      hitPreventsCastingProbabilityMin: 0
+      hitPreventsCastingProbabilityMax: 0
+      hitInterruptsCasting: 0
+      hitInterruptsCastingRandomChance: 0
+      hitInterruptsCastingProbabilityMin: 0
+      hitInterruptsCastingProbabilityMax: 0
+      playEffect: 0
+      addToEffectText: 0
+      effectText: Ammo Acquired
+      effectTextDuration: 0
+      effectTextColour: {r: 1, g: 1, b: 1, a: 0}
+      addToEffectLog: 0
+      effectLogText: 
+      enableRemoveEffect: 0
+      dispellable: 0
+      specificPrepareTimeRequried: 0
+      specificPrepareTimeArithmeticComparison: 0
+      prepareTimeToActivate: 1
+      requireSplashToActivate: 0
+      requireCriticalHitToActivate: 0
+      removeEffectAddToEffectText: 0
+      removeEffectText: 
+      removeEffectTextDuration: 0
+      removeEffectTextColour: {r: 0, g: 0, b: 0, a: 0}
+      removeEffectAddToEffectLog: 0
+      removeEffectLogText: 
+      showNonActivationReason: 0
+      effectGraphic:
+        refVal: {fileID: 0}
+        refName: 
+        refUpdateDateTime: 
+      effectChildGraphic:
+        refVal: {fileID: 0}
+        refName: 
+        refUpdateDateTime: 
+      scaleEffectGraphic: 0
+      effectGraphicScale: 0
+      effectGraphicOffset: {x: 0, y: 0, z: 0}
+      effectGraphicForwardOffset: 0
+      effectGraphicRightOffset: 0
+      effectGraphicDelay: 0
+      effectGraphicDuration: 2
+      effectFollowTarget: 0
+      effectOnHitPosition: 0
+    - effectPool: []
+      foldOut: 0
+      globalEffect: {fileID: 0}
+      effectAbilityID: 111840375
+      effectID: 111846690
+      effectName: AdjustWeaponAmmo
+      potency: 75
+      modifyPotencyUsingStats: 0
+      potencyStatModifications: []
+      enhancePotencyFromCriticalHit: 0
+      potencyCriticalHitBasePercentageEnhancement: 100
+      potencyCriticalHitEnablePercentageEnhancementStatModification: 0
+      potencyCriticalHitPercentageEnhancementStatModification:
+        statIntegrationType: 0
+        arithmeticOperator: 0
+        percentageValue: 0
+        statSource: 0
+        statName: 
+      potencyCriticalHitAudio:
+        refVal: {fileID: 0}
+        refName: 
+        refUpdateDateTime: 
+      potencyCriticalHitColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+      miscellaneousProperty: 111842143
+      miscellaneousAltProperty: 
+      activateOn: 0
+      eventType: 0
+      delay: 0
+      effectDuration: 0.1
+      allowDuplicateEffectActivation: 0
+      limitNoOfDuplicateEffectActivations: 0
+      maxNoDuplicateEffectActivations: 0
+      repeatEffect: 0
+      repeatDuration: 0
+      repeatInterval: 0
+      repeatCount: 0
+      repeatAesthetics: 0
+      enableEffectActivationRange: 0
+      effectActivationRange: 0
+      effectIgnoreTag: []
+      effectIgnoreTagCheckObject: 0
+      effectIgnoreTagCheckEntity: 0
+      effectRequiredTag: []
+      effectRequiredTagCheckObject: 0
+      effectRequiredTagCheckEntity: 0
+      useProjectileForActivationRange: 0
+      effectRandomChance: 0
+      effectRandomChanceProbabilityMin: 0
+      effectRandomChanceProbabilityMax: 0
+      hitStopsMovement: 0
+      hitStopsMovementRandomChance: 0
+      hitStopsMovementProbabilityMin: 0
+      hitStopsMovementProbabilityMax: 0
+      hitPreventsCasting: 0
+      hitPreventsCastingRandomChance: 0
+      hitPreventsCastingProbabilityMin: 0
+      hitPreventsCastingProbabilityMax: 0
+      hitInterruptsCasting: 0
+      hitInterruptsCastingRandomChance: 0
+      hitInterruptsCastingProbabilityMin: 0
+      hitInterruptsCastingProbabilityMax: 0
+      playEffect: 0
+      addToEffectText: 0
+      effectText: Ammo Acquired
+      effectTextDuration: 0
+      effectTextColour: {r: 1, g: 1, b: 1, a: 0}
+      addToEffectLog: 0
+      effectLogText: 
+      enableRemoveEffect: 0
+      dispellable: 0
+      specificPrepareTimeRequried: 0
+      specificPrepareTimeArithmeticComparison: 0
+      prepareTimeToActivate: 1
+      requireSplashToActivate: 0
+      requireCriticalHitToActivate: 0
+      removeEffectAddToEffectText: 0
+      removeEffectText: 
+      removeEffectTextDuration: 0
+      removeEffectTextColour: {r: 0, g: 0, b: 0, a: 0}
+      removeEffectAddToEffectLog: 0
+      removeEffectLogText: 
+      showNonActivationReason: 0
+      effectGraphic:
+        refVal: {fileID: 0}
+        refName: 
+        refUpdateDateTime: 
+      effectChildGraphic:
+        refVal: {fileID: 0}
+        refName: 
+        refUpdateDateTime: 
+      scaleEffectGraphic: 0
+      effectGraphicScale: 0
+      effectGraphicOffset: {x: 0, y: 0, z: 0}
+      effectGraphicForwardOffset: 0
+      effectGraphicRightOffset: 0
+      effectGraphicDelay: 0
+      effectGraphicDuration: 2
+      effectFollowTarget: 0
+      effectOnHitPosition: 0
+    onEnter: 1
+    onStay: 0
+    onStayInterval: 0.3
+    onExit: 0
+    particleCollision: 0
+    enableCollisionAfterKeyPress: 0
+    enableCollisionAfterKeyInputType: 0
+    enableCollisionAfterKeyButton: 
+    enableCollisionAfterKey: 0
+    startingRotation: {x: 0, y: 0, z: 0}
+    setEulerRotation: 0
+    travelDrag: 0
+    startingPosition: 0
+    additionalStartingPositions: []
+    affectOriginObject: 0
+    startingPositionOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    startingPositionOnTag: 
+    startingPositionOffset: {x: 0, y: 0.1, z: 0}
+    startingPositionForwardOffset: 0
+    startingPositionRightOffset: 0
+    abilityCollisionIgnores: 0
+    impactDestroy: 0
+    destroyIgnoreTag: []
+    destroyDelay: 0
+    useDestroySplashEffect: 0
+    destroySplashRadius: 0
+    destroySplashExplosion: 0
+    destroySplashExplosionRadius: 5
+    destroySplashExplosionPower: 5
+    destroySplashExplosionUplift: 3
+    destroySplashExplosionTagLimit: 0
+    destroySplashExplosionAffectTag: []
+    modifyGameSpeedOnInitiation: 0
+    modifyGameSpeedOnInitiationSpeedFactor: 0.05
+    modifyGameSpeedOnInitiationDelay: 0.2
+    modifyGameSpeedOnInitiationDuration: 0.5
+    modifyGameSpeedOnImpact: 0
+    modifyGameSpeedOnImpactSpeedFactor: 0.05
+    modifyGameSpeedOnImpactDuration: 0.5
+    modifyGameSpeedOnImpactDelay: 0.2
+    enableHitStopOnImpact: 0
+    hitStopOnImpactDelay: 0
+    hitStopOnImpactDuration: 0.1
+    hitStopOnImpactEntityHitDelay: 0.2
+    hitStopCurrentlyActive: 0
+    hitStopCurrentTotalExtendDuration: 0
+    globalImpactRequiredTag: []
+    shakeCameraOnInitiation: 0
+    shakeCameraOnInitiationDelay: 0
+    shakeCameraOnInitiationDuration: 0.5
+    shakeCameraOnInitiationAmount: 0.5
+    shakeCameraOnInitiationSpeed: 25
+    shakeCameraOnImpact: 0
+    shakeCameraOnImpactDelay: 0
+    shakeCameraOnImpactDuration: 0.5
+    shakeCameraOnImpactAmount: 0.5
+    shakeCameraOnImpactSpeed: 25
+    pushEntityOnImpact: 0
+    pushEntityOnImpactDelay: 0.1
+    pushEntityOnImpactAmount: 1.5
+    pushEntityOnImpactLiftForce: 0
+    defyEntityGravityOnImpact: 0
+    defyEntityGravityOnImpactDelay: 0.1
+    defyEntityGravityOnImpactDuration: 1.5
+    shakeEntityOnImpact: 0
+    shakeEntityOnImpactShakeAmount: 0.1
+    shakeEntityOnImpactShakeDecay: 0.007
+    shakeEntityOnImpactShakeDelay: 0
+    attachToObjectOnImpact: 0
+    attachToObjectProbabilityMinValue: 0
+    attachToObjectProbabilityMaxValue: 100
+    attachToObjectStickOutFactor: 0.5
+    attachToObjectNearestBone: 0
+    switchColorOnImpact: 0
+    switchColorOnImpactColor: {r: 70, g: 4, b: 4, a: 1}
+    switchColorOnImpactDelay: 0
+    switchColorOnImpactDuration: 0.2
+    switchColorOnImpactUseEmission: 0
+    addAbilityCollider: 1
+    applyColliderSettingsToParent: 1
+    applyColliderSettingsToChildren: 0
+    affectLayer:
+      serializedVersion: 2
+      m_Bits: 4294967295
+    useGraphicRadius: 0
+    colliderRadius: 1.5
+    colliderOffset: {x: 0, y: 0, z: 0}
+    applyTravelDuration: 0
+    travelDurationOriginatorTagsRequired: []
+    travelDurationTime: 0
+    travelDurationStopSuddenly: 0
+    useInitiatingAesthetics: 0
+    initiatingAnimateOnEntity: 1
+    initiatingAnimateOnScrollGraphic: 0
+    initiatingAnimateOnWeapon: 0
+    defyGravityInitiating: 0
+    defyGravityInitiatingDuration: 2
+    defyGravityInitiatingDelay: 0
+    defyGravityInitiatingRaiseEvent: 0
+    initiatingAestheticsPositionOffset: {x: 0, y: 0, z: 0}
+    initiatingAestheticsPositionForwardOffset: 0
+    initiatingAestheticsPositionRightOffset: 0
+    initiatingAnimationRunnerClip:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    initiatingAnimationRunnerMask:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    initiatingAnimationRunnerClipSpeed: 1
+    initiatingAnimationRunnerClipDelay: 0
+    initiatingAnimationRunnerClipDuration: 1
+    initiatingAnimationRunnerOnEntity: 1
+    initiatingAnimationRunnerOnScrollGraphic: 0
+    initiatingAnimationRunnerOnWeapon: 0
+    initiatingAnimatorParameter: 
+    initiatingAnimatorParameterType: 0
+    initiatingAnimatorOnValue: 
+    initiatingAnimatorOffValue: 
+    initiatingAnimatorDuration: 1.5
+    moveSelfWhenInitiating: 0
+    moveSelfInitiatingOffset: {x: 0, y: 0, z: 0}
+    moveSelfInitiatingForwardOffset: 0
+    moveSelfInitiatingRightOffset: 0
+    moveSelfInitiatingDelay: 0
+    moveSelfInitiatingDuration: 1
+    moveSelfToTargetWhenInitiating: 0
+    moveSelfToTargetInitiatingDelay: 0
+    moveSelfToTargetInitiatingDuration: 0.5
+    moveSelfToTargetInitiatingStopDistance: 5
+    moveSelfToTargetInitiatingOffset: {x: 0, y: 0, z: 0}
+    moveSelfToTargetInitiatingForwardOffset: 0
+    moveSelfToTargetInitiatingRightOffset: 0
+    initiatingGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    initiatingSubGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    initiatingAestheticActivateWithAbility: 0
+    initiatingAestheticDuration: 2
+    initiatingAestheticDelay: 0
+    initiatingAestheticDetachFromParentAfterDelay: 0
+    initiatingAestheticDetachDelay: 0.1
+    initiatingUseWeaponTrail: 0
+    initiatingWeaponTrailGraphicIteration: 0
+    intiatingProjectileDelayType: 0
+    delayBetweenInitiatingAndProjectile: 0
+    initiatingProjectileDelayAnimationPercentage: 30
+    initiatingStartPosition: 0
+    initiatingPositionOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    initiatingPositionOnTag: 
+    colliderTimeDelay: 0
+    colliderDelayTime: 0
+    colliderKeyPressDelay: 0
+    colliderDelayInputType: 0
+    colliderDelayButton: 
+    colliderDelayKey: 0
+    ignoreActiveTerrain: 1
+    persistIK: 0
+    spawnObject: 0
+    spawnObjectOnDestroy: 0
+    spawnObjectOnCollide: 0
+    spawningObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    useRange: 0
+    selectedTargetRangeGreaterThan: 0
+    selectedTargetRangeLessThan: 100
+    selectedTargetOffset: {x: 0, y: 0, z: 0}
+    selectedTargetForwardOffset: 0
+    selectedTargetRightOffset: 0
+    abilityCanMiss: 1
+    prepareTime: 0
+    ignoreGlobalPrepareTimeAdjustments: 0
+    prepareTriggerHoldRequied: 0
+    abilityInitiatingBaseSpeedAdjustment: 100
+    ignoreGlobalInitiatingSpeedAdjustments: 0
+    modifyAbilityInitiatingBaseSpeedByStat: 0
+    abilityInitiatingBaseSpeedStatModification:
+      statIntegrationType: 0
+      arithmeticOperator: 0
+      percentageValue: 0
+      statSource: 0
+      statName: 
+    waitForKeyBeforeInitiating: 0
+    waitBeforeInitiatingInputType: 0
+    waitBeforeInitiatingButton: 
+    waitBeforeInitiatingKey: 13
+    waitForKeyBeforeInitiatingDelay: 0
+    waitForKeyAllowChangeOfTarget: 0
+    moveInteruptPreparation: 0
+    distanceInteruptPreparation: 0
+    showPrepareTimeOnGUI: 0
+    usePreparingAesthetics: 0
+    preparingAnimateOnEntity: 1
+    preparingAnimateOnScrollGraphic: 0
+    preparingAnimateOnWeapon: 0
+    defyGravityPreparing: 0
+    defyGravityPreparingDuration: 2
+    defyGravityPreparingDelay: 0
+    defyGravityPreparingRaiseEvent: 0
+    preparingAestheticsPositionOffset: {x: 0, y: 0, z: 0}
+    preparingAestheticsPositionForwardOffset: 0
+    preparingAestheticsPositionRightOffset: 0
+    preparingAnimationRunnerClip:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    preparingAnimationRunnerMask:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    preparingAnimationRunnerClipSpeed: 1
+    preparingAnimationRunnerClipDelay: 0
+    preparingAnimationRunnerOnEntity: 1
+    preparingAnimationRunnerOnScrollGraphic: 0
+    preparingAnimationRunnerOnWeapon: 0
+    preparingAnimatorParameter: 
+    preparingAnimatorParameterType: 0
+    preparingAnimatorOnValue: 
+    preparingAnimatorOffValue: 
+    moveSelfWhenPreparing: 0
+    moveSelfPreparingOffset: {x: 0, y: 0, z: 0}
+    moveSelfPreparingForwardOffset: 0
+    moveSelfPreparingRightOffset: 0
+    moveSelfPreparingDelay: 0
+    moveSelfPreparingDuration: 1
+    moveSelfToTargetWhenPreparing: 0
+    moveSelfToTargetPreparingDelay: 0
+    moveSelfToTargetPreparingDuration: 0.5
+    moveSelfToTargetPreparingStopDistance: 5
+    moveSelfToTargetActivatePreparingAnimationOnlyWhenMoving: 0
+    moveSelfToTargetPreparingOffset: {x: 0, y: 0, z: 0}
+    moveSelfToTargetPreparingForwardOffset: 0
+    moveSelfToTargetPreparingRightOffset: 0
+    preparingGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    preparingSubGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    preparingAestheticDurationUsePrepareTime: 1
+    preparingAestheticDuration: 0
+    preparingStartPosition: 0
+    preparingPositionOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    preparingPositionOnTag: 
+    useProjectileToStartPosition: 0
+    projectileToStartType: 0
+    projToStartDelay: 0
+    useOriginalProjectilePTS: 0
+    projToStartPosGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    projToStartPosSubGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    projToStartPosDuration: 5
+    projToStartStartingPosition: 0
+    projToStartRotateToTarget: 0
+    projToStartRotation: {x: 0, y: 0, z: 0}
+    projToStartSetEulerRotation: 0
+    projToStartPositionOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    projToStartPositionOnTag: 
+    projToStartPositionOffset: {x: 0, y: 0, z: 0}
+    projToStartPositionForwardOffset: 0
+    projToStartPositionRightOffset: 0
+    projToStartHoverOnSpot: 0
+    projToStartHoverDistance: 0.4
+    projToStartTravelToAbilityStartPosition: 1
+    projToStartMoveWithTarget: 1
+    projToStartReachPositionTime: 2
+    projToStartTravelDelay: 0
+    useScrollAbilityAesthetics: 0
+    scrollAbilityAnimateOnEntity: 1
+    scrollAbilityAnimateOnScrollGraphic: 0
+    scrollAbilityAnimateOnWeapon: 0
+    scrollAbilityAestheticsPositionOffset: {x: 0, y: 0, z: 0}
+    scrollAbilityAestheticsPositionForwardOffset: 0
+    scrollAbilityAestheticsPositionRightOffset: 0
+    scrollAbilityAnimationRunnerClip:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scrollAbilityAnimationRunnerMask:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scrollAbilityAnimationRunnerClipSpeed: 1
+    scrollAbilityAnimationRunnerClipDelay: 0
+    scrollAbilityAnimationRunnerClipDuration: 1
+    scrollAbilityAnimationRunnerOnEntity: 1
+    scrollAbilityAnimationRunnerOnScrollGraphic: 0
+    scrollAbilityAnimationRunnerOnWeapon: 0
+    scrollAbilityAnimatorParameter: 
+    scrollAbilityAnimatorParameterType: 0
+    scrollAbilityAnimatorOnValue: 
+    scrollAbilityAnimatorOffValue: 
+    scrollAbilityAnimatorDuration: 3
+    scrollAbilityDeactivateAnimationRunnerClip:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scrollAbilityDeactivateAnimationRunnerMask:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scrollAbilityDeactivateAnimationRunnerClipSpeed: 1
+    scrollAbilityDeactivateAnimationRunnerClipDelay: 0
+    scrollAbilityDeactivateAnimationRunnerClipDuration: 1
+    scrollAbilityDeactivateAnimationRunnerOnEntity: 1
+    scrollAbilityDeactivateAnimationRunnerOnScrollGraphic: 0
+    scrollAbilityDeactivateAnimationRunnerOnWeapon: 0
+    scrollAbilityDeactivateAnimatorParameter: 
+    scrollAbilityDeactivateAnimateOnEntity: 1
+    scrollAbilityDeactivateAnimateOnScrollGraphic: 0
+    scrollAbilityDeactivateAnimateOnWeapon: 0
+    scrollAbilityDeactivateAnimatorParameterType: 0
+    scrollAbilityDeactivateAnimatorOnValue: 
+    scrollAbilityDeactivateAnimatorOffValue: 
+    scrollAbilityDeactivateAnimatorDuration: 3
+    scrollAbilityGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scrollAbilitySubGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scrollAbilityGraphicActivateDelay: 0
+    scrollAbilityGraphicDeactivateDelay: 0
+    scrollAbilityStartPosition: 0
+    scrollAbilityPositionOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scrollAbilityPositionOnTag: 
+    scrollAbilityAestheticDurationType: 0
+    scrollAbilityAestheticDuration: 0
+    scrollAbilityPersistantAestheticInactivePosition: 0
+    scrollAbilityPersistantAestheticInactivePositionOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scrollAbilityPersistantAestheticInactivePositionOnTag: 
+    useReloadAbilityAesthetics: 0
+    reloadAbilityAnimateOnEntity: 1
+    reloadAbilityAnimateOnScrollGraphic: 0
+    reloadAbilityAnimateOnWeapon: 0
+    reloadAbilityAestheticsPositionOffset: {x: 0, y: 0, z: 0}
+    reloadAbilityAestheticsPositionForwardOffset: 0
+    reloadAbilityAestheticsPositionRightOffset: 0
+    reloadAbilityAnimatorParameter: 
+    reloadAbilityAnimationRunnerClip:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    reloadAbilityAnimationRunnerMask:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    reloadAbilityAnimationRunnerClipSpeed: 1
+    reloadAbilityAnimationRunnerClipDelay: 0
+    reloadAbilityAnimationRunnerOnEntity: 1
+    reloadAbilityAnimationRunnerOnScrollGraphic: 0
+    reloadAbilityAnimationRunnerOnWeapon: 0
+    reloadAbilityAnimatorParameterType: 0
+    reloadAbilityAnimatorOnValue: 
+    reloadAbilityAnimatorOffValue: 
+    reloadAbilityGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    reloadAbilitySubGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    reloadAbilityAestheticDuration: 2
+    reloadAbilityStartPosition: 0
+    reloadAbilityPositionOnObject:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    reloadAbilityPositionOnTag: 
+    useAbilityEndAesthetics: 0
+    abilityEndUseEffectGraphic: 0
+    abilityEndActivateOnEnvironmentOnly: 0
+    abilityEndGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    abilityEndSubGraphic:
+      refVal: {fileID: 0}
+      refName: 
+      refUpdateDateTime: 
+    scaleAbilityEndGraphic: 0
+    abilityEndGraphicScale: 1
+    abEndAestheticDuration: 2
+    stopMovementOnInitiate: 0
+    stopMovementOnInitiateDuration: 0
+    stopMovementOnInitiateFreezePosition: 1
+    stopMovementOnInitiateDisableComponents: 0
+    stopMovementOnInitiateRaiseEvent: 0
+    stopMovementOnPreparing: 0
+    stopMovementOnPreparingDuration: 0
+    stopMovementOnPreparingFreezePosition: 1
+    stopMovementOnPreparingDisableComponents: 0
+    stopMovementOnPreparingRaiseEvent: 0
+  _currentAbilities: []
+  AIRules:
+  - RuleName: 'Ammo Pickup '
+    AIRuleLastActivationTime: 0
+    selectedAIAction: 0
+    AIAbilityID: 111840375
+    AIAbilityListChoice: 0
+    AIActivateAbilityGroupIDs: 
+    AIActivateGroupListChoice: 0
+    AIWeaponID: -1
+    AIWeaponListChoice: 0
+    AIBlockDurationMin: 10
+    AIBlockDurationMax: 20
+    AIEnableRuleCooldown: 0
+    AIRuleCooldownMinValue: 30
+    AIRuleCooldownMaxValue: 90
+    AIRuleCurrentCooldown: 0
+    probabilityMinValue: 0
+    probabilityMaxValue: 100
+    AITargets:
+    - {fileID: 0}
+    AITags: []
+    AIAbilityTarget: 0
+    AINearestTargets: []
+    AINearestTags: []
+    castWithoutConditions: 1
+    activateWithoutTarget: 1
+    bypassTargetLimitations: 1
+    AIRangeMin: 0
+    AIRangeMax: 2
+    updateTarget: 0
+    ignoreCaster: 0
+    stateEffectConditions: []
+    stateEffectAbsentConditions: []
+    AIHP: 0
+    AIHealthGreaterThan: 0
+    AIHealthLessThan: 100
+    AIMP: 0
+    AIManaGreaterThan: 0
+    AIManaLessThan: 100
+    AIAreaActivationLimit: 0
+    AIAreaActivationLimitRange: 20
+    AIAreaActivationLimitMax: 2
+    AIAreaActivationLimitTags: []
+    AIFacingTarget: 0
+    AIActive: 1
+  ManaGUIList: []
+  IconUIs: []
+  toolbarControllerManagerSelection: 4
+  toolbarControllerManagerGeneralSettingsSelection: 0
+  toolbarControllerManagerTargetSettingsSelection: 0
+  toolbarControllerManagerAISettingsSelection: 1
+  toolbarControllerManagerAbilityGroupSettingsSelection: 0
+  toolbarControllerManagerWeaponSettingsSelection: 0
+  toolbarAbiltyManagerSelection: 0
+  toolbarAbilityManagerGeneralSettingsSelection: 2
+  toolbarAbilityManagerPositionTravelSettingsSelection: 0
+  toolbarAbilityManagerCollisionImpactSettingsSelection: 0
+  toolbarAbilityManagerAnimationSettingsSelection: 0
+  CurrentIconUI: 0
+  iconUISideListFilterChoice: 0
+  iconUISideListPreviousFilterChoice: 0
+  CurrentAbilityGroup: 0
+  CurrentWeaponIndex: 0
+  CurrentAI: 0
+  CurrentAbility: 0
+  abilitySideListFilterChoice: 0
+  abilitySideListPreviousFilterChoice: 0
+  DraggableMode: 0
+  importElementObj: {fileID: 0}
+  showAbilityQuickEdits: 0
+  showAbilitiesInGroup: 0
+  showHelpInformation: 1
+  updateEditorAtRunTime: 0
+  enableDiagnosticLogging: 0
+  logDiagnosticToConsole: 0
+  diagnosticLog: []
+  allowAbilitiesToRandomlySwapPositions: 1
+  abilityRandomPositionSwapInterval: 3
+  enablePooling: 1
+  entityCamera:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  enableIdleModeToggle: 0
+  inIdleMode: 0
+  idleToggleInputType: 0
+  idleToggleButton: 
+  idleToggleKey: 279
+  idleToggleDelay: 0
+  deactiveIdleModeOnAbilityInput: 1
+  enableAI: 1
+  aiRestrictSystemTriggers: 1
+  maxAIRange: 5
+  aiPotentialTargetRetrievalIntermission: 1
+  aiRandomizePotentialTargets: 0
+  minimumAICheckIntermission: 0
+  maximumAICheckIntermission: 3
+  randomizeAIRules: 0
+  navAIEnabled: 0
+  navAIToggleIdleMode: 0
+  navAITriggerIdleModeForTags: []
+  navAIPreventMovementWhenSwitchingIdleMode: 0
+  wanderTillDestinationSet: 0
+  wanderInterval: 10
+  wanderAreaRange: 20
+  wanderSpeed: 2
+  wanderAnimationRunnerClip:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  wanderAnimationRunnerMask:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  wanderAnimationRunnerClipSpeed: 1
+  wanderAnimationRunnerClipDelay: 0
+  wanderAnimationRunnerClipDuration: 1
+  wanderAnimationRunnerEnableWeaponAnimationOverrides: 0
+  wanderAnimatorParameter: 
+  wanderAnimatorParameterType: 0
+  wanderAnimatorOnValue: 
+  wanderAnimatorOffValue: 
+  wanderAnimatorDuration: 3
+  destinationTags: []
+  randomizeDestinationTags: 0
+  destinationSearchRadius: 25
+  aiNavNewDestinationInterval: 15
+  speed: 5
+  navSpeedAdjustment: 0
+  navWeaponSpeedAdjustment: 0
+  toDestinationAnimationRunnerClip:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  toDestinationAnimationRunnerMask:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  toDestinationAnimationRunnerClipSpeed: 1
+  toDestinationAnimationRunnerClipDelay: 0
+  toDestinationAnimationRunnerEnableWeaponAnimationOverrides: 0
+  toDestinationAnimatorParameter: 
+  toDestinationAnimatorParameterType: 0
+  toDestinationAnimatorOnValue: 
+  toDestinationAnimatorOffValue: 
+  minimumStopDistance: 5
+  maximumStopDistance: 13
+  stopDistanceCheckVelocity: 0
+  alwaysFaceDestination: 1
+  faceDestinationTurnSpeed: 20
+  lineOfSightRequired: 0
+  lineOfSightRange: 25
+  enableRotationBehaviour: 0
+  rotationInterval: 25
+  rotationSpeed: 10
+  rotateAroundLeftAnimationRunnerClip:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  rotateAroundLeftAnimationRunnerMask:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  rotateAroundLeftAnimationRunnerClipSpeed: 1
+  rotateAroundLeftAnimationRunnerClipDelay: 0
+  rotateAroundLeftAnimationRunnerEnableWeaponAnimationOverrides: 0
+  rotateAroundLeftAnimatorParameter: 
+  rotateAroundLeftAnimatorParameterType: 0
+  rotateAroundLeftAnimatorOnValue: 
+  rotateAroundLeftAnimatorOffValue: 
+  rotateAroundRightAnimationRunnerClip:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  rotateAroundRightAnimationRunnerMask:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  rotateAroundRightAnimationRunnerClipSpeed: 1
+  rotateAroundRightAnimationRunnerClipDelay: 0
+  rotateAroundRightAnimationRunnerEnableWeaponAnimationOverrides: 0
+  rotateAroundRightAnimatorParameter: 
+  rotateAroundRightAnimatorParameterType: 0
+  rotateAroundRightAnimatorOnValue: 
+  rotateAroundRightAnimatorOffValue: 
+  rotationMinDuration: 4
+  rotationMaxDuration: 9
+  enableDistanceBehaviour: 0
+  distanceChangeInterval: 40
+  moveBackSpeed: 1
+  moveBackAnimationRunnerClip:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  moveBackAnimationRunnerMask:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  moveBackAnimationRunnerClipSpeed: 1
+  moveBackAnimationRunnerClipDelay: 0
+  moveBackAnimationRunnerEnableWeaponAnimationOverrides: 0
+  moveBackAnimatorParameter: 
+  moveBackAnimatorParameterType: 0
+  moveBackAnimatorOnValue: 
+  moveBackAnimatorOffValue: 
+  moveForwardSpeed: 1
+  moveForwardAnimationRunnerClip:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  moveForwardAnimationRunnerMask:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  moveForwardAnimationRunnerClipSpeed: 1
+  moveForwardAnimationRunnerClipDelay: 0
+  moveForwardAnimationRunnerEnableWeaponAnimationOverrides: 0
+  moveForwardAnimatorParameter: 
+  moveForwardAnimatorParameterType: 0
+  moveForwardAnimatorOnValue: 
+  moveForwardAnimatorOffValue: 
+  aiFallAnimationRunnerClip:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  aiFallAnimationRunnerMask:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  aiFallAnimationRunnerClipSpeed: 1
+  aiFallAnimationRunnerClipDelay: 0
+  aiFallAnimationRunnerEnableWeaponAnimationOverrides: 0
+  aiFallAnimatorParameter: 
+  aiFallAnimatorParameterType: 0
+  aiFallAnimatorOnValue: 
+  aiFallAnimatorOffValue: 
+  inputComboRecycleInterval: 0.5
+  abilityActivationInterval: 0.4
+  globalAbilityInitiationSpeedAdjustment: 100
+  globalAbilityCoolDownAdjustment: 100
+  globalAbilityPrepareTimeAdjustment: 100
+  globalAbilityCritChanceAdjustment: 0
+  globalAbilityCritPotencyAdjustment: 0
+  globalAbilityMissChance: 0
+  abilityMissMinOffset: {x: -7, y: 0, z: -6}
+  abilityMissMaxOffset: {x: 8, y: 7, z: 6}
+  inputCancelEnabled: 1
+  inputCancelInputType: 0
+  inputCancelButton: 
+  inputCancelKey: 27
+  hitsPreventCasting: 1
+  hitsPreventCastingDuration: 1.5
+  hitsInterruptCasting: 1
+  maxMana: 500
+  manaABC: 500
+  manaIntergrationType: 0
+  gcManaID: mana
+  manaRegenPerSecond: 3
+  fullManaOnEnable: 1
+  nextWeapon: 0
+  nextWeaponInputType: 0
+  nextWeaponButton: 
+  nextWeaponKey: 0
+  previousWeapon: 0
+  previousWeaponInputType: 0
+  previousWeaponButton: 
+  previousWeaponKey: 0
+  cycleWeaponsUsingMouseScroll: 1
+  reloadWeaponInputType: 0
+  reloadWeaponButton: 
+  reloadWeaponKey: 0
+  restrictDropWeaponCount: 1
+  restrictDropWeaponIfWeaponCountLessOrEqualTo: 1
+  enableWeaponParry: 0
+  weaponParryInputType: 0
+  weaponParryButton: 
+  weaponParryKey: 0
+  enableWeaponBlock: 0
+  weaponBlockInputType: 0
+  weaponBlockButton: 
+  weaponBlockKey: 0
+  maxBlockDurability: 500
+  blockDurabilityABC: 500
+  blockDurabilityIntergrationType: 0
+  gcBlockDurabilityID: blockdurability
+  blockDurabilityRegenPerSecond: 10
+  blockDurabilityRegenWhenNotBlocking: 1
+  fullBlockDurabilityOnEnable: 1
+  allowWeaponDrop: 0
+  weaponDropInputType: 0
+  weaponDropButton: 
+  weaponDropKey: 0
+  nextScroll: 1
+  nextScrollInputType: 0
+  nextScrollButton: 
+  nextScrollKey: 0
+  previousScroll: 1
+  previousScrollInputType: 0
+  previousScrollButton: 
+  previousScrollKey: 0
+  reloadScrollAbilityInputType: 0
+  reloadScrollAbilityButton: 
+  reloadScrollAbilityKey: 0
+  activateCurrentScrollAbilityInputType: 0
+  activateCurrentScrollAbilityButton: 
+  activateCurrentScrollAbilityKey: 0
+  playScrollAnimationOnEnable: 0
+  targetSelectType: 0
+  selectSoftTarget: 0
+  targetSelectRange: 20
+  targetSelectInterval: 0
+  targetSelectLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  targetSelectRaiseEvent: 0
+  targetSelectLeeway: 0
+  targetSelectLeewayRadius: 0.5
+  crosshairEnabled: 0
+  crosshair:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  crosshairPositionX: 0.5
+  crosshairPositionY: 0.5
+  showCrossHairOnKey: 0
+  showCrossHairInputType: 0
+  showCrossHairButton: 
+  showCrossHairKey: 324
+  crossHairOverride:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  useCrossHairOverrideAesthetics: 0
+  prioritiseCurrentWeaponCrosshairAnimation: 1
+  persistentCrosshairAestheticMode: 0
+  crossHairOverrideAestheticsPositionOffset: {x: 0, y: 0, z: 0}
+  crossHairOverrideAestheticsPositionForwardOffset: 0
+  crossHairOverrideAestheticsPositionRightOffset: 0
+  crossHairOverrideAnimateOnEntity: 1
+  crossHairOverrideAnimateOnScrollGraphic: 0
+  crossHairOverrideAnimateOnWeapon: 0
+  crossHairOverrideAnimatorParameter: 
+  crossHairOverrideAnimationRunnerClip:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  crossHairOverrideAnimationRunnerMask:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  crossHairOverrideAnimationRunnerClipSpeed: 1
+  crossHairOverrideAnimationRunnerClipDelay: 0
+  crossHairOverrideAnimationRunnerOnEntity: 1
+  crossHairOverrideAnimationRunnerOnScrollGraphic: 0
+  crossHairOverrideAnimationRunnerOnWeapon: 0
+  crossHairOverrideAnimatorParameterType: 0
+  crossHairOverrideAnimatorOnValue: 
+  crossHairOverrideAnimatorOffValue: 
+  crossHairOverrideParticle:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  crossHairOverrideObject:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  crossHairOverrideStartPosition: 0
+  crossHairOverridePositionAuxiliarySoftTarget: 0
+  crossHairOverridePositionOnObject:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  crossHairOverridePositionOnTag: 
+  hoverForTarget: 0
+  clickForTarget: 1
+  clickForTargetInputType: 0
+  clickForTargetButton: 
+  clickForTargetKey: 323
+  disableDeselect: 0
+  selectTargetTagOnly: 0
+  selectTargetTags: []
+  tabThroughTargets: 1
+  tabSoftTarget: 0
+  tabTargetNextInputType: 0
+  tabTargetNextButton: 
+  tabTargetNextKey: 0
+  tabTargetPrevInputType: 0
+  tabTargetPrevButton: 
+  tabTargetPrevKey: 0
+  tabTargetTagOnly: 0
+  tabTargetTags: []
+  tabTargetInCamera: 0
+  tabTargetToSelf: 0
+  autoTargetSelect: 0
+  autoTargetSoftTarget: 0
+  autoTargetSoftTargetOverrideOnlyIfNoTarget: 1
+  autoTargetInterval: 0
+  autoTargetType: 0
+  autoTargetInputType: 0
+  autoTargetButton: 
+  autoTargetKey: 0
+  autoTargetTagOnly: 0
+  autoTargetTags: []
+  autoTargetInCamera: 0
+  autoTargetSwapClosest: 0
+  autoTargetSelfFacing: 0
+  autoTargetSwapClosestPrioritiseSelfFacing: 1
+  targetOutlineGlow: 0
+  targetOutlineGlowColour: {r: 1, g: 0, b: 0, a: 1}
+  selectedTargetShader:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  selectedTargetIndicator:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  targetIndicatorFreezeRotation: 1
+  targetIndicatorOffset: {x: 0, y: 0, z: 0}
+  targetIndicatorForwardOffset: 0
+  targetIndicatorRightOffset: 0
+  targetIndicatorScaleSize: 1
+  targetIndicatorScaleFactor: 1
+  softTargetOutlineGlow: 0
+  softTargetOutlineGlowColour: {r: 1, g: 1, b: 1, a: 1}
+  softTargetShader:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  softTargetIndicator:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  softTargetIndicatorFreezeRotation: 1
+  softTargetIndicatorOffset: {x: 0, y: 0, z: 0}
+  softTargetIndicatorForwardOffset: 0
+  softTargetIndicatorRightOffset: 0
+  softTargetIndicatorScaleSize: 1
+  softTargetIndicatorScaleFactor: 1
+  softTargetConfirmInputType: 0
+  softTargetConfirmButton: 
+  softTargetConfirmKey: 271
+  softTargetSetRaiseEvent: 0
+  preparingAbilityGUIBar:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  preparingAbilityGUIText:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  abilityLogGUIText:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  scrollAbilityammoGUIText:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  scrollAbilityImageGUI:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  weaponAmmoGUIText:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  weaponImageGUI:
+    refVal: {fileID: 0}
+    refName: 
+    refUpdateDateTime: 
+  logReadyToCastAgain: 0
+  logRange: 1
+  logFacingTarget: 1
+  logFpsSelection: 0
+  logTargetSelection: 0
+  logSoftTargetSelection: 0
+  logWorldSelection: 0
+  logAbilityActivationError: 0
+  logNoMana: 0
+  logPreparing: 0
+  logAbilityInterruption: 0
+  logInitiating: 0
+  logAbilityActivation: 0
+  logScrollAbilityEquip: 0
+  logAmmoInformation: 0
+  logBlockingInformation: 0
+  logWeaponInformation: 0
+  logParryInformation: 0
+  abilityLogMaxLines: 5
+  abilityLogUseDuration: 0
+  abilityLogDuration: 4
+  currentComboKey: 0
+  currentComboButton: 
+  recordedKeyInputHistory: 
+  currentEquippedWeaponID: -1
+  currentScrollAbilityID: -1
+  hitRestrictsAbilityActivation: 0
+  toggledAbilityRestrictsAbilityActivation: 0
+  worldTargetObject: {fileID: 0}
+  worldTargetPosition: {x: 0, y: 0, z: 0}
+  abilityRangeIndicatorObj: {fileID: 0}
+  abilityWorldTargetIndicatorObj: {fileID: 0}
+  abilityMouseTargetIndicatorObj: {fileID: 0}
+  foldOutIntegration: 0

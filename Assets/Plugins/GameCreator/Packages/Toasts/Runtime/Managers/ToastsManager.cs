@@ -27,7 +27,7 @@ namespace GameCreator.Runtime.Toasts
                 this.m_Panels.Add(panelId, panels);
             }
             
-            panels.Add(toastsPanelUI.GetInstanceID(), toastsPanelUI);
+            panels.Add(toastsPanelUI.GetEntityId().GetHashCode(), toastsPanelUI);
         }
 
         public void UnregisterPanel(ToastsPanelUI toastsPanelUI)
@@ -37,7 +37,7 @@ namespace GameCreator.Runtime.Toasts
             IdString panelId = toastsPanelUI.PanelId;
             if (this.m_Panels.TryGetValue(panelId, out Dictionary<int, ToastsPanelUI> panels))
             {
-                panels.Remove(toastsPanelUI.GetInstanceID());
+                panels.Remove(toastsPanelUI.GetEntityId().GetHashCode());
                 if (panels.Count == 0) this.m_Panels.Remove(panelId);   
             }
         }

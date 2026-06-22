@@ -2,7 +2,7 @@
 using UnityEditor;
 #endif
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
+
 using UnityEngine.SceneManagement;
 
 // Trace and warm up pipeline state objects (PSOs) in a GraphicsStateCollection object.
@@ -19,12 +19,12 @@ public class GraphicsStateCollectionManager : MonoBehaviour
     public static GraphicsStateCollectionManager Instance;
 
     // Set up the collection of PSOs, and set where to store the files in the project folder.
-    public GraphicsStateCollection[] collections;
+    public UnityEngine.Rendering.GraphicsStateCollection[] collections;
     private const string k_CollectionFolderPath = "SharedAssets/GraphicsStateCollections/";
 
     // Create internal variables for the traced PSOs, and the file to output.
     private string m_OutputCollectionName;
-    private GraphicsStateCollection m_GraphicsStateCollection;
+    private UnityEngine.Rendering.GraphicsStateCollection m_GraphicsStateCollection;
 
 
     #if UNITY_EDITOR
@@ -34,11 +34,11 @@ public class GraphicsStateCollectionManager : MonoBehaviour
     public void UpdateCollectionList()
     {
         string[] collectionGUIDs = AssetDatabase.FindAssets("t:GraphicsStateCollection", new[] {"Assets/" + k_CollectionFolderPath});
-        collections = new GraphicsStateCollection[collectionGUIDs.Length];
+        collections = new UnityEngine.Rendering.GraphicsStateCollection[collectionGUIDs.Length];
         for (int i = 0; i < collections.Length; i++)
         {
             string path = AssetDatabase.GUIDToAssetPath(collectionGUIDs[i]);
-            collections[i] = AssetDatabase.LoadAssetAtPath<GraphicsStateCollection>(path);
+            collections[i] = AssetDatabase.LoadAssetAtPath<UnityEngine.Rendering.GraphicsStateCollection>(path);
         }
         EditorUtility.SetDirty(this);
     }
@@ -46,7 +46,7 @@ public class GraphicsStateCollectionManager : MonoBehaviour
     #endif
 
     // Find the available collection file that matches the current platform and quality level.
-    private GraphicsStateCollection FindExistingCollection()
+    private UnityEngine.Rendering.GraphicsStateCollection FindExistingCollection()
     {
         for (int i = 0; i < collections.Length; i++)
         {
@@ -103,7 +103,7 @@ public class GraphicsStateCollectionManager : MonoBehaviour
                 m_OutputCollectionName = string.Concat(k_CollectionFolderPath, "GfxState_", Application.platform, "_", SystemInfo.graphicsDeviceType.ToString(), "_", qualityLevelName);
 
                 // Create a new GraphicsStateCollection.
-                m_GraphicsStateCollection = new GraphicsStateCollection();
+                m_GraphicsStateCollection = new UnityEngine.Rendering.GraphicsStateCollection();
             }
 
             // Start tracing PSOs.
@@ -114,7 +114,7 @@ public class GraphicsStateCollectionManager : MonoBehaviour
         else
         {
             // Find the existing collection file based on current settings.
-            GraphicsStateCollection collection = FindExistingCollection();
+            UnityEngine.Rendering.GraphicsStateCollection collection = FindExistingCollection();
 
             // Warm up the PSOs.
             if (collection != null)

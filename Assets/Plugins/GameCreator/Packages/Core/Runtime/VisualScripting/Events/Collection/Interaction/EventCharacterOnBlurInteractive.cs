@@ -40,7 +40,7 @@ namespace GameCreator.Runtime.VisualScripting
             if (character.Interaction.Target == null) return;
 
             int targetId = character.Interaction.Target.InstanceID;
-            int triggerId = this.m_Trigger.gameObject.GetInstanceID(); 
+            int triggerId = this.m_Trigger.gameObject.GetEntityId().GetHashCode(); 
             if (targetId != triggerId) return;
             
             _ = this.m_Trigger.Execute(character.gameObject);

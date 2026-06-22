@@ -17,7 +17,7 @@ namespace GameCreator.Editor.Common
 
             public PropertyKey(SerializedProperty property)
             {
-                this.instanceId = property.serializedObject.targetObject.GetInstanceID();
+                this.instanceId = property.serializedObject.targetObject.GetEntityId().GetHashCode();
                 this.propertyPath = property.propertyPath;
             }
 

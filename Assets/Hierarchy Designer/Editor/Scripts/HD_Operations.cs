@@ -1275,13 +1275,7 @@ namespace HierarchyDesigner
             {
                 foreach (GameObject selectedGameObject in selectedGameObjects)
                 {
-#if UNITY_6000_4_OR_NEWER
-#pragma warning disable CS0618
-#endif
-                    int instanceID = selectedGameObject.GetInstanceID();
-#if UNITY_6000_4_OR_NEWER
-#pragma warning restore CS0618
-#endif
+                    int instanceID = selectedGameObject.GetEntityId().GetHashCode();
                     if (HD_Manager.gameObjectDataCache.TryGetValue(instanceID, out HD_Manager.GameObjectData data))
                     {
                         data.MainIcon = HD_Manager.GetGameObjectMainIcon(selectedGameObject);
@@ -1304,13 +1298,7 @@ namespace HierarchyDesigner
             {
                 foreach (GameObject selectedGameObject in selectedGameObjects)
                 {
-#if UNITY_6000_4_OR_NEWER
-#pragma warning disable CS0618
-#endif
-                    int instanceID = selectedGameObject.GetInstanceID();
-#if UNITY_6000_4_OR_NEWER
-#pragma warning restore CS0618
-#endif
+                    int instanceID = selectedGameObject.GetEntityId().GetHashCode();
                     if (HD_Manager.gameObjectDataCache.TryGetValue(instanceID, out HD_Manager.GameObjectData data))
                     {
                         data.ComponentIcons = HD_Manager.GetComponentIcons(selectedGameObject);
@@ -1333,13 +1321,7 @@ namespace HierarchyDesigner
             {
                 foreach (GameObject selectedGameObject in selectedGameObjects)
                 {
-#if UNITY_6000_4_OR_NEWER
-#pragma warning disable CS0618
-#endif
-                    int instanceID = selectedGameObject.GetInstanceID();
-#if UNITY_6000_4_OR_NEWER
-#pragma warning restore CS0618
-#endif
+                    int instanceID = selectedGameObject.GetEntityId().GetHashCode();
                     if (HD_Manager.gameObjectDataCache.TryGetValue(instanceID, out HD_Manager.GameObjectData data))
                     {
                         data.HierarchyTreeIcon = HD_Manager.GetOrCreateBranchIcon(selectedGameObject.transform);
@@ -1362,13 +1344,7 @@ namespace HierarchyDesigner
             {
                 foreach (GameObject selectedGameObject in selectedGameObjects)
                 {
-#if UNITY_6000_4_OR_NEWER
-#pragma warning disable CS0618
-#endif
-                    int instanceID = selectedGameObject.GetInstanceID();
-#if UNITY_6000_4_OR_NEWER
-#pragma warning restore CS0618
-#endif
+                    int instanceID = selectedGameObject.GetEntityId().GetHashCode();
                     if (HD_Manager.gameObjectDataCache.TryGetValue(instanceID, out HD_Manager.GameObjectData data))
                     {
                         data.Tag = selectedGameObject.tag;
@@ -1391,13 +1367,7 @@ namespace HierarchyDesigner
             {
                 foreach (GameObject selectedGameObject in selectedGameObjects)
                 {
-#if UNITY_6000_4_OR_NEWER
-#pragma warning disable CS0618
-#endif
-                    int instanceID = selectedGameObject.GetInstanceID();
-#if UNITY_6000_4_OR_NEWER
-#pragma warning restore CS0618
-#endif
+                    int instanceID = selectedGameObject.GetEntityId().GetHashCode();
                     if (HD_Manager.gameObjectDataCache.TryGetValue(instanceID, out HD_Manager.GameObjectData data))
                     {
                         data.Layer = LayerMask.LayerToName(selectedGameObject.layer);
@@ -1413,13 +1383,7 @@ namespace HierarchyDesigner
 
         public static void RefreshGameObjectData(GameObject gameObject)
         {
-#if UNITY_6000_4_OR_NEWER
-#pragma warning disable CS0618
-#endif
-            int instanceID = gameObject.GetInstanceID();
-#if UNITY_6000_4_OR_NEWER
-#pragma warning restore CS0618
-#endif
+            int instanceID = gameObject.GetEntityId().GetHashCode();
             if (!HD_Manager.gameObjectDataCache.TryGetValue(instanceID, out HD_Manager.GameObjectData data))
             {
                 data = new HD_Manager.GameObjectData();
@@ -1480,16 +1444,12 @@ namespace HierarchyDesigner
 #if UNITY_6000_4_OR_NEWER
         private static void CollapseRecursive(GameObject obj)
         {
-#pragma warning disable CS0618
-            SetExpandedRecursive(obj.GetInstanceID(), false);
-#pragma warning restore CS0618
+            SetExpandedRecursive(obj.GetEntityId().GetHashCode(), false);
         }
 
         private static void ExpandRecursive(GameObject obj)
         {
-#pragma warning disable CS0618
-            SetExpandedRecursive(obj.GetInstanceID(), true);
-#pragma warning restore CS0618
+            SetExpandedRecursive(obj.GetEntityId().GetHashCode(), true);
         }
 
         private static void InitializeHierarchyExpandDelegates(EditorWindow hierarchyWindow)
@@ -1666,13 +1626,7 @@ namespace HierarchyDesigner
                 if (t.childCount > 0)
                 {
                     total++;
-#if UNITY_6000_4_OR_NEWER
-#pragma warning disable CS0618
-#endif
-                    if (expanded.Contains(t.gameObject.GetInstanceID())) expandedCount++;
-#if UNITY_6000_4_OR_NEWER
-#pragma warning restore CS0618
-#endif
+                    if (expanded.Contains(t.gameObject.GetEntityId().GetHashCode())) expandedCount++;
                 }
 
                 for (int i = 0; i < t.childCount; i++)

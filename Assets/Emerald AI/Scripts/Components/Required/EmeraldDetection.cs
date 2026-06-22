@@ -692,6 +692,18 @@ namespace EmeraldAI
         /// </summary>
         public void SetTargetToFollow(Transform Target, bool CopyFactionData = true)
         {
+            if (Target == null)
+            {
+                Debug.LogWarning($"{name}: SetTargetToFollow called with a null target.");
+                return;
+            }
+
+            if (!Target.gameObject.activeInHierarchy)
+            {
+                Debug.LogWarning($"{name}: SetTargetToFollow called with an inactive target '{Target.name}'.");
+                return;
+            }
+
             EmeraldSystem TargetEmeraldComponent = Target.GetComponent<EmeraldSystem>(); //Attempt to get the Target's EmeraldComponent
             if (TargetEmeraldComponent != null)
             {
@@ -724,6 +736,18 @@ namespace EmeraldAI
         /// </summary>
         public void InitializeSummonTarget(Transform Target, bool CopyFactionData = true)
         {
+            if (Target == null)
+            {
+                Debug.LogWarning($"{name}: InitializeSummonTarget called with a null target.");
+                return;
+            }
+
+            if (!Target.gameObject.activeInHierarchy)
+            {
+                Debug.LogWarning($"{name}: InitializeSummonTarget called with an inactive target '{Target.name}'.");
+                return;
+            }
+
             EmeraldSystem TargetEmeraldComponent = Target.GetComponent<EmeraldSystem>(); //Attempt to get the Target's EmeraldComponent
             if (TargetEmeraldComponent != null)
             {

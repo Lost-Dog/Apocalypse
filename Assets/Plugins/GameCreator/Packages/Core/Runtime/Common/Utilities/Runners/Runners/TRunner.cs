@@ -40,7 +40,7 @@ namespace GameCreator.Runtime.Common
                 hideFlags = TEMPLATE_FLAGS
             };
 
-            container.name = container.GetInstanceID().ToString();
+            container.name = container.GetEntityId().GetHashCode().ToString();
             template.transform.SetParent(container.transform);
             
             TRunnerType runner = template.Add<TRunnerType>();
@@ -63,7 +63,7 @@ namespace GameCreator.Runtime.Common
                 rotation = config.Location.Parent.rotation * rotation;
             }
 
-            int templateHash = template.GetInstanceID();
+            int templateHash = template.GetEntityId().GetHashCode();
             if (!Pool.ContainsKey(templateHash))
             {
                 template.transform.parent.gameObject.name = config.Name;
@@ -91,7 +91,7 @@ namespace GameCreator.Runtime.Common
             if (runner == null) return;
             if (runner.Template == null) Destroy(runner.gameObject);
             
-            if (Pool.TryGetValue(runner.Template.GetInstanceID(), out RunnerPool runnerPool))
+            if (Pool.TryGetValue(runner.Template.GetEntityId().GetHashCode(), out RunnerPool runnerPool))
             {
                 runnerPool.Restore(runner.gameObject);
             }

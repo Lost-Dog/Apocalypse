@@ -208,7 +208,7 @@ namespace GameCreator.Runtime.Characters
             Skeleton skeleton = this.m_BoneRack.Skeleton;
             if (skeleton == null) return;
 
-            int modelID = character.Animim.Animator.gameObject.GetInstanceID();
+            int modelID = character.Animim.Animator.gameObject.GetEntityId().GetHashCode();
             if (modelID == this.m_CurrentModelID && !force) return;
 
             this.m_Bones = skeleton.Refresh(character);

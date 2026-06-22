@@ -21,7 +21,8 @@ public class ChallengeZoneEnemyScaler : MonoBehaviour
     public bool showGizmos = true;
     public bool showDebugLogs = false;
     
-    private List<GameObject> scaledEnemies = new List<GameObject>();
+    private readonly HashSet<GameObject> scaledEnemies = new HashSet<GameObject>();
+    private Collider[] overlapResults = new Collider[64];
     
     private void Start()
     {
@@ -33,18 +34,28 @@ public class ChallengeZoneEnemyScaler : MonoBehaviour
     
     private void ScanAndScaleEnemies()
     {
-        Collider[] colliders = Physics.OverlapSphere(transform.position, detectionRadius);
-        
-        foreach (Collider col in colliders)
+        int hitCount = Physics.OverlapSphereNonAlloc(transform.position, detectionRadius, overlapResults);
+
+        // Grow once if the buffer is saturated so dense areas do not miss enemies.
+        if (hitCount == overlapResults.Length)
         {
-            if (col.CompareTag("Enemy") && !scaledEnemies.Contains(col.gameObject))
+            overlapResults = new Collider[overlapResults.Length * 2];
+            hitCount = Physics.OverlapSphereNonAlloc(transform.position, detectionRadius, overlapResults);
+        }
+
+        for (int i = 0; i < hitCount; i++)
+        {
+            Collider col = overlapResults[i];
+            if (col == null || !col.CompareTag("Enemy")) continue;
+
+            GameObject enemy = col.gameObject;
+            if (scaledEnemies.Add(enemy))
             {
-                ScaleEnemy(col.gameObject);
-                scaledEnemies.Add(col.gameObject);
+                ScaleEnemy(enemy);
             }
         }
-        
-        scaledEnemies.RemoveAll(e => e == null);
+
+        scaledEnemies.RemoveWhere(enemy => enemy == null);
     }
     
     public void ScaleEnemy(GameObject enemy)

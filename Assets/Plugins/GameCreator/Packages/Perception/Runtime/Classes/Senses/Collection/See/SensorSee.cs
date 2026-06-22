@@ -144,7 +144,7 @@ namespace GameCreator.Runtime.Perception
         public Vector3 GetPositionLastSeen(GameObject target)
         {
             if (target == null) return default;
-            int instanceId = target.GetInstanceID();
+            int instanceId = target.GetEntityId().GetHashCode();
             
             return this.m_PositionsLastSeen.GetValueOrDefault(instanceId);
         }
@@ -230,7 +230,7 @@ namespace GameCreator.Runtime.Perception
                 float increment = score * detectionSpeed * deltaTime;
                 this.Perception.AddAwareness(tracker.Target, increment);
 
-                int instanceId = tracker.Target.GetInstanceID();
+                int instanceId = tracker.Target.GetEntityId().GetHashCode();
                 this.m_PositionsLastSeen[instanceId] = target.position;
 
                 this.EventSee?.Invoke(tracker.Target);

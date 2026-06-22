@@ -6,6 +6,6 @@ namespace GameCreator.Runtime.Common
     {
         sealed Vector3 Position => ((Component) this).transform.position;
 
-        sealed int UniqueCode => ((Component) this).transform.GetInstanceID();
+        sealed int UniqueCode => ((Component) this).transform.GetEntityId().GetHashCode();
     }
 }

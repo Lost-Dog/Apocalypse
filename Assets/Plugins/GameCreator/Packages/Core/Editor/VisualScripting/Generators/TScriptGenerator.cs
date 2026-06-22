@@ -69,11 +69,11 @@ namespace GameCreator.Editor.VisualScripting
         
         // EDIT NAME CLASS: -----------------------------------------------------------------------
 
-        internal class NameEditScript : EndNameEditAction
+        internal class NameEditScript : AssetCreationEndAction
         {
             public string Namespace { private get; set; } = string.Empty;
             
-            public override void Action(int instanceId, string filePath, string resourceFilePath)
+            public override void Action(EntityId instanceId, string filePath, string resourceFilePath)
             {
                 string fullFilePath = Path.GetFullPath(filePath);
                 string content = File.ReadAllText(PathUtils.PathForOS(resourceFilePath));

@@ -106,7 +106,7 @@ namespace Threepeat
                 {
                     Debug.LogFormat("PARKOUR_DEBUG: Object hit by down ray {0} (prior hit object was {1})", hitDown.collider.name, parkour.parkourCurrentVaultObject == null ? null : parkour.parkourCurrentVaultObject.name);
                 }
-                if ((parkour.parkourCurrentVaultObject != null && parkour.parkourCurrentVaultObject.GetInstanceID() != hitDown.collider.gameObject.GetInstanceID()))
+                if ((parkour.parkourCurrentVaultObject != null && parkour.parkourCurrentVaultObject != hitDown.collider.gameObject))
                 {
                     // need to make sure backEdge gets set properly
                 }

@@ -65,14 +65,14 @@ namespace GameCreator.Runtime.Perception
             tracker.EventChangeAwareness += this.OnAwarenessChangeAwareness;
             tracker.EventChangeStage += this.OnAwarenessChangeStage;
             
-            this.Trackers.Add(target.GetInstanceID(), tracker);
+            this.Trackers.Add(target.GetEntityId().GetHashCode(), tracker);
             this.EventAwarenessTrack?.Invoke(target);
         }
 
         public void Untrack(GameObject target)
         {
             if (target == null) return;
-            if (this.Trackers.Remove(target.GetInstanceID(), out Tracker awareness))
+            if (this.Trackers.Remove(target.GetEntityId().GetHashCode(), out Tracker awareness))
             {
                 awareness.EventChangeAwareness -= this.OnAwarenessChangeAwareness;
                 awareness.EventChangeStage -= this.OnAwarenessChangeStage;
@@ -83,7 +83,7 @@ namespace GameCreator.Runtime.Perception
         
         public bool IsTracking(GameObject target)
         {
-            return target != null && this.Trackers.ContainsKey(target.GetInstanceID());
+            return target != null && this.Trackers.ContainsKey(target.GetEntityId().GetHashCode());
         }
         
         // PUBLIC AWARENESS METHODS: --------------------------------------------------------------
@@ -92,7 +92,7 @@ namespace GameCreator.Runtime.Perception
         {
             if (target == null) return null;
             
-            int targetId = target.GetInstanceID();
+            int targetId = target.GetEntityId().GetHashCode();
             return this.Trackers.GetValueOrDefault(targetId);
         }
 

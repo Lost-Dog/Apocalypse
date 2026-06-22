@@ -298,7 +298,7 @@ namespace GameCreator.Runtime.Melee
                     Transform character = this.Attacks.MeleeStance.Character.transform;
                     if (candidate.GameObject.transform.IsChildOf(character)) continue;
                     
-                    if (this.m_HitsBuffer.Contains(candidate.GameObject.GetInstanceID())) continue;
+                    if (this.m_HitsBuffer.Contains(candidate.GameObject.GetEntityId().GetHashCode())) continue;
                     if (hits.Contains(candidate)) continue;
                     
                     hits.Add(candidate);
@@ -314,7 +314,7 @@ namespace GameCreator.Runtime.Melee
 
                 if (!this.ComboSkill.CanHit(hitArgs))
                 {
-                    this.m_HitsBuffer.Add(hit.GameObject.GetInstanceID());
+                    this.m_HitsBuffer.Add(hit.GameObject.GetEntityId().GetHashCode());
                     continue;
                 }
                 
@@ -360,7 +360,7 @@ namespace GameCreator.Runtime.Melee
                         this.ComboSkill.OnHit(hitArgs, hit.Point, direction);
                     }
                     
-                    this.m_HitsBuffer.Add(hit.GameObject.GetInstanceID());
+                    this.m_HitsBuffer.Add(hit.GameObject.GetEntityId().GetHashCode());
                     continue;
                 }
 
@@ -404,7 +404,7 @@ namespace GameCreator.Runtime.Melee
                     }
                 }
                 
-                this.m_HitsBuffer.Add(hit.GameObject.GetInstanceID());
+                this.m_HitsBuffer.Add(hit.GameObject.GetEntityId().GetHashCode());
             }
         }
         

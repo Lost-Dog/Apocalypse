@@ -111,7 +111,7 @@ namespace GameCreator.Runtime.Inventory.UnityUI
             int cellsOffsetX = this.m_CurrentPosition.x - this.m_StartPosition.x;
             int cellsOffsetY = this.m_CurrentPosition.y - this.m_StartPosition.y;
 
-            Vector3Int key = new Vector3Int(cellsOffsetX, cellsOffsetY, sprite.GetInstanceID());
+            Vector3Int key = new Vector3Int(cellsOffsetX, cellsOffsetY, sprite.GetEntityId().GetHashCode());
             if (!PARTIAL_SPRITES.TryGetValue(key, out Sprite partialSprite))
             {
                 float cellW = sprite.rect.width  / cellsX;

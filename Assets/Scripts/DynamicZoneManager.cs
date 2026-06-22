@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
 
 public class DynamicZoneManager : MonoBehaviour
 {
@@ -67,18 +66,27 @@ public class DynamicZoneManager : MonoBehaviour
     
     public DynamicChallengeZone GetRandomAvailableZone(ChallengeData.ChallengeType challengeType)
     {
-        List<DynamicChallengeZone> availableZones = allZones
-            .Where(z => z.CanHostChallenge(challengeType))
-            .ToList();
-        
-        if (availableZones.Count == 0)
+        DynamicChallengeZone selectedZone = null;
+        int availableCount = 0;
+
+        // Reservoir sampling picks a uniformly random available zone in a single pass.
+        for (int i = 0; i < allZones.Count; i++)
+        {
+            DynamicChallengeZone zone = allZones[i];
+            if (!zone.CanHostChallenge(challengeType)) continue;
+
+            availableCount++;
+            if (Random.Range(0, availableCount) == 0)
+            {
+                selectedZone = zone;
+            }
+        }
+
+        if (selectedZone == null)
         {
             Debug.LogWarning($"No available zones for challenge type: {challengeType}");
             return null;
         }
-        
-        int randomIndex = Random.Range(0, availableZones.Count);
-        DynamicChallengeZone selectedZone = availableZones[randomIndex];
         
         // Debug.Log($"<color=cyan>Selected zone '{selectedZone.zoneName}' for {challengeType} challenge (from {availableZones.Count} available)</color>");
         
@@ -87,30 +95,29 @@ public class DynamicZoneManager : MonoBehaviour
     
     public DynamicChallengeZone GetClosestAvailableZone(Vector3 position, ChallengeData.ChallengeType challengeType)
     {
-        List<DynamicChallengeZone> availableZones = allZones
-            .Where(z => z.CanHostChallenge(challengeType))
-            .ToList();
+        DynamicChallengeZone closest = null;
+        float closestDistanceSqr = float.MaxValue;
         
-        if (availableZones.Count == 0)
+        for (int i = 0; i < allZones.Count; i++)
+        {
+            DynamicChallengeZone zone = allZones[i];
+            if (!zone.CanHostChallenge(challengeType)) continue;
+
+            float distanceSqr = (position - zone.GetCenterPosition()).sqrMagnitude;
+            if (distanceSqr < closestDistanceSqr)
+            {
+                closestDistanceSqr = distanceSqr;
+                closest = zone;
+            }
+        }
+
+        if (closest == null)
         {
             Debug.LogWarning($"No available zones for challenge type: {challengeType}");
             return null;
         }
         
-        DynamicChallengeZone closest = null;
-        float closestDistance = float.MaxValue;
-        
-        foreach (DynamicChallengeZone zone in availableZones)
-        {
-            float distance = Vector3.Distance(position, zone.GetCenterPosition());
-            if (distance < closestDistance)
-            {
-                closestDistance = distance;
-                closest = zone;
-            }
-        }
-        
-        Debug.Log($"<color=cyan>Selected closest zone '{closest.zoneName}' for {challengeType} challenge ({closestDistance:F1}m away)</color>");
+        Debug.Log($"<color=cyan>Selected closest zone '{closest.zoneName}' for {challengeType} challenge ({Mathf.Sqrt(closestDistanceSqr):F1}m away)</color>");
         
         return closest;
     }
@@ -160,11 +167,30 @@ public class DynamicZoneManager : MonoBehaviour
     
     public int GetAvailableZoneCount(ChallengeData.ChallengeType? challengeType = null)
     {
+        int count = 0;
+
         if (challengeType.HasValue)
         {
-            return allZones.Count(z => z.CanHostChallenge(challengeType.Value));
+            for (int i = 0; i < allZones.Count; i++)
+            {
+                if (allZones[i].CanHostChallenge(challengeType.Value))
+                {
+                    count++;
+                }
+            }
+
+            return count;
         }
-        return allZones.Count(z => z.IsAvailable());
+
+        for (int i = 0; i < allZones.Count; i++)
+        {
+            if (allZones[i].IsAvailable())
+            {
+                count++;
+            }
+        }
+
+        return count;
     }
     
     public Vector3 GetChallengePosition(ActiveChallenge challenge)

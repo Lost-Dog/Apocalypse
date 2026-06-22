@@ -127,7 +127,7 @@ namespace GameCreator.Runtime.Shooter
 
         public WeaponData Get(ShooterWeapon weapon)
         {
-            int weaponInstanceId = weapon != null ? weapon.GetInstanceID() : 0;
+            int weaponInstanceId = weapon != null ? weapon.GetEntityId().GetHashCode() : 0;
             return this.m_Equipment.GetValueOrDefault(weaponInstanceId);
         }
 
@@ -140,7 +140,7 @@ namespace GameCreator.Runtime.Shooter
 
             if (shooterWeapon.Sights.Contains(sightId))
             {
-                int weaponInstanceId = shooterWeapon.GetInstanceID();
+                int weaponInstanceId = shooterWeapon.GetEntityId().GetHashCode();
                 WeaponData weaponData = this.m_Equipment[weaponInstanceId];
                 
                 if (weaponData.SightId == sightId) return;
@@ -170,7 +170,7 @@ namespace GameCreator.Runtime.Shooter
             ShooterWeapon shooterWeapon = this.GetWeapon(optionalWeapon);
             if (shooterWeapon == null) return;
             
-            int shooterWeaponId = shooterWeapon.GetInstanceID();
+            int shooterWeaponId = shooterWeapon.GetEntityId().GetHashCode();
             if (!this.m_Equipment.TryGetValue(shooterWeaponId, out WeaponData weaponData)) return;
 
             if (this.Reloading.WeaponReloading == shooterWeapon)
@@ -214,7 +214,7 @@ namespace GameCreator.Runtime.Shooter
             ShooterWeapon shooterWeapon = this.GetWeapon(optionalWeapon);
             if (shooterWeapon == null) return;
             
-            int shooterWeaponId = shooterWeapon.GetInstanceID();
+            int shooterWeaponId = shooterWeapon.GetEntityId().GetHashCode();
             if (!this.m_Equipment.TryGetValue(shooterWeaponId, out WeaponData weaponData)) return;
             
             weaponData.OnReleaseTrigger();
@@ -229,7 +229,7 @@ namespace GameCreator.Runtime.Shooter
             ShooterWeapon shooterWeapon = this.GetWeapon(optionalWeapon);
             if (shooterWeapon == null) return;
 
-            int shooterWeaponId = shooterWeapon.GetInstanceID();
+            int shooterWeaponId = shooterWeapon.GetEntityId().GetHashCode();
             if (!this.m_Equipment.TryGetValue(shooterWeaponId, out WeaponData weaponData)) return;
             
             weaponData.OnCancelTrigger();
@@ -305,7 +305,7 @@ namespace GameCreator.Runtime.Shooter
             ShooterWeapon weapon = this.GetWeapon(optionalWeapon);
             if (weapon == null) return;
 
-            int shooterWeaponId = weapon.GetInstanceID();
+            int shooterWeaponId = weapon.GetEntityId().GetHashCode();
             if (!this.m_Equipment.TryGetValue(shooterWeaponId, out WeaponData weaponData)) return;
             
             weapon.Shell.Eject(weaponData.WeaponArgs);
@@ -326,7 +326,7 @@ namespace GameCreator.Runtime.Shooter
         
         private ShooterWeapon GetWeapon(ShooterWeapon weapon)
         {
-            if (weapon != null && this.m_Equipment.ContainsKey(weapon.GetInstanceID()))
+            if (weapon != null && this.m_Equipment.ContainsKey(weapon.GetEntityId().GetHashCode()))
             {
                 return weapon;
             }
@@ -334,7 +334,7 @@ namespace GameCreator.Runtime.Shooter
             foreach (Weapon currentWeapon in this.Character.Combat.Weapons)
             {
                 if (currentWeapon?.Asset is not ShooterWeapon shooterWeapon) continue;
-                if (this.m_Equipment.ContainsKey(shooterWeapon.GetInstanceID()))
+                if (this.m_Equipment.ContainsKey(shooterWeapon.GetEntityId().GetHashCode()))
                 {
                     return shooterWeapon;
                 }
@@ -353,7 +353,7 @@ namespace GameCreator.Runtime.Shooter
             if (weapon is not ShooterWeapon shooterWeapon) return;
 
             WeaponData weaponData = new WeaponData(this.Character, shooterWeapon, prop);
-            this.m_Equipment[shooterWeapon.GetInstanceID()] = weaponData;
+            this.m_Equipment[shooterWeapon.GetEntityId().GetHashCode()] = weaponData;
             
             this.EnterSight(shooterWeapon, shooterWeapon.Sights.DefaultId);
             weaponData.OnEquip();
@@ -365,7 +365,7 @@ namespace GameCreator.Runtime.Shooter
         {
             if (weapon is not ShooterWeapon shooterWeapon) return;
 
-            int weaponId = shooterWeapon.GetInstanceID();
+            int weaponId = shooterWeapon.GetEntityId().GetHashCode();
             if (this.m_Equipment.TryGetValue(weaponId, out WeaponData weaponData))
             {
                 weaponData.OnUnequip();
@@ -374,7 +374,7 @@ namespace GameCreator.Runtime.Shooter
                 currentSight?.Exit(this.Character, shooterWeapon);
             }
             
-            this.m_Equipment.Remove(shooterWeapon.GetInstanceID());
+            this.m_Equipment.Remove(shooterWeapon.GetEntityId().GetHashCode());
             this.m_Accuracy.Target = 1f;
         }
     }

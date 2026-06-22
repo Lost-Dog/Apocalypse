@@ -23,7 +23,7 @@ namespace GameCreator.Runtime.Perception
 
         [NonSerialized] private float m_GlobalDin;
 
-        [NonSerialized] private Dictionary<int, Din> m_LocalDins;
+        [NonSerialized] private HashSet<Din> m_LocalDins;
 
         [NonSerialized] private List<GizmoNoise> m_GizmoNoises;
         
@@ -50,7 +50,7 @@ namespace GameCreator.Runtime.Perception
             base.OnCreate();
             
             this.m_GlobalDin = 0f;
-            this.m_LocalDins = new Dictionary<int, Din>();
+            this.m_LocalDins = new HashSet<Din>();
             this.m_GizmoNoises = new List<GizmoNoise>();
         }
         
@@ -59,21 +59,21 @@ namespace GameCreator.Runtime.Perception
         public void InsertLocalDin(Din din)
         {
             if (din == null) return;
-            this.m_LocalDins.TryAdd(din.GetInstanceID(), din);
+            this.m_LocalDins.Add(din);
         }
         
         public void RemoveLocalDin(Din din)
         {
             if (din == null) return;
-            this.m_LocalDins.Remove(din.GetInstanceID());
+            this.m_LocalDins.Remove(din);
         }
         
         public float DinFor(Perception perception)
         {
             float din = this.m_GlobalDin;
-            foreach (KeyValuePair<int, Din> entry in this.m_LocalDins)
+            foreach (Din entry in this.m_LocalDins)
             {
-                float value = entry.Value.GetValue(perception);
+                float value = entry.GetValue(perception);
                 din = Math.Max(din, value);
             }
 

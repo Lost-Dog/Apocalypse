@@ -242,7 +242,6 @@ namespace DistantLands.Cozy
 
         public Light sunLight;
         public Transform sunTransform;
-        private bool warnedMissingSunLight;
         public bool centerAroundCustomObject;
         public Transform customPivot;
         public MeshRenderer cloudMesh;
@@ -517,13 +516,13 @@ namespace DistantLands.Cozy
                 return;
             }
 
-            triggersPerScene.Add(scene.handle, blockZones);
+            triggersPerScene.Add(unchecked((int) scene.handle.GetRawData()), blockZones);
             RefreshTriggers();
         }
 
         public void RemoveTriggersInScene(Scene scene)
         {
-            triggersPerScene.Remove(scene.handle);
+            triggersPerScene.Remove(unchecked((int) scene.handle.GetRawData()));
             RefreshTriggers();
         }
 
@@ -922,26 +921,18 @@ namespace DistantLands.Cozy
                 sunLensFlare.useOcclusion = sunFlare.useOcclusion;
             }
 #endif
-            if (sunLight)
+            if (handleSceneLighting)
             {
-                if (handleSceneLighting)
-                {
-                    sunLight.color = sunlightColor * sunFilter;
-                    if (disableSunAtNight)
-                        sunLight.enabled = sunLight.color.r + sunLight.color.g + sunLight.color.b > 0;
-                }
-                else
-                {
-                    sunLight.enabled = false;
-                }
+                sunLight.color = sunlightColor * sunFilter;
+                if (disableSunAtNight)
+                    sunLight.enabled = sunLight.color.r + sunLight.color.g + sunLight.color.b > 0;
+            }
+            else
+            {
+                sunLight.enabled = false;
+            }
 
-                sunLight.shadows = sunLight.enabled ? sunlightShadows : LightShadows.None;
-            }
-            else if (!warnedMissingSunLight)
-            {
-                warnedMissingSunLight = true;
-                Debug.LogWarning("Cozy Weather is missing a Sun Light reference. Assign `sunLight` on CozyWeather or disable scene lighting handling.");
-            }
+            sunLight.shadows = sunLight.enabled ? sunlightShadows : LightShadows.None;
 
             if (climateModule)
             {

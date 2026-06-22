@@ -40,7 +40,7 @@ namespace GameCreator.Editor.Behavior
         [field: NonSerialized] public Dictionary<string, TNodeTool> NodeTools { get; }
         [field: NonSerialized] public Dictionary<string, TPortTool> PortTools { get; }
 
-        public int InstanceId => this.Graph != null ? this.Graph.GetInstanceID() : 0;
+        public int InstanceId => this.Graph != null ? this.Graph.GetEntityId().GetHashCode() : 0;
         
         public abstract bool AllowCycles { get; }
 

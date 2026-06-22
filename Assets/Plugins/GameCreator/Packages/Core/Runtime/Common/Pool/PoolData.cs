@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -27,7 +27,7 @@ namespace GameCreator.Runtime.Common
 
         public PoolData(GameObject prefab, int count)
         {
-            this.m_CollectionId = prefab.GetInstanceID();
+            this.m_CollectionId = prefab.GetEntityId().GetHashCode();
             this.m_Prefab = prefab;
             this.m_Container = new GameObject(string.Format(CONTAINER_NAME, prefab.name)).transform;
             
@@ -64,7 +64,7 @@ namespace GameCreator.Runtime.Common
             PoolInstance instance = this.m_ReadyInstances[0];
             this.m_ReadyInstances.RemoveAt(0);
             
-            int instanceId = instance.GetInstanceID();
+            int instanceId = instance.GetEntityId().GetHashCode();
             this.m_RunningInstances[instanceId] = instance;
             
             instance.transform.SetPositionAndRotation(position, rotation);
@@ -139,7 +139,7 @@ namespace GameCreator.Runtime.Common
         
         internal void OnDisableInstance(PoolInstance instance)
         {
-            int instanceId = instance.GetInstanceID();
+            int instanceId = instance.GetEntityId().GetHashCode();
             if (this.m_RunningInstances.Remove(instanceId))
             {
                 this.m_ReadyInstances.Add(instance);
@@ -148,7 +148,7 @@ namespace GameCreator.Runtime.Common
         
         internal void OnDestroyInstance(PoolInstance instance)
         {
-            int instanceId = instance.GetInstanceID();
+            int instanceId = instance.GetEntityId().GetHashCode();
             
             this.m_RunningInstances.Remove(instanceId);
             this.m_ReadyInstances.Remove(instance);

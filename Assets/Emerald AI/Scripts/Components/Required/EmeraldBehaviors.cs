@@ -114,6 +114,13 @@ namespace EmeraldAI
         IEnumerator SetFollowerTargetInternal ()
         {
             yield return new WaitForSeconds(0.1f);
+
+            if (EmeraldComponent == null || EmeraldComponent.DetectionComponent == null)
+                yield break;
+
+            if (TargetToFollow == null || !TargetToFollow.gameObject.activeInHierarchy)
+                yield break;
+
             EmeraldComponent.DetectionComponent.SetTargetToFollow(TargetToFollow);
         }
 

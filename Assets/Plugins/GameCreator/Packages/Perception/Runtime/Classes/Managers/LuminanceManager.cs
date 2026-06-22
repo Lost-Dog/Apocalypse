@@ -61,19 +61,19 @@ namespace GameCreator.Runtime.Perception
 
         public void Insert(Luminance instance)
         {
-            int instanceId = instance.GetInstanceID();
+            int instanceId = instance.GetEntityId().GetHashCode();
             this.m_Instances[instanceId] = instance;
         }
         
         public void Remove(Luminance instance)
         {
-            int instanceId = instance.GetInstanceID();
+            int instanceId = instance.GetEntityId().GetHashCode();
             this.m_Instances.Remove(instanceId);
         }
         
         public float LuminanceAt(Transform target)
         {
-            int targetId = target.GetInstanceID();
+            int targetId = target.GetEntityId().GetHashCode();
             if (this.m_Cache.TryGetValue(targetId, out LuminanceData data))
             {
                 if (data.Frame == Time.frameCount && target.position == data.Position)

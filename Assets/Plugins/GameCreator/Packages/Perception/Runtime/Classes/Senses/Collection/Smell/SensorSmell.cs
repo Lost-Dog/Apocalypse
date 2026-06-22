@@ -188,7 +188,7 @@ namespace GameCreator.Runtime.Perception
                     if (this.Scents[scent.ScentTag].Score < score)
                     {
                         this.Scents[scent.ScentTag] = new Trace(
-                            scent.GetInstanceID(),
+                            scent.GetEntityId().GetHashCode(),
                             score,
                             scent.ScentTag
                         );
@@ -197,7 +197,7 @@ namespace GameCreator.Runtime.Perception
                 else
                 {
                     this.Scents[scent.ScentTag] = new Trace(
-                        scent.GetInstanceID(),
+                        scent.GetEntityId().GetHashCode(),
                         score,
                         scent.ScentTag
                     );
@@ -250,7 +250,7 @@ namespace GameCreator.Runtime.Perception
                 Gizmos.color = new Color(1f, 0f, 0, normalAlpha);
                 if (this.Scents.TryGetValue(scentTag, out Trace trace))
                 {
-                    if (trace.ScentId == scent.GetInstanceID())
+                    if (trace.ScentId == scent.GetEntityId().GetHashCode())
                     {
                         float activeAlpha = (1f - scent.Ratio) * GIZMOS_MAX_ALPHA_ACTIVE;
                         Gizmos.color = new Color(0f, 1f, 0, activeAlpha);

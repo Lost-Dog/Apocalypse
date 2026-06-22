@@ -37,7 +37,7 @@ namespace GameCreator.Runtime.Characters
         private void Awake()
         {
             this.hideFlags = FLAGS;
-            this.m_InstanceID = this.gameObject.GetInstanceID();
+            this.m_InstanceID = this.gameObject.GetEntityId().GetHashCode();
         }
 
         private void OnEnable()

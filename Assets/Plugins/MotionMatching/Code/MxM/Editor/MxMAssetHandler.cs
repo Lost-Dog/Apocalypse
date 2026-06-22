@@ -1,4 +1,4 @@
-﻿// Copyright © 2017-2024 Vault Break Studios Pty Ltd
+// Copyright © 2017-2024 Vault Break Studios Pty Ltd
 
 using UnityEngine;
 using UnityEditor;
@@ -13,7 +13,9 @@ namespace MxMEditor
         [OnOpenAsset(1)]
         public static bool OpenAsset(int a_instanceId, int a_line)
         {
-            Object asset = EditorUtility.InstanceIDToObject(a_instanceId);
+            UnityEngine.EntityId entityId = (UnityEngine.EntityId)a_instanceId;
+            string assetPath = AssetDatabase.GetAssetPath(entityId);
+            Object asset = string.IsNullOrEmpty(assetPath) ? null : AssetDatabase.LoadAssetAtPath<Object>(assetPath);
 
             MxMAnimationIdleSet idleSet = asset as MxMAnimationIdleSet;
             if (idleSet)

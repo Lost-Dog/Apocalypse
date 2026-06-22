@@ -75,7 +75,7 @@ namespace GameCreator.Runtime.Common
             string typeName = type.Name.ToLowerInvariant();
             string memberName = member.ToLowerInvariant();
             
-            return $"{typeName}.{instance.GetInstanceID()}.{memberName}".GetHashCode();
+            return $"{typeName}.{instance.GetEntityId().GetHashCode()}.{memberName}".GetHashCode();
         }
     }
 }

@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
+
 
 // This script is used to make sure build contains only the GraphicsStateCollections files that matches with build target platform,
 // by moving the unwanted collections to a temp folder before build and restoring them after build.
@@ -45,11 +45,11 @@ class GraphicsStateCollectionStripper : IPreprocessBuildWithReport, IPostprocess
     {
         // Get all GraphicsStateCollection files in the project.
         string[] collectionGUIDs = AssetDatabase.FindAssets("t:GraphicsStateCollection", new[] {"Assets/SharedAssets/GraphicsStateCollections"});
-        GraphicsStateCollection[] collections = new GraphicsStateCollection[collectionGUIDs.Length];
+        UnityEngine.Rendering.GraphicsStateCollection[] collections = new UnityEngine.Rendering.GraphicsStateCollection[collectionGUIDs.Length];
         for (int i = 0; i < collections.Length; i++)
         {
             string path = AssetDatabase.GUIDToAssetPath(collectionGUIDs[i]);
-            collections[i] = AssetDatabase.LoadAssetAtPath<GraphicsStateCollection>(path);
+            collections[i] = AssetDatabase.LoadAssetAtPath<UnityEngine.Rendering.GraphicsStateCollection>(path);
         }
 
         // Make a list of collections files to be stripped.

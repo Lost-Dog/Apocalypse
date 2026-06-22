@@ -62,7 +62,7 @@ namespace GameCreator.Editor.Quests
 
         private string SelectionKey => string.Format(
             KEY_LASTS_SELECTION,
-            this.Property.serializedObject.targetObject.GetInstanceID()
+            this.Property.serializedObject.targetObject.GetEntityId().GetHashCode()
         );
 
         // CONSTRUCTORS: --------------------------------------------------------------------------

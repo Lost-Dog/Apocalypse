@@ -152,6 +152,50 @@ MonoBehaviour:
   tint:
     m_OverrideState: 1
     m_Value: 0
+--- !u!114 &-6822926116674244950
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60f3b30c03e6ba64d9a27dc9dba8f28d, type: 3}
+  m_Name: OutlineVolumeComponent
+  m_EditorClassIdentifier: Assembly-CSharp::OutlineVolumeComponent
+  active: 1
+  Enabled:
+    m_OverrideState: 1
+    m_Value: 0
+--- !u!114 &-6703574987279083178
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a00a63fdd6bd2a45ab1f2d869305ffd, type: 3}
+  m_Name: OasisFogVolumeComponent
+  m_EditorClassIdentifier: Assembly-CSharp::OasisFogVolumeComponent
+  active: 1
+  Density:
+    m_OverrideState: 1
+    m_Value: 0
+  StartDistance:
+    m_OverrideState: 1
+    m_Value: 0
+  HeightRange:
+    m_OverrideState: 1
+    m_Value: {x: 0, y: 50}
+  Tint:
+    m_OverrideState: 1
+    m_Value: {r: 1, g: 1, b: 1, a: 1}
+  SunScatteringIntensity:
+    m_OverrideState: 1
+    m_Value: 2
 --- !u!114 &-5856420008444461018
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -451,6 +495,8 @@ MonoBehaviour:
   - {fileID: 3645576579191340931}
   - {fileID: 5494444000275891641}
   - {fileID: -4032259385621923212}
+  - {fileID: -6822926116674244950}
+  - {fileID: -6703574987279083178}
 --- !u!114 &1273030152663751384
 MonoBehaviour:
   m_ObjectHideFlags: 3

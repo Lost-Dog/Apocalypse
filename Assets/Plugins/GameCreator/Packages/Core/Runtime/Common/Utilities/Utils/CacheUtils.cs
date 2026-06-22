@@ -80,7 +80,7 @@ namespace GameCreator.Runtime.Common
         public static Component Get(this GameObject gameObject, Type type)
         {
             if (gameObject == null) return null;
-            int instanceID = gameObject.GetInstanceID();
+            int instanceID = gameObject.GetEntityId().GetHashCode();
 
             if (!CACHE.TryGetValue(instanceID, out Cache cache))
             {
@@ -149,7 +149,7 @@ namespace GameCreator.Runtime.Common
         public static Component Add(this GameObject gameObject, Type type)
         {
             if (gameObject == null) return null;
-            int instanceID = gameObject.GetInstanceID();
+            int instanceID = gameObject.GetEntityId().GetHashCode();
 
             if (!CACHE.TryGetValue(instanceID, out Cache cache))
             {
@@ -211,7 +211,7 @@ namespace GameCreator.Runtime.Common
         public static Component Require(this GameObject gameObject, Type type)
         {
             if (gameObject == null) return null;
-            int instanceID = gameObject.GetInstanceID();
+            int instanceID = gameObject.GetEntityId().GetHashCode();
             
             if (!CACHE.TryGetValue(instanceID, out Cache cache))
             {

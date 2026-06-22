@@ -67,14 +67,14 @@ namespace GameCreator.Runtime.Characters
         public bool HasInstance(GameObject instance)
         {
             if (instance == null) return false;
-            int instanceID = instance.GetInstanceID();
+            int instanceID = instance.GetEntityId().GetHashCode();
             
             foreach (KeyValuePair<int, List<IProp>> entry in this.m_Props)
             {
                 foreach (IProp prop in entry.Value)
                 {
                     if (prop.Instance == null) continue;
-                    if (prop.Instance.GetInstanceID() == instanceID) return true;
+                    if (prop.Instance.GetEntityId().GetHashCode() == instanceID) return true;
                 }
             }
 
@@ -96,7 +96,7 @@ namespace GameCreator.Runtime.Characters
         {
             if (prefab == null) return null;
             
-            int instanceID = prefab.GetInstanceID();
+            int instanceID = prefab.GetEntityId().GetHashCode();
             if (!this.m_Props.TryGetValue(instanceID, out List<IProp> props))
             {
                 props = new List<IProp>();
@@ -129,7 +129,7 @@ namespace GameCreator.Runtime.Characters
         {
             if (instance == null) return null;
             
-            int instanceID = instance.GetInstanceID();
+            int instanceID = instance.GetEntityId().GetHashCode();
             if (!this.m_Props.TryGetValue(instanceID, out List<IProp> props))
             {
                 props = new List<IProp>();
@@ -157,7 +157,7 @@ namespace GameCreator.Runtime.Characters
         public void RemovePrefab(GameObject prefab)
         {
             if (prefab == null) return;
-            int instanceID = prefab.GetInstanceID();
+            int instanceID = prefab.GetEntityId().GetHashCode();
             
             if (!this.m_Props.TryGetValue(instanceID, out List<IProp> props)) return;
             if (props.Count <= 0) return;
@@ -182,7 +182,7 @@ namespace GameCreator.Runtime.Characters
         public void RemovePrefab(GameObject prefab, int instanceID)
         {
             if (prefab == null) return;
-            int prefabInstanceID = prefab.GetInstanceID();
+            int prefabInstanceID = prefab.GetEntityId().GetHashCode();
 
             if (!this.m_Props.TryGetValue(prefabInstanceID, out List<IProp> props)) return;
             if (props.Count <= 0) return;
@@ -192,7 +192,7 @@ namespace GameCreator.Runtime.Characters
                 IProp prop = props[i];
                 
                 if (prop.Instance == null) continue;
-                if (prop.Instance.GetInstanceID() != instanceID) continue;
+                if (prop.Instance.GetEntityId().GetHashCode() != instanceID) continue;
 
                 Transform bone = prop.Bone;
 
@@ -214,7 +214,7 @@ namespace GameCreator.Runtime.Characters
         public void RemoveInstance(GameObject instance)
         {
             if (instance == null) return;
-            int instanceID = instance.GetInstanceID();
+            int instanceID = instance.GetEntityId().GetHashCode();
             
             if (!this.m_Props.TryGetValue(instanceID, out List<IProp> props)) return;
             if (props.Count <= 0) return;
@@ -240,7 +240,7 @@ namespace GameCreator.Runtime.Characters
         public GameObject DropPrefab(GameObject prefab)
         {
             if (prefab == null) return null;
-            int instanceID = prefab.GetInstanceID();
+            int instanceID = prefab.GetEntityId().GetHashCode();
 
             if (!this.m_Props.TryGetValue(instanceID, out List<IProp> props)) return null;
             if (props.Count <= 0) return null;
@@ -269,7 +269,7 @@ namespace GameCreator.Runtime.Characters
         public GameObject DropPrefab(GameObject prefab, int instanceID)
         {
             if (prefab == null) return null;
-            int prefabInstanceID = prefab.GetInstanceID();
+            int prefabInstanceID = prefab.GetEntityId().GetHashCode();
 
             if (!this.m_Props.TryGetValue(prefabInstanceID, out List<IProp> props)) return null;
             if (props.Count <= 0) return null;
@@ -279,7 +279,7 @@ namespace GameCreator.Runtime.Characters
                 IProp prop = props[i];
                 
                 if (prop.Instance == null) continue;
-                if (prop.Instance.GetInstanceID() != instanceID) continue;
+                if (prop.Instance.GetEntityId().GetHashCode() != instanceID) continue;
 
                 Transform bone = prop.Bone;
                 GameObject instance = prop.Instance;
@@ -304,7 +304,7 @@ namespace GameCreator.Runtime.Characters
         public void DropInstance(GameObject instance)
         {
             if (instance == null) return;
-            int instanceID = instance.GetInstanceID();
+            int instanceID = instance.GetEntityId().GetHashCode();
             
             if (!this.m_Props.TryGetValue(instanceID, out List<IProp> props)) return;
             if (props.Count <= 0) return;
@@ -447,7 +447,7 @@ namespace GameCreator.Runtime.Characters
         {
             if (prefab == null) return null;
             
-            int instanceID = prefab.GetInstanceID();
+            int instanceID = prefab.GetEntityId().GetHashCode();
             if (!this.m_Props.TryGetValue(instanceID, out List<IProp> props))
             {
                 props = new List<IProp>();
@@ -470,7 +470,7 @@ namespace GameCreator.Runtime.Characters
         public void RemoveSkinMesh(GameObject prefab)
         {
             if (prefab == null) return;
-            int instanceID = prefab.GetInstanceID();
+            int instanceID = prefab.GetEntityId().GetHashCode();
             
             if (!this.m_Props.TryGetValue(instanceID, out List<IProp> props)) return;
             if (props.Count <= 0) return;

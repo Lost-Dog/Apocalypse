@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2022, Threepeat, LLC.
+// Copyright (c) 2022, Threepeat, LLC.
 using MxM;
 using MxMGameplay;
 using System.Linq;
@@ -978,7 +978,7 @@ namespace Threepeat
                 {
                     Debug.LogFormat("PARKOUR_DEBUG: Object hit by down ray {0} (prior hit object was {1}", hitDown.collider.name, parkourCurrentVaultObject.name);
                 }
-                if ((parkourCurrentVaultObject.GetInstanceID() != hitDown.collider.gameObject.GetInstanceID()) &&
+                if ((parkourCurrentVaultObject != hitDown.collider.gameObject) &&
                     parkourCurrentVaultType.Equals("highMantle"))
                 {
                     // need to make sure backEdge gets set properly

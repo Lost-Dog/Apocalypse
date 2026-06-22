@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -25,7 +25,7 @@ namespace GameCreator.Runtime.Common
         public GameObject GetLastPicked(GameObject prefab)
         {
             if (prefab == null) return null;
-            return this.Collection.TryGetValue(prefab.GetInstanceID(), out PoolData data)
+            return this.Collection.TryGetValue(prefab.GetEntityId().GetHashCode(), out PoolData data)
                 ? data.LastGet
                 : null;
         }
@@ -33,7 +33,7 @@ namespace GameCreator.Runtime.Common
         public GameObject Pick(GameObject prefab, int count, float duration = -1f)
         {
             if (prefab == null) return null;
-            int instanceID = prefab.GetInstanceID();
+            int instanceID = prefab.GetEntityId().GetHashCode();
 
             if (!this.Collection.ContainsKey(instanceID)) this.CreatePool(prefab, count);
             return this.Collection[instanceID].Get(Vector3.zero, Quaternion.identity, duration);
@@ -42,7 +42,7 @@ namespace GameCreator.Runtime.Common
         public GameObject Pick(GameObject prefab, Vector3 position, Quaternion rotation, int count, float duration = -1f)
         {
             if (prefab == null) return null;
-            int instanceID = prefab.GetInstanceID();
+            int instanceID = prefab.GetEntityId().GetHashCode();
 
             if (!this.Collection.ContainsKey(instanceID)) this.CreatePool(prefab, count);
             return this.Collection[instanceID].Get(position, rotation, duration);
@@ -57,7 +57,7 @@ namespace GameCreator.Runtime.Common
         public void Prewarm(GameObject prefab, int count)
         {
             if (prefab == null) return;
-            int instanceID = prefab.GetInstanceID();
+            int instanceID = prefab.GetEntityId().GetHashCode();
             
             if (this.Collection.TryGetValue(instanceID, out PoolData pool))
             {
@@ -75,7 +75,7 @@ namespace GameCreator.Runtime.Common
         public void Dispose(GameObject prefab)
         {
             if (prefab == null) return;
-            int instanceID = prefab.GetInstanceID();
+            int instanceID = prefab.GetEntityId().GetHashCode();
             
             if (this.Collection.TryGetValue(instanceID, out PoolData pool))
             {
@@ -86,7 +86,7 @@ namespace GameCreator.Runtime.Common
         public void DontDestroyOnLoadPool(GameObject prefab)
         {
             if (prefab == null) return;
-            int instanceID = prefab.GetInstanceID();
+            int instanceID = prefab.GetEntityId().GetHashCode();
             
             if (this.Collection.TryGetValue(instanceID, out PoolData pool))
             {
@@ -98,7 +98,7 @@ namespace GameCreator.Runtime.Common
 
         private void CreatePool(GameObject prefab, int count)
         {
-            int instanceID = prefab.GetInstanceID();
+            int instanceID = prefab.GetEntityId().GetHashCode();
             this.Collection.Add(instanceID, new PoolData(prefab, count));
         }
         

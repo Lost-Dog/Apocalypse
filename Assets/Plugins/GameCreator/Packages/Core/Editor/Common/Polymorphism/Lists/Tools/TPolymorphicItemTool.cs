@@ -628,7 +628,7 @@ namespace GameCreator.Editor.Common
             
             return string.Format(
                 KEY_EXPANDED, 
-                property.serializedObject.targetObject.GetInstanceID(),
+                property.serializedObject.targetObject.GetEntityId().GetHashCode(),
                 property.propertyPath
             );
         }
