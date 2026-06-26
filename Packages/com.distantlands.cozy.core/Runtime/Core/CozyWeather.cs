@@ -257,8 +257,6 @@ namespace DistantLands.Cozy
 
         #region Modules
 
-        public List<Type> activeModules;
-
         public CozyInteractionsModule interactionsModule;
         public CozyClimateModule climateModule;
         public CozyWeatherModule weatherModule;
@@ -332,6 +330,7 @@ namespace DistantLands.Cozy
 
         [HideInInspector]
         public List<Collider> cozyTriggers;
+        [NonSerialized]
         public Dictionary<int, List<Collider>> triggersPerScene = new();
 
         #endregion
@@ -484,7 +483,14 @@ namespace DistantLands.Cozy
         public void SetupSystems()
         {
             systems = new List<CozySystem>() { this };
-            systems.AddRange(FindObjectsByType<CozySystem>(FindObjectsSortMode.None).Where(x => x != this));
+
+#if UNITY_6000_5_OR_NEWER
+            CozySystem[] potentialSystems = FindObjectsByType<CozySystem>();
+#else
+            CozySystem[] potentialSystems = FindObjectsByType<CozySystem>(FindObjectsSortMode.None);
+#endif
+
+            systems.AddRange(potentialSystems.Where(x => x != this));
         }
 
         public void ResetFXTriggers()
@@ -492,7 +498,12 @@ namespace DistantLands.Cozy
             cozyTriggers.Clear();
             try
             {
-                foreach (Collider i in FindObjectsByType<Collider>(FindObjectsSortMode.None))
+#if UNITY_6000_5_OR_NEWER
+                Collider[] potentialTriggers = FindObjectsByType<Collider>();
+#else
+                Collider[] potentialTriggers = FindObjectsByType<Collider>(FindObjectsSortMode.None);
+#endif
+                foreach (Collider i in potentialTriggers)
                 {
                     if (i.gameObject.CompareTag(cozyTriggerTag))
                     {
@@ -515,14 +526,21 @@ namespace DistantLands.Cozy
             {
                 return;
             }
-
-            triggersPerScene.Add(unchecked((int) scene.handle.GetRawData()), blockZones);
+#if UNITY_6000_5_OR_NEWER
+            triggersPerScene.Add((int)scene.handle.GetRawData(), blockZones);
+#else
+            triggersPerScene.Add(scene.handle, blockZones);
+#endif
             RefreshTriggers();
         }
 
         public void RemoveTriggersInScene(Scene scene)
         {
-            triggersPerScene.Remove(unchecked((int) scene.handle.GetRawData()));
+#if UNITY_6000_5_OR_NEWER
+            triggersPerScene.Remove((int)scene.handle.GetRawData());
+#else
+            triggersPerScene.Remove(scene.handle);
+#endif
             RefreshTriggers();
         }
 
@@ -1238,7 +1256,7 @@ namespace DistantLands.Cozy
                 if (cachedInstance)
                     return cachedInstance;
 
-                cachedInstance = FindObjectOfType<CozyWeather>();
+                cachedInstance = FindAnyObjectByType<CozyWeather>();
                 return cachedInstance;
 
 

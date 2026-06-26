@@ -85,6 +85,8 @@ namespace DistantLands.Cozy.EditorScripts
                         break;
                 }
             });
+            
+            ChancesByVariableLimit.Init(ChanceEffector.LimitType.Temperature);
 
             RefreshChanceGraph();
 

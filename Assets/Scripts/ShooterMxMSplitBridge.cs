@@ -18,6 +18,7 @@ public class ShooterMxMSplitBridge : MonoBehaviour
     private bool originalKeepGCPlayerControllableInMxM;
     private bool hasCapturedDefaults;
     private bool shooterWeaponEquipped;
+    private bool shooterAimActive;
     private bool isPlayerDead;
     private float nextEnforceTime;
 
@@ -44,8 +45,11 @@ public class ShooterMxMSplitBridge : MonoBehaviour
         Subscribe();
 
         shooterWeaponEquipped = gcCharacter != null && gcCharacter.Combat.GetActiveWeapon<ShooterWeapon>() != null;
-        if (shooterWeaponEquipped)
+        shooterAimActive = IsShooterAimActive();
+        if (shooterAimActive)
             ApplyShooterMxMSplit();
+        else if (shooterWeaponEquipped)
+            RestoreDefaults();
 
         isPlayerDead = gcCharacter != null && gcCharacter.IsDead;
         if (isPlayerDead)
@@ -60,12 +64,27 @@ public class ShooterMxMSplitBridge : MonoBehaviour
             RestoreDefaults(immediate: true);
 
         shooterWeaponEquipped = false;
+        shooterAimActive = false;
     }
 
     private void Update()
     {
         if (gcCharacter != null)
         {
+            bool weaponEquippedNow = gcCharacter.Combat.GetActiveWeapon<ShooterWeapon>() != null;
+            bool aimActiveNow = weaponEquippedNow && IsShooterAimActive();
+
+            if (weaponEquippedNow != shooterWeaponEquipped || aimActiveNow != shooterAimActive)
+            {
+                shooterWeaponEquipped = weaponEquippedNow;
+                shooterAimActive = aimActiveNow;
+
+                if (shooterAimActive)
+                    ApplyShooterMxMSplit();
+                else
+                    RestoreDefaults();
+            }
+
             if (!isPlayerDead && gcCharacter.IsDead)
             {
                 isPlayerDead = true;
@@ -75,7 +94,7 @@ public class ShooterMxMSplitBridge : MonoBehaviour
             {
                 isPlayerDead = false;
 
-                if (shooterWeaponEquipped)
+                if (shooterAimActive)
                     ApplyShooterMxMSplit();
                 else
                     RestoreDefaults();
@@ -85,7 +104,7 @@ public class ShooterMxMSplitBridge : MonoBehaviour
         if (isPlayerDead)
             return;
 
-        if (!enforceWhileShooterWeaponEquipped || !shooterWeaponEquipped)
+        if (!enforceWhileShooterWeaponEquipped || !shooterAimActive)
             return;
 
         if (Time.time < nextEnforceTime)
@@ -150,7 +169,12 @@ public class ShooterMxMSplitBridge : MonoBehaviour
             return;
 
         shooterWeaponEquipped = true;
-        ApplyShooterMxMSplit();
+        shooterAimActive = IsShooterAimActive();
+
+        if (shooterAimActive)
+            ApplyShooterMxMSplit();
+        else
+            RestoreDefaults();
     }
 
     private void OnUnequip(IWeapon weapon, GameObject instance)
@@ -159,8 +183,9 @@ public class ShooterMxMSplitBridge : MonoBehaviour
             return;
 
         shooterWeaponEquipped = gcCharacter != null && gcCharacter.Combat.GetActiveWeapon<ShooterWeapon>() != null;
+        shooterAimActive = shooterWeaponEquipped && IsShooterAimActive();
 
-        if (shooterWeaponEquipped)
+        if (shooterAimActive)
         {
             ApplyShooterMxMSplit();
         }
@@ -210,5 +235,22 @@ public class ShooterMxMSplitBridge : MonoBehaviour
         // MMC starts a coroutine only when duration > 0. During OnDisable we force immediate restore (duration 0).
         float duration = immediate ? 0f : Mathf.Max(0f, blendDuration);
         mmcBridge.SetMxMAnimatorBlendWeight(0f, duration, false);
+    }
+
+    private bool IsShooterAimActive()
+    {
+        if (gcCharacter == null)
+            return false;
+
+        ShooterWeapon activeWeapon = gcCharacter.Combat.GetActiveWeapon<ShooterWeapon>();
+        if (activeWeapon == null)
+            return false;
+
+        ShooterStance stance = gcCharacter.Combat.RequestStance<ShooterStance>();
+        WeaponData weaponData = stance != null ? stance.Get(activeWeapon) : null;
+        if (weaponData == null)
+            return false;
+
+        return weaponData.SightId != activeWeapon.Sights.DefaultId;
     }
 }

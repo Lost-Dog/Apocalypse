@@ -12,6 +12,8 @@ public class ShooterHolsterSetupTool : EditorWindow
     private GameObject defaultPistolModel;
 
     private KeyCode holsterKey = KeyCode.F2;
+    private bool enableGamepadFaceButton = true;
+    private KeyCode gamepadFaceButton = KeyCode.JoystickButton3;
     private bool toggleBackOnSecondPress = true;
     private bool autoResolveCharacter = true;
     private bool loadKeybindFromPrefs = true;
@@ -102,6 +104,8 @@ public class ShooterHolsterSetupTool : EditorWindow
         EditorGUILayout.LabelField("Holster Settings", EditorStyles.boldLabel);
 
         holsterKey = (KeyCode)EditorGUILayout.EnumPopup("Holster Key", holsterKey);
+        enableGamepadFaceButton = EditorGUILayout.Toggle("Enable Gamepad Face Button", enableGamepadFaceButton);
+        gamepadFaceButton = (KeyCode)EditorGUILayout.EnumPopup("Gamepad Face Button", gamepadFaceButton);
         toggleBackOnSecondPress = EditorGUILayout.Toggle("Toggle Re-equip", toggleBackOnSecondPress);
         autoResolveCharacter = EditorGUILayout.Toggle("Auto Resolve Character", autoResolveCharacter);
 
@@ -155,6 +159,8 @@ public class ShooterHolsterSetupTool : EditorWindow
 
         so.FindProperty("gcCharacter").objectReferenceValue = character;
         so.FindProperty("holsterKey").enumValueIndex = (int)holsterKey;
+        so.FindProperty("enableGamepadFaceButton").boolValue = enableGamepadFaceButton;
+        so.FindProperty("gamepadFaceButton").enumValueIndex = (int)gamepadFaceButton;
         so.FindProperty("toggleBackOnSecondPress").boolValue = toggleBackOnSecondPress;
         so.FindProperty("autoResolveCharacter").boolValue = autoResolveCharacter;
         so.FindProperty("defaultPistolWeapon").objectReferenceValue = defaultPistolWeapon;
@@ -228,6 +234,8 @@ public class ShooterHolsterSetupTool : EditorWindow
 
         character = so.FindProperty("gcCharacter").objectReferenceValue as Character;
         holsterKey = (KeyCode)so.FindProperty("holsterKey").enumValueIndex;
+        enableGamepadFaceButton = so.FindProperty("enableGamepadFaceButton").boolValue;
+        gamepadFaceButton = (KeyCode)so.FindProperty("gamepadFaceButton").enumValueIndex;
         toggleBackOnSecondPress = so.FindProperty("toggleBackOnSecondPress").boolValue;
         autoResolveCharacter = so.FindProperty("autoResolveCharacter").boolValue;
         defaultPistolWeapon = so.FindProperty("defaultPistolWeapon").objectReferenceValue as ShooterWeapon;

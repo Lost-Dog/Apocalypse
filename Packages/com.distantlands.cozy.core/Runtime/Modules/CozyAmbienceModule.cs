@@ -123,12 +123,17 @@ namespace DistantLands.Cozy
                     SetNextAmbience();
                 }
 
-                foreach (WeightedAmbience i in weightedAmbience)
+                // Added a catch to stop ambience at very low weight
+                for (int i = weightedAmbience.Count - 1; i >= 0; i--)
                 {
-                    i.weight = i.weight * weight;
-                }
+                    WeightedAmbience w = weightedAmbience[i];
 
-                weightedAmbience.RemoveAll(x => x.weight == 0 && x.transitioning == false);
+                    if (w.weight <= 0 && w.transitioning == false)
+                    {
+                        w.ambienceProfile.SetWeight(0);
+                        weightedAmbience.RemoveAt(i);
+                    }
+                }
 
             }
 
@@ -140,15 +145,14 @@ namespace DistantLands.Cozy
         {
             foreach (WeightedAmbience weather in weightedAmbience)
             {
+                // Moved weight calculation to the FX weights method
                 if (weather != null && weather.ambienceProfile)
-                    weather.ambienceProfile.SetWeight(weather.weight);
+                    weather.ambienceProfile.SetWeight(weather.weight * weight);
             }
         }
         public override void UpdateBiomeModule()
         {
-
             currentAmbienceProfile.SetWeight(weight);
-
         }
 
         public void SetNextAmbience()
@@ -169,11 +173,14 @@ namespace DistantLands.Cozy
 
             foreach (WeightedAmbience j in weightedAmbience)
             {
-
                 if (j.ambienceProfile == profile)
+                {
                     StartCoroutine(j.Transition(1, timeToChangeProfiles));
+                }
                 else
+                {
                     StartCoroutine(j.Transition(0, timeToChangeProfiles));
+                }
 
             }
 

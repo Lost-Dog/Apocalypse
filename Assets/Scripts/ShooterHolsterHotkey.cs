@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using GameCreator.Runtime.Characters;
 using GameCreator.Runtime.Common;
+using GameCreator.Runtime.Inventory;
 using GameCreator.Runtime.Shooter;
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
@@ -11,10 +12,19 @@ using UnityEngine.InputSystem;
 [DisallowMultipleComponent]
 public class ShooterHolsterHotkey : MonoBehaviour
 {
+    [System.Serializable]
+    private struct WeaponItemBinding
+    {
+        public ShooterWeapon weapon;
+        public Item inventoryItem;
+    }
+
     private static readonly Dictionary<int, ShooterHolsterHotkey> ACTIVE_BY_CHARACTER = new Dictionary<int, ShooterHolsterHotkey>();
 
     [SerializeField] private Character gcCharacter;
     [SerializeField] private KeyCode holsterKey = KeyCode.F2;
+    [SerializeField] private bool enableGamepadFaceButton = true;
+    [SerializeField] private KeyCode gamepadFaceButton = KeyCode.JoystickButton3;
     [SerializeField] private bool enableGamepadDpadUp = true;
     [SerializeField] private KeyCode gamepadDpadUpButton = KeyCode.JoystickButton13;
     [SerializeField] private string gamepadDpadVerticalAxis = "DPadY";
@@ -38,13 +48,25 @@ public class ShooterHolsterHotkey : MonoBehaviour
     [Tooltip("Optional model prop for the default pistol. If empty, the script tries Character.Combat.GetProp(defaultPistolWeapon).")]
     [SerializeField] private GameObject defaultPistolModel;
 
+    [Header("Inventory Transfer")]
+    [SerializeField] private bool transferMappedWeaponsToInventory = true;
+    [SerializeField] private bool requireMappedItemInBagForUnholster;
+    [SerializeField] private Bag fallbackPlayerBag;
+    [SerializeField] private WeaponItemBinding[] weaponItemBindings = new WeaponItemBinding[0];
+
+    [Header("Equip Behavior")]
+    [SerializeField] private bool enforceSingleShooterWeapon = true;
+    [SerializeField] private bool hideStaleWeaponInstances = true;
+
     private ShooterWeapon cachedWeapon;
     private GameObject cachedModel;
     private bool isTransitioning;
+    private bool isResolvingEquipStack;
     private string debugOverlayText;
     private float debugOverlayUntil;
     private bool wasDpadUpHeld;
     private bool dpadAxisUnavailableLogged;
+    private bool cachedWeaponStoredInInventory;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void AutoAttachToPlayer()
@@ -119,6 +141,10 @@ public class ShooterHolsterHotkey : MonoBehaviour
 
         cachedWeapon = shooterWeapon;
         cachedModel = instance != null ? instance : gcCharacter.Combat.GetProp(shooterWeapon);
+        cachedWeaponStoredInInventory = false;
+
+        if (enforceSingleShooterWeapon)
+            _ = EnforceSingleShooterWeaponAsync(shooterWeapon, cachedModel);
     }
 
     private void ResolveCharacter()
@@ -174,9 +200,23 @@ public class ShooterHolsterHotkey : MonoBehaviour
 
         cachedWeapon = weapon;
         cachedModel = gcCharacter.Combat.GetProp(weapon);
+        cachedWeaponStoredInInventory = TryStoreWeaponInInventory(weapon, out Item mappedItem);
 
         _ = HolsterWeaponAsync(weapon);
-        ShowDebug($"Holstered: {weapon.name}");
+
+        if (mappedItem != null)
+        {
+            ShowDebug(cachedWeaponStoredInInventory
+                ? $"Holstered: {weapon.name} (stored in inventory)"
+                : $"Holstered: {weapon.name} (inventory store failed)",
+                isWarning: !cachedWeaponStoredInInventory
+            );
+        }
+        else
+        {
+            ShowDebug($"Holstered: {weapon.name}");
+        }
+
         return true;
     }
 
@@ -243,6 +283,9 @@ public class ShooterHolsterHotkey : MonoBehaviour
         if (gcCharacter.Combat.IsEquipped(weaponToEquip))
             return;
 
+        if (!TryConsumeWeaponFromInventory(weaponToEquip, out _))
+            return;
+
         isTransitioning = true;
 
         try
@@ -251,6 +294,7 @@ public class ShooterHolsterHotkey : MonoBehaviour
 
             cachedWeapon = weaponToEquip;
             cachedModel = modelToEquip;
+            cachedWeaponStoredInInventory = false;
             ShowDebug($"Equipped: {weaponToEquip.name}");
         }
         finally
@@ -275,6 +319,9 @@ public class ShooterHolsterHotkey : MonoBehaviour
         if (WasKeyPressedThisFrame(holsterKey))
             return true;
 
+        if (enableGamepadFaceButton && WasGamepadButtonPressedThisFrame(GetConfiguredGamepadFaceButton()))
+            return true;
+
         if (!enableGamepadDpadUp)
             return false;
 
@@ -291,6 +338,9 @@ public class ShooterHolsterHotkey : MonoBehaviour
         return wasPressedThisFrame;
 #else
         if (Input.GetKeyDown(holsterKey))
+            return true;
+
+        if (enableGamepadFaceButton && Input.GetKeyDown(GetConfiguredGamepadFaceButton()))
             return true;
 
         if (!enableGamepadDpadUp)
@@ -548,5 +598,157 @@ public class ShooterHolsterHotkey : MonoBehaviour
             debugOverlayText = message;
             debugOverlayUntil = Time.unscaledTime + debugOverlayDuration;
         }
+    }
+
+    private KeyCode GetConfiguredGamepadFaceButton()
+    {
+        return gamepadFaceButton != KeyCode.None
+            ? gamepadFaceButton
+            : KeyCode.JoystickButton3;
+    }
+
+    private Item ResolveInventoryItem(ShooterWeapon weapon)
+    {
+        if (weapon == null)
+            return null;
+
+        for (int i = 0; i < weaponItemBindings.Length; i++)
+        {
+            if (weaponItemBindings[i].weapon != weapon)
+                continue;
+
+            return weaponItemBindings[i].inventoryItem;
+        }
+
+        return null;
+    }
+
+    private Bag ResolvePlayerBag()
+    {
+        if (gcCharacter != null)
+        {
+            Bag onCharacter = gcCharacter.GetComponent<Bag>();
+            if (onCharacter != null) return onCharacter;
+
+            Bag inChildren = gcCharacter.GetComponentInChildren<Bag>(true);
+            if (inChildren != null) return inChildren;
+        }
+
+        if (fallbackPlayerBag != null)
+            return fallbackPlayerBag;
+
+        return FindFirstObjectByType<Bag>();
+    }
+
+    private bool TryStoreWeaponInInventory(ShooterWeapon weapon, out Item inventoryItem)
+    {
+        inventoryItem = ResolveInventoryItem(weapon);
+
+        if (!transferMappedWeaponsToInventory || inventoryItem == null)
+            return false;
+
+        Bag bag = ResolvePlayerBag();
+        if (bag == null)
+        {
+            ShowDebug("No GC2 Bag found. Weapon item was not stored.", isWarning: true);
+            return false;
+        }
+
+        if (!bag.Content.CanAddType(inventoryItem, true))
+        {
+            ShowDebug($"No inventory space for '{inventoryItem.name}'.", isWarning: true);
+            return false;
+        }
+
+        RuntimeItem added = bag.Content.AddType(inventoryItem, true);
+        return added != null;
+    }
+
+    private bool TryConsumeWeaponFromInventory(ShooterWeapon weapon, out Item inventoryItem)
+    {
+        inventoryItem = ResolveInventoryItem(weapon);
+
+        if (!transferMappedWeaponsToInventory || inventoryItem == null)
+            return true;
+
+        Bag bag = ResolvePlayerBag();
+        if (bag == null)
+        {
+            ShowDebug("No GC2 Bag found. Cannot remove mapped weapon item.", isWarning: true);
+            return !requireMappedItemInBagForUnholster;
+        }
+
+        if (!bag.Content.ContainsType(inventoryItem, 1))
+        {
+            ShowDebug($"Inventory missing '{inventoryItem.name}' for unholster.", isWarning: true);
+            return !requireMappedItemInBagForUnholster;
+        }
+
+        RuntimeItem removed = bag.Content.RemoveType(inventoryItem);
+        if (removed == null)
+        {
+            ShowDebug($"Failed to remove '{inventoryItem.name}' from inventory.", isWarning: true);
+            return !requireMappedItemInBagForUnholster;
+        }
+
+        return true;
+    }
+
+    private async Task EnforceSingleShooterWeaponAsync(ShooterWeapon keepWeapon, GameObject keepInstance)
+    {
+        if (gcCharacter == null || keepWeapon == null)
+            return;
+
+        if (isResolvingEquipStack)
+            return;
+
+        isResolvingEquipStack = true;
+
+        try
+        {
+            Weapon[] equippedWeapons = gcCharacter.Combat.Weapons;
+            for (int i = 0; i < equippedWeapons.Length; i++)
+            {
+                IWeapon asset = equippedWeapons[i].Asset;
+                if (asset is not ShooterWeapon shooterWeapon)
+                    continue;
+
+                if (ReferenceEquals(shooterWeapon, keepWeapon))
+                    continue;
+
+                GameObject staleInstance = equippedWeapons[i].Instance;
+                ForceResetShooterStance(shooterWeapon);
+                await gcCharacter.Combat.Unequip(shooterWeapon, new Args(gcCharacter.gameObject));
+
+                HideStaleWeaponInstance(staleInstance, keepInstance);
+                ShowDebug($"Unequipped stacked weapon: {shooterWeapon.name}");
+            }
+        }
+        finally
+        {
+            isResolvingEquipStack = false;
+        }
+    }
+
+    private void HideStaleWeaponInstance(GameObject staleInstance, GameObject keepInstance)
+    {
+        if (!hideStaleWeaponInstances)
+            return;
+
+        if (staleInstance == null || staleInstance == keepInstance)
+            return;
+
+        if (!staleInstance.scene.IsValid())
+            return;
+
+        Transform characterRoot = gcCharacter != null ? gcCharacter.transform : null;
+        if (characterRoot == null)
+            return;
+
+        if (!staleInstance.transform.IsChildOf(characterRoot))
+            return;
+
+        staleInstance.SetActive(false);
+        ShowDebug($"Hid stale weapon instance: {staleInstance.name}");
     }
 }
