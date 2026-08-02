@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-#if THE_VISUAL_ENGINE
+#if THE_VISUAL_ENGINE || THE_VISUAL_ENGINE_21
 using TheVisualEngine;
 #elif THE_VEGETATION_ENGINE
 using TheVegetationEngine;
@@ -23,7 +23,7 @@ namespace DistantLands.Cozy
         [Tooltip("Enable snow integration with TVE")]
         public bool enableSnowControl = true;
 
-#if THE_VISUAL_ENGINE
+#if THE_VISUAL_ENGINE || THE_VISUAL_ENGINE_21
         public TVEManager visualManager;
 #elif THE_VEGETATION_ENGINE
         public TVEGlobalControl globalControl;
@@ -34,7 +34,7 @@ namespace DistantLands.Cozy
         {
             InitializeModule();
 
-#if THE_VEGETATION_ENGINE || THE_VISUAL_ENGINE
+#if THE_VEGETATION_ENGINE || THE_VISUAL_ENGINE || THE_VISUAL_ENGINE_21
             if (updateFrequency == UpdateFrequency.onAwake)
                 UpdateTVE();
 #endif
@@ -53,7 +53,7 @@ namespace DistantLands.Cozy
                 return;
             }
 
-#if THE_VISUAL_ENGINE
+#if THE_VISUAL_ENGINE || THE_VISUAL_ENGINE_21
             if (!visualManager)
                 visualManager = FindObjectOfType<TVEManager>();
 
@@ -133,7 +133,7 @@ namespace DistantLands.Cozy
                 globalMotion.windPower = Mathf.Clamp01(windPower);
                 globalMotion.transform.LookAt(globalMotion.transform.position + windDirection, Vector3.up);
             }
-#elif THE_VISUAL_ENGINE
+#elif THE_VISUAL_ENGINE || THE_VISUAL_ENGINE_21
             if (weatherSphere.climateModule)
             {
                 if (enableWetnessControl)

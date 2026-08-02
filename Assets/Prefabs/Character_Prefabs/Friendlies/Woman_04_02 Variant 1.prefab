@@ -6467,7 +6467,7 @@ MonoBehaviour:
   Type2AttackBlankOptions:
   - No Type 2 Attack Animations
   HideSettingsFoldout: 0
-  AnimationProfileFoldout: 1
+  AnimationProfileFoldout: 0
 --- !u!114 &8045404655447469835
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6504,7 +6504,7 @@ MonoBehaviour:
   Type1EquippableWeapons:
   - HeldToggle: 0
     HeldObject: {fileID: 5540707057669311693}
-    HolsteredToggle: 1
+    HolsteredToggle: 0
     HolsteredObject: {fileID: 7948433184979648408}
     DroppableToggle: 0
     DroppableObject: {fileID: 0}
@@ -6513,8 +6513,6 @@ MonoBehaviour:
   - ItemID: 0
     ItemObject: {fileID: 6435149677518967041, guid: 795d05eeefadc414598af4e373046715,
       type: 3}
-  - ItemID: 1
-    ItemObject: {fileID: 7948433184979648408}
   HideSettingsFoldout: 0
   WeaponsFoldout: 1
   ItemsFoldout: 1
@@ -6692,7 +6690,7 @@ MonoBehaviour:
   PercentToFlee: 40
   UpdateFleePositionSeconds: 1.5
   MaxDistanceFromStartingArea: 10
-  FollowingStoppingDistance: 8
+  FollowingStoppingDistance: 7
   IsAiming: 0
   FleeOnLowHealth: 1
   StayNearStartingArea: 1
@@ -6846,7 +6844,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4435fe59ad515fd4d94c2dd09006f199, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EmeraldAI.EmeraldHealth
-  CurrentHealth: 300
+  CurrentHealth: 50
   StartingHealth: 50
   HealRate: 2
   AttachHitEffects: 0
@@ -8925,8 +8923,6 @@ Transform:
   - {fileID: 3111411601838159443}
   - {fileID: 2355728335129175512}
   - {fileID: 1149347002215165287}
-  - {fileID: 990359323849930983}
-  - {fileID: 3887236796922523164}
   - {fileID: 4222738504227955466}
   m_Father: {fileID: 168243211525773977}
   m_LocalEulerAnglesHint: {x: -8.387, y: 109.259, z: 86.176}
@@ -10356,37 +10352,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 8835830843883603846}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &7753762044955977662
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 990359323849930983}
-  m_Layer: 0
-  m_Name: WeaponFirePoint
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &990359323849930983
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7753762044955977662}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0, y: 0.078, z: 1.307}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1355828927987145913}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7806704401987378108
 GameObject:
   m_ObjectHideFlags: 0
@@ -10481,37 +10446,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5744702380155046625}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &7935218057205917869
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 3887236796922523164}
-  m_Layer: 0
-  m_Name: WeaponFirePoint
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &3887236796922523164
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7935218057205917869}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0, y: 0.078, z: 1.307}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1355828927987145913}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7947792580278547367
 GameObject:

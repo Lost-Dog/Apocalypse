@@ -31,7 +31,6 @@ namespace DistantLands.Cozy.EditorScripts
 
         static VersionVerification()
         {
-            // Retrieving cached SessionState/PlayerPrefs values is not allowed from an instance field initializer
             EditorApplication.update += CheckForUpdatesAfterEditorUpdate;
         }
 

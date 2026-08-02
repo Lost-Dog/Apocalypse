@@ -8,6 +8,7 @@ public class ShooterMxMSplitBridge : MonoBehaviour
 {
     [SerializeField] private Character gcCharacter;
     [SerializeField] private MMCGameCreator2 mmcBridge;
+    [SerializeField] private NGCharacter ngCharacter;
     [SerializeField] private float blendDuration = 0.15f;
     [SerializeField] private bool keepGCCharacterEnabledInMxMMode = true;
     [SerializeField] private bool keepGCPlayerControllableInMxMMode = true;
@@ -21,6 +22,10 @@ public class ShooterMxMSplitBridge : MonoBehaviour
     private bool shooterAimActive;
     private bool isPlayerDead;
     private float nextEnforceTime;
+
+    // Strafe state captured before the first weapon equip so it can be restored on unequip.
+    private bool strafeStateBeforeWeapon;
+    private bool hasCapturedStrafeState;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void AutoAttachToPlayer()
@@ -62,6 +67,10 @@ public class ShooterMxMSplitBridge : MonoBehaviour
 
         if (shooterWeaponEquipped)
             RestoreDefaults(immediate: true);
+
+        // Always restore the original strafe state when this bridge is disabled.
+        RestoreStrafeState();
+        hasCapturedStrafeState = false;
 
         shooterWeaponEquipped = false;
         shooterAimActive = false;
@@ -123,6 +132,9 @@ public class ShooterMxMSplitBridge : MonoBehaviour
 
         if (mmcBridge == null)
             mmcBridge = GetComponent<MMCGameCreator2>();
+
+        if (ngCharacter == null)
+            ngCharacter = GetComponent<NGCharacter>();
     }
 
     private void CaptureDefaults()
@@ -168,6 +180,13 @@ public class ShooterMxMSplitBridge : MonoBehaviour
         if (weapon is not ShooterWeapon)
             return;
 
+        // Capture the pre-weapon strafe state exactly once so we can restore it on unequip.
+        if (!hasCapturedStrafeState && ngCharacter != null)
+        {
+            strafeStateBeforeWeapon = ngCharacter.Strafing;
+            hasCapturedStrafeState = true;
+        }
+
         shooterWeaponEquipped = true;
         shooterAimActive = IsShooterAimActive();
 
@@ -192,6 +211,14 @@ public class ShooterMxMSplitBridge : MonoBehaviour
         else
         {
             RestoreDefaults();
+
+            // Restore the strafe state that was active before any weapon was equipped,
+            // but only once all shooter weapons are fully unequipped.
+            if (!shooterWeaponEquipped)
+            {
+                RestoreStrafeState();
+                hasCapturedStrafeState = false;
+            }
         }
     }
 
@@ -209,6 +236,9 @@ public class ShooterMxMSplitBridge : MonoBehaviour
         mmcBridge.keepGCPlayerControllableInMxMMode = keepGCPlayerControllableInMxMMode;
 
         mmcBridge.SetMxMAnimatorBlendWeight(1f, Mathf.Max(0f, duration), false);
+
+        // Enable strafing only when the player is actively aiming.
+        SetStrafe(true);
     }
 
     private void ApplyDeathControlLock()
@@ -235,6 +265,27 @@ public class ShooterMxMSplitBridge : MonoBehaviour
         // MMC starts a coroutine only when duration > 0. During OnDisable we force immediate restore (duration 0).
         float duration = immediate ? 0f : Mathf.Max(0f, blendDuration);
         mmcBridge.SetMxMAnimatorBlendWeight(0f, duration, false);
+
+        // When not aiming, disable strafe so normal forward locomotion resumes.
+        SetStrafe(false);
+    }
+
+    /// <summary>Sets NGCharacter.Strafing if the reference is available.</summary>
+    private void SetStrafe(bool strafe)
+    {
+        if (ngCharacter == null)
+            return;
+
+        ngCharacter.Strafing = strafe;
+    }
+
+    /// <summary>Restores the strafe state that was captured before the weapon was equipped.</summary>
+    private void RestoreStrafeState()
+    {
+        if (ngCharacter == null || !hasCapturedStrafeState)
+            return;
+
+        ngCharacter.Strafing = strafeStateBeforeWeapon;
     }
 
     private bool IsShooterAimActive()
