@@ -306,6 +306,22 @@ public class ProgressionManager : MonoBehaviour
     public int   GetPowerLevel()      => currentLevel + (equippedGearScore / 100);
     public float GetPowerLevelFloat() => currentLevel + (equippedGearScore / 100f);
 
+    // ── Public API — weapon damage scaling ────────────────────────────────────
+
+    [Header("Weapon Damage Scaling")]
+    [Tooltip("Percentage bonus added to weapon damage per level above 1 (0.05 = +5% per level).")]
+    public float weaponDamagePerLevelPercent = 0.05f;
+
+    /// <summary>
+    /// Returns the multiplier that should be applied to the player's weapon damage
+    /// based on their current level. Multiplier is 1.0 at level 1 and grows by
+    /// <see cref="weaponDamagePerLevelPercent"/> for every level above 1.
+    /// </summary>
+    public float GetWeaponDamageMultiplier()
+    {
+        return 1f + Mathf.Max(0, currentLevel - 1) * weaponDamagePerLevelPercent;
+    }
+
     /// <summary>Returns recommended gear score for the current level.</summary>
     public int GetRecommendedGearScore() => 100 + (currentLevel * 40);
 

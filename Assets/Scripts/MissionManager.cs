@@ -19,7 +19,24 @@ public class MissionManager : MonoBehaviour
     public UnityEvent<MissionData> onMissionFail;
     public UnityEvent<MissionData> onObjectiveUpdate;
     
+    [Header("Mission Start Audio")]
+    [Tooltip("A random clip from this list is played whenever a mission starts.")]
+    public List<AudioClip> missionStartSounds = new List<AudioClip>();
+    
+    private AudioSource audioSource;
+    
     private const string MISSION_RESOURCE_PATH = "Missions";
+    
+    private void Awake()
+    {
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null && missionStartSounds.Count > 0)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
+            audioSource.spatialBlend = 0f; // 2D sound
+        }
+    }
     
     public void Initialize()
     {
@@ -93,9 +110,25 @@ public class MissionManager : MonoBehaviour
         
         activeMission = mission;
         activeMission.StartMission();
+        PlayRandomMissionStartSound();
         onMissionStart?.Invoke(mission);
         
         Debug.Log($"Started mission: {mission.missionName}");
+    }
+    
+    /// <summary>
+    /// Plays a random clip from <see cref="missionStartSounds"/>, if any are assigned.
+    /// </summary>
+    private void PlayRandomMissionStartSound()
+    {
+        if (missionStartSounds.Count == 0 || audioSource == null)
+            return;
+        
+        AudioClip clip = missionStartSounds[Random.Range(0, missionStartSounds.Count)];
+        if (clip != null)
+        {
+            audioSource.PlayOneShot(clip);
+        }
     }
     
     public void UpdateMissionProgress(float progress)
@@ -105,6 +138,36 @@ public class MissionManager : MonoBehaviour
         activeMission.UpdateProgress(progress);
         onObjectiveUpdate?.Invoke(activeMission);
         
+        if (activeMission.IsComplete())
+        {
+            CompleteMission();
+        }
+    }
+
+    /// <summary>
+    /// Notifies the active mission that an enemy was killed. Advances the current
+    /// objective by <paramref name="amount"/> when it is a KillEnemies objective, or
+    /// a BossKill objective and <paramref name="isBoss"/> is true. No-op otherwise
+    /// (e.g. the current objective is not kill-related, or there is no active mission).
+    /// </summary>
+    public void NotifyEnemyKilled(bool isBoss = false, int amount = 1)
+    {
+        if (activeMission == null) return;
+
+        MissionObjective currentObjective = activeMission.GetCurrentObjective();
+        if (currentObjective == null) return;
+
+        bool matchesObjective =
+            currentObjective.type == MissionObjective.ObjectiveType.KillEnemies ||
+            (currentObjective.type == MissionObjective.ObjectiveType.BossKill && isBoss);
+
+        if (!matchesObjective) return;
+
+        currentObjective.IncrementProgress(amount);
+        onObjectiveUpdate?.Invoke(activeMission);
+
+        Debug.Log($"[MissionManager] Enemy kill registered for objective '{currentObjective.description}' ({currentObjective.GetCurrentCount()}/{currentObjective.GetTargetCount()}).");
+
         if (activeMission.IsComplete())
         {
             CompleteMission();

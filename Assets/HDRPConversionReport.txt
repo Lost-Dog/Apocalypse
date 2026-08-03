@@ -1,0 +1,1447 @@
+﻿Apocalypse HDRP Conversion Report
+Generated: 2026-08-02T11:21:16.8949727+01:00
+Materials scanned: 1344
+URP materials requiring replacement or vendor conversion: 1141
+Built-in/custom untagged materials requiring review: 203
+Materials with missing shaders: 0
+
+Shader usage:
+   670  Universal Render Pipeline/Lit
+   199  Synty/Generic_Basic
+    59  Synty/Generic_Decals
+    43  Legacy Shaders/Particles/Additive
+    35  Universal Render Pipeline/2D/Mesh2D-Lit-Default
+    31  Universal Render Pipeline/Particles/Unlit
+    28  GUI/Text Shader
+    19  Synty/Generic_Basic_Bloody
+    18  Legacy Shaders/Particles/Additive (Soft)
+    17  Legacy Shaders/Particles/Alpha Blended
+    16  TextMeshPro/Distance Field
+    15  Synty/Generic_Standard
+    14  TextMeshPro/Mobile/Distance Field
+    14  Synty/Generic_ParticlesUnlit
+     9  Legacy Shaders/Particles/Multiply
+     8  Shader Graphs/OasisVegetationGraph
+     7  Unlit/Color
+     6  Universal Render Pipeline/Simple Lit
+     5  Universal Render Pipeline/Particles/Lit
+     5  HDRP/Lit
+     5  SyntyStudios/UI/Additive
+     4  CompassNavigatorPro/Demo/Gradient
+     4  Legacy Shaders/Particles/Multiply (Double)
+     4  Shader Graphs/Tent_Graph
+     4  Shader Graphs/GrungeDecal_Graph
+     4  Shader Graphs/ScreenBlockerDissolve_Graph
+     4  Custom/UI/Blur Masked
+     3  Hidden/InternalErrorShader
+     3  Unlit/Transparent
+     3  URP Sample/Oasis/LayeredLit_Graph
+     3  Shader Graphs/Screen_Graph
+     3  Shader Graphs/HoloRing_Graph
+     3  Synty/Triplanar_Basic
+     3  Synty/Generic_ParticlesLit
+     3  Synty/PolygonShader
+     3  TextMeshPro/SRP/TMP_SDF-URP Lit
+     3  TextMeshPro/SRP/TMP_SDF-HDRP UNLIT
+     3  TextMeshPro/SRP/TMP_SDF-HDRP LIT
+     2  Shader Graphs/Holoscope
+     2  TextMeshPro/Distance Field Overlay
+     2  CompassNavigatorPro/Sprite Curved
+     2  Shader Graphs/OasisTerrain_Graph
+     2  Shader Graphs/Water
+     2  Shader Graphs/BasicDecal_Graph
+     2  Shader Graphs/HexagonHologram_Graph
+     2  Shader Graphs/SpriteSheetHologram_Graph
+     2  Shader Graphs/HolgramCone_Graph
+     2  Shader Graphs/ScrollingHologram_Graph
+     2  UI/CirkleShader
+     2  SyntyStudios/UI/AlphaBlended
+     2  Synty/Skybox_Generic
+     1  UI/Unlit/Text
+     1  UI/Default+1
+     1  Universal Render Pipeline/Baked Lit
+     1  Universal Render Pipeline/Unlit
+     1  Universal Render Pipeline/Terrain/Lit
+     1  CompassNavigatorPro/Demo/Ground
+     1  CompassNavigatorPro/Beacon
+     1  CompassNavigatorPro/MiniMap Circle
+     1  CompassNavigatorPro/MiniMapFullScreenBackground
+     1  CompassNavigatorPro/MiniMapOverlayUnlit
+     1  CompassNavigatorPro/Scan
+     1  CompassNavigatorPro/Sprite Overlay Unlit
+     1  CompassNavigatorPro/UI Default Curved
+     1  Skybox/Cubemap
+     1  Shader Graphs/HeightFog
+     1  VFX/Oasis/SG_VFX_Smoke
+     1  VFX/Oasis/SG_Wind_Cliff_SceneColor
+     1  Hidden/VFX/VFXG_Dune_Sand/Sand Tongue /Out Sand Tongue
+     1  Hidden/VFX/VFXG_Falling_Sand_Rocks/Dust Fall/Sand
+     1  Hidden/VFX/VFXG_Insects/System/Output Particle Unlit Quad
+     1  Hidden/VFX/VFXG_LocalizedSand/Fog/Output Particle Shader Graph Quad - Unlit
+     1  Hidden/VFX/VFXG_TerrainSand/GroupedSpawn/Output Particle Shader Graph Quad - Unlit
+     1  Custom/StencilOnly
+     1  Shader Graphs/Triangle_Graph
+     1  UI/Particles/Additive
+     1  SyntyStudios/UI/Multiply
+     1  Unlit/Texture
+     1  Legacy Shaders/Particles/Anim Alpha Blended
+     1  Synty/Generic_Basic_Specular
+     1  Synty/Generic_Basic_Specular_Bloody
+     1  Synty/PolygonShaderTransparent
+     1  Synty/SkyDome
+     1  TextMeshPro/Mobile/Distance Field - 2 Pass
+     1  TextMeshPro/Mobile/Distance Field Overlay
+     1  TextMeshPro/Mobile/Distance Field - Masking
+     1  TextMeshPro/Mobile/Distance Field (Surface)
+     1  TextMeshPro/Sprite
+     1  TextMeshPro/SRP/TMP_SDF-URP Unlit
+
+URP material paths:
+Assets/Emerald AI/Demo/Demo Source/Animations/Cartoon Warriors/Models/Male_Animation_Skeleton.FBX
+Assets/Emerald AI/Demo/Demo Source/Animations/Ellen/@EllenGunHit.fbx
+Assets/Emerald AI/Demo/Demo Source/Animations/Ellen/@EllenGunIdle 2.fbx
+Assets/Emerald AI/Demo/Demo Source/Animations/Ellen/@EllenGunIdle.fbx
+Assets/Emerald AI/Demo/Demo Source/Animations/Ellen/@EllenGunPutAway.fbx
+Assets/Emerald AI/Demo/Demo Source/Animations/Ellen/@EllenGunShoot.fbx
+Assets/Emerald AI/Demo/Demo Source/Animations/Ellen/@EllenGunTakeOut.fbx
+Assets/Emerald AI/Demo/Demo Source/Animations/Ellen/Materials/Ellen_Body_Dirty_Mat.mat
+Assets/Emerald AI/Demo/Demo Source/Animations/Ellen/Materials/Ellen_Body_Mat.mat
+Assets/Emerald AI/Demo/Demo Source/Animations/Ellen/Materials/Ellen_Head_Dirty_Mat.mat
+Assets/Emerald AI/Demo/Demo Source/Animations/Ellen/Materials/Ellen_Head_Mat.mat
+Assets/Emerald AI/Demo/Demo Source/Animations/Ellen/Materials/Ellen_Tear_Mat.mat
+Assets/Emerald AI/Demo/Demo Source/Animations/RPG Character/Materials/RPG-Character (Blue).mat
+Assets/Emerald AI/Demo/Demo Source/Animations/RPG Character/Materials/RPG-Character (Companion).mat
+Assets/Emerald AI/Demo/Demo Source/Animations/RPG Character/Materials/RPG-Character (Red).mat
+Assets/Emerald AI/Demo/Demo Source/Animations/Sorceress/Materials/Sorceress.mat
+Assets/Emerald AI/Demo/Demo Source/Animations/Villager and Basic/Basic Motions/Materials/BasicMotionsFloor.mat
+Assets/Emerald AI/Demo/Demo Source/Animations/Villager and Basic/Basic Motions/Materials/BasicMotionsMaterial.mat
+Assets/Emerald AI/Demo/Demo Source/Animations/Villager and Basic/Villager Animations/Materials/VillagerMaterial.mat
+Assets/Emerald AI/Demo/Demo Source/Demo Abilities/Ability Source/Materials/Bullet Body.mat
+Assets/Emerald AI/Demo/Demo Source/Demo Abilities/Ability Source/Materials/Bullet Impact.mat
+Assets/Emerald AI/Demo/Demo Source/Demo Abilities/Ability Source/Materials/Bullet Sparks.mat
+Assets/Emerald AI/Demo/Demo Source/Demo Abilities/Ability Source/Materials/Bullet Trail.mat
+Assets/Emerald AI/Demo/Demo Source/Demo Abilities/Ability Source/Materials/Heal Particle.mat
+Assets/Emerald AI/Demo/Demo Source/Demo Abilities/Ability Source/Materials/Ice Particle.mat
+Assets/Emerald AI/Demo/Demo Source/Demo Abilities/Ability Source/Materials/Ring.mat
+Assets/Emerald AI/Demo/Demo Source/Demo Abilities/Ability Source/Materials/Summon Particle.mat
+Assets/Emerald AI/Demo/Demo Source/Footstep Surface Objects/Footstep Demo Source/Footprint.mat
+Assets/Emerald AI/Demo/Demo Source/Models/Demo Models/Materials/Arrow Material.mat
+Assets/Emerald AI/Demo/Demo Source/Models/Demo Models/Materials/Demo Material.mat
+Assets/Emerald AI/Demo/Demo Source/Models/Demo Models/Materials/Footprint.mat
+Assets/Emerald AI/Demo/Demo Source/Models/Demo Models/Materials/Grenade Material.mat
+Assets/Emerald AI/Demo/Demo Source/Models/Demo Models/Materials/Ice Shard.mat
+Assets/Emerald AI/Demo/Demo Source/Models/Demo Models/Materials/Pistol Material.mat
+Assets/Emerald AI/Demo/Demo Source/Models/Demo Models/Materials/Player Material.mat
+Assets/Emerald AI/Demo/Demo Source/Models/Demo Models/Materials/Rock Material.mat
+Assets/Emerald AI/Demo/Demo Source/Models/Demo Models/Mesh/Materials/Pistol_Mat.mat
+Assets/Female_Soldiers_Pack/Woman_01/Materials/Automatic_Gun_01.mat
+Assets/Female_Soldiers_Pack/Woman_01/Materials/Automatic_Gun_02.mat
+Assets/Female_Soldiers_Pack/Woman_01/Materials/Automatic_Gun_03.mat
+Assets/Female_Soldiers_Pack/Woman_01/Materials/Automatic_Gun_04.mat
+Assets/Female_Soldiers_Pack/Woman_01/Materials/Automatic_Gun_05.mat
+Assets/Female_Soldiers_Pack/Woman_01/Materials/Automatic_Gun_06.mat
+Assets/Female_Soldiers_Pack/Woman_01/Materials/Glasses.mat
+Assets/Female_Soldiers_Pack/Woman_01/Materials/Stand.mat
+Assets/Female_Soldiers_Pack/Woman_01/Materials/Woman_01_Belts_01.mat
+Assets/Female_Soldiers_Pack/Woman_01/Materials/Woman_01_Belts_02.mat
+Assets/Female_Soldiers_Pack/Woman_01/Materials/Woman_01_Belts_03.mat
+Assets/Female_Soldiers_Pack/Woman_01/Materials/Woman_01_Belts_04.mat
+Assets/Female_Soldiers_Pack/Woman_01/Materials/Woman_01_Body_01.mat
+Assets/Female_Soldiers_Pack/Woman_01/Materials/Woman_01_Body_02.mat
+Assets/Female_Soldiers_Pack/Woman_01/Materials/Woman_01_Body_03.mat
+Assets/Female_Soldiers_Pack/Woman_01/Materials/Woman_01_Body_04.mat
+Assets/Female_Soldiers_Pack/Woman_01/Materials/Woman_01_Details_01.mat
+Assets/Female_Soldiers_Pack/Woman_01/Materials/Woman_01_Details_02.mat
+Assets/Female_Soldiers_Pack/Woman_01/Materials/Woman_01_Details_03.mat
+Assets/Female_Soldiers_Pack/Woman_01/Materials/Woman_01_Details_04.mat
+Assets/Female_Soldiers_Pack/Woman_01/Materials/Woman_01_Hair_01.mat
+Assets/Female_Soldiers_Pack/Woman_01/Materials/Woman_01_Hair_02.mat
+Assets/Female_Soldiers_Pack/Woman_01/Mesh/Automatic_Gun_Catridge.FBX
+Assets/Female_Soldiers_Pack/Woman_01/Mesh/Automatic_Gun_Full_01.FBX
+Assets/Female_Soldiers_Pack/Woman_01/Mesh/Automatic_Gun_Without_Catridge.FBX
+Assets/Female_Soldiers_Pack/Woman_01/Mesh/Stand.obj
+Assets/Female_Soldiers_Pack/Woman_01/Mesh/Woman_01.FBX
+Assets/Female_Soldiers_Pack/Woman_02/Materials/Woman_02_Armored_01.mat
+Assets/Female_Soldiers_Pack/Woman_02/Materials/Woman_02_Armored_02.mat
+Assets/Female_Soldiers_Pack/Woman_02/Materials/Woman_02_Armored_03.mat
+Assets/Female_Soldiers_Pack/Woman_02/Materials/Woman_02_Armored_04.mat
+Assets/Female_Soldiers_Pack/Woman_02/Materials/Woman_02_Body_01.mat
+Assets/Female_Soldiers_Pack/Woman_02/Materials/Woman_02_Body_02.mat
+Assets/Female_Soldiers_Pack/Woman_02/Materials/Woman_02_Body_03.mat
+Assets/Female_Soldiers_Pack/Woman_02/Materials/Woman_02_Body_04.mat
+Assets/Female_Soldiers_Pack/Woman_02/Materials/Woman_02_Hair.mat
+Assets/Female_Soldiers_Pack/Woman_02/Materials/Woman_02_Head_Arms_01.mat
+Assets/Female_Soldiers_Pack/Woman_02/Materials/Woman_02_Head_Arms_02.mat
+Assets/Female_Soldiers_Pack/Woman_02/Materials/Woman_02_Head_Arms_03.mat
+Assets/Female_Soldiers_Pack/Woman_02/Materials/Woman_02_Head_Arms_04.mat
+Assets/Female_Soldiers_Pack/Woman_02/Materials/Woman_02_Pants_01.mat
+Assets/Female_Soldiers_Pack/Woman_02/Materials/Woman_02_Pants_02.mat
+Assets/Female_Soldiers_Pack/Woman_02/Materials/Woman_02_Pants_03.mat
+Assets/Female_Soldiers_Pack/Woman_02/Materials/Woman_02_Pants_04.mat
+Assets/Female_Soldiers_Pack/Woman_02/Materials/Woman_02_Weapon_01.mat
+Assets/Female_Soldiers_Pack/Woman_02/Materials/Woman_02_Weapon_02.mat
+Assets/Female_Soldiers_Pack/Woman_02/Materials/Woman_02_Weapon_03.mat
+Assets/Female_Soldiers_Pack/Woman_02/Materials/Woman_02_Weapon_04.mat
+Assets/Female_Soldiers_Pack/Woman_02/Materials/Woman_02_Weapon_05.mat
+Assets/Female_Soldiers_Pack/Woman_02/Materials/Woman_02_Weapon_Glasses.mat
+Assets/Female_Soldiers_Pack/Woman_02/Mesh/Weapon_02_Bullet.FBX
+Assets/Female_Soldiers_Pack/Woman_02/Mesh/Weapon_02_Cartrigde.FBX
+Assets/Female_Soldiers_Pack/Woman_02/Mesh/Weapon_02_Full_With_Cartrigde.FBX
+Assets/Female_Soldiers_Pack/Woman_02/Mesh/Weapon_02_Full_Without_Cartrigde.FBX
+Assets/Female_Soldiers_Pack/Woman_02/Mesh/Woman_02.FBX
+Assets/Female_Soldiers_Pack/Woman_03/Materials/Woman_03_Body_01.mat
+Assets/Female_Soldiers_Pack/Woman_03/Materials/Woman_03_Body_02.mat
+Assets/Female_Soldiers_Pack/Woman_03/Materials/Woman_03_Body_03.mat
+Assets/Female_Soldiers_Pack/Woman_03/Materials/Woman_03_Body_04.mat
+Assets/Female_Soldiers_Pack/Woman_03/Materials/Woman_03_Details_01.mat
+Assets/Female_Soldiers_Pack/Woman_03/Materials/Woman_03_Details_02.mat
+Assets/Female_Soldiers_Pack/Woman_03/Materials/Woman_03_Details_03.mat
+Assets/Female_Soldiers_Pack/Woman_03/Materials/Woman_03_Details_04.mat
+Assets/Female_Soldiers_Pack/Woman_03/Materials/Woman_03_Hair.mat
+Assets/Female_Soldiers_Pack/Woman_03/Materials/Woman_03_Head_Details_01.mat
+Assets/Female_Soldiers_Pack/Woman_03/Materials/Woman_03_Head_Details_02.mat
+Assets/Female_Soldiers_Pack/Woman_03/Materials/Woman_03_Head_Details_03.mat
+Assets/Female_Soldiers_Pack/Woman_03/Materials/Woman_03_Head_Details_04.mat
+Assets/Female_Soldiers_Pack/Woman_03/Materials/Woman_03_Head_Details_Glasses.mat
+Assets/Female_Soldiers_Pack/Woman_03/Materials/Woman_03_Weapon_01.mat
+Assets/Female_Soldiers_Pack/Woman_03/Materials/Woman_03_Weapon_02.mat
+Assets/Female_Soldiers_Pack/Woman_03/Materials/Woman_03_Weapon_03.mat
+Assets/Female_Soldiers_Pack/Woman_03/Materials/Woman_03_Weapon_04.mat
+Assets/Female_Soldiers_Pack/Woman_03/Materials/Woman_03_Weapon_05.mat
+Assets/Female_Soldiers_Pack/Woman_03/Materials/Woman_03_Weapon_Glasses.mat
+Assets/Female_Soldiers_Pack/Woman_03/Mesh/Woman_03.FBX
+Assets/Female_Soldiers_Pack/Woman_03/Mesh/Woman_03_Arms.FBX
+Assets/Female_Soldiers_Pack/Woman_03/Mesh/Woman_03_Weapon_Bullet.FBX
+Assets/Female_Soldiers_Pack/Woman_03/Mesh/Woman_03_Weapon_Cartridge.FBX
+Assets/Female_Soldiers_Pack/Woman_03/Mesh/Woman_03_Weapon_Full.FBX
+Assets/Female_Soldiers_Pack/Woman_03/Mesh/Woman_03_Weapon_Full_Without_Cartridge.FBX
+Assets/Female_Soldiers_Pack/Woman_03/Mesh/Woman_03_Weapon_Sleeve.FBX
+Assets/Female_Soldiers_Pack/Woman_04/Materials/Woman_04_Body_01.mat
+Assets/Female_Soldiers_Pack/Woman_04/Materials/Woman_04_Body_02.mat
+Assets/Female_Soldiers_Pack/Woman_04/Materials/Woman_04_Body_03.mat
+Assets/Female_Soldiers_Pack/Woman_04/Materials/Woman_04_Body_04.mat
+Assets/Female_Soldiers_Pack/Woman_04/Materials/Woman_04_Details_01.mat
+Assets/Female_Soldiers_Pack/Woman_04/Materials/Woman_04_Details_02.mat
+Assets/Female_Soldiers_Pack/Woman_04/Materials/Woman_04_Details_03.mat
+Assets/Female_Soldiers_Pack/Woman_04/Materials/Woman_04_Details_04.mat
+Assets/Female_Soldiers_Pack/Woman_04/Materials/Woman_04_Hair_01.mat
+Assets/Female_Soldiers_Pack/Woman_04/Materials/Woman_04_Heads_01.mat
+Assets/Female_Soldiers_Pack/Woman_04/Materials/Woman_04_Heads_02.mat
+Assets/Female_Soldiers_Pack/Woman_04/Materials/Woman_04_Heads_03.mat
+Assets/Female_Soldiers_Pack/Woman_04/Materials/Woman_04_Heads_04.mat
+Assets/Female_Soldiers_Pack/Woman_04/Materials/Woman_04_Sniper_Rifle_01.mat
+Assets/Female_Soldiers_Pack/Woman_04/Materials/Woman_04_Sniper_Rifle_02.mat
+Assets/Female_Soldiers_Pack/Woman_04/Materials/Woman_04_Sniper_Rifle_03.mat
+Assets/Female_Soldiers_Pack/Woman_04/Materials/Woman_04_Sniper_Rifle_04.mat
+Assets/Female_Soldiers_Pack/Woman_04/Materials/Woman_04_Sniper_Rifle_Glasses.mat
+Assets/Female_Soldiers_Pack/Woman_04/Mesh/Siper_Rifle_01.FBX
+Assets/Female_Soldiers_Pack/Woman_04/Mesh/Siper_Rifle_02.FBX
+Assets/Female_Soldiers_Pack/Woman_04/Mesh/Siper_Rifle_Cartrigde.FBX
+Assets/Female_Soldiers_Pack/Woman_04/Mesh/Siper_Rifle_Sleeve.FBX
+Assets/Female_Soldiers_Pack/Woman_04/Mesh/Woman_04.FBX
+Assets/Female_Soldiers_Pack/Woman_05/Materials/Woman_05_Body/Woman_05_Body_01.mat
+Assets/Female_Soldiers_Pack/Woman_05/Materials/Woman_05_Body/Woman_05_Body_02.mat
+Assets/Female_Soldiers_Pack/Woman_05/Materials/Woman_05_Body/Woman_05_Body_03.mat
+Assets/Female_Soldiers_Pack/Woman_05/Materials/Woman_05_Body/Woman_05_Body_04.mat
+Assets/Female_Soldiers_Pack/Woman_05/Materials/Woman_05_Body_Details/Woman_05_Body_Details_01.mat
+Assets/Female_Soldiers_Pack/Woman_05/Materials/Woman_05_Body_Details/Woman_05_Body_Details_02.mat
+Assets/Female_Soldiers_Pack/Woman_05/Materials/Woman_05_Body_Details/Woman_05_Body_Details_03.mat
+Assets/Female_Soldiers_Pack/Woman_05/Materials/Woman_05_Body_Details/Woman_05_Body_Details_04.mat
+Assets/Female_Soldiers_Pack/Woman_05/Materials/Woman_05_Hair/Woman_05_Hair_01.mat
+Assets/Female_Soldiers_Pack/Woman_05/Materials/Woman_05_Hair/Woman_05_Hair_02.mat
+Assets/Female_Soldiers_Pack/Woman_05/Materials/Woman_05_Heads/Woman_05_Heads_01.mat
+Assets/Female_Soldiers_Pack/Woman_05/Materials/Woman_05_Heads/Woman_05_Heads_02.mat
+Assets/Female_Soldiers_Pack/Woman_05/Materials/Woman_05_Heads/Woman_05_Heads_03.mat
+Assets/Female_Soldiers_Pack/Woman_05/Materials/Woman_05_Heads/Woman_05_Heads_04.mat
+Assets/Female_Soldiers_Pack/Woman_05/Materials/Woman_05_Heads/Woman_05_Heads_05.mat
+Assets/Female_Soldiers_Pack/Woman_05/Materials/Woman_05_Weapon/Woman_05_Weapon_01.mat
+Assets/Female_Soldiers_Pack/Woman_05/Materials/Woman_05_Weapon/Woman_05_Weapon_02.mat
+Assets/Female_Soldiers_Pack/Woman_05/Materials/Woman_05_Weapon/Woman_05_Weapon_03.mat
+Assets/Female_Soldiers_Pack/Woman_05/Materials/Woman_05_Weapon/Woman_05_Weapon_04.mat
+Assets/Female_Soldiers_Pack/Woman_05/Materials/Woman_05_Weapon/Woman_05_Weapon_Glasses.mat
+Assets/Female_Soldiers_Pack/Woman_05/Mesh/Woman_05_Mesh.FBX
+Assets/Female_Soldiers_Pack/Woman_05/Mesh/Woman_05_Weapon.FBX
+Assets/Female_Soldiers_Pack/Woman_05/Mesh/Woman_05_Weapon_Cartridge.FBX
+Assets/Female_Soldiers_Pack/Woman_05/Mesh/Woman_05_Weapon_Sleeve.FBX
+Assets/KingEdward/SkillTree/Examples/05_Materials/Block 1.mat
+Assets/KingEdward/SkillTree/Examples/05_Materials/Block.mat
+Assets/KingEdward/SkillTree/Examples/05_Materials/Glow 1.mat
+Assets/KingEdward/SkillTree/Examples/05_Materials/Glow 2.mat
+Assets/KingEdward/SkillTree/Examples/05_Materials/Glow.mat
+Assets/KingEdward/SkillTree/Examples/05_Materials/ParticleMaterial.mat
+Assets/Materials/Billboard_Apocalypse_Emissive.mat
+Assets/Materials/Billboard_CallHal_Emissive.mat
+Assets/Materials/Billboard_MeadowspringFarm_Emissive.mat
+Assets/Materials/PolygonApocalypse_ArcadeSign.mat
+Assets/Materials/PolygonApocalypse_EmergencySign.mat
+Assets/Materials/PolygonApocalypse_HospitalSign.mat
+Assets/Materials/PolygonApocalypse_HuntingStoreSign.mat
+Assets/MovementAnimsetPro/Models/Dummy.fbx
+Assets/MovementAnimsetPro/Models/Materials/Dummy.mat
+Assets/New Terrain Material.mat
+Assets/Plugins/GameCreator/Installs/Behavior.ActionPlan@1.1.3/Models/Axe.fbx
+Assets/Plugins/GameCreator/Installs/Behavior.ActionPlan@1.1.3/Models/Branch.fbx
+Assets/Plugins/GameCreator/Installs/Behavior.ActionPlan@1.1.3/Models/Tree.fbx
+Assets/Plugins/GameCreator/Installs/GameCreator.Blockout@1.6.12/Materials/Prototype_Color_Blue.mat
+Assets/Plugins/GameCreator/Installs/GameCreator.Blockout@1.6.12/Materials/Prototype_Color_Green.mat
+Assets/Plugins/GameCreator/Installs/GameCreator.Blockout@1.6.12/Materials/Prototype_Color_Red.mat
+Assets/Plugins/GameCreator/Installs/GameCreator.Blockout@1.6.12/Materials/Prototype_Guide_Blue.mat
+Assets/Plugins/GameCreator/Installs/GameCreator.Blockout@1.6.12/Materials/Prototype_Guide_Darker.mat
+Assets/Plugins/GameCreator/Installs/GameCreator.Blockout@1.6.12/Materials/Prototype_Guide_Default.mat
+Assets/Plugins/GameCreator/Installs/GameCreator.Blockout@1.6.12/Materials/Prototype_Guide_Green.mat
+Assets/Plugins/GameCreator/Installs/GameCreator.Blockout@1.6.12/Materials/Prototype_Guide_Red.mat
+Assets/Plugins/GameCreator/Installs/GameCreator.Characters@1.8.25/Assets/Materials/Poof_Default.mat
+Assets/Plugins/GameCreator/Installs/GameCreator.Characters@1.8.25/Assets/Materials/Poof_Footprint.mat
+Assets/Plugins/GameCreator/Installs/GameCreator.Characters@1.8.25/Assets/Models/MannequinFPS.fbx
+Assets/Plugins/GameCreator/Installs/GameCreator.Examples@1.11.28/1 - Characters/5_Footsteps/Materials/Wood.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Examples@1.6.13/_Meshes/Alchemy/Alchemy.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Examples@1.6.13/_Meshes/Chest/Chest.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Examples@1.6.13/_Meshes/Forge/Forge.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Examples@1.6.13/_Meshes/Forge/Workbench.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Examples@1.6.13/_Meshes/Merchant/Merchant.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Armor/Armor_Base.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Armor/Armor_Fabric.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Armor/Armor_Joints.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Armor/Armor_Leather.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Bag_Coin/Bag_Coins.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Bag_Coin/Bag_Leather.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Bag_Coin/Bag_Rope.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Currency/Copper.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Currency/Gold.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Currency/Silver.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Ingredient_Herb_Blue/Ingredient_Blue.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Ingredient_Herb_Red/Ingredient_Red.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Ingredient_Metal_Ingot/Metal_Ingot.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Ingredient_Spiritus/Ingredient_Cap.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Ingredient_Spiritus/Ingredient_Crystal.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Ingredient_Spiritus/Ingredient_Spiritus.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Potion_Health/Potion_Cap.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Potion_Health/Potion_Crystal.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Potion_Health/Potion_Health.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Potion_Mana/Potion_Cap.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Potion_Mana/Potion_Crystal.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Potion_Mana/Potion_Mana.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Rune_Attack/Rune_Attack.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Rune_Defense/Rune_Defense.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Shield_Metal/Shield_Frame.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Shield_Metal/Shield_Metal.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Shield_Wood/Shield_Screw.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Shield_Wood/Shield_Wood.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Sword_Metal/Sword_Handle.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Sword_Metal/Sword_Metal.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Sword_Wood/WoodSword_Screw.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Meshes/Sword_Wood/WoodSword_Wood.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Textures/Effects/Particle_Health.mat
+Assets/Plugins/GameCreator/Installs/Inventory.Items@1.3.13/_Textures/Effects/Particle_Mana.mat
+Assets/Plugins/GameCreator/Installs/Melee.Brawl@1.1.4/Materials/Brawl@FX_Bokeh.mat
+Assets/Plugins/GameCreator/Installs/Melee.Brawl@1.1.4/Materials/Brawl@FX_Damage.mat
+Assets/Plugins/GameCreator/Installs/Melee.Brawl@1.1.4/Materials/Brawl@FX_Ember.mat
+Assets/Plugins/GameCreator/Installs/Melee.Brawl@1.1.4/Materials/Brawl@FX_Flare.mat
+Assets/Plugins/GameCreator/Installs/Melee.Brawl@1.1.4/Materials/Brawl@FX_Guard.mat
+Assets/Plugins/GameCreator/Installs/Melee.Brawl@1.1.4/Materials/Brawl@FX_Trail.mat
+Assets/Plugins/GameCreator/Installs/Melee.Brawl@1.1.4/Materials/Brawl@Trail.mat
+Assets/Plugins/GameCreator/Installs/Melee.Sword@1.1.3/Materials/Sword@FX_Bokeh.mat
+Assets/Plugins/GameCreator/Installs/Melee.Sword@1.1.3/Materials/Sword@FX_Damage.mat
+Assets/Plugins/GameCreator/Installs/Melee.Sword@1.1.3/Materials/Sword@FX_Ember.mat
+Assets/Plugins/GameCreator/Installs/Melee.Sword@1.1.3/Materials/Sword@FX_Flare.mat
+Assets/Plugins/GameCreator/Installs/Melee.Sword@1.1.3/Materials/Sword@FX_Guard.mat
+Assets/Plugins/GameCreator/Installs/Melee.Sword@1.1.3/Materials/Sword@FX_Trail.mat
+Assets/Plugins/GameCreator/Installs/Melee.Sword@1.1.3/Materials/Sword@Trail.mat
+Assets/Plugins/GameCreator/Installs/Melee.Sword@1.1.3/Meshes/Sword_Handle.mat
+Assets/Plugins/GameCreator/Installs/Melee.Sword@1.1.3/Meshes/Sword_Metal.mat
+Assets/Plugins/GameCreator/Installs/Melee.SwordFPS@1.1.2/Materials/SwordFPS@FX_Bokeh.mat
+Assets/Plugins/GameCreator/Installs/Melee.SwordFPS@1.1.2/Materials/SwordFPS@FX_Damage.mat
+Assets/Plugins/GameCreator/Installs/Melee.SwordFPS@1.1.2/Materials/SwordFPS@FX_Ember.mat
+Assets/Plugins/GameCreator/Installs/Melee.SwordFPS@1.1.2/Materials/SwordFPS@FX_Flare.mat
+Assets/Plugins/GameCreator/Installs/Melee.SwordFPS@1.1.2/Materials/SwordFPS@FX_Guard.mat
+Assets/Plugins/GameCreator/Installs/Melee.SwordFPS@1.1.2/Materials/SwordFPS@FX_Trail.mat
+Assets/Plugins/GameCreator/Installs/Melee.SwordFPS@1.1.2/Materials/SwordFPS@Trail.mat
+Assets/Plugins/GameCreator/Installs/Melee.SwordFPS@1.1.2/Meshes/FPSSword_Handle.mat
+Assets/Plugins/GameCreator/Installs/Melee.SwordFPS@1.1.2/Meshes/FPSSword_Metal.mat
+Assets/Plugins/GameCreator/Installs/Perception.Examples@1.0.2/Models/CardboardBox.fbx
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Effects/Flames/Flame_Smoke.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Effects/Hits/Hit_Decal.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Effects/Hits/Hit_Smoke.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Effects/Muzzle_Gun/Muzzle_Smoke.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Effects/Scope/Sniper_RenderTexture.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Materials/Laser_Dot.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Materials/Laser_Line.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Materials/Raycast_Trace.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Models/AK/Ak-Magazine.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Models/AK/Ak-Sight.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Models/AK/Ak-Weapon.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Models/Ammo/Ammo-Bow-Arrow.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Models/Ammo/Ammo-Gun-Projectile.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Models/Ammo/Ammo-Gun-Shell.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Models/Ammo/Ammo-Rifle-Projectile.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Models/Ammo/Ammo-Rifle-Shell.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Models/Bow/Bow-Arrow.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Models/Bow/Bow-Weapon.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Models/Flamethrower/Flamethrower-Weapon.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Models/Flashlight/Flashlight-Weapon.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Models/Grenade/Grenade-Weapon.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Models/Minigun/Minigun-Weapon.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Models/Pistol/Pistol-Magazine.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Models/Pistol/Pistol-Weapon.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Models/Revolver/Revolver-Weapon.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Models/Shotgun/Shotgun-Weapon.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Models/Sniper/Sniper-Magazine.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Models/Sniper/Sniper-Scope.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Models/Sniper/Sniper-Weapon.mat
+Assets/Plugins/GameCreator/Installs/Shooter.Weapons@1.1.4/Models/Wand/Wand-Weapon.mat
+Assets/Plugins/GameCreator/Installs/Stats.Classes@1.3.7/_StatusEffects/Poison/Assets/Mat_Poison.mat
+Assets/Plugins/GameCreator/Installs/Stats.Examples@1.6.12/Assets/Materials/Mat_Fireball.mat
+Assets/Plugins/GameCreator/Installs/Stats.Examples@1.6.12/Assets/Models/Sword/Sword_Blade.mat
+Assets/Plugins/GameCreator/Installs/Stats.Examples@1.6.12/Assets/Models/Sword/Sword_Handle.mat
+Assets/Plugins/GameCreator/Installs/Traversal.Elements@1.0.2/Ladder/Models/Model_Ladder.fbx
+Assets/Plugins/GameCreator/Installs/Traversal.Elements@1.0.2/Rope/Materials/Hook.mat
+Assets/Plugins/GameCreator/Installs/Traversal.Elements@1.0.2/Rope/Materials/Rope.mat
+Assets/Plugins/GameCreator/Packages/Core/Runtime/Characters/Assets/3D/Materials/Joints.mat
+Assets/Plugins/GameCreator/Packages/Core/Runtime/Characters/Assets/3D/Materials/Surface.mat
+Assets/Plugins/GameCreator/Packages/Shooter/Runtime/Models/Gun.fbx
+Assets/Plugins/GameCreator/Packages/Shooter/Runtime/Shaders/Holoscope.shadergraph
+Assets/Plugins/Kronnect/CompassNavigatorPro/Demo/Sources/Materials/Bricks.mat
+Assets/Plugins/Kronnect/CompassNavigatorPro/Demo/Sources/Materials/Ground.mat
+Assets/Plugins/Kronnect/CompassNavigatorPro/Demo/Sources/Materials/RedCube.mat
+Assets/Plugins/Kronnect/CompassNavigatorPro/Demo/Sources/Materials/Sphere.mat
+Assets/Plugins/Kronnect/CompassNavigatorPro/Demo/Sources/Materials/WhiteCube.mat
+Assets/Plugins/Kronnect/CompassNavigatorPro/Resources/CNPro/Materials/Scan.mat
+Assets/Plugins/MotionMatching/Code/MxM/Editor/Resources/DebugArrowMat.mat
+Assets/Plugins/Threepeat/MMCLocomotion/Demos/Prefabs/Prism.obj
+Assets/Plugins/Threepeat/MMCLocomotion/Demos/Prefabs/Stairs.obj
+Assets/Plugins/Threepeat/MMCLocomotion/models/textures/DefaultHDMaterial.mat
+Assets/Plugins/Threepeat/MMCLocomotion/models/textures/DefaultHDMaterialTranslucent.mat
+Assets/Plugins/Threepeat/MMCLocomotion/models/textures/Obstacle.mat
+Assets/Plugins/Threepeat/MMCLocomotion/models/textures/ObstacleTranslucent.mat
+Assets/Plugins/Threepeat/MMCLocomotion/models/textures/PrototypeCheckerboard20x20.mat
+Assets/Plugins/Threepeat/MMCLocomotion/models/textures/remesh_11_combined_Remeshed_LOD1_Pbr.mat
+Assets/Plugins/Threepeat/ParkourAnimations/animations/base/IP-kipup-backwards-lyingback-to-idle.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/base/IP-kipup-lying-back-headup-to-idle.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/base/IP-midair-fallingdown.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/base/IP-midair-fallingdownhighforwardvel.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/base/IP-midair-lowvel.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/base/IP-sprint-loop-smooth.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/base/IP-stop-lowplatform_sprint-to-idle.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/base/kipup-backwards-lyingback-to-idle.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/base/kipup-lying-back-headup-to-idle.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/base/lying-back-headup.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/base/midair-fallingdown.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/base/midair-fallingdownhighforwardvel.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/base/midair-lowvel.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/base/parkour-idle.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/base/sprint-loop-smooth.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/base/stop-lowplatform_sprint-to-idle.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/drop/drop-high-reversegainer-sprint-to-fallfwd.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/drop/drop-high-reversegainer-sprint-to-sprint.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/drop/dropdive-frontflip-sprint-to-fallfwd.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/drop/IP-drop-high-reversegainer-sprint-to-fallfwd.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/drop/IP-drop-high-reversegainer-sprint-to-sprint.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/drop/IP-dropdive-frontflip-sprint-to-fallfwd.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/landing/IP-landing-hard1-fast-fallfwd-to-idle.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/landing/IP-landing-hard1-slower-fallfwd-to-idle.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/landing/IP-landing-hardfrontroll-fallfwd-to-sprint.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/landing/IP-landing-hardhands-fallfwd-to-sprint.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/landing/landing-hard1-fast-fallfwd-to-idle.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/landing/landing-hard1-fast-fallingdown-to-idle.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/landing/landing-hard1-slower-fallfwd-to-idle.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/landing/landing-hard1-slower-fallingdown-to-idle.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/landing/landing-hardfrontroll-fallfwd-to-sprint.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/landing/landing-hardhands-fallfwd-to-sprint.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/ledge/climbup-to-ledgegrab-sprint-to-ledge-grab-braced.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/ledge/IP-climbup-to-ledgegrab-sprint-to-ledge-grab-braced.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/ledge/IP-ledge-grab-braced-drop.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/ledge/IP-ledge-grab-braced-drop180.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/ledge/IP-ledge-grab-braced-idle.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/ledge/IP-ledge-grab-braced-jump.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/ledge/IP-ledge-grab-braced-start.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/ledge/IP-ledge-grab-braced-switchsides.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/ledge/IP-up-jump-to-ledge-grab-braced.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/ledge/IP-vault-low-over-180-ledge-grab-braced-idle-to-ledge-grab-braced.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/ledge/IP-vault-low-over-180-ledge-grab-braced-run-to-ledge-grab-braced.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/ledge/ledge-grab-braced-drop.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/ledge/ledge-grab-braced-drop180.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/ledge/ledge-grab-braced-idle.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/ledge/ledge-grab-braced-jump.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/ledge/ledge-grab-braced-start.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/ledge/ledge-grab-braced-switchsides.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/ledge/up-jump-to-ledge-grab-braced.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/ledge/vault-low-over-180-ledge-grab-braced-idle-to-ledge-grab-braced.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/ledge/vault-low-over-180-ledge-grab-braced-run-to-ledge-grab-braced.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/mantle/high/IP-mantle-high-3m-climbup-run-to-run.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/mantle/high/IP-mantle-high-climbup-run-to-idle.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/mantle/high/IP-mantle-high-climbup-run-to-run.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/mantle/high/IP-mantle-high-climbup-sprint-to-sprint.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/mantle/high/mantle-high-3m-climbup-run-to-run.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/mantle/high/mantle-high-climbup-run-to-idle.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/mantle/high/mantle-high-climbup-run-to-run.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/mantle/high/mantle-high-climbup-sprint-to-sprint.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/mantle/low/IP-mantle-low-frontroll-sprint-to-sprint.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/mantle/low/IP-mantle-low-konglong-run-to-run.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/mantle/low/IP-mantle-low-onto-kongshort-run-to-run.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/mantle/low/mantle-low-frontroll-sprint-to-sprint.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/mantle/low/mantle-low-onto-konglong-run-to-run.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/mantle/low/mantle-low-onto-kongshort-run-to-run.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/high/IP-vault-high-3m-twohand-run-to-fallfwd.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/high/IP-vault-high-twohand-run-to-fallfwd.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/high/IP-vault-high-twohand-run-to-run.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/high/IP-vault-high-twohand-sprint-to-sprint.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/high/vault-high-3m-twohand-run-to-fallfwd.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/high/vault-high-twohand-run-to-fallfwd.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/high/vault-high-twohand-run-to-run.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/high/vault-high-twohand-sprint-to-sprint.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/low/IP-vault-low-dive-run-to-run.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/low/IP-vault-low-kong-trip-wipeout-sprint-to-lying-back-headup.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/low/IP-vault-low-konglong-run-to-run.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/low/IP-vault-low-konglong-sprint-to-sprint.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/low/IP-vault-low-kongshort-run-to-run.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/low/IP-vault-low-shoulderroll-idle-to-idle.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/low/IP-vault-low-shoulderroll-sprint-to-sprint.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/low/IP-vault-low-twohand-leftarm-idle-to-idle.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/low/IP-vault-low-twohand-leftarm-run-to-run.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/low/IP-vault-low-twohand-leftarm-sprint-to-sprint.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/low/vault-low-dive-sprint-to-sprint.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/low/vault-low-kong-trip-wipeout-sprint-to-lying-back-headup.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/low/vault-low-konglong-run-to-run.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/low/vault-low-konglong-sprint-to-sprint.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/low/vault-low-kongshort-run-to-run.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/low/vault-low-shoulderroll-idle-to-idle.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/low/vault-low-shoulderroll-sprint-to-sprint.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/low/vault-low-twohand-leftarm-idle-to-idle.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/low/vault-low-twohand-leftarm-run-to-run.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/vault/low/vault-low-twohand-leftarm-sprint-to-sprint.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/IP-midair-lowvel-mirror-to-wall-plant-left.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/IP-midair-lowvel-to-wall-plant-front-leaningback.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/IP-midair-lowvel-to-wall-plant-front.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/IP-midair-lowvel-to-wall-plant-right.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/IP-sprint-to-wall-plant-front.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/IP-sprint-to-wall-plant-right.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/IP-tictac-to-reverse-vault-sprint-to-fallfwd.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/IP-wall-plant-front-drop.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/IP-wall-plant-front-leaningback-backflip.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/IP-wall-plant-front-step-up.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/IP-wall-plant-front-to-180leap.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/IP-wall-plant-front-to-up-jump.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/IP-wall-plant-left-to-outward-leap-mirror.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/IP-wall-plant-right-to-forward-jump-reach-and-grab-high-ledge.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/IP-wall-plant-right-to-forward-leap-high.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/IP-wall-plant-right-to-forward-leap.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/IP-wall-plant-right-to-outward-leap.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/midair-lowvel-mirror-to-wall-plant-left.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/midair-lowvel-to-wall-plant-front-leaningback.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/midair-lowvel-to-wall-plant-front.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/midair-lowvel-to-wall-plant-right.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/sprint-to-wall-plant-front.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/sprint-to-wall-plant-right.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/tictac-to-reverse-vault-sprint-to-fallfwd.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/wall-plant-front-drop.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/wall-plant-front-leaningback-backflip.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/wall-plant-front-step-up.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/wall-plant-front-to-180leap.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/wall-plant-front-to-up-jump.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/wall-plant-left-to-outward-leap-mirror.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/wall-plant-right-to-forward-jump-reach-and-grab-high-ledge.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/wall-plant-right-to-forward-leap-high.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/wall-plant-right-to-forward-leap.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/animations/wall/wall-plant-right-to-outward-leap.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/models/DarkGray.mat
+Assets/Plugins/Threepeat/ParkourAnimations/models/Gray.mat
+Assets/Plugins/Threepeat/ParkourAnimations/models/hoodieguy_model.fbx
+Assets/Plugins/Threepeat/ParkourAnimations/models/Orange Translucent.mat
+Assets/Plugins/Threepeat/ParkourAnimations/models/Orange.mat
+Assets/Plugins/Threepeat/ParkourAnimations/models/textures_hoodieguy_model/remesh_11_combined_Remeshed_LOD1_Pbr.mat
+Assets/PolygonParticleFX/Materials/FX_01.mat
+Assets/PolygonParticleFX/Materials/FX_Blood_01.mat
+Assets/PolygonParticleFX/Materials/FX_Dark_01.mat
+Assets/PolygonParticleFX/Materials/FX_Emission_01.mat
+Assets/PolygonParticleFX/Materials/FX_Emissive_Fire_01.mat
+Assets/PolygonParticleFX/Materials/FX_Flies_01.mat
+Assets/PolygonParticleFX/Materials/FX_Ice_01.mat
+Assets/PolygonParticleFX/Materials/FX_Ice_02.mat
+Assets/PolygonParticleFX/Materials/FX_Rock_01.mat
+Assets/PolygonParticleFX/Materials/FX_Rock_02.mat
+Assets/PolygonParticleFX/Materials/FX_Smoke_01.mat
+Assets/PolygonParticleFX/Materials/Materials/pCube1Mat.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Blood.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Dark.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Emission.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Emissive_Fire.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Flies.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Ice_01.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Ice_02.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Rock_01.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Rock_02.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Smoke_Mat_03.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Texture.mat
+Assets/PolygonParticleFX/Materials/PolygonParticles_Material_01_A.mat
+Assets/PolygonParticleFX/Materials/PolygonParticles_Material_01_B.mat
+Assets/PolygonParticleFX/Materials/PolygonParticles_Material_01_C.mat
+Assets/Rifle_27A2_Basic/Animation/Aim_Offsets/Materials/MCG_diff.mat
+Assets/Rifle_27A2_Basic/Animation/Aim_Offsets/W2_Crouch_Aim_Point_Center.fbx
+Assets/Rifle_27A2_Basic/Animation/Aim_Offsets/W2_Crouch_Aim_Point_D90.fbx
+Assets/Rifle_27A2_Basic/Animation/Aim_Offsets/W2_Crouch_Aim_Point_L90.fbx
+Assets/Rifle_27A2_Basic/Animation/Aim_Offsets/W2_Crouch_Aim_Point_R90.fbx
+Assets/Rifle_27A2_Basic/Animation/Aim_Offsets/W2_Crouch_Aim_Point_U90.fbx
+Assets/Rifle_27A2_Basic/Animation/Aim_Offsets/W2_Stand_Aim_Point_Center.fbx
+Assets/Rifle_27A2_Basic/Animation/Aim_Offsets/W2_Stand_Aim_Point_D90.fbx
+Assets/Rifle_27A2_Basic/Animation/Aim_Offsets/W2_Stand_Aim_Point_L90.fbx
+Assets/Rifle_27A2_Basic/Animation/Aim_Offsets/W2_Stand_Aim_Point_R90.fbx
+Assets/Rifle_27A2_Basic/Animation/Aim_Offsets/W2_Stand_Aim_Point_U90.fbx
+Assets/Rifle_27A2_Basic/Animation/Aim_Offsets/W2_Stand_Relaxed_Look_Center.fbx
+Assets/Rifle_27A2_Basic/Animation/Aim_Offsets/W2_Stand_Relaxed_Look_D90.fbx
+Assets/Rifle_27A2_Basic/Animation/Aim_Offsets/W2_Stand_Relaxed_Look_U90.fbx
+Assets/Rifle_27A2_Basic/Animation/Holster_Reload_Fire/Materials/MCG_diff.mat
+Assets/Rifle_27A2_Basic/Animation/Holster_Reload_Fire/W1_Crouch_Aim_Swap_To_W2.fbx
+Assets/Rifle_27A2_Basic/Animation/Holster_Reload_Fire/W1_Stand_Aim_Swap_To_W2.fbx
+Assets/Rifle_27A2_Basic/Animation/Holster_Reload_Fire/W2_Crouch_Aim_Equip_Get_From_MOB.fbx
+Assets/Rifle_27A2_Basic/Animation/Holster_Reload_Fire/W2_Crouch_Aim_Equip_Return_To_MOB.fbx
+Assets/Rifle_27A2_Basic/Animation/Holster_Reload_Fire/W2_Crouch_Aim_Reload.fbx
+Assets/Rifle_27A2_Basic/Animation/Holster_Reload_Fire/W2_Crouch_Aim_Swap_To_W1.fbx
+Assets/Rifle_27A2_Basic/Animation/Holster_Reload_Fire/W2_Crouch_Fire_Continuous.fbx
+Assets/Rifle_27A2_Basic/Animation/Holster_Reload_Fire/W2_Crouch_Fire_Single.fbx
+Assets/Rifle_27A2_Basic/Animation/Holster_Reload_Fire/W2_Stand_Aim_Equip_Get_From_MOB.fbx
+Assets/Rifle_27A2_Basic/Animation/Holster_Reload_Fire/W2_Stand_Aim_Equip_Return_To_MOB.fbx
+Assets/Rifle_27A2_Basic/Animation/Holster_Reload_Fire/W2_Stand_Aim_Reload.fbx
+Assets/Rifle_27A2_Basic/Animation/Holster_Reload_Fire/W2_Stand_Aim_Swap_To_W1.fbx
+Assets/Rifle_27A2_Basic/Animation/Holster_Reload_Fire/W2_Stand_Fire_Burst.fbx
+Assets/Rifle_27A2_Basic/Animation/Holster_Reload_Fire/W2_Stand_Fire_Continuous.fbx
+Assets/Rifle_27A2_Basic/Animation/Holster_Reload_Fire/W2_Stand_Fire_Single.fbx
+Assets/Rifle_27A2_Basic/Animation/Holster_Reload_Fire/W2_Stand_Relaxed_Reload.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Crouch_Aim_Idle_v2_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Crouch_Aim_Turn_In_Place_L_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Crouch_Aim_Turn_In_Place_R_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Crouch_Idle_v2_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Crouch_Rlx_Turn_In_Place_L_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Crouch_Rlx_Turn_In_Place_R_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_CrouchWalk_Aim_B_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_CrouchWalk_Aim_F_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_CrouchWalk_Aim_L_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_CrouchWalk_Aim_R_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_CrouchWalk_B_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_CrouchWalk_F_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_CrouchWalk_L_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_CrouchWalk_R_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Jog_Aim_B_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Jog_Aim_F_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Jog_Aim_L_CIR_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Jog_Aim_L_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Jog_Aim_R_CIR_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Jog_Aim_R_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Jog_B_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Jog_F_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Jog_L_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Jog_R_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Run_F_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Run_L_CIR_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Run_L_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Run_R_CIR_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Run_R_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Stand_Aim_Idle_v2_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Stand_Aim_Turn_In_Place_L_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Stand_Aim_Turn_In_Place_R_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Stand_Relaxed_Idle_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Stand_Rlx_Turn_In_Place_L_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Stand_Rlx_Turn_In_Place_R_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Walk_Aim_B_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Walk_Aim_F_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Walk_Aim_L_CIR_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Walk_Aim_L_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Walk_Aim_R_CIR_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Walk_Aim_R_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Walk_B_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Walk_F_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Walk_L_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Loops/W2_Walk_R_Loop_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Materials/MCG_diff.mat
+Assets/Rifle_27A2_Basic/Animation/IPC/Split_Jumps/W2_Jog_Aim_F_Jump_RU_Air_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Split_Jumps/W2_Jog_Aim_F_Jump_RU_End_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Split_Jumps/W2_Jog_Aim_F_Jump_RU_Start_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Split_Jumps/W2_Jog_Aim_L_Jump_RU_Air_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Split_Jumps/W2_Jog_Aim_L_Jump_RU_End_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Split_Jumps/W2_Jog_Aim_L_Jump_RU_Start_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Split_Jumps/W2_Jog_Aim_R_Jump_RU_Air_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Split_Jumps/W2_Jog_Aim_R_Jump_RU_End_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Split_Jumps/W2_Jog_Aim_R_Jump_RU_Start_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Split_Jumps/W2_Run_F_Jump_RU_Air_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Split_Jumps/W2_Run_F_Jump_RU_End_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Split_Jumps/W2_Run_F_Jump_RU_Start_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Split_Jumps/W2_Stand_Aim_Jump_Air_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Split_Jumps/W2_Stand_Aim_Jump_End_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Split_Jumps/W2_Stand_Aim_Jump_Start_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Split_Jumps/W2_Stand_Relaxed_Jump_Air_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Split_Jumps/W2_Stand_Relaxed_Jump_End_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Split_Jumps/W2_Stand_Relaxed_Jump_Start_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Split_Jumps/W2_Walk_Aim_F_Jump_RU_Air_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Split_Jumps/W2_Walk_Aim_F_Jump_RU_End_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/Split_Jumps/W2_Walk_Aim_F_Jump_RU_Start_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Crouch_Aim_L_90_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Crouch_Aim_R_90_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Crouch_Aim_To_Crouch_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Crouch_Aim_To_CrouchWalk_Aim_F_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Crouch_Aim_To_Stand_Aim_v2_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Crouch_To_Crouch_Aim_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_CrouchWalk_Aim_F_to_Crouch_Aim_RU_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Jog_Aim_F_Jump_RU_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Jog_Aim_F_to_Stand_Aim_RU_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Jog_Aim_L_Jump_RU_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Jog_Aim_R_Jump_RU_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Run_F_Jump_RU_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Run_F_to_Stand_Relaxed_RU_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Stand_Aim_Fgt_v1_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Stand_Aim_Jump_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Stand_Aim_L_90_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Stand_Aim_R_90_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Stand_Aim_To_Crouch_Aim_v2_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Stand_Aim_To_Relaxed_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Stand_Aim_To_Walk_Aim_F_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Stand_Relaxed_Death_B_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Stand_Relaxed_Death_F_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Stand_Relaxed_Death_L_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Stand_Relaxed_Death_R_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Stand_Relaxed_Fgt_v2_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Stand_Relaxed_To_Aim_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Walk_Aim_F_Jump_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/IPC/W2_Walk_Aim_F_to_Stand_Aim_RU_IPC.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Crouch_Aim_Idle_v2.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Crouch_Aim_Turn_In_Place_L_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Crouch_Aim_Turn_In_Place_R_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Crouch_Idle_v2.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Crouch_Rlx_Turn_In_Place_L_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Crouch_Rlx_Turn_In_Place_R_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_CrouchWalk_Aim_B_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_CrouchWalk_Aim_F_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_CrouchWalk_Aim_L_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_CrouchWalk_Aim_R_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_CrouchWalk_B_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_CrouchWalk_F_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_CrouchWalk_L_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_CrouchWalk_R_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Jog_Aim_B_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Jog_Aim_F_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Jog_Aim_L_CIR_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Jog_Aim_L_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Jog_Aim_R_CIR_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Jog_Aim_R_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Jog_B_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Jog_F_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Jog_L_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Jog_R_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Run_F_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Run_L_CIR_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Run_L_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Run_R_CIR_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Run_R_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Stand_Aim_Idle_v2.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Stand_Aim_Turn_In_Place_L_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Stand_Aim_Turn_In_Place_R_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Stand_Relaxed_Idle.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Stand_Rlx_Turn_In_Place_L_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Stand_Rlx_Turn_In_Place_R_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Walk_Aim_B_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Walk_Aim_F_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Walk_Aim_L_CIR_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Walk_Aim_L_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Walk_Aim_R_CIR_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Walk_Aim_R_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Walk_B_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Walk_F_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Walk_L_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Loops/W2_Walk_R_Loop.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/Materials/MCG_diff.mat
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Crouch_Aim_L_90.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Crouch_Aim_R_90.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Crouch_Aim_To_Crouch.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Crouch_Aim_To_CrouchWalk_Aim_F.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Crouch_Aim_To_Stand_Aim_v2.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Crouch_To_Crouch_Aim.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_CrouchWalk_Aim_F_to_Crouch_Aim_RU.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Jog_Aim_F_Jump_RU.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Jog_Aim_F_to_Stand_Aim_RU.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Jog_Aim_L_Jump_RU.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Jog_Aim_R_Jump_RU.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Run_F_Jump_RU.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Run_F_to_Stand_Relaxed_RU.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Stand_Aim_Fgt_v1.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Stand_Aim_Jump.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Stand_Aim_L_90.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Stand_Aim_R_90.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Stand_Aim_To_Crouch_Aim_v2.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Stand_Aim_To_Relaxed.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Stand_Aim_To_Walk_Aim_F.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Stand_Relaxed_Death_B.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Stand_Relaxed_Death_F.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Stand_Relaxed_Death_L.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Stand_Relaxed_Death_R.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Stand_Relaxed_Fgt_v2.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Stand_Relaxed_To_Aim.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Walk_Aim_F_Jump.fbx
+Assets/Rifle_27A2_Basic/Animation/Root_Motion/W2_Walk_Aim_F_to_Stand_Aim_RU.fbx
+Assets/Rifle_27A2_Basic/MotusMan/1911/1911_01.fbx
+Assets/Rifle_27A2_Basic/MotusMan/1911/Materials/1911.mat
+Assets/Rifle_27A2_Basic/MotusMan/M4/M4_Rifle_01.fbx
+Assets/Rifle_27A2_Basic/MotusMan/M4/Materials/M4DF2048.mat
+Assets/Rifle_27A2_Basic/MotusMan/Materials/MCG_diff.mat
+Assets/Rifle_27A2_Basic/MotusMan/MotusMan_v55.fbx
+Assets/Samples/Behavior/1.0.16/Unity Behavior Example/Materials/Blue.mat
+Assets/Samples/Behavior/1.0.16/Unity Behavior Example/Materials/Green.mat
+Assets/Samples/Behavior/1.0.16/Unity Behavior Example/Materials/Grey.mat
+Assets/Samples/Behavior/1.0.16/Unity Behavior Example/Materials/Red.mat
+Assets/Samples/Behavior/1.0.16/Unity Behavior Example/Materials/White.mat
+Assets/Samples/Cinemachine/3.1.6/Shared Assets/Materials/Blue.mat
+Assets/Samples/Cinemachine/3.1.6/Shared Assets/Materials/Cameron_Enemy_Material.mat
+Assets/Samples/Cinemachine/3.1.6/Shared Assets/Materials/Cameron_Material.mat
+Assets/Samples/Cinemachine/3.1.6/Shared Assets/Materials/Checkerboard Big Squares.mat
+Assets/Samples/Cinemachine/3.1.6/Shared Assets/Materials/Checkerboard.mat
+Assets/Samples/Cinemachine/3.1.6/Shared Assets/Materials/DarkStripes.mat
+Assets/Samples/Cinemachine/3.1.6/Shared Assets/Materials/GlowingGold.mat
+Assets/Samples/Cinemachine/3.1.6/Shared Assets/Materials/Grey.mat
+Assets/Samples/Cinemachine/3.1.6/Shared Assets/Materials/GreyTransparent.mat
+Assets/Samples/Cinemachine/3.1.6/Shared Assets/Materials/Red.mat
+Assets/Samples/Cinemachine/3.1.6/Shared Assets/Materials/ShinyDarkBlue.mat
+Assets/Scenes/Oasis/Art/Architecture/Materials/Teleporter_Platform_01_Mat.mat
+Assets/Scenes/Oasis/Art/Architecture/Materials/Teleporter_Platform_02_Mat.mat
+Assets/Scenes/Oasis/Art/Architecture/Materials/Tent_01_Mat.mat
+Assets/Scenes/Oasis/Art/Architecture/Materials/Tent_Stand_01_Mat.mat
+Assets/Scenes/Oasis/Art/Architecture/Materials/Tent_Strings_01_Mat.mat
+Assets/Scenes/Oasis/Art/Architecture/Materials/Tent_Tiling_01_Mat.mat
+Assets/Scenes/Oasis/Art/Architecture/Meshes/Teleporter_Platform_01_Mesh.fbx
+Assets/Scenes/Oasis/Art/Architecture/Meshes/Tent_01_Mesh.fbx
+Assets/Scenes/Oasis/Art/Architecture/Meshes/Tent_02_Mesh.fbx
+Assets/Scenes/Oasis/Art/Architecture/Meshes/Tent_03_Mesh.fbx
+Assets/Scenes/Oasis/Art/Architecture/Meshes/Tent_04_Mesh.fbx
+Assets/Scenes/Oasis/Art/Environment/Materials/BigRock_01_Mat.mat
+Assets/Scenes/Oasis/Art/Environment/Materials/BlackGrungeDecal_M.mat
+Assets/Scenes/Oasis/Art/Environment/Materials/Cliff_01_Mat.mat
+Assets/Scenes/Oasis/Art/Environment/Materials/Cliff_02_Mat.mat
+Assets/Scenes/Oasis/Art/Environment/Materials/Gravel_01_Mat.mat
+Assets/Scenes/Oasis/Art/Environment/Materials/LeakDecal_Mat.mat
+Assets/Scenes/Oasis/Art/Environment/Materials/Mountain_01_Mat.mat
+Assets/Scenes/Oasis/Art/Environment/Materials/Mountain_02_Mat.mat
+Assets/Scenes/Oasis/Art/Environment/Materials/OasisTerrain_Mat.mat
+Assets/Scenes/Oasis/Art/Environment/Materials/OasisWater_Mat.mat
+Assets/Scenes/Oasis/Art/Environment/Materials/Rock_01_Mat.mat
+Assets/Scenes/Oasis/Art/Environment/Materials/SandDecal_Mat.mat
+Assets/Scenes/Oasis/Art/Environment/Materials/Vegetation/LongGrassAtlas_Mat.mat
+Assets/Scenes/Oasis/Art/Environment/Materials/WhiteGrungeDecal_Mat.mat
+Assets/Scenes/Oasis/Art/Environment/Meshes/Cliff_01_Mesh.fbx
+Assets/Scenes/Oasis/Art/Environment/Meshes/Rock_01_Mesh.fbx
+Assets/Scenes/Oasis/Art/Environment/Meshes/Rock_02_Mesh.fbx
+Assets/Scenes/Oasis/Art/Environment/Meshes/Rock_03_Mesh.fbx
+Assets/Scenes/Oasis/Art/Environment/Meshes/Terrain_01_ShadowCage_Mesh.fbx
+Assets/Scenes/Oasis/Art/Props/Materials/Carpets_01_Mat.mat
+Assets/Scenes/Oasis/Art/Props/Materials/Carpets_02_Mat.mat
+Assets/Scenes/Oasis/Art/Props/Materials/Carpets_Big_01_Mat.mat
+Assets/Scenes/Oasis/Art/Props/Materials/Carpets_Big_02_Mat.mat
+Assets/Scenes/Oasis/Art/Props/Materials/Cushions_01_Mat.mat
+Assets/Scenes/Oasis/Art/Props/Materials/Cushions_02_Mat.mat
+Assets/Scenes/Oasis/Art/Props/Materials/Cushions_03_Mat.mat
+Assets/Scenes/Oasis/Art/Props/Materials/Firepit_01_Mat.mat
+Assets/Scenes/Oasis/Art/Props/Materials/Shisha_01_Mat.mat
+Assets/Scenes/Oasis/Art/Props/Materials/Teaset_01_Mat.mat
+Assets/Scenes/Oasis/Art/Props/Meshes/Teaset_Plate_01_Mesh.fbx
+Assets/Scenes/Oasis/Art/Vegetation/Materials/FountainAtlas_Mat.mat
+Assets/Scenes/Oasis/Art/Vegetation/Materials/FountainStem_Mat.mat
+Assets/Scenes/Oasis/Art/Vegetation/Materials/GrassAtlas_Mat.mat
+Assets/Scenes/Oasis/Art/Vegetation/Materials/Grassl_LongAtlas_Mat.mat
+Assets/Scenes/Oasis/Art/Vegetation/Materials/PalmAtlas_Mat.mat
+Assets/Scenes/Oasis/Art/Vegetation/Materials/PalmBark_Mat.mat
+Assets/Scenes/Oasis/Shaders/BasicDecal_Graph.shadergraph
+Assets/Scenes/Oasis/Shaders/GrungeDecal_Graph.shadergraph
+Assets/Scenes/Oasis/Shaders/HeightFog.shadergraph
+Assets/Scenes/Oasis/Shaders/LayeredLit_Graph.shadergraph
+Assets/Scenes/Oasis/Shaders/OasisTerrain_Graph.shadergraph
+Assets/Scenes/Oasis/Shaders/OasisVegetationGraph.shadergraph
+Assets/Scenes/Oasis/Shaders/Tent_Graph.shadergraph
+Assets/Scenes/Oasis/VFX/Shaders/SG_VFX_Smoke.shadergraph
+Assets/Scenes/Oasis/VFX/Shaders/SG_Wind_Cliff_SceneColor.shadergraph
+Assets/Scenes/Oasis/VFX/VFXGraph/VFXG_Dune_Sand.vfx
+Assets/Scenes/Oasis/VFX/VFXGraph/VFXG_Falling_Sand_Rocks.vfx
+Assets/Scenes/Oasis/VFX/VFXGraph/VFXG_Insects.vfx
+Assets/Scenes/Oasis/VFX/VFXGraph/VFXG_LocalizedSand.vfx
+Assets/Scenes/Oasis/VFX/VFXGraph/VFXG_TerrainSand.vfx
+Assets/Scenes/Terminal/Art/Props/Materials/BackToTerminalScreen_Mat.mat
+Assets/Scenes/Terminal/Art/Props/Materials/ControlPanel_Mat.mat
+Assets/Scenes/Terminal/Art/Props/Materials/Room2Screen_Mat.mat
+Assets/Scenes/Terminal/Art/Props/Materials/ScreenBorder_Mat.mat
+Assets/Scenes/Terminal/Art/Props/Materials/WhitePlastic_Mat.mat
+Assets/Scenes/Terminal/Art/Props/Meshes/ControlPanel_02_Mesh.fbx
+Assets/Scenes/Terminal/Art/Props/Meshes/RoomScreen_07_Mesh.fbx
+Assets/Scenes/Terminal/Art/VFX/Materials/HexagonHologram_Mat.mat
+Assets/Scenes/Terminal/Art/VFX/Materials/HoloLoading_01_Mat.mat
+Assets/Scenes/Terminal/Art/VFX/Materials/HoloLoading_02_Mat.mat
+Assets/Scenes/Terminal/Art/VFX/Materials/LogoHologram_Mat.mat
+Assets/Scenes/Terminal/Art/VFX/Materials/ProjectionCone_Mat.mat
+Assets/Scenes/Terminal/Art/VFX/Materials/SpeckHologram_Mat.mat
+Assets/Scenes/Terminal/Art/VFX/Shaders/HoloRing_Graph.shadergraph
+Assets/Scenes/Terminal/Art/VFX/Shaders/Triangle_Graph.shadergraph
+Assets/Scenes/Terminal/Shaders/HexagonHologram_Graph.shadergraph
+Assets/Scenes/Terminal/Shaders/HolgramCone_Graph.shadergraph
+Assets/Scenes/Terminal/Shaders/Screen_Graph.shadergraph
+Assets/Scenes/Terminal/Shaders/ScreenBlockerDissolve_Graph.shadergraph
+Assets/Scenes/Terminal/Shaders/ScrollingHologram_Graph.shadergraph
+Assets/Scenes/Terminal/Shaders/SpriteSheetHologram_Graph.shadergraph
+Assets/SharedAssets/FirstPersonController/Mobile/UI/BackgroundCirkle.mat
+Assets/SharedAssets/FirstPersonController/Mobile/UI/HandleCirkle.mat
+Assets/SharedAssets/Shaders/Water.shadergraph
+Assets/Shift - Complete Sci-Fi UI/Materials/Button BG.mat
+Assets/Shift - Complete Sci-Fi UI/Materials/Minimap Blur.mat
+Assets/Shift - Complete Sci-Fi UI/Materials/Modal Window Blur.mat
+Assets/Shift - Complete Sci-Fi UI/Materials/Pause Menu Blur.mat
+Assets/Shift - Complete Sci-Fi UI/Materials/Server Browser Blur.mat
+Assets/Shift - Complete Sci-Fi UI/Materials/Shadow Blur.mat
+Assets/Shift - Complete Sci-Fi UI/Materials/Splash Screen BG.mat
+Assets/Shift - Complete Sci-Fi UI/Materials/Top Panel Blur.mat
+Assets/Synty/AnimationBaseLocomotion/Samples/Materials/M_Dummy.mat
+Assets/Synty/AnimationBaseLocomotion/Samples/Materials/M_Ground.mat
+Assets/Synty/AnimationBaseLocomotion/Samples/Materials/M_Highlight.mat
+Assets/Synty/AnimationBaseLocomotion/Samples/Materials/M_PolygonApocalypse_Fence_01.mat
+Assets/Synty/AnimationBaseLocomotion/Samples/Materials/M_PolygonApocalypse_Material_01.mat
+Assets/Synty/AnimationBaseLocomotion/Samples/Materials/M_Sky.mat
+Assets/Synty/AnimationBaseLocomotion/Samples/Materials/M_Target.mat
+Assets/Synty/AnimationIdles/Samples/Materials/Dummy_Mat.mat
+Assets/Synty/AnimationIdles/Samples/Materials/Ground_Mat.mat
+Assets/Synty/AnimationIdles/Samples/Materials/Prop_Mat.mat
+Assets/Synty/AnimationIdles/Samples/Materials/Sky_Mat.mat
+Assets/Synty/PolygonApocalypse/Materials/Alts/PolygonApocalypse_01_A.mat
+Assets/Synty/PolygonApocalypse/Materials/Alts/PolygonApocalypse_01_B.mat
+Assets/Synty/PolygonApocalypse/Materials/Alts/PolygonApocalypse_01_Burnt.mat
+Assets/Synty/PolygonApocalypse/Materials/Alts/PolygonApocalypse_01_C.mat
+Assets/Synty/PolygonApocalypse/Materials/Alts/PolygonApocalypse_02_A.mat
+Assets/Synty/PolygonApocalypse/Materials/Alts/PolygonApocalypse_02_B.mat
+Assets/Synty/PolygonApocalypse/Materials/Alts/PolygonApocalypse_02_C.mat
+Assets/Synty/PolygonApocalypse/Materials/Alts/PolygonApocalypse_03_A.mat
+Assets/Synty/PolygonApocalypse/Materials/Alts/PolygonApocalypse_03_B.mat
+Assets/Synty/PolygonApocalypse/Materials/Alts/PolygonApocalypse_03_C.mat
+Assets/Synty/PolygonApocalypse/Materials/Alts/PolygonApocalypse_04_A.mat
+Assets/Synty/PolygonApocalypse/Materials/Alts/PolygonApocalypse_04_B.mat
+Assets/Synty/PolygonApocalypse/Materials/Alts/PolygonApocalypse_04_C.mat
+Assets/Synty/PolygonApocalypse/Materials/Character/PolygonApocalypse_Chr_01_A.mat
+Assets/Synty/PolygonApocalypse/Materials/Character/PolygonApocalypse_Chr_01_B.mat
+Assets/Synty/PolygonApocalypse/Materials/Character/PolygonApocalypse_Chr_01_C.mat
+Assets/Synty/PolygonApocalypse/Materials/Character/PolygonApocalypse_Chr_02_A.mat
+Assets/Synty/PolygonApocalypse/Materials/Character/PolygonApocalypse_Chr_02_B.mat
+Assets/Synty/PolygonApocalypse/Materials/Character/PolygonApocalypse_Chr_02_C.mat
+Assets/Synty/PolygonApocalypse/Materials/Character/PolygonApocalypse_Chr_03_A.mat
+Assets/Synty/PolygonApocalypse/Materials/Character/PolygonApocalypse_Chr_03_B.mat
+Assets/Synty/PolygonApocalypse/Materials/Character/PolygonApocalypse_Chr_03_C.mat
+Assets/Synty/PolygonApocalypse/Materials/Character/PolygonApocalypse_Chr_04_A.mat
+Assets/Synty/PolygonApocalypse/Materials/Character/PolygonApocalypse_Chr_04_B.mat
+Assets/Synty/PolygonApocalypse/Materials/Character/PolygonApocalypse_Chr_04_C.mat
+Assets/Synty/PolygonApocalypse/Materials/FX/FX_Vertex_01.mat
+Assets/Synty/PolygonApocalypse/Materials/FX/PolygonApocalypse_01_Cleaned.mat
+Assets/Synty/PolygonApocalypse/Materials/FX/PolygonFarm_Texture_01_A_2k.mat
+Assets/Synty/PolygonApocalypse/Materials/Misc/Background_Bunker_01.mat
+Assets/Synty/PolygonApocalypse/Materials/Misc/Billboard_01.mat
+Assets/Synty/PolygonApocalypse/Materials/Misc/Clouds_01.mat
+Assets/Synty/PolygonApocalypse/Materials/Misc/Fence_01.mat
+Assets/Synty/PolygonApocalypse/Materials/Misc/Ocean_01.mat
+Assets/Synty/PolygonApocalypse/Materials/Misc/Overgrowth_01.mat
+Assets/Synty/PolygonApocalypse/Materials/Misc/PolygonApocalypse_01_A_Alt.mat
+Assets/Synty/PolygonApocalypse/Materials/Misc/PolygonApocalypse_01_Dirty.mat
+Assets/Synty/PolygonApocalypse/Materials/Misc/PolygonApocalypse_01_Glass.mat
+Assets/Synty/PolygonApocalypse/Materials/Misc/PolygonApocalypse_Water_01.mat
+Assets/Synty/PolygonApocalypse/Materials/Misc/Road_01_Triplanar.mat
+Assets/Synty/PolygonApocalypse/Materials/Misc/Road_Standard_01.mat
+Assets/Synty/PolygonApocalypse/Materials/Misc/Rubble_01.mat
+Assets/Synty/PolygonApocalypse/Materials/Misc/Swamp_Water_01.mat
+Assets/Synty/PolygonApocalypse/Materials/Misc/Vehicle_Glass_01.mat
+Assets/Synty/PolygonApocalypse/Materials/Vehicles/Vehicle_01.mat
+Assets/Synty/PolygonApocalypse/Materials/Vehicles/Vehicle_02.mat
+Assets/Synty/PolygonApocalypse/Materials/Vehicles/Vehicle_03.mat
+Assets/Synty/PolygonApocalypse/Materials/Vehicles/Vehicle_04.mat
+Assets/Synty/PolygonApocalypse/Materials/Vehicles/Vehicle_05.mat
+Assets/Synty/PolygonApocalypse/Materials/Vehicles/Vehicle_06.mat
+Assets/Synty/PolygonApocalypse/Materials/Vehicles/Vehicle_Standard_01.mat
+Assets/Synty/PolygonApocalypse/Models/Collision/Materials/lambert62.mat
+Assets/Synty/PolygonApocalypse/Models/Collision/SM_Env_Tree_Pine_Cluster_01_Collision.fbx
+Assets/Synty/PolygonApocalypse/Models/Collision/SM_Env_Tree_Pine_Cluster_02_Collision.fbx
+Assets/Synty/PolygonApocalypse/Models/Collision/SM_Env_Tree_Pine_Cluster_03_Collision.fbx
+Assets/Synty/PolygonApocalypse/Models/Materials/lambert1.mat
+Assets/Synty/PolygonApocalypse/Models/Materials/lambert32.mat
+Assets/Synty/PolygonApocalypse/Models/Materials/lambert33.mat
+Assets/Synty/PolygonApocalypse/Models/Materials/lambert661.mat
+Assets/Synty/PolygonApocalypse/Models/Materials/lambert921.mat
+Assets/Synty/PolygonApocalypse/Models/Materials/lambert922.mat
+Assets/Synty/PolygonApocalypse/Models/Materials/Overgrowth.mat
+Assets/Synty/PolygonApocalypse/Models/Materials/pasted__lambert2.mat
+Assets/Synty/PolygonApocalypse/Models/Materials/PolygonApocalypse_Texture_01_Cleaned.mat
+Assets/Synty/PolygonApocalypse/Models/Materials/PolygonApocalypse_Texture_01_Cleaned_jason.mat
+Assets/Synty/PolygonApocalypse/Models/SM_Bld_Commercial_Medium_01_Overgrowth_01.fbx
+Assets/Synty/PolygonApocalypse/Models/SM_Prop_Backetball_Hoop_02.fbx
+Assets/Synty/PolygonApocalypse/Models/SM_Prop_Scaffold_01.fbx
+Assets/Synty/PolygonApocalypse/Models/SM_Prop_Scaffold_Base_01.fbx
+Assets/Synty/PolygonApocalypse/Models/SM_Prop_TrashPile_08.fbx
+Assets/Synty/PolygonApocalypse/Models/SM_Prop_Wall_Junk_03_Tarp.fbx
+Assets/Synty/PolygonApocalypse/Models/SM_Veh_Army_Truck_01.fbx
+Assets/Synty/PolygonCity/Materials/Alts/PolygonCity_01_A.mat
+Assets/Synty/PolygonCity/Materials/Alts/PolygonCity_01_B.mat
+Assets/Synty/PolygonCity/Materials/Alts/PolygonCity_01_C.mat
+Assets/Synty/PolygonCity/Materials/Alts/PolygonCity_02_A.mat
+Assets/Synty/PolygonCity/Materials/Alts/PolygonCity_02_B.mat
+Assets/Synty/PolygonCity/Materials/Alts/PolygonCity_02_C.mat
+Assets/Synty/PolygonCity/Materials/Alts/PolygonCity_03_A.mat
+Assets/Synty/PolygonCity/Materials/Alts/PolygonCity_03_B.mat
+Assets/Synty/PolygonCity/Materials/Alts/PolygonCity_03_C.mat
+Assets/Synty/PolygonCity/Materials/Alts/PolygonCity_04_A.mat
+Assets/Synty/PolygonCity/Materials/Alts/PolygonCity_04_B.mat
+Assets/Synty/PolygonCity/Materials/Alts/PolygonCity_04_C.mat
+Assets/Synty/PolygonCity/Materials/FX/Cloud_Mat.mat
+Assets/Synty/PolygonCity/Materials/FX/RainWater_Mat.mat
+Assets/Synty/PolygonCity/Materials/FX/Skyline_Mat.mat
+Assets/Synty/PolygonCity/Materials/FX/Water_Mat.mat
+Assets/Synty/PolygonCity/Materials/Misc/Billboard_01.mat
+Assets/Synty/PolygonCity/Materials/Misc/Glass_01.mat
+Assets/Synty/PolygonCity/Materials/Misc/Glass_Vehicle_01.mat
+Assets/Synty/PolygonCity/Materials/Misc/Road_01.mat
+Assets/Synty/PolygonCity/Materials/Misc/Road_02.mat
+Assets/Synty/PolygonCity/Materials/Misc/Road_03.mat
+Assets/Synty/PolygonCity/Materials/Misc/Road_04.mat
+Assets/Synty/PolygonCity/Materials/Misc/Water_01.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_01.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_02.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_03.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Coyote_01.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Coyote_02.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Coyote_03.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Dalmatian_01.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Doberman_01.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Doberman_02.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Doberman_03.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Fox_01.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Fox_02.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Fox_03.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_GermanShepherd_01.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_GermanShepherd_02.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_GermanShepherd_03.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Glass_01.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_GoldenRetriever_01.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_GoldenRetriever_02.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_GoldenRetriever_03.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Greyhound_01.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Greyhound_02.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Greyhound_03.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_HellHound_01.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_HellHound_02.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_HellHound_03.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Husky_01.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Husky_02.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Husky_03.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Labrador_01.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Labrador_02.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Labrador_03.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Pointer_01.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Pointer_02.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Pointer_03.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Ridgeback_01.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Ridgeback_02.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Ridgeback_03.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Robot_01.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Robot_02.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Robot_03.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_ScFi_01.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_ScFi_02.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_ScFi_03.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Shiba_01.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Shiba_02.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Shiba_03.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Wolf_01.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Wolf_02.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Wolf_03.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Zombie_Doberman_01.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Zombie_Doberman_02.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Zombie_Doberman_03.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Zombie_GermanShepherd_01.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Zombie_GermanShepherd_02.mat
+Assets/Synty/PolygonDog/Materials/Dogs/PolygonDog_Zombie_GermanShepherd_03.mat
+Assets/Synty/PolygonDog/Materials/Misc/FX_Brown_01.mat
+Assets/Synty/PolygonDog/Materials/Misc/Ground_01.mat
+Assets/Synty/PolygonGeneric/Materials/Alts/Generic_01_A.mat
+Assets/Synty/PolygonGeneric/Materials/Alts/Generic_01_B.mat
+Assets/Synty/PolygonGeneric/Materials/Alts/Generic_01_C.mat
+Assets/Synty/PolygonGeneric/Materials/Alts/Generic_02_A.mat
+Assets/Synty/PolygonGeneric/Materials/Alts/Generic_02_B.mat
+Assets/Synty/PolygonGeneric/Materials/Alts/Generic_02_C.mat
+Assets/Synty/PolygonGeneric/Materials/Alts/Generic_03_A.mat
+Assets/Synty/PolygonGeneric/Materials/Alts/Generic_03_B.mat
+Assets/Synty/PolygonGeneric/Materials/Alts/Generic_03_C.mat
+Assets/Synty/PolygonGeneric/Materials/Alts/Generic_04_A.mat
+Assets/Synty/PolygonGeneric/Materials/Alts/Generic_04_B.mat
+Assets/Synty/PolygonGeneric/Materials/Alts/Generic_04_C.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Arrow_01.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Arrow_02.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Character_Doller.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Character_EM.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Character_Period.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Character_QM.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Crack_01.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Crack_02.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Grunge_01.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Grunge_02.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Grunge_03.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Grunge_04.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_A.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_B.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_C.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_D.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_E.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_F.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_G.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_H.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_I.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_J.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_K.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_L.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_M.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_N.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_O.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_P.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_Q.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_R.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_S.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_T.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_U.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_V.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_W.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_X.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_Y.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Letter_Z.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Number_0.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Number_1.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Number_2.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Number_3.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Number_4.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Number_5.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Number_6.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Number_7.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Number_8.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Number_9.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Pool_01.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Pool_02.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Splatter_01.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Splatter_02.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Splatter_Drag_01.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Splatter_Drag_02.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decal_Splatter_Drag_03.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decals_Tyre_01.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decals_Tyre_02.mat
+Assets/Synty/PolygonGeneric/Materials/Decals/Generic_Decals_Tyre_03.mat
+Assets/Synty/PolygonGeneric/Materials/FX/Fire/Gen_Ember_01.mat
+Assets/Synty/PolygonGeneric/Materials/FX/Fire/Gen_FireFrames_01.mat
+Assets/Synty/PolygonGeneric/Materials/FX/Fire/Gen_FireFrames_Large_01.mat
+Assets/Synty/PolygonGeneric/Materials/FX/Generic_Blank.mat
+Assets/Synty/PolygonGeneric/Materials/FX/Generic_Candle_Glow_01.mat
+Assets/Synty/PolygonGeneric/Materials/FX/Generic_Circle_Additive_01.mat
+Assets/Synty/PolygonGeneric/Materials/FX/Generic_Circle_Additive_01_Alt.mat
+Assets/Synty/PolygonGeneric/Materials/FX/Generic_Circle_Multiply_01.mat
+Assets/Synty/PolygonGeneric/Materials/FX/Generic_Circle_Soft_01.mat
+Assets/Synty/PolygonGeneric/Materials/FX/Generic_Leaf.mat
+Assets/Synty/PolygonGeneric/Materials/FX/Generic_Lightray_01.mat
+Assets/Synty/PolygonGeneric/Materials/FX/Generic_Sun_Beam_01.mat
+Assets/Synty/PolygonGeneric/Materials/FX/Generic_Wind_Streak.mat
+Assets/Synty/PolygonGeneric/Materials/Generic_Brick.mat
+Assets/Synty/PolygonGeneric/Materials/Generic_Carpet.mat
+Assets/Synty/PolygonGeneric/Materials/Generic_Cloud.mat
+Assets/Synty/PolygonGeneric/Materials/Generic_Concrete.mat
+Assets/Synty/PolygonGeneric/Materials/Generic_Dirt.mat
+Assets/Synty/PolygonGeneric/Materials/Generic_Glass.mat
+Assets/Synty/PolygonGeneric/Materials/Generic_Glass_Opaque.mat
+Assets/Synty/PolygonGeneric/Materials/Generic_Grass.mat
+Assets/Synty/PolygonGeneric/Materials/Generic_Ivy.mat
+Assets/Synty/PolygonGeneric/Materials/Generic_Mountains.mat
+Assets/Synty/PolygonGeneric/Materials/Generic_Overview_Map_Ground.mat
+Assets/Synty/PolygonGeneric/Materials/Generic_Plaster.mat
+Assets/Synty/PolygonGeneric/Materials/Generic_Road.mat
+Assets/Synty/PolygonGeneric/Materials/Generic_Rock.mat
+Assets/Synty/PolygonGeneric/Materials/Generic_SimpleSky.mat
+Assets/Synty/PolygonGeneric/Materials/Generic_Skyline.mat
+Assets/Synty/PolygonGeneric/Materials/Generic_Triplanar_Grass_01.mat
+Assets/Synty/PolygonGeneric/Materials/Generic_Water.mat
+Assets/Synty/PolygonGeneric/Materials/Generic_Water_Fade.mat
+Assets/Synty/PolygonGeneric/Materials/Generic_Wood.mat
+Assets/Synty/PolygonGeneric/Materials/Glass_Opaque_01.mat
+Assets/Synty/PolygonGeneric/Materials/Skybox_01.mat
+Assets/Synty/PolygonGeneric/Materials/Waterflow_01.mat
+Assets/Synty/PolygonGeneric/Models/Collision/SM_Gen_Beam_01_Convex.fbx
+Assets/Synty/PolygonGeneric/Models/FX/FX_LightRay_Cube_01.fbx
+Assets/Synty/PolygonGeneric/Models/FX/FX_LightRay_Round_01.fbx
+Assets/Synty/PolygonGeneric/Models/FX/FX_SunShafts_01.fbx
+Assets/Synty/PolygonGeneric/Models/SM_Gen_Env_Water_Plane_01.fbx
+Assets/Synty/PolygonGeneric/Shaders/Generic_Basic.shadergraph
+Assets/Synty/PolygonGeneric/Shaders/Generic_Basic_Bloody.shadergraph
+Assets/Synty/PolygonGeneric/Shaders/Generic_Basic_Specular.shadergraph
+Assets/Synty/PolygonGeneric/Shaders/Generic_Basic_Specular_Bloody.shadergraph
+Assets/Synty/PolygonGeneric/Shaders/Generic_Decals.shadergraph
+Assets/Synty/PolygonGeneric/Shaders/Generic_ParticlesLit.shadergraph
+Assets/Synty/PolygonGeneric/Shaders/Generic_ParticlesUnlit.shadergraph
+Assets/Synty/PolygonGeneric/Shaders/Generic_Standard.shadergraph
+Assets/Synty/PolygonGeneric/Shaders/PolygonShader.shadergraph
+Assets/Synty/PolygonGeneric/Shaders/PolygonShaderTransparent.shadergraph
+Assets/Synty/PolygonGeneric/Shaders/Skybox_Generic.shadergraph
+Assets/Synty/PolygonGeneric/Shaders/SkyDome.shadergraph
+Assets/Synty/PolygonGeneric/Shaders/Triplanar_Basic.shadergraph
+Assets/Synty/PolygonHeist/Materials/Emission_01.mat
+Assets/Synty/PolygonHeist/Materials/Emission_Red_01.mat
+Assets/Synty/PolygonHeist/Materials/Layout_Ground_01.mat
+Assets/Synty/PolygonHeist/Materials/PolygonHeist_01_A.mat
+Assets/Synty/PolygonHeist/Materials/PolygonHeist_01_A_Glass.mat
+Assets/Synty/PolygonHeist/Materials/PolygonHeist_01_A_Shiny.mat
+Assets/Synty/PolygonHeist/Materials/PolygonHeist_01_B.mat
+Assets/Synty/PolygonHeist/Materials/PolygonHeist_01_C.mat
+Assets/Synty/PolygonHeist/Materials/PolygonHeist_02_A.mat
+Assets/Synty/PolygonHeist/Materials/PolygonHeist_02_B.mat
+Assets/Synty/PolygonHeist/Materials/PolygonHeist_Character_01.mat
+Assets/Synty/PolygonHeist/Materials/PolygonHeist_Character_Swat_Glass_01.mat
+Assets/Synty/PolygonHeist/Materials/PolygonHeist_Material_02_C.mat
+Assets/Synty/PolygonHeist/Materials/PolygonHeist_Material_03_A.mat
+Assets/Synty/PolygonHeist/Materials/PolygonHeist_Material_03_B.mat
+Assets/Synty/PolygonHeist/Materials/PolygonHeist_Material_03_C.mat
+Assets/Synty/PolygonHeist/Materials/PolygonHeist_Material_04_A.mat
+Assets/Synty/PolygonHeist/Materials/PolygonHeist_Material_04_B.mat
+Assets/Synty/PolygonHeist/Materials/PolygonHeist_Material_04_C.mat
+Assets/Synty/PolygonHeist/Materials/SimplePeople_Masks_01_Black.mat
+Assets/Synty/PolygonHeist/Materials/SimplePeople_Masks_01_Brown.mat
+Assets/Synty/PolygonHeist/Materials/SimplePeople_Masks_01_White.mat
+Assets/Synty/PolygonHeist/Materials/SimplePeople_Masks_White_01_Blonde.mat
+Assets/Synty/PolygonHeist/Model/Collisions/SM_Env_Wall_Glass_DoorFrame_01_Collision.fbx
+Assets/Synty/PolygonTown/Materials/Alts/PolygonTown_01_A.mat
+Assets/Synty/PolygonTown/Materials/Alts/PolygonTown_01_B.mat
+Assets/Synty/PolygonTown/Materials/Alts/PolygonTown_01_C.mat
+Assets/Synty/PolygonTown/Materials/Alts/PolygonTown_02_A.mat
+Assets/Synty/PolygonTown/Materials/Alts/PolygonTown_02_B.mat
+Assets/Synty/PolygonTown/Materials/Alts/PolygonTown_02_C.mat
+Assets/Synty/PolygonTown/Materials/Alts/PolygonTown_03_A.mat
+Assets/Synty/PolygonTown/Materials/Alts/PolygonTown_03_B.mat
+Assets/Synty/PolygonTown/Materials/Alts/PolygonTown_03_C.mat
+Assets/Synty/PolygonTown/Materials/Alts/PolygonTown_04_A.mat
+Assets/Synty/PolygonTown/Materials/Alts/PolygonTown_04_B.mat
+Assets/Synty/PolygonTown/Materials/Alts/PolygonTown_04_C.mat
+Assets/Synty/PolygonTown/Materials/Misc/Fridge_Glass_01.mat
+Assets/Synty/PolygonTown/Materials/Misc/Ground_01.mat
+Assets/Synty/PolygonTown/Materials/Misc/Mirror_01.mat
+Assets/Synty/PolygonTown/Materials/Misc/Mirror_Glass_01.mat
+Assets/Synty/PolygonTown/Materials/Misc/PolygonTown_01_A_Alt.mat
+Assets/Synty/PolygonTown/Materials/Misc/PolygonTown_01_A_Emissive.mat
+Assets/Synty/PolygonTown/Materials/Misc/PolygonTown_01_Glass.mat
+Assets/Synty/PolygonTown/Materials/Misc/Road_01.mat
+Assets/Synty/PolygonTown/Materials/Misc/Television_Screen_01.mat
+Assets/Synty/PolygonTown/Materials/Misc/Vehicle_Glass_01.mat
+Assets/Synty/PolygonTown/Materials/Misc/Water_01.mat
+Assets/Synty/PolygonTown/Materials/Misc/Window_Glass_01.mat
+Assets/Synty/PolygonTown/Materials/Misc/Window_Glass_01_Opaque.mat
+Assets/TextMesh Pro/Examples & Extras/Materials/Crate - Surface Shader Scene.mat
+Assets/TextMesh Pro/Examples & Extras/Materials/Crate - URP.mat
+Assets/TextMesh Pro/Examples & Extras/Materials/Ground - Logo Scene.mat
+Assets/TextMesh Pro/Examples & Extras/Materials/Ground - Surface Shader Scene.mat
+Assets/TextMesh Pro/Examples & Extras/Materials/Ground - URP.mat
+Assets/TextMesh Pro/Examples & Extras/Materials/Small Crate_diffuse.mat
+Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/Bangers SDF Logo - URP.mat
+Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/Bangers SDF Logo.mat
+Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/Roboto-Bold SDF - URP.mat
+Assets/TextMesh Pro/Shaders/TMP_SDF-URP Lit.shadergraph
+Assets/TextMesh Pro/Shaders/TMP_SDF-URP Unlit.shadergraph
+
+Built-in/custom untagged material paths:
+Assets/Emerald AI/Demo/Demo Source/Animations/Ellen/Materials/Ellen_EyeLash_Mat.mat
+Assets/Emerald AI/Demo/Demo Source/Animations/Ellen/Materials/Ellen_Eyes_Mat.mat
+Assets/Emerald AI/Demo/Demo Source/Animations/Ellen/Materials/Ellen_Hair_Mat.mat
+Assets/Emerald AI/Demo/Demo Source/Fonts/Peace Sans Webfont.ttf
+Assets/Emerald AI/Resources/Combat Text Font.mat
+Assets/Emerald AI/Scripts/Shaders/Emerald AI UI.mat
+Assets/Hierarchy Designer/Editor/Resources/Hierarchy Designer Font Bold.ttf
+Assets/Hierarchy Designer/Editor/Resources/Hierarchy Designer Font Regular.ttf
+Assets/Plugins/GameCreator/Installs/Dialogue.SkinCyberpunk@1.2.7/_Assets/Fonts/Roboto-Medium.ttf
+Assets/Plugins/GameCreator/Installs/Dialogue.SkinCyberpunk@1.2.7/_Assets/Fonts/Roboto-Regular.ttf
+Assets/Plugins/GameCreator/Installs/Dialogue.SkinMessage@1.2.7/_Assets/Fonts/Inter-Regular.ttf
+Assets/Plugins/GameCreator/Installs/Dialogue.SkinPixel@1.2.6/_Assets/Fonts/Alagard.ttf
+Assets/Plugins/GameCreator/Installs/GameCreator.Blockout@1.6.12/Materials/Prototype_Color_Black.mat
+Assets/Plugins/GameCreator/Installs/GameCreator.Blockout@1.6.12/Materials/Prototype_Color_White.mat
+Assets/Plugins/GameCreator/Installs/GameCreator.Blockout@1.6.12/Materials/Prototype_Fade_Blue.mat
+Assets/Plugins/GameCreator/Installs/GameCreator.Blockout@1.6.12/Materials/Prototype_Fade_Green.mat
+Assets/Plugins/GameCreator/Installs/GameCreator.Blockout@1.6.12/Materials/Prototype_Fade_Red.mat
+Assets/Plugins/GameCreator/Installs/GameCreator.Blockout@1.6.12/UI/_Fonts/JosefinSans-Bold.ttf
+Assets/Plugins/GameCreator/Installs/GameCreator.Blockout@1.6.12/UI/_Fonts/JosefinSans-Regular.ttf
+Assets/Plugins/GameCreator/Packages/Core/Editor/Common/UI/Fonts/RobotoMono.ttf
+Assets/Plugins/GameCreator/Packages/Core/Runtime/Common/Console/Fonts/RobotoMono.ttf
+Assets/Plugins/Kronnect/CompassNavigatorPro/Resources/CNPro/Fonts/Actor-Regular.ttf
+Assets/Plugins/Kronnect/CompassNavigatorPro/Resources/CNPro/Fonts/Distance Font SDF.asset
+Assets/Plugins/Kronnect/CompassNavigatorPro/Resources/CNPro/Fonts/Title Font SDF.asset
+Assets/Plugins/Kronnect/CompassNavigatorPro/Resources/CNPro/Fonts/Vollkorn-Regular.ttf
+Assets/Plugins/Kronnect/CompassNavigatorPro/Resources/CNPro/Materials/Beacon.mat
+Assets/Plugins/Kronnect/CompassNavigatorPro/Resources/CNPro/Materials/CompassBar.mat
+Assets/Plugins/Kronnect/CompassNavigatorPro/Resources/CNPro/Materials/MiniMapCircle.mat
+Assets/Plugins/Kronnect/CompassNavigatorPro/Resources/CNPro/Materials/MiniMapFullScreenBackground.mat
+Assets/Plugins/Kronnect/CompassNavigatorPro/Resources/CNPro/Materials/MiniMapOverlayUnlit.mat
+Assets/Plugins/Kronnect/CompassNavigatorPro/Resources/CNPro/Materials/SpriteCurved.mat
+Assets/Plugins/Kronnect/CompassNavigatorPro/Resources/CNPro/Materials/SpriteOverlayUnlit.mat
+Assets/Plugins/Kronnect/CompassNavigatorPro/Resources/CNPro/Materials/UIDefaultCurved.mat
+Assets/Plugins/Threepeat/MMCLocomotion/models/DarkGray.mat
+Assets/Plugins/Threepeat/MMCLocomotion/models/Gray.mat
+Assets/Plugins/Threepeat/MMCLocomotion/models/Orange Translucent.mat
+Assets/Plugins/Threepeat/MMCLocomotion/models/Orange.mat
+Assets/Plugins/Threepeat/MMCLocomotion/models/textures/remesh_11_combined_Remeshed_LOD1_PbrHDRP.mat
+Assets/PolygonParticleFX/Materials/FX_Additive_Soft_01.mat
+Assets/PolygonParticleFX/Materials/FX_Bubble_01.mat
+Assets/PolygonParticleFX/Materials/FX_Bubble_02.mat
+Assets/PolygonParticleFX/Materials/FX_Circle_01.mat
+Assets/PolygonParticleFX/Materials/FX_Cloud_01.mat
+Assets/PolygonParticleFX/Materials/FX_Cutout_Round_01.mat
+Assets/PolygonParticleFX/Materials/FX_Cutout_Round_01_Dark.mat
+Assets/PolygonParticleFX/Materials/FX_Cutout_Round_01_Multiply.mat
+Assets/PolygonParticleFX/Materials/FX_Cutout_Round_01_VertexLit.mat
+Assets/PolygonParticleFX/Materials/FX_Cutout_Round_02.mat
+Assets/PolygonParticleFX/Materials/FX_Default_01.mat
+Assets/PolygonParticleFX/Materials/FX_Default_02.mat
+Assets/PolygonParticleFX/Materials/FX_Dust_01.mat
+Assets/PolygonParticleFX/Materials/FX_Empty_01.mat
+Assets/PolygonParticleFX/Materials/FX_Fumes_01.mat
+Assets/PolygonParticleFX/Materials/FX_Fumes_02.mat
+Assets/PolygonParticleFX/Materials/FX_Fumes_03.mat
+Assets/PolygonParticleFX/Materials/FX_GroundBreaking_01.mat
+Assets/PolygonParticleFX/Materials/FX_Half_Circle_01.mat
+Assets/PolygonParticleFX/Materials/FX_Hexagon_01.mat
+Assets/PolygonParticleFX/Materials/FX_Leaves_01.mat
+Assets/PolygonParticleFX/Materials/FX_Lightning_01.mat
+Assets/PolygonParticleFX/Materials/FX_LightRay_Cube_01.mat
+Assets/PolygonParticleFX/Materials/FX_Material_01.mat
+Assets/PolygonParticleFX/Materials/FX_Portal_01.mat
+Assets/PolygonParticleFX/Materials/FX_Rainbow_01.mat
+Assets/PolygonParticleFX/Materials/FX_Ring_01.mat
+Assets/PolygonParticleFX/Materials/FX_RitualCircle_01.mat
+Assets/PolygonParticleFX/Materials/FX_SemiCircle_01.mat
+Assets/PolygonParticleFX/Materials/FX_Shell_01.mat
+Assets/PolygonParticleFX/Materials/FX_Smoke_02.mat
+Assets/PolygonParticleFX/Materials/FX_Soft_Spot_01.mat
+Assets/PolygonParticleFX/Materials/FX_Soft_Spot_02.mat
+Assets/PolygonParticleFX/Materials/FX_Sparkle_01.mat
+Assets/PolygonParticleFX/Materials/FX_Sparkle_02.mat
+Assets/PolygonParticleFX/Materials/FX_Sun_Beams_01.mat
+Assets/PolygonParticleFX/Materials/FX_Swipe_01.mat
+Assets/PolygonParticleFX/Materials/FX_Swipe_Grid_01.mat
+Assets/PolygonParticleFX/Materials/FX_VertexLit_Blended_01_Dark.mat
+Assets/PolygonParticleFX/Materials/FX_VertexLit_Blended_01_Light.mat
+Assets/PolygonParticleFX/Materials/FX_Wind_01.mat
+Assets/PolygonParticleFX/Materials/FX_Wings_Grid_01.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Additive_Soft.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Bubble.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Bubble_01.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Circle.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Cloud.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Cutout_Round 1.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Cutout_Round.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Cutout_Round_Dark.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Cutout_Round_Multiply.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Cutout_Round_VertexLit.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Default.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Default_01.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Dust.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Empty.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Fumes.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Fumes_01.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Fumes_02.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_GroundBreaking.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_HalfCircle.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Hexagon.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Leaves.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Lightning.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_LightRay_Cube.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Material.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Portal_01.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Rainbow_FX.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Ring_01.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_RitualCircle_01.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_SemiCircle.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Shell.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Smoke_Mat_05.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Soft_Spot 1.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Soft_Spot.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Sparkle 1.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Sparkle.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Sun_Beams.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Swipe_02.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Swipe_Grid.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_VertexLitBlended_Dark.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_VertexLitBlended_Light.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Wind.mat
+Assets/PolygonParticleFX/Materials/PolygonParticleFX_Wings_Grid.mat
+Assets/Samples/Behavior/1.0.16/Runtime Serialization/Agent.mat
+Assets/Samples/Behavior/1.0.16/Runtime Serialization/Ground.mat
+Assets/Scenes/Oasis/Art/Environment/Materials/OasisSunsetSkybox_Mat.mat
+Assets/Scenes/Terminal/Art/Props/Materials/StencilOnly_Mat.mat
+Assets/SharedAssets/TextMeshPro/Resources/FontsAndMaterials/LiberationSansSDF-Fallback.asset
+Assets/SharedAssets/TextMeshPro/Resources/FontsAndMaterials/LiberationSansSDF.asset
+Assets/Shift - Complete Sci-Fi UI/Fonts/Rajdhani-Bold SDF.asset
+Assets/Shift - Complete Sci-Fi UI/Fonts/Rajdhani-Bold.ttf
+Assets/Shift - Complete Sci-Fi UI/Fonts/Rajdhani-Light SDF.asset
+Assets/Shift - Complete Sci-Fi UI/Fonts/Rajdhani-Light.ttf
+Assets/Shift - Complete Sci-Fi UI/Fonts/Rajdhani-Medium SDF.asset
+Assets/Shift - Complete Sci-Fi UI/Fonts/Rajdhani-Medium.ttf
+Assets/Shift - Complete Sci-Fi UI/Fonts/Rajdhani-Regular SDF.asset
+Assets/Shift - Complete Sci-Fi UI/Fonts/Rajdhani-Regular.ttf
+Assets/Shift - Complete Sci-Fi UI/Fonts/Rajdhani-SemiBold SDF.asset
+Assets/Shift - Complete Sci-Fi UI/Fonts/Rajdhani-SemiBold.ttf
+Assets/Shift - Complete Sci-Fi UI/Materials/Glow Mote.mat
+Assets/Shift - Complete Sci-Fi UI/Materials/UI Particle Additive.mat
+Assets/Synty/InterfaceApocalypseHUD/Fonts/SairaCondensed/Font_Apocalypse_Body.asset
+Assets/Synty/InterfaceApocalypseHUD/Fonts/SairaCondensed/Font_Apocalypse_Body_Underlay.mat
+Assets/Synty/InterfaceApocalypseHUD/Fonts/SairaCondensed/Font_Apocalypse_Bold.asset
+Assets/Synty/InterfaceApocalypseHUD/Fonts/SairaCondensed/Font_Apocalypse_Bold_Underlay.mat
+Assets/Synty/InterfaceApocalypseHUD/Fonts/SairaCondensed/Font_Apocalypse_Header.asset
+Assets/Synty/InterfaceApocalypseHUD/Fonts/SairaCondensed/Font_Apocalypse_Header_Underlay.mat
+Assets/Synty/InterfaceApocalypseHUD/Fonts/SairaCondensed/SairaCondensed-ExtraBold.ttf
+Assets/Synty/InterfaceApocalypseHUD/Fonts/SairaCondensed/SairaCondensed-Regular.ttf
+Assets/Synty/InterfaceApocalypseHUD/Fonts/SairaCondensed/SairaCondensed-SemiBold.ttf
+Assets/Synty/InterfaceApocalypseHUD/Materials/MAT_Apocalypse_ParticleFX_Bloodsplats.mat
+Assets/Synty/InterfaceApocalypseHUD/Materials/MAT_Apocalypse_ParticleFX_Glow_Additive.mat
+Assets/Synty/InterfaceApocalypseHUD/Materials/MAT_Apocalypse_ParticleFX_HealingDots_AddItive.mat
+Assets/Synty/InterfaceApocalypseHUD/Materials/MAT_Apocalypse_ParticleFX_HitLines.mat
+Assets/Synty/InterfaceApocalypseHUD/Materials/MAT_Apocalypse_ParticleFX_Prop_Additive.mat
+Assets/Synty/InterfaceApocalypseHUD/Materials/MAT_Apocalypse_ParticleFX_Prop_Smoke.mat
+Assets/Synty/InterfaceApocalypseHUD/Materials/MAT_Apocalypse_UI_Additive.mat
+Assets/Synty/InterfaceApocalypseHUD/Materials/MAT_Apocalypse_UI_Multiply.mat
+Assets/Synty/PolygonApocalypse/Materials/FX/Circle_Particle_01.mat
+Assets/Synty/PolygonApocalypse/Materials/FX/FX_Additive_01.mat
+Assets/Synty/PolygonApocalypse/Materials/FX/FX_Default_01.mat
+Assets/Synty/PolygonApocalypse/Materials/FX/FX_Gray_01.mat
+Assets/Synty/PolygonApocalypse/Materials/FX/FX_Multiply_01.mat
+Assets/Synty/PolygonApocalypse/Materials/Misc/Background_Mountains_01.mat
+Assets/Synty/PolygonApocalypse/Materials/Misc/Background_Mountains_02.mat
+Assets/Synty/PolygonApocalypse/Materials/Misc/Background_Mountains_03.mat
+Assets/Synty/PolygonApocalypse/Materials/Misc/Skydome_Day_01.mat
+Assets/Synty/PolygonCity/Materials/FX/Steam_Mat.mat
+Assets/Synty/PolygonDog/Materials/Misc/FX_Circle_01.mat
+Assets/TextMesh Pro/Examples & Extras/Fonts/Anton.ttf
+Assets/TextMesh Pro/Examples & Extras/Fonts/Bangers.ttf
+Assets/TextMesh Pro/Examples & Extras/Fonts/Electronic Highway Sign.TTF
+Assets/TextMesh Pro/Examples & Extras/Fonts/Oswald-Bold.ttf
+Assets/TextMesh Pro/Examples & Extras/Fonts/Roboto-Bold.ttf
+Assets/TextMesh Pro/Examples & Extras/Fonts/Unity.ttf
+Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/Anton SDF - Drop Shadow.mat
+Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/Anton SDF - Outline.mat
+Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/Anton SDF - Sunny Days.mat
+Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/Anton SDF.asset
+Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/Bangers SDF - Drop Shadow - 2 Pass.mat
+Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/Bangers SDF - Drop Shadow.mat
+Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/Bangers SDF - Outline.mat
+Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/Bangers SDF Glow.mat
+Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/Bangers SDF.asset
+Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/Electronic Highway Sign SDF.asset
+Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/LiberationSans SDF - Metalic Green.mat
+Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/LiberationSans SDF - Overlay.mat
+Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/LiberationSans SDF - Soft Mask.mat
+Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/Oswald Bold SDF.asset
+Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/Roboto-Bold SDF - Drop Shadow.mat
+Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/Roboto-Bold SDF - HDRP Unlit.mat
+Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/Roboto-Bold SDF - Surface.mat
+Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/Roboto-Bold SDF.asset
+Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/Unity SDF - HDRP LIT - Bloom.mat
+Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/Unity SDF - HDRP LIT - Outline.mat
+Assets/TextMesh Pro/Examples & Extras/Resources/Fonts & Materials/Unity SDF.asset
+Assets/TextMesh Pro/Fonts/LiberationSans.ttf
+Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Drop Shadow.mat
+Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset
+Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Outline.mat
+Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset
+Assets/TextMesh Pro/Resources/Sprite Assets/MixedIndexTest.asset
+Assets/TextMesh Pro/Shaders/TMP_SDF-HDRP LIT.shadergraph
+Assets/TextMesh Pro/Shaders/TMP_SDF-HDRP UNLIT.shadergraph
+
+Missing shader material paths:

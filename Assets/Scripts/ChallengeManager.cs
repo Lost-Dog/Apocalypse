@@ -68,8 +68,14 @@ public class ChallengeManager : MonoBehaviour
     public UnityEvent<ActiveChallenge> onChallengeExpired;
     public UnityEvent<ActiveChallenge> onChallengeFailed;
     
+    [Header("Challenge Loop Audio")]
+    [Tooltip("A random clip from this list loops continuously while any challenge is active. Stops once no challenges remain active.")]
+    public List<AudioClip> challengeLoopSounds = new List<AudioClip>();
+
     private float spawnTimer;
     private AudioSource audioSource;
+    private AudioSource loopAudioSource;
+    private int activeLoopingChallengeCount;
     private const string CHALLENGE_RESOURCE_PATH = "Challenges";
 
     // OPTIMIZATION: Cache the active world events count to avoid LINQ in Update
@@ -82,6 +88,39 @@ public class ChallengeManager : MonoBehaviour
     {
         if (!logChallengeStats) return;
         Debug.Log(message);
+    }
+
+    /// <summary>
+    /// Starts looping a random clip from <see cref="challengeLoopSounds"/> while any challenge is active.
+    /// No-ops if the loop is already playing so overlapping challenges share the same loop.
+    /// </summary>
+    private void PlayRandomChallengeLoopSound()
+    {
+        activeLoopingChallengeCount++;
+
+        if (loopAudioSource == null || challengeLoopSounds.Count == 0 || loopAudioSource.isPlaying)
+            return;
+
+        AudioClip clip = challengeLoopSounds[Random.Range(0, challengeLoopSounds.Count)];
+        if (clip == null) return;
+
+        loopAudioSource.clip = clip;
+        loopAudioSource.Play();
+    }
+
+    /// <summary>
+    /// Stops the challenge loop audio once every challenge that started it has completed, failed, or expired.
+    /// Must be paired 1:1 with a prior <see cref="PlayRandomChallengeLoopSound"/> call.
+    /// </summary>
+    private void StopChallengeLoopSoundIfNoneActive()
+    {
+        activeLoopingChallengeCount = Mathf.Max(0, activeLoopingChallengeCount - 1);
+
+        if (loopAudioSource == null || !loopAudioSource.isPlaying || activeLoopingChallengeCount > 0)
+            return;
+
+        loopAudioSource.Stop();
+        loopAudioSource.clip = null;
     }
 
     private void Awake()
@@ -104,6 +143,11 @@ public class ChallengeManager : MonoBehaviour
             audioSource.spatialBlend = 0f; // 2D sound for UI
             LogChallengeStat("Added AudioSource to ChallengeManager for playing challenge sounds");
         }
+
+        loopAudioSource = gameObject.AddComponent<AudioSource>();
+        loopAudioSource.playOnAwake = false;
+        loopAudioSource.spatialBlend = 0f; // 2D sound for UI
+        loopAudioSource.loop = true;
     }
     
     private void Start()
@@ -284,6 +328,7 @@ public class ChallengeManager : MonoBehaviour
         {
             // Auto-start challenge
             activeChallenge.StartChallenge();
+            PlayRandomChallengeLoopSound();
             
             if (challenge.startSound != null && audioSource != null)
             {
@@ -357,6 +402,7 @@ public class ChallengeManager : MonoBehaviour
                 if (challenge.challengeData.allowRetry)
                 {
                     challenge.FailChallenge();
+                    StopChallengeLoopSoundIfNoneActive();
                     RecordChallengeOutcome(challenge, false);
                     LogChallengeStat($"Challenge failed (time expired): {challenge.challengeData.challengeName} - Retry available in {challenge.retryCooldown}s");
                     onChallengeExpired?.Invoke(challenge);
@@ -367,6 +413,7 @@ public class ChallengeManager : MonoBehaviour
                     // Permanent failure
                     onChallengeExpired?.Invoke(challenge);
                     CleanupChallenge(challenge);
+                    StopChallengeLoopSoundIfNoneActive();
 
                     // OPTIMIZATION: Update cache before removing
                     if (challenge.challengeData.frequency == ChallengeData.ChallengeFrequency.WorldEvent)
@@ -400,6 +447,8 @@ public class ChallengeManager : MonoBehaviour
             audioSource.PlayOneShot(challenge.challengeData.completeSound);
         }
 
+        StopChallengeLoopSoundIfNoneActive();
+
         RecordChallengeOutcome(challenge, true);
         
         // Grant scaled rewards
@@ -419,6 +468,8 @@ public class ChallengeManager : MonoBehaviour
         {
             audioSource.PlayOneShot(challenge.challengeData.failSound);
         }
+
+        StopChallengeLoopSoundIfNoneActive();
 
         challenge.playerDied = true;
         RecordChallengeOutcome(challenge, false);
@@ -811,6 +862,7 @@ public class ChallengeManager : MonoBehaviour
         
         // Start the challenge
         challenge.StartChallenge();
+        PlayRandomChallengeLoopSound();
         
         // Spawn challenge content
         if (ChallengeSpawner.Instance != null)

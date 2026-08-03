@@ -3487,6 +3487,7 @@ GameObject:
   - component: {fileID: 5310348356438992035}
   - component: {fileID: -6913495370159953979}
   - component: {fileID: -2614769449345661093}
+  - component: {fileID: 899858485058210540}
   m_Layer: 9
   m_Name: Woman_03_04
   m_TagString: Enemy
@@ -4655,6 +4656,104 @@ MonoBehaviour:
   restoreStaminaOnKill: 1
   staminaRestoreAmount: 20
   staminaRestorePercentage: 0.1
+--- !u!114 &899858485058210540
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4748545584943783636}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78ba861a214074aa4bdac708dcacc9fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::CompassNavigatorPro.CompassProPOI
+  id: 0
+  priority: 0
+  _compassGroupMask: 15
+  visibility: 0
+  ignoreAreaOfInterest: 0
+  clampPosition: 0
+  visibleDistanceOverride: 0
+  visibleMinDistanceOverride: 0
+  titleMinPOIDistanceOverride: 0
+  title: 
+  titleVisibility: 0
+  canBeVisited: 1
+  visitedDistanceOverride: 0
+  hideWhenVisited: 0
+  _isVisitedInitial: 0
+  visitedText: 
+  playAudioClipWhenVisited: 1
+  visitedAudioClipOverride: {fileID: 0}
+  radius: 0
+  iconScale: 1
+  iconScaleIsFixed: 0
+  iconShowDistance: 1
+  iconNonVisited: {fileID: 21300000, guid: c6d02f050cea94d4cb15203a01a9b880, type: 3}
+  iconVisited: {fileID: 0}
+  tintColor: {r: 1, g: 0, b: 0, a: 1}
+  showOnScreenIndicator: 1
+  onScreenIndicatorScale: 1
+  onScreenIndicatorShowDistance: 1
+  onScreenIndicatorShowTitle: 1
+  onScreenIndicatorPrefabOverride: {fileID: 0}
+  positionOffset: {x: 0, y: 0, z: 0}
+  showSceneGizmo: 1
+  showOffScreenIndicator: 1
+  offScreenIndicatorShowDistance: 1
+  offScreenIndicatorMarginOverride: 0
+  onScreenIndicatorNearFadeDistance: 0
+  onScreenIndicatorNearFadeMin: 0
+  onScreenIndicatorFarDistance: 0
+  onScreenIndicatorFarFadeDistance: 0
+  beaconAudioClip: {fileID: 0}
+  scanHitAudioClip: {fileID: 0}
+  dontDestroyOnLoad: 0
+  heartbeatEnabled: 0
+  heartbeatAudioClip: {fileID: 0}
+  heartbeatDistance: 20
+  heartbeatInterval:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.25
+      inSlope: 0
+      outSlope: 2.75
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 3
+      inSlope: 2.75
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  miniMapType: 0
+  miniMapVisibility: 0
+  miniMapIconPrefabOverride: {fileID: 0}
+  miniMapVisibleDistanceOverride: 0
+  miniMapClampPosition: 0
+  miniMapClampedScaleMultiplier: 1.1
+  miniMapShowRotation: 0
+  miniMapRotationAngleOffset: 0
+  miniMapIconScale: 1
+  miniMapShowCircle: 0
+  miniMapCircleRadius: 0
+  miniMapCircleColor: {r: 0, g: 1, b: 0, a: 0.5}
+  miniMapCircleInnerColor: {r: 0, g: 0, b: 1, a: 0}
+  miniMapCircleStartRadius: 0.25
+  miniMapCircleAnimationWhenAppears: 1
+  miniMapCircleAnimationRepetitions: 5
+  scene: {}
 --- !u!1 &4902632459034513583
 GameObject:
   m_ObjectHideFlags: 0

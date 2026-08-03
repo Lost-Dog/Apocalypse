@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using System.Reflection;
+using EmeraldAI;
 
 /// <summary>
 /// Runtime link between a spawned challenge actor and its parent challenge.
@@ -19,6 +20,7 @@ public class ChallengeSpawnedActor : MonoBehaviour
     private bool _finalized;
     private float _nextDeathProbeTime;
     private MonoBehaviour[] _cachedBehaviours;
+    private EmeraldHealth _emeraldHealth;
 
     private static readonly string[] DeadFlagNames =
     {
@@ -39,6 +41,30 @@ public class ChallengeSpawnedActor : MonoBehaviour
         _finalized = false;
         _nextDeathProbeTime = 0f;
         _cachedBehaviours = GetComponentsInChildren<MonoBehaviour>(true);
+
+        SubscribeToEmeraldHealth();
+    }
+
+    /// <summary>
+    /// Subscribes to the actor's EmeraldHealth.OnDeath event, if present, so kills are
+    /// registered with the challenge the moment the AI dies (Emerald AI ragdolls on death
+    /// rather than disabling/destroying the GameObject, so OnDisable/OnDestroy never fire).
+    /// </summary>
+    private void SubscribeToEmeraldHealth()
+    {
+        if (category != ChallengeData.SpawnableCategory.Enemy && category != ChallengeData.SpawnableCategory.Boss)
+            return;
+
+        _emeraldHealth = GetComponent<EmeraldHealth>() ?? GetComponentInChildren<EmeraldHealth>(true);
+        if (_emeraldHealth == null) return;
+
+        _emeraldHealth.OnDeath -= HandleEmeraldDeath;
+        _emeraldHealth.OnDeath += HandleEmeraldDeath;
+    }
+
+    private void HandleEmeraldDeath()
+    {
+        MarkEliminated();
     }
 
     public void SuppressCallbacks()
@@ -80,6 +106,11 @@ public class ChallengeSpawnedActor : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (_emeraldHealth != null)
+        {
+            _emeraldHealth.OnDeath -= HandleEmeraldDeath;
+        }
+
         if (!Application.isPlaying) return;
         if (_callbacksSuppressed || _finalized) return;
         if (!countDestroyAsElimination) return;

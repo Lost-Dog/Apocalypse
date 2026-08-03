@@ -66,15 +66,32 @@ public class FullscreenEffectBase<T> : MonoBehaviour where T:FullscreenPassBase<
 
     public virtual void OnBeginCamera( ScriptableRenderContext ctx, Camera cam )
     {
+        // Guard against destroyed/null cameras, e.g. from nested Camera.Render() calls
+        // triggered by third-party minimap plugins mid-frame.
+        if (cam == null)
+            return;
+
         // Skip if pass wasn't initialized or if material is empty
         if (_pass == null || _material == null)
+            return;
+
+        // This pass is implemented with URP render features and cannot run in HDRP.
+        // Check both the configured asset and the actively running pipeline instance,
+        // since nested/mid-frame Camera.Render() calls (e.g. minimap plugins) can leave
+        // the render graph in a transient state where only one of the two is reliable.
+        if (GraphicsSettings.currentRenderPipeline is not UniversalRenderPipelineAsset)
+            return;
+        if (RenderPipelineManager.currentPipeline != null && RenderPipelineManager.currentPipeline is not UniversalRenderPipeline)
             return;
 
         // Only draw for selected camera types
         if ( (cam.cameraType & _cameraType) == 0) return;
 
         // injection pass
-        cam.GetUniversalAdditionalCameraData().scriptableRenderer.EnqueuePass( _pass );
+        UniversalAdditionalCameraData cameraData = cam.GetUniversalAdditionalCameraData();
+        if (cameraData == null || cameraData.scriptableRenderer == null) return;
+
+        cameraData.scriptableRenderer.EnqueuePass( _pass );
     }
 
     private void OnValidate()

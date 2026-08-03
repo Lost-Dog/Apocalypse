@@ -7,9 +7,16 @@ public class OasisFog : FullscreenEffectBase<OasisFogPass>
 {
     public override void OnBeginCamera(ScriptableRenderContext ctx, Camera cam)
     {
-        // disable fog pass for the main camera if player is in the Terminal
-        if (SceneTransitionManager.IsAvailable() && SceneTransitionManager.IsInTerminal() && cam != SceneTransitionManager.GetMainCamera().GetComponent<Camera>())
+        if (cam == null)
             return;
+
+        // disable fog pass for the main camera if player is in the Terminal
+        if (SceneTransitionManager.IsAvailable() && SceneTransitionManager.IsInTerminal())
+        {
+            GameObject mainCameraObj = SceneTransitionManager.GetMainCamera();
+            if (mainCameraObj != null && cam != mainCameraObj.GetComponent<Camera>())
+                return;
+        }
 
         base.OnBeginCamera(ctx, cam);
     }

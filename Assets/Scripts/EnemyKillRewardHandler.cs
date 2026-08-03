@@ -31,6 +31,10 @@ public class EnemyKillRewardHandler : MonoBehaviour
     [Tooltip("Percentage of max stamina to restore (0.1 = 10%)")]
     [SerializeField] private float staminaRestorePercentage = 0.1f;
 
+    [Header("Corpse Cleanup")]
+    [Tooltip("Seconds after death before the corpse is removed from the scene (returned to its pool if pooled, otherwise destroyed). Negative disables automatic cleanup.")]
+    [SerializeField] private float corpseCleanupDelay = 20f;
+
     private EmeraldHealth enemyHealth;
     private bool hasRewardedPlayer = false;
 
@@ -48,12 +52,21 @@ public class EnemyKillRewardHandler : MonoBehaviour
         }
     }
 
+    private void OnEnable()
+    {
+        // Reset so a pooled/reused enemy (Emerald AI auto-resets IsDead on OnEnable)
+        // can reward the player and register mission/challenge kills again next death.
+        hasRewardedPlayer = false;
+    }
+
     private void OnDestroy()
     {
         if (enemyHealth != null)
         {
             enemyHealth.OnDeath -= OnEnemyDeath;
         }
+
+        CancelInvoke(nameof(CleanupCorpse));
     }
 
     private void OnEnemyDeath()
@@ -62,6 +75,56 @@ public class EnemyKillRewardHandler : MonoBehaviour
 
         hasRewardedPlayer = true;
         RewardPlayer();
+        NotifyMissionOfKill();
+        ScheduleCorpseCleanup();
+    }
+
+    /// <summary>
+    /// Advances the active mission's current KillEnemies/BossKill objective, if any.
+    /// </summary>
+    private void NotifyMissionOfKill()
+    {
+        if (GameManager.Instance == null || GameManager.Instance.missionManager == null) return;
+
+        GameManager.Instance.missionManager.NotifyEnemyKilled(isBoss);
+    }
+
+    // CORPSE CLEANUP -------------------------------------------------------------------------------
+
+    /// <summary>
+    /// Schedules removal of this enemy's corpse from the scene after <see cref="corpseCleanupDelay"/>
+    /// seconds. Emerald AI ragdolls on death rather than disabling/destroying the GameObject, so
+    /// without this the corpse (colliders, rigidbodies, rendering) would remain in the scene indefinitely.
+    /// </summary>
+    private void ScheduleCorpseCleanup()
+    {
+        if (corpseCleanupDelay < 0f) return;
+
+        Invoke(nameof(CleanupCorpse), corpseCleanupDelay);
+    }
+
+    /// <summary>
+    /// Removes the corpse: returns it to whichever pool spawned it (CharacterSpawner or a generic
+    /// PooledObject), if any, so it can be revived and reused; otherwise destroys the GameObject.
+    /// </summary>
+    private void CleanupCorpse()
+    {
+        if (this == null || gameObject == null) return;
+
+        if (CharacterSpawner.Instance != null)
+        {
+            CharacterSpawner.Instance.DespawnCharacter(gameObject);
+            if (!gameObject.activeSelf) return; // Successfully returned to the CharacterSpawner pool.
+        }
+
+        PooledObject pooled = GetComponent<PooledObject>();
+        if (pooled != null)
+        {
+            pooled.ReturnToPool();
+            return;
+        }
+
+        Destroy(gameObject);
     }
 
     private void RewardPlayer()

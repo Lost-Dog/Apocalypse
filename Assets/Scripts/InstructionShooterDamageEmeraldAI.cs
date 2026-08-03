@@ -53,6 +53,8 @@ namespace GameCreator.Runtime.VisualScripting
 
             Transform attackerTransform = shotData.Source != null ? shotData.Source.transform : args.Self != null ? args.Self.transform : null;
 
+            damageAmount = ApplyPlayerLevelScaling(damageAmount, attackerTransform);
+
             if (locationBasedDamageArea != null)
             {
                 locationBasedDamageArea.DamageArea(damageAmount, attackerTransform, ragdollForce, false);
@@ -61,6 +63,25 @@ namespace GameCreator.Runtime.VisualScripting
 
             emeraldHealth.Damage(damageAmount, attackerTransform, ragdollForce, false);
             return DefaultResult;
+        }
+
+        /// <summary>
+        /// Scales damage dealt by the player's weapon using the player's current level, via
+        /// ProgressionManager.GetWeaponDamageMultiplier(). Damage from non-player attackers
+        /// (e.g. AI vs AI shots) is left unscaled.
+        /// </summary>
+        private static int ApplyPlayerLevelScaling(int damageAmount, Transform attackerTransform)
+        {
+            if (attackerTransform == null) return damageAmount;
+            if (ProgressionManager.Instance == null) return damageAmount;
+
+            bool isPlayer = attackerTransform.CompareTag("Player") ||
+                             attackerTransform.GetComponentInParent<GC2PlayerProvider>() != null;
+
+            if (!isPlayer) return damageAmount;
+
+            float multiplier = ProgressionManager.Instance.GetWeaponDamageMultiplier();
+            return Mathf.Max(1, Mathf.RoundToInt(damageAmount * multiplier));
         }
     }
 }
